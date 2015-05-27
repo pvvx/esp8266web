@@ -1,0 +1,15 @@
+<response>
+<ginp>~gpio_inp~</ginp>
+<gout>~gpio_out~</gout>
+<gdir>~gpio_dir~</gdir>
+<gfun0>~gpio0_fun~</gfun0>
+<gfun1>~gpio1_fun~</gfun1>
+<gfun2>~gpio2_fun~</gfun2>
+<gfun3>~gpio3_fun~</gfun3>
+<gfun4>~gpio4_fun~</gfun4>
+<gfun5>~gpio5_fun~</gfun5>
+<gfun12>~gpio12_fun~</gfun12>
+<gfun13>~gpio13_fun~</gfun13>
+<gfun14>~gpio14_fun~</gfun14>
+<gfun15>~gpio15_fun~</gfun15>
+</response>

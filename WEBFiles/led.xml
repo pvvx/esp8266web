@@ -1,0 +1,6 @@
+<response>
+<ledio_inp>~gpio1_inp~</ledio_inp>
+<ledio_out>~gpio1_out~</ledio_out>
+<ledio_dir>~gpio1_dir~</ledio_dir>
+<ledio_fun>~gpio1_fun~</ledio_fun>
+</response>

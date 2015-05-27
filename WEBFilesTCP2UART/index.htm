@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266EX TCP2UART</title>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/scripts.js"></script>
+</head><body>
+~inc:menu.inc~
+	<div class="content">
+		<table class="details">
+		<caption>Pin definition</caption>
+		<tr>
+			<th>I/O</th><th>Dir</th><th>Name</th>
+		</tr><tr>
+			<td>GPIO1</td><td>Output</td><td>TX</td>
+		</tr><tr>
+			<td>GPIO3</td><td>Input</td><td>RX</td>
+		</tr><tr>
+			<td>GPIO13</td><td>Input</td><td>CTS</td>
+		</tr><tr>
+			<td>GPIO15</td><td>Output</td><td>RTS</td>
+		</tr></table>
+	</div>
+	<div class="content">
+	TCP2UART Connection: ~tcp_remote~, WEB Connection: ~web_remote~<br>
+	SDK version: ~sys_sdkver~. Web version: ~sys_webver~.<br>
+	</div>
+~inc:footer.inc~
+</body></html>

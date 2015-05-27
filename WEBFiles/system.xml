@@ -1,0 +1,108 @@
+<response>
+<name>~hellomsg~</name>
+<gpio_inp>~gpio_inp~</gpio_inp>
+<gpio_out>~gpio_out~</gpio_out>
+<gpio_dir>~gpio_dir~</gpio_dir>
+<gpio0_15_fun>~gpio0_fun~,~gpio1_fun~,~gpio2_fun~,~gpio3_fun~,~gpio4_fun~,~gpio5_fun~,~gpio6_fun~,~gpio7_fun~,~gpio8_fun~,~gpio9_fun~,~gpio10_fun~,~gpio11_fun~,~gpio12_fun~,~gpio13_fun~,~gpio14_fun~,~gpio15_fun~</gpio0_15_fun>
+<uart0>
+ <baud>~uart_0_baud~</baud>
+ <config>~uart_0_bits~,~uart_0_stop~,~uart_0_parity~,~uart_0_even~</config>
+ <control>~uart_0_loopback~,~uart_0_flow~</control>
+ <pins_inv>~uart_0_txd_inv~,~uart_0_rxd_inv~,~uart_0_cts_inv~,~uart_0_rts_inv~</pins_inv>
+</uart0>
+<uart1>
+ <baud>~uart_1_baud~</baud>
+ <config>~uart_1_bits~,~uart_1_stop~,~uart_1_parity~,~uart_1_even~</config>
+ <control>~uart_1_loopback~,~uart_1_flow~</control>
+ <pins_inv>~uart_1_txd_inv~,~uart_1_rxd_inv~,~uart_1_cts_inv~,~uart_1_rts_inv~</pins_inv>
+</uart1>
+<sys>
+ <chip_id>~sys_cid~</chip_id>
+ <flash_id>~sys_fid~</flash_id>
+ <flash_size>~sys_fsize~</flash_size>
+ <sysver>~sys_sysver~</sysver>
+ <sdkver>~sys_sdkver~</sdkver>
+ <webver>~sys_webver~</webver>
+ <clk_cpu_mhz>~sys_clkcpu~</clk_cpu_mhz>
+ <adc>~sys_adc~</adc>
+ <adc_vdd3v3>~sys_vdd33~</adc_vdd3v3>
+ <time>~sys_time~</time>
+ <rtctime>~sys_rtctime~</rtctime>
+ <sntp_time>~sntp_time~</sntp_time>
+ <heap>~sys_heap~</heap>
+ <wdtmode>~sys_wdt~</wdtmode>
+ <cur_start_reset_pin>~sys_rst~</cur_start_reset_pin>
+ <reset_event>~sys_res_event~</reset_event>
+ <old_deep_sleep_option>~sys_sleep_old~</old_deep_sleep_option>
+ <cur_ip>~sys_ip~</cur_ip>
+ <cur_url>~sys_url~</cur_url>
+ <netbios_name>~sys_netbios~</netbios_name>
+ <test>~sys_test~</test>
+</sys>
+<web>
+ <port>~web_port~</port>
+ <host>~web_host~</host>
+ <remote>~web_remote~</remote>
+ <time_wait_recved>~web_twrec~</time_wait_recved>
+ <time_wait_close>~web_twcls~</time_wait_close>
+</web>
+<tcp2uart>
+ <connected>~tcp_connected~</connected>
+ <host>~tcp_host~</host>
+ <remote>~tcp_remote~</remote>
+</tcp2uart>
+<cfg>
+ <web_port>~cfg_web_port~</web_port>
+ <web_pcb_close_time_wait_free_enable>~cfg_web_twd~</web_pcb_close_time_wait_free_enable>
+ <tcp_port>~cfg_tcp_port~</tcp_port>
+ <udp_port>~cfg_udp_port~</udp_port>
+ <hi_clock_cpu_enable>~cfg_overclk~</hi_clock_cpu_enable>
+ <pin_RX_clr_cfg_enable>~cfg_pinclr~</pin_RX_clr_cfg_enable>
+ <debug_print_gpio2_enable>~cfg_debug~</debug_print_gpio2_enable>
+ <netbios_enable>~cfg_netbios~</netbios_enable>
+ <sntp_enable>~cfg_sntp~</sntp_enable>
+</cfg>
+<wifi>
+ <connect_status>~wifi_csta~</connect_status>
+ <mode>~wifi_mode~</mode>
+ <id>~wifi_id~</id>
+ <phy>~wifi_phy~</phy>
+ <chl>~wifi_chl~</chl>
+ <sleeptype>~wifi_sleep~</sleeptype>
+ <noisefloor>~wifi_noise~</noisefloor>
+ <hwnoisefloor>~wifi_hwnoise~</hwnoisefloor>
+ <power>~wifi_power~</power>
+ <phy_max_tpw>~wifi_maxpw~</phy_max_tpw>
+ <phy_tpw_vdd33>~wifi_vddpw~</phy_tpw_vdd33>
+ <phy_afterwake_rfoption>~wifi_rfopt~</phy_afterwake_rfoption>
+ <ap>
+  <ssid>~wifi_ap_ssid~</ssid>
+  <password>~wifi_ap_psw~</password>
+  <channel>~wifi_ap_chl~</channel>
+  <auth_mode>~wifi_ap_aum~</auth_mode>
+  <ssid_hidden>~wifi_ap_hssid~</ssid_hidden>
+  <max_connection>~wifi_ap_mcns~</max_connection>
+  <ip>~wifi_ap_ip~</ip>
+  <gw>~wifi_ap_gw~</gw>
+  <netmask>~wifi_ap_msk~</netmask>
+  <mac>~wifi_ap_mac~</mac>
+  <dncp>~wifi_ap_dncp~</dncp>
+  <dncp_ip_start>~wifi_ap_sip~</dncp_ip_start>
+  <dncp_ip_stop>~wifi_ap_eip~</dncp_ip_stop>
+  <beacon_interval>~wifi_ap_bint~</beacon_interval>
+ </ap>
+ <st>
+  <ssid>~wifi_st_ssid~</ssid>
+  <password>~wifi_st_psw~</password>
+  <bssid>~wifi_st_bssid~</bssid>
+  <set_bssid>~wifi_st_sbss~</set_bssid>
+  <ip>~wifi_st_ip~</ip>
+  <gw>~wifi_st_gw~</gw>
+  <netmask>~wifi_st_msk~</netmask>
+  <mac>~wifi_st_mac~</mac>
+  <dncp>~wifi_st_dncp~</dncp>
+  <rssi>~wifi_st_rssi~</rssi>
+  <autoconnect>~wifi_aucn~</autoconnect>
+ </st>
+</wifi>
+</response>
