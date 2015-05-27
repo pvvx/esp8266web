@@ -22,8 +22,8 @@ void overlap_hspi_init(void)
 	SPI0_EXT3 |= 1;
 	SPI1_EXT3 |= SPI_INT_HOLD_ENA;
 	SPI1_USER |= SPI_CS_SETUP;
-	SPI1_PIN = (SPI1_PIN & 0x7E) | (SPI_CS2_DIS | SPI_CS1_DIS); // SPI_CS0_ENA
-	SPI1_CLOCK &= ~SPI_CLK_EQU_SYSCLK;
+	SPI1_PIN = (SPI1_PIN & 0xfffffffe) | (SPI_CS2_DIS | SPI_CS1_DIS); // SPI_CS0_ENA
+//	SPI1_CLOCK &= ~SPI_CLK_EQU_SYSCLK; // deleted in SDKv1.1.0 libmain_patch_01.a
 }
 //=============================================================================
 // overlap_hspi_deinit()
@@ -31,12 +31,12 @@ void overlap_hspi_init(void)
 void overlap_hspi_deinit(void)
 {
 	while((SPI0_EXT2) || (SPI1_CMD & 0xFFFC0000)); // 0x600001F8 || 0x60000100
-	PERI_IO_SWAP &= 0xF7F; // two spi masters on cspi
-	SPI0_EXT3 &= 0x7E;
-	SPI1_EXT3 &= 0x7C;
-	SPI1_USER &= 0xFDF;
-	SPI1_PIN = (SPI1_PIN & 0x7E) | (SPI_CS2_DIS | SPI_CS1_DIS);
-	SPI1_CLOCK &= ~SPI_CLK_EQU_SYSCLK;
+	PERI_IO_SWAP &= 0xFFFFFF7F; // two spi masters on cspi
+	SPI0_EXT3 &= 0xFFFFFFFE;
+	SPI1_EXT3 &= 0xFFFFFFFC;
+	SPI1_USER &= 0xFFFFFFDF;
+	SPI1_PIN = (SPI1_PIN & 0xfffffffe) | (SPI_CS2_DIS | SPI_CS1_DIS);
+//	SPI1_CLOCK &= ~SPI_CLK_EQU_SYSCLK; // deleted in SDKv1.1.0 libmain_patch_01.a
 }
 //=============================================================================
 // overlap_hspi_read_data()
