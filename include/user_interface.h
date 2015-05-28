@@ -31,14 +31,14 @@ enum rst_reason {
 };
 
 struct rst_info{
-	uint32 reason;
-	uint32 exccause;
-	uint32 epc1;
-	uint32 epc2;
-	uint32 epc3;
-	uint32 excvaddr;
-	uint32 depc;
-};
+	uint32 reason;		//+00
+	uint32 exccause;	//+04
+	uint32 epc1;		//+08
+	uint32 epc2;		//+12
+	uint32 epc3;		//+16
+	uint32 excvaddr;	//+20
+	uint32 depc;		//+24
+}; // [28]
 
 #define UPGRADE_FW_BIN1         0x00
 #define UPGRADE_FW_BIN2         0x01

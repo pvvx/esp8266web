@@ -84,7 +84,7 @@ void ICACHE_FLASH_ATTR loading_rx_buf(void)
 	// если передача ещё не идет и есть данные для передачи размером с буфер у Lwip, то передать
 	if((!conn->flag.wait_sent) && (conn->cntro)) {
 		uint32 len = conn->pcb->snd_buf;
-		uint32 time_ms = phy_get_mactime();
+		uint32 time_ms = IOREG(0x3FF20C00); // phy_get_mactime();
 		if(((time_ms - wait_send_tx) > (MAX_WAIT_TX_BUF/1000)) || len  <= conn->cntro) {
    			wait_send_tx = time_ms;
 			conn->flag.busy_bufo = 1; // в данный момент bufo обрабатывается (передается LwIP-у)

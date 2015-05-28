@@ -12,7 +12,7 @@
 #include "add_sdk_func.h"
 
 ETSTimer *SoftWdtTimer;
-int soft_wdt_interval; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
+int soft_wdt_interval = 1600; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
 bool wdt_flg;
 uint8 t0x3FFEB460[16]; // 16?
 

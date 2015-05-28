@@ -288,7 +288,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	os_print_reset_error(); // вывод фатальных ошибок, вызвавших рестарт. см. в модуле wdt
 	//
 #endif
-//	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F;
+//	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F; // ??
 	wdt_init();
 	user_init();
 	user_init_flag = true;

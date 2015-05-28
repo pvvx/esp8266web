@@ -17,6 +17,8 @@
 
 bool wdt_flg;
 
+// struct rst_info rst_inf; // SDK 1.1.0 + libmain_patch_01.a
+
 ETSEvent wdt_eventq;
 
 void store_exception_error(uint32_t errn)
@@ -95,17 +97,17 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 {
 	uint32 errn = RTC_MEM(0);
 	if(errn >= RST_EVENT_WDT && errn <= RST_EVENT_MAX) {
-		struct rst_info rst_info;
-		system_rtc_mem_read(0, &rst_info, sizeof(rst_info));
+		struct rst_info rst_inf;
+		system_rtc_mem_read(0, &rst_inf, sizeof(rst_inf));
 		os_printf("Old reset: ");
 		switch(errn) {
 		case RST_EVENT_WDT:
-			os_printf("WDT (%d):\n", rst_info.exccause);
-			os_printf_plus(aEpc10x08xEpc20, rst_info.epc1, rst_info.epc2, rst_info.epc3, rst_info.excvaddr, rst_info.depc);
+			os_printf("WDT (%d):\n", rst_inf.exccause);
+			os_printf_plus(aEpc10x08xEpc20, rst_inf.epc1, rst_inf.epc2, rst_inf.epc3, rst_inf.excvaddr, rst_inf.depc);
 			break;
 		case RST_EVENT_EXP:
-			os_printf_plus(aFatalException, rst_info.exccause);
-			os_printf_plus(aEpc10x08xEpc20, rst_info.epc1, rst_info.epc2, rst_info.epc3, rst_info.excvaddr, rst_info.depc);
+			os_printf_plus(aFatalException, rst_inf.exccause);
+			os_printf_plus(aEpc10x08xEpc20, rst_inf.epc1, rst_inf.epc2, rst_inf.epc3, rst_inf.excvaddr, rst_inf.depc);
 			break;
 		case RST_EVENT_SOFT_RESET:
 			os_printf("SoftReset\n");
@@ -114,14 +116,20 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 			os_printf("Deep_Sleep\n");
 			break;
 		default: {
-			char * txt = (char *)rst_info.epc1;
+			char * txt = (char *)rst_inf.epc1;
 			if(txt == NULL) txt = aNull;
-			os_printf("Error (%u): addr=0x%08x, ", errn, rst_info.exccause);
+			os_printf("Error (%u): addr=0x%08x, ", errn, rst_inf.exccause);
 			os_printf_plus(txt);
 			os_printf("\n");
 			}
 		}
 	}
 	RTC_MEM(0) = 0;
+//	rst_inf.reason = 0; // SDK 1.1.0 + libmain_patch_01.a
 }
+
+// SDK 1.1.0 + libmain_patch_01.a
+/* struct rst_info *system_get_rst_info(void){
+	return rst_inf;
+}*/
 

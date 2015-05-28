@@ -1,9 +1,8 @@
 /******************************************************************************
- * FileName: SpiFlash.c
- * Description: mem funcs in ROM-BIOS
- * Alternate SDK ver 0.0.0 (b0)
+ * FileName: rts_dtm.c
+ * Description: functions in ROM-BIOS
+ * Alternate SDK ver 0.0.1
  * Author: PV`
- * (c) PV` 2015
 *******************************************************************************/
 #include "c_types.h"
 #include "hw/esp8266.h"

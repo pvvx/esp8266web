@@ -20,6 +20,7 @@ GEN_IMAGES= eagle.app.v6.out
 GEN_BINS = eagle.app.v6.bin
 SUBDIRS=    \
 	main	\
+	phy		\
 	user	\
 	driver	\
 	lwip \
@@ -41,6 +42,7 @@ endif
 
 COMPONENTS_eagle.app.v6 = \
 	main/libaddmmain.a	\
+	phy/libaddmphy.a	\
 	driver/libdriver.a \
 	lwip/liblwip.a \
 	web/libweb.a	\
@@ -57,7 +59,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-Wl,--start-group \
 	-lmc	\
 	-lmgcc	\
-	-lphy	\
+	-lmphy	\
 	-lpp	\
 	-lnet80211 \
 	-lwpa	\

@@ -7,7 +7,10 @@
 
 #ifndef _LIBS_PHY_H_
 #define _LIBS_PHY_H_
-			//
+
+typedef int (* func_2arg)(int, int);
+
+//
 //[0x3fffc730]=0x3fffc734  phy_get_romfuncs(void)
 struct phy_func_tab {
 	void * abs_temp;				// +000 rom_abs_temp
@@ -27,7 +30,7 @@ struct phy_func_tab {
 	void * linear_to_db;			// +056 rom_linear_to_db
 	void * set_txclk_en;			// +060 rom_set_txclk_en
 	void * set_rxclk_en;			// +064 rom_set_rxclk_en
-	void * mhz2ieee;				// +068 rom_mhz2ieee
+	func_2arg mhz2ieee;				// +068 rom_mhz2ieee
 	void * rxiq_get_mis;			// +072 ram_rxiq_get_mis / rom_rxiq_get_mis
 	void * sar_init;				// +076 rom_sar_init
 	void * set_ana_inf_tx_scale;	// +080 rom_set_ana_inf_tx_scale
@@ -83,32 +86,36 @@ struct phy_func_tab {
 	void * xxx_end;					// +280 NULL
 };
 
+typedef void (* phy_func_var_int_int)(int ch, int n);
+typedef void (* phy_func_var_int)(int);
+typedef void (* phy_func_void)(void);
+
 struct phy_funcs{	// off_3FFE8454
-	void * rf_init; 		// +00 = int chip_v6_rf_init(int ch);
-	void * set_chanfreq; 	// +04 = void chip_v6_set_chanfreq(int chfr);
-	void * set_chan;		// +08 = void chip_v6_set_chan(int ch);
-	void * unset_chanfreq;	// +12 = int chip_v6_unset_chanfreq(void) // return 0;
-	void * enable_cca;		// +16 = void rom_chip_v5_enable_cca(void) // *0x60009B00 &= ~0x10000000;
-	void * disable_cca;		// +20 = void rom_chip_v5_disable_cca(void) // *0x60009B00 |= 0x10000000;
-	void * initialize_bb; 	// +24 = int chip_v6_initialize_bb(void)
-	void * set_sense; 		// +28 = void chip_v6_set_sense(void)
+	phy_func_var_int_int rf_init; 		// +00 = int chip_v6_rf_init(int ch, int n);
+	phy_func_var_int set_chanfreq; 		// +04 = void chip_v6_set_chanfreq(int chfr);
+	phy_func_var_int set_chan;			// +08 = void chip_v6_set_chan(int ch);
+	phy_func_void unset_chanfreq;		// +12 = int chip_v6_unset_chanfreq(void) // return 0;
+	phy_func_void enable_cca;			// +16 = void rom_chip_v5_enable_cca(void) // *0x60009B00 &= ~0x10000000;
+	phy_func_void disable_cca;			// +20 = void rom_chip_v5_disable_cca(void) // *0x60009B00 |= 0x10000000;
+	phy_func_var_int initialize_bb; 	// +24 = int chip_v6_initialize_bb(void)
+	phy_func_void set_sense; 			// +28 = void chip_v6_set_sense(void)
 };
 
 extern struct phy_func_tab * g_phyFuns; // RAM:3FFEAC50
 extern uint8 chip6_phy_init_ctrl[3];
 
-extern void register_phy_ops(struct phy_funcs * phy_base);
-extern void register_get_phy_addr(struct phy_funcs * phy_base);
-extern int phy_change_channel(int chfr);
-extern int chip_v6_set_chanfreq(uint32 chfr);
-extern uint32 phy_get_mactime(void);
-extern void phy_init(int8 ch); //(int8 ch, b)???
-extern void RFChannelSel(int ch);
-extern void phy_delete_channel(void);
-extern void phy_enable_agc(void);
-extern void phy_disable_agc(void);
-extern void phy_initialize_bb(void);
-extern void phy_set_sense(void);
+void register_phy_ops(struct phy_funcs * phy_base);
+void register_get_phy_addr(struct phy_funcs * prt);
+int phy_change_channel(int chfr);
+uint32 phy_get_mactime(void);
+int chip_v6_set_chanfreq(uint32 chfr)  ICACHE_FLASH_ATTR;
+void phy_init(int8 ch, int n) ICACHE_FLASH_ATTR; //(int8 ch, b)???
+void RFChannelSel(int8 ch) ICACHE_FLASH_ATTR;
+void phy_delete_channel(void) ICACHE_FLASH_ATTR;
+void phy_enable_agc(void) ICACHE_FLASH_ATTR;
+void phy_disable_agc(void) ICACHE_FLASH_ATTR;
+void phy_initialize_bb(int n) ICACHE_FLASH_ATTR;
+void phy_set_sense(void) ICACHE_FLASH_ATTR;
 
 
 #endif /* _LIBS_PHY_H_ */
