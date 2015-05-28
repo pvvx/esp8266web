@@ -1,6 +1,7 @@
 inc:footer.inc
 inc:grfx1.inc
 inc:grfx2.inc
+test_adc
 sys_adc
 inc:menu.inc
 sys_const_107

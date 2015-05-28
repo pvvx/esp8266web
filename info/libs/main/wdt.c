@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: wdt.c
- * Description: disasm WDT funcs SDK 1.1.0 (libmain.a + libpp.a)
+ * Description: disasm WDT functions SDK 1.1.0 (libmain.a + libpp.a)
  * Author: PV`
  * (c) PV` 2015
  ******************************************************************************/
@@ -74,7 +74,7 @@ void wdt_init(int flg) // wdt_init(1) вызывается в стартовом блоке libmain.a
 	if(flg) {
 		WDT_CTRL &= 0x7e; // Disable WDT  // 0x60000900
 		INTC_EDGE_EN |= 1; // 0x3ff00004 |= 1
-		WDT_REG1 = 0xb; // WDT timeot
+		WDT_REG1 = 0xb; // WDT timeout
 		WDT_REG2 = 0xd;
 		WDT_CTRL |= 0x38;
 		WDT_CTRL &= 0x79;
