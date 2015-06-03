@@ -3,7 +3,6 @@
  * Description: Alternate SDK (libmain.a)
  * Author: PV`
  * (c) PV` 2015
- * ver 0.0.0 (b0)
 *******************************************************************************/
 #ifndef _INCLUDE_EAGLE_LWIP_IF_H_
 #define _INCLUDE_EAGLE_LWIP_IF_H_

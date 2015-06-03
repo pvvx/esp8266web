@@ -49,11 +49,6 @@ void ICACHE_FLASH_ATTR wdt_init(void)
 	ets_task(wdt_task, WDT_TASK_PRIO, &wdt_eventq, 1);
 	ets_isr_attach(ETS_WDT_INUM , wdt_feed, NULL);
 	INTC_EDGE_EN |= 1; // 0x3ff00004 |= 1
-/*	WDT_REG1 = 0xb; // WDT timeot
-	WDT_REG2 = 0xb;
-	WDT_CTRL = (WDT_CTRL | 0x38) & 0x79; // WDT cfg
-	WDT_CTRL |= 1;	// Enable WDT
-	ets_isr_unmask(1 << ETS_WDT_INUM); // Enable WDT isr */
 	ets_wdt_enable(2,3,3); // mode 2 (wdt isr), step 1680403 us
 }
 

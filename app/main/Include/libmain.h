@@ -3,7 +3,6 @@
  * Description: Alternate SDK (libmain.a Bad Espressif SDK 1.1.0)
  * Author: PV`
  * (c) PV` 2015
- * ver 0.0.1
 *******************************************************************************/
 
 #ifndef _INCLUDE_LIBMAIN_H_

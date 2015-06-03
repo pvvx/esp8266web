@@ -1,5 +1,4 @@
 /*
- * copyright (c) 2008 - 2011 Espressif System
  *
  * Define user specified Event signals and Task priorities here
  *

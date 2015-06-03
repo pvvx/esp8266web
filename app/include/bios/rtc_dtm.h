@@ -26,6 +26,27 @@
  PROVIDE ( save_tsf_us = 0x400027ac );
  */
 
+struct sdtm_params
+{
+	ETSTimer timer;//+0x00..0x14
+	uint32 dtm_14;//+0x14 // a6 dtm_set_params
+	uint32 rxbcn_mactime;//+0x18
+	uint32 tsf_us;//+0x1C
+	uint32 sleep_time;//+0x20 time
+	uint32 timer_us;//+0x24
+	uint32 time_ms;//+0x28
+	uint32 dtm_2C;//+0x2C // a4 dtm_set_params
+	uint32 mode;//+0x30
+	uint32 cycles;//+0x34 timer cycles
+	uint32 intr_mask;//+0x38
+	uint32 sleep_func;//+0x3C
+	uint32 int_func;//+0x40
+	uint32 dtm_44;//+0x44
+};
+
+// RAM_BIOS:3FFFDD64
+extern struct sdtm_params dtm_params; // 64 bytes
+
 void software_reset(void);
 void rtc_set_sleep_mode(uint32 a, uint32 t, uint32 m);
 uint32 rtc_get_reset_reason(void);

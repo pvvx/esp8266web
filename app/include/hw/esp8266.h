@@ -418,12 +418,16 @@ uart0 and uart1 intr combine together, when interrupt occur */
 #define IO_RTC_GPIO_IN_DATA		rtc_[35]
 /* RTC_GPIO_CONF:	0x60000790 */
 #define IO_RTC_GPIO_CONF		rtc_[36]
+/* RTC_GPIO_CFG:	0x60000794 */
 #define RTC_GPI0_CFG			rtc_[37]
+/* RTC_GPI1_CFG:	0x60000798 */
 #define RTC_GPI1_CFG			rtc_[38]
+/* RTC_GPI2_CFG:	0x6000079C */
 #define RTC_GPI2_CFG			rtc_[39]
-/* RTC_GPIO0_CFG:	0x600007A0 */
+/* RTC_GPI3_CFG:	0x600007A0 */
 #define IO_PAD_XPD_DCDC_CONF	rtc_[40] // GPIO16, XPD_DCDC
 #define RTC_GPIO3_CFG			rtc_[40]
+
 #define GPIO_CFG_FUN_BIT0				0
 #define GPIO_CFG_FUN_BIT1				1
 #define GPIO_CFG_PULLUP_BIT				2 // ?
