@@ -1,9 +1,9 @@
-/*
- * web_utils.h
- *
- *  Created on: 25 дек. 2014 г.
- *      Author: PVV
- */
+ /******************************************************************************
+ * FileName: web_utils.h
+ * Alternate SDK 
+ * Author: PV`
+ * (c) PV` 2015
+*******************************************************************************/
 
 #ifndef _INCLUDE_WEB_UTILS_H_
 #define _INCLUDE_WEB_UTILS_H_

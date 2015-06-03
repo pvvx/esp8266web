@@ -216,11 +216,13 @@ void ICACHE_FLASH_ATTR startup(void)
 #ifdef DEBUG_UART
 		if(read_sys_const(sys_const_soc_param0) == 1) { // soc_param0: 0: 40MHz, 1: 26MHz, 2: 24MHz
 #ifdef NO_SET_UART_BAUD
-			// установить 80MHz PLL CPU
+			// set 80MHz PLL CPU
 			rom_i2c_writeReg(103,4,1,136);
 			rom_i2c_writeReg(103,4,2,145);
 			UART0_CLKDIV = (UART0_CLKDIV * 394) >> 8;
 			UART1_CLKDIV = (UART1_CLKDIV * 394) >> 8;
+			ets_delay_us(150);
+//			ets_update_cpu_frequency(80); // set clk cpu (rom-bios set default 80)
 #else
 			ets_update_cpu_frequency(80); // указание правильной частоты для подсчета времени в ets_delay_us(), т.к. она считает такты CPU и множит на указанное число в MHz...
 			if(UART0_CLKDIV == CALK_UART_CLKDIV(115200)) {
@@ -293,7 +295,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	wdt_init();
 	user_init();
 	user_init_flag = true;
-	WDT_FEED = WDT_FEED_MAGIC; // WDT
+//	WDT_FEED = WDT_FEED_MAGIC; // WDT
 	//
 	int wfmode = g_ic.g.wifi_store.wfmode[0];
 	wifi_mode_set(wfmode);

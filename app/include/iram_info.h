@@ -1,9 +1,10 @@
-/*
- * extra_ram.h
- *
- *  Created on: 18/01/2015
- *      Author: PV`
- */
+/******************************************************************************
+ * FileName: iram_info.h
+ * Description: IRAM
+ * Alternate SDK 
+ * Author: PV`
+ * (c) PV` 2015
+*******************************************************************************/
 
 #ifndef __EXRTA_RAM_H_
 #define __EXRTA_RAM_H_

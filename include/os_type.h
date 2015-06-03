@@ -1,5 +1,4 @@
 /*
- * copyright (c) Espressif System 2010
  *
  * mapping to ETS structures
  *

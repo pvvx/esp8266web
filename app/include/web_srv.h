@@ -2,8 +2,7 @@
  * File: web_srv.h
  * Description: The web server configration.
  * Small WEB server ESP8266EX
- * Created on: 20 дек. 2014 г.
- * Author: PV` 12/2014
+ * Author: PV` 
  */
 
 #ifndef _INCLUDE_WEB_SRV_H_

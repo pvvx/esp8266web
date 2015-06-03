@@ -1,10 +1,10 @@
-/*
- * flash_eep.h
- *
- *  Created on: 19/01/2015 ã.
- *      Author: PV`
- */
-
+/******************************************************************************
+ * FileName: flash_eep.h
+ * Description: FLASH
+ * Alternate SDK 
+ * Author: PV`
+ * (c) PV` 2015
+*******************************************************************************/
 #ifndef __FLASH_EEP_H_
 #define __FLASH_EEP_H_
 
