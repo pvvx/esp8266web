@@ -18,12 +18,12 @@ TARGET = eagle
 ifndef PDIR # {
 GEN_IMAGES= eagle.app.v6.out
 GEN_BINS = eagle.app.v6.bin
-SUBDIRS=    \
+SUBDIRS =	\
 	main	\
 	phy		\
 	user	\
 	driver	\
-	lwip \
+	lwip	\
 	web
 endif # } PDIR
 
@@ -66,9 +66,6 @@ LINKFLAGS_eagle.app.v6 = \
 	-lmmain	\
 	$(DEP_LIBS_eagle.app.v6) \
 	-Wl,--end-group
-
-#	-lmlwip	\
-#	-lespconn \
 
 DEPENDS_eagle.app.v6 = \
                 $(LD_FILE) \
