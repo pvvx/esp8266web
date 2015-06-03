@@ -132,7 +132,7 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 {
 	struct rst_info * rst_inf = (struct rst_info *)&RTC_MEM(0);
 //	system_rtc_mem_read(0, &rst_inf, sizeof(struct rst_info));
-	if(rst_inf->reason >= RST_EVENT_WDT && rst_inf->reason <= RST_EVENT_EXP) {
+	if(rst_inf->reason >= RST_EVENT_WDT && rst_inf->reason <= RST_EVENT_MAX) {
 		os_printf("Old reset: ");
 		switch(rst_inf->reason) {
 		case RST_EVENT_WDT:

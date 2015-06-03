@@ -150,7 +150,7 @@ void rtc_enter_sleep(void)
 	else gpio_pin_wakeup_enable(2, 5);
 	rtc_[6]  = 0x18; // IOREG(0x60000718)
 	RTC_GPIO5_CFG  = 1; //	IOREG(0x600007A8) = 0x1;
-	while((RTC_CALIB_VALUE & 0x1F)==0) // IOREG(0x60000370)
+	while((RTC_CALIB_VALUE & (1<<31))==0) // IOREG(0x60000370)
 	rtc_claib = RTC_CALIB_VALUE & 0xFFFFF;
 	if(dtm_params.sleep_func != NULL) dtm_params.sleep_func();
 	x = dtm_params.time_ms;
