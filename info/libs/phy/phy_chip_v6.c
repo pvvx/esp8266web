@@ -13,30 +13,91 @@
 extern uint8 periodic_cal_sat;
 extern uint8 soc_param0; // chip6_phy_init_ctrl +1, берется из esp_init_data_default.bin +50, 0: 40MHz, 1: 26MHz, 2: 24MHz
 
-void ICACHE_FLASH_ATTR pm_set_sleep_cycles(uint32 x)
+void ICACHE_FLASH_ATTR ram_tx_mac_enable(void)
 {
-	RTC_BASE[1] = x + RTC_BASE[7];
-	if(x <= 5000) x = 1;
-	else x = 0;
-    periodic_cal_sat = x;
+	// ret.n
 }
 
-void ICACHE_FLASH_ATTR pm_wakeup_opt(uint32 a2, uint32 a3)
+uint32 ICACHE_FLASH_ATTR rtc_mem_backup(uint32 *mem_start, uint32 *mem_end, uint32 off_ram_rtc)
 {
-	RTC_BASE[0x18>>2] = (RTC_BASE[0x18>>2] & 0xFC0) | a2;
-	RTC_BASE[0xA8>>2] = (RTC_BASE[0xA8>>2] & 0x7E) | a3;
+	uint32 i = (((uint32)mem_end - (uint32)mem_start + 3) >> 2) + 1;
+	volatile uint32 * ptr_reg = &RTC_RAM_BASE[off_ram_rtc>>2];
+	uint32 ret = i << 2;
+	while(i--) *ptr_reg++ = *mem_start++;
+	return ret;
 }
 
-extern uint8 software_slp_reject;
-extern uint8 hardware_reject;
-
-void ICACHE_FLASH_ATTR pm_wait4wakeup(uint32 a2)
+uint32 ICACHE_FLASH_ATTR rtc_mem_recovery(uint32 *mem_start, uint32 *mem_end, uint32 off_ram_rtc)
 {
-	if((a2 == 1 || a2 == 2) && (software_slp_reject == 0)) {
-		while((RTC_BASE[0x28>>2] & 3) == 0);
-		hardware_reject = RTC_BASE[0x28>>2] & 2;
-	}
+	uint32 i = (((uint32)mem_end - (uint32)mem_start + 3) >> 2) + 1;
+	volatile uint32 * ptr_reg = &RTC_RAM_BASE[off_ram_rtc>>2];
+	uint32 ret = i << 2;
+	while(i--) *mem_start++ = *ptr_reg++;
+	return ret;
 }
+
+// set_cal_rxdc()
+// set_rx_gain_cal_iq()
+// gen_rx_gain_table()
+//- pbus_set_rxbbgain()
+// set_rx_gain_testchip_50() // phy_bb_rx_cfg() // periodic_cal()
+//- ram_get_corr_power()
+//- check_data_func()
+//- do_noisefloor_lsleep_v50()
+// do_noisefloor() // noise_init()
+// start_dig_rx() // chip_v6_set_chan()
+// stop_dig_rx() // chip_v6_set_chan()
+// chip_v6_set_chanfreq()
+// tx_cap_init() // chip_v6_initialize_bb
+// target_power_add_backoff() // tx_pwctrl_init_cal/set_most_pwr_reg
+// tx_pwctrl_init_cal() // tx_pwctrl_init
+// tx_atten_set_interp()
+// tx_pwctrl_init()
+// ram_get_noisefloor()
+// get_noisefloor_sat()
+// ram_set_noise_floor()
+// ram_start_noisefloor()
+// read_hw_noisefloor()
+// noise_check_loop()
+// noise_init()
+// target_power_backoff()
+// sdt_on_noise_start()
+// chip_v6_set_chan_rx_cmp()
+// chip_v6_set_chan_misc()
+// phy_dig_spur_set()
+// phy_dig_spur_prot()
+// chip_v6_rxmax_ext_dig()
+// chip_v6_rxmax_ext()
+// phy_bb_rx_cfg()
+//- uart_wait_idle()
+// phy_pbus_soc_cfg()
+// phy_gpio_cfg()
+// tx_cont_en()
+// tx_cont_dis()
+// tx_cont_cfg()
+// chip_v6_initialize_bb()
+// periodic_cal()
+// bbpll_cal()
+// periodic_cal_top()
+// register_chipv6_phy_init_param()
+//+ change_bbpll160_sleep()
+//+ change_bbpll160()
+//+ set_crystal_uart()
+// ant_switch_init()
+// reduce_current_init()
+// rtc_mem_check()
+// phy_afterwake_set_rfoption()
+// deep_sleep_set_option()
+// register_chipv6_phy()
+// set_dpd_bypass()
+// set_rf_gain_stage10()
+// get_vdd33_offset()
+// get_phy_target_power()
+// set_most_pwr_reg()
+// phy_set_most_tpw()
+// phy_vdd33_set_tpw()
+// get_adc_rand()
+// phy_get_rand()
 
 // вызывается, для двух вариантов soc_param0 = 1: 26MHz и soc_param0 = 2: 24MHz
 void ICACHE_FLASH_ATTR change_bbpll160_sleep(void)

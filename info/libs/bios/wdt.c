@@ -36,7 +36,7 @@ void ets_wdt_enable(int mode, uint32_t a, uint32_t b)
 	if(wdt_info.wdt_mode != 2) ets_isr_mask(0x100);
 	wdt_info.a = a;
 	wdt_info.b = b;
-	WDT_CTRL &= 0x7E;
+	WDT_CTRL &= 0x7E; // Disable WDT
 	if(mode == 1) {
 		ets_timer_setfn(wdt_timer, wdt_timer_proc, NULL);
 		ets_timer_arm(wdt_timer, 10, 1);
@@ -84,7 +84,6 @@ void _wdt_timer_proc(void)
 {
 	int mode = ets_wdt_get_mode();
 	if(mode == 1)	{
-	case 1:
 		WDT_FEED = WDT_FEED_MAGIC;
 		WDT_BASE[4]; // просто чтение 0x60000910
 	}

@@ -4,7 +4,7 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM2 -b 230400
+ESPOPTION ?= -p COM6 -b 230400
 
 USERFADDR = 0x0A000
 USERFBIN = ./webbin/WEBFiles.bin

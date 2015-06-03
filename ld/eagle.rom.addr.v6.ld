@@ -355,7 +355,13 @@ PROVIDE ( esp_exception9 = 0x400017E0 );
 PROVIDE ( SPIFlashCnfig = 0x40004568 );
 PROVIDE ( _putc1 = 0x40001dcc );
 PROVIDE ( _putc2_def = 0x400024A8 );
+PROVIDE ( printf_buf_len = 0x3FFFDD58 );
+PROVIDE ( printf_pbuf = 0x3FFFDD5C );
 PROVIDE ( user_start_proc = 0x3FFFDCD0 );
+
+/* 0x3FFFE360..0x3FFFEA80 ram buf max 1824 bytes */
+PROVIDE ( _sprintf_buf = 0x3FFFE360 ); /* char * _sprintf_buf; - use ets_sprintf */
+PROVIDE ( print_mem_buf = 0x3FFFE364 ); /* os_printf_plus() + ets_sprintf() buf 1820 bytes */
 
 PROVIDE ( dport_	= 0x3ff00000);
 PROVIDE ( io2_regs_	= 0x3ff20000);

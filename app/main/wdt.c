@@ -1,10 +1,9 @@
 /******************************************************************************
  * FileName: wdt.c
- * Description: Alternate SDK (libmain.a)
+ * Description: Alternate SDK (libmain.a) (SDK 1.1.0 no patch!)
  * Author: PV`
  * (c) PV` 2015
- * ver 0.0.0 (b0)
-*******************************************************************************/
+ ******************************************************************************/
 
 #include "user_config.h"
 #include "bios.h"
@@ -15,33 +14,23 @@
 #include "user_interface.h"
 #include "add_sdk_func.h"
 
+#if 1 // SDK_VERSION < 1109 // (SDK 1.1.0 no patch!)
+
+#define WDT_TASK_PRIO 0x1e
+
 bool wdt_flg;
 
-// struct rst_info rst_inf; // SDK 1.1.0 + libmain_patch_01.a
-
-ETSEvent wdt_eventq;
-
-void store_exception_error(uint32_t errn)
-{
-		uint32_t *ptr = (uint32_t *)(RTC_MEM_BASE);
-			*ptr++ = errn;
-			*ptr++ = RSR(EXCCAUSE);
-			*ptr++ = RSR(EPC1);
-			*ptr++ = RSR(EPC2);
-			*ptr++ = RSR(EPC3);
-			*ptr++ = RSR(EXCVADDR);
-			*ptr++ = RSR(DEPC);
-		if(errn > RST_EVENT_WDT) do _ResetVector(); while(1);
-}
-
+// каждые 1680403 us
 void wdt_feed(void)
 {
 	if (RTC_MEM(0) < RST_EVENT_WDT) {
 		store_exception_error(RST_EVENT_WDT);
 		wdt_flg = true;
-		ets_post(0x1e, 0, 0);
+		ets_post(WDT_TASK_PRIO, 0, 0);
 	}
 }
+
+ETSEvent wdt_eventq;
 
 void wdt_task(ETSEvent *e)
 {
@@ -56,21 +45,72 @@ void wdt_task(ETSEvent *e)
 
 void ICACHE_FLASH_ATTR wdt_init(void)
 {
-	RTC_MEM(0) = 0;
-//	wdt_flg = true;
-	ets_task(&wdt_task, 0x1e, &wdt_eventq, 1);
-
-	WDT_CTRL &= 0x7e; // Disable WDT
-
+//	RTC_MEM(0) = 0;
+	ets_task(wdt_task, WDT_TASK_PRIO, &wdt_eventq, 1);
 	ets_isr_attach(ETS_WDT_INUM , wdt_feed, NULL);
-
 	INTC_EDGE_EN |= 1; // 0x3ff00004 |= 1
-	WDT_REG1 = 0xb; // WDT timeot
+/*	WDT_REG1 = 0xb; // WDT timeot
 	WDT_REG2 = 0xb;
 	WDT_CTRL = (WDT_CTRL | 0x38) & 0x79; // WDT cfg
 	WDT_CTRL |= 1;	// Enable WDT
-	ets_isr_unmask(1 << ETS_WDT_INUM); // Enable WDT isr
+	ets_isr_unmask(1 << ETS_WDT_INUM); // Enable WDT isr */
+	ets_wdt_enable(2,3,3); // mode 2 (wdt isr), step 1680403 us
 }
+
+#else
+
+extern ETSTimer SoftWdtTimer;
+extern int soft_wdt_interval; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
+#define wdt_flg ((int *)&SoftWdtTimer)[-1]
+// extern void system_restart_local(void);
+extern void pp_post(int);
+
+void wdt_feed(void)
+{
+	if (RTC_MEM(0) <= RST_EVENT_WDT) {
+		if(wdt_flg == true) {
+			store_exception_error(RST_EVENT_WDT);
+			_ResetVector(); //	system_restart_local();
+		}
+		else {
+			ets_timer_disarm(&SoftWdtTimer);
+			ets_timer_arm_new(&SoftWdtTimer, soft_wdt_interval, 0, 1);
+			wdt_flg = true;
+			pp_post(12);
+		}
+	}
+}
+
+void ICACHE_FLASH_ATTR wdt_init(void)
+{
+	RTC_MEM(0) = 0;
+	WDT_CTRL &= 0x7e; // Disable WDT
+	INTC_EDGE_EN |= 1; // 0x3ff00004 |= 1
+	WDT_REG1 = 0xb; // WDT timeot
+	WDT_REG2 = 0xd;
+	WDT_CTRL = (WDT_CTRL | 0x38) & 0x79; // WDT cfg
+	ets_timer_setfn(&SoftWdtTimer, (ETSTimerFunc *)wdt_feed, NULL);
+	ets_timer_arm_new(&SoftWdtTimer, soft_wdt_interval, 0, 1);
+	WDT_CTRL |= 1;	// Enable WDT
+}
+
+#endif
+// struct rst_info rst_inf; // SDK 1.1.0 + libmain_patch_01.a
+
+
+void store_exception_error(uint32_t errn)
+{
+		uint32_t *ptr = (uint32_t *)(RTC_MEM_BASE);
+			*ptr++ = errn;
+			*ptr++ = RSR(EXCCAUSE);
+			*ptr++ = RSR(EPC1);
+			*ptr++ = RSR(EPC2);
+			*ptr++ = RSR(EPC3);
+			*ptr++ = RSR(EXCVADDR);
+			*ptr++ = RSR(DEPC);
+		if(errn > RST_EVENT_WDT) _ResetVector();
+}
+
 
 void default_exception_handler(void)
 {
@@ -83,7 +123,7 @@ void fatal_error(uint32_t errn, void *addr, void *txt)
 			*ptr++ = errn;
 			*ptr++ = (uint32_t)addr;
 			*ptr++ = (uint32_t)txt;
-		do _ResetVector(); while(1);
+		_ResetVector();
 }
 
 //RAM_BIOS:3FFFD814 aFatalException .ascii "Fatal exception (%d): \n"

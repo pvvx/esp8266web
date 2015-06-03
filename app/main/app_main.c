@@ -198,6 +198,7 @@ void ICACHE_FLASH_ATTR read_wifi_config(void)
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR startup(void)
 {
+	ets_set_user_start(call_user_start);
 	// Очистка сегмента bss //	mem_clr_bss();
 	uint8 * ptr = &_bss_start;
 	while(ptr < &_bss_end) *ptr++ = 0;

@@ -8,10 +8,12 @@
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "hw/specreg.h"
+
+
 //#include "user_interface.h"
 #include "add_sdk_func.h"
 
-ETSTimer *SoftWdtTimer;
+ETSTimer SoftWdtTimer;
 int soft_wdt_interval = 1600; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
 bool wdt_flg;
 uint8 t0x3FFEB460[16]; // 16?
@@ -81,4 +83,23 @@ void wdt_init(int flg) // wdt_init(1) вызывается в стартовом блоке libmain.a
 		WDT_CTRL |= 1;	// Enable WDT
 	}
 	pp_soft_wdt_init();
+}
+
+
+void slop_wdt_feed(void)
+{
+	WDT_FEED = WDT_FEED_MAGIC;
+}
+
+extern bool dbg_stop_hw_wdt;
+extern bool dbg_stop_sw_wdt;
+
+void _pp_task_12(void)
+{
+	ets_intr_lock();
+	if(dbg_stop_sw_wdt == false) wdt_flg = false;
+	if(dbg_stop_hw_wdt == false) {
+		WDT_FEED = WDT_FEED_MAGIC;
+	}
+	ets_intr_unlock();
 }
