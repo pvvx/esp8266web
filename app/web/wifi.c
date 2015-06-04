@@ -167,7 +167,7 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 	if ((wset.b.ap_config) || (wset.b.ap_ipinfo) || (wset.b.ap_ipdhcp)) {
 		wifi_softap_dhcps_stop();
 		if (wset.b.ap_config) {
-#if (SDK_VERSION < 1000)  // исправление для SDK 0.9.5...
+#if (SDK_VERSION < 1000)  // РёСЃРїСЂР°РІР»РµРЅРёРµ РґР»СЏ SDK 0.9.5...
 			struct softap_config ap_config;
 			os_memset(&ap_config, 0, sizeof(ap_config));
 			if (wifi_softap_get_config(&ap_config)
@@ -447,7 +447,7 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 #endif
 	}
 	if(wifi_get_opmode() != wificonfig.b.mode) {
-		New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
+		New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // РїСЂРѕРІРµСЂРёС‚СЊ С‡С‚Рѕ РЅР°РґРѕ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ Рё РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РІ РїСЂР°РІРёР»СЊРЅРѕР№ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё
 	}
 }
 /******************************************************************************

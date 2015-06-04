@@ -1,5 +1,4 @@
 /* 
- * copyright (c) 2008 - 2012 Espressif System 
  * 
  * esf buffer data structure
  */

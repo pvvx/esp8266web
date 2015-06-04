@@ -18,7 +18,7 @@
 
 #define mMIN(a, b)  ((a<b)?a:b)
 
-typedef union // заголовок объекта сохранения
+typedef union // Р·Р°РіРѕР»РѕРІРѕРє РѕР±СЉРµРєС‚Р° СЃРѕС…СЂР°РЅРµРЅРёСЏ
 {
 	struct {
 	uint16 size;
@@ -29,17 +29,17 @@ typedef union // заголовок объекта сохранения
 
 #define fobj_head_size 4
 #define fobj_x_free 0xffffffff
-#define MAX_FOBJ_SIZE 512 // максимальный размер сохраняемых объeктов
+#define MAX_FOBJ_SIZE 512 // РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ СЃРѕС…СЂР°РЅСЏРµРјС‹С… РѕР±СЉeРєС‚РѕРІ
 
 //-----------------------------------------------------------------------------
 
 #define align(a) ((a + 3) & 0xFFFFFFFC)
 //-----------------------------------------------------------------------------
 // FunctionName : get_addr_bscfg
-// Опции:
-//  fasle - поиск текушего сегмента
-//  true - поиск нового сегмента для записи (pack)
-// Returns     : новый адрес сегмента для записи
+// РћРїС†РёРё:
+//  fasle - РїРѕРёСЃРє С‚РµРєСѓС€РµРіРѕ СЃРµРіРјРµРЅС‚Р°
+//  true - РїРѕРёСЃРє РЅРѕРІРѕРіРѕ СЃРµРіРјРµРЅС‚Р° РґР»СЏ Р·Р°РїРёСЃРё (pack)
+// Returns     : РЅРѕРІС‹Р№ Р°РґСЂРµСЃ СЃРµРіРјРµРЅС‚Р° РґР»СЏ Р·Р°РїРёСЃРё
 //-----------------------------------------------------------------------------
 LOCAL ICACHE_FLASH_ATTR uint32 get_addr_bscfg(bool flg)
 {
@@ -48,15 +48,15 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_bscfg(bool flg)
 	uint32 reta = FMEMORY_SCFG_BASE_ADDR;
 	do {
 		if(spi_flash_read(faddr, &x2, 4) != SPI_FLASH_RESULT_OK) return 1;
-		if(flg) { // поиск нового сегмента для записи (pack)
+		if(flg) { // РїРѕРёСЃРє РЅРѕРІРѕРіРѕ СЃРµРіРјРµРЅС‚Р° РґР»СЏ Р·Р°РїРёСЃРё (pack)
 			if(x2 > x1 || x2 == 0xFFFFFFFF) {
 				x1 = x2;
-				reta = faddr; // новый адрес сегмента для записи
+				reta = faddr; // РЅРѕРІС‹Р№ Р°РґСЂРµСЃ СЃРµРіРјРµРЅС‚Р° РґР»СЏ Р·Р°РїРёСЃРё
 			}
 		}
-		else if(x2 < x1) { // поиск текушего сегмента
+		else if(x2 < x1) { // РїРѕРёСЃРє С‚РµРєСѓС€РµРіРѕ СЃРµРіРјРµРЅС‚Р°
 			x1 = x2;
-			reta = faddr; // новый адрес сегмента для записи
+			reta = faddr; // РЅРѕРІС‹Р№ Р°РґСЂРµСЃ СЃРµРіРјРµРЅС‚Р° РґР»СЏ Р·Р°РїРёСЃРё
 		};
 		faddr += FMEMORY_SCFG_BANK_SIZE;
 	} while(faddr < (FMEMORY_SCFG_BASE_ADDR + FMEMORY_SCFG_BANKS * FMEMORY_SCFG_BANK_SIZE));
@@ -74,11 +74,11 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_bscfg(bool flg)
 }
 //-----------------------------------------------------------------------------
 // FunctionName : get_addr_fobj
-// Опции:
-//  false - Поиск последней записи объекта по id и size
-//  true - Поиск присуствия записи объекта по id и size
-// Returns : адрес записи данных объекта
-// 0 - не найден
+// РћРїС†РёРё:
+//  false - РџРѕРёСЃРє РїРѕСЃР»РµРґРЅРµР№ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р° РїРѕ id Рё size
+//  true - РџРѕРёСЃРє РїСЂРёСЃСѓСЃС‚РІРёСЏ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р° РїРѕ id Рё size
+// Returns : Р°РґСЂРµСЃ Р·Р°РїРёСЃРё РґР°РЅРЅС‹С… РѕР±СЉРµРєС‚Р°
+// 0 - РЅРµ РЅР°Р№РґРµРЅ
 //-----------------------------------------------------------------------------
 LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj(uint32 base, fobj_head *obj, bool flg)
 {
@@ -109,8 +109,8 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj(uint32 base, fobj_head *obj, bool f
 }
 //-----------------------------------------------------------------------------
 // FunctionName : get_addr_fend
-// Поиск последнего адреса в сегменте для записи объекта
-// Returns : адрес для записи объекта
+// РџРѕРёСЃРє РїРѕСЃР»РµРґРЅРµРіРѕ Р°РґСЂРµСЃР° РІ СЃРµРіРјРµРЅС‚Рµ РґР»СЏ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р°
+// Returns : Р°РґСЂРµСЃ РґР»СЏ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р°
 //-----------------------------------------------------------------------------
 LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj_save(uint32 base, fobj_head obj)
 {
@@ -119,13 +119,13 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj_save(uint32 base, fobj_head obj)
 	uint32 fend = base + FMEMORY_SCFG_BANK_SIZE - align(obj.n.size + fobj_head_size);
 	do {
 		if(spi_flash_read(faddr, (uint32 *) &fobj, fobj_head_size) != SPI_FLASH_RESULT_OK) {
-			return 1; // ошибка
+			return 1; // РѕС€РёР±РєР°
 		}
 		if(fobj.x == fobj_x_free) {
 			if(faddr < fend) {
 				return faddr;
 			}
-			return 0; // не влезет, на pack
+			return 0; // РЅРµ РІР»РµР·РµС‚, РЅР° pack
 		}
 		if(fobj.n.size <= MAX_FOBJ_SIZE) {
 			faddr += align(fobj.n.size + fobj_head_size);
@@ -133,7 +133,7 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj_save(uint32 base, fobj_head obj)
 		else faddr += align(MAX_FOBJ_SIZE + fobj_head_size);
 	}
 	while(faddr < fend);
-	return 0; // не влезет, на pack
+	return 0; // РЅРµ РІР»РµР·РµС‚, РЅР° pack
 }
 //=============================================================================
 // FunctionName : spi_flash_save_struct
@@ -143,9 +143,9 @@ LOCAL ICACHE_FLASH_ATTR uint32 pack_cfg_fmem(fobj_head obj)
 {
 	fobj_head fobj;
 	uint8 buf[align(MAX_FOBJ_SIZE + fobj_head_size)];
-	uint32 fnewseg = get_addr_bscfg(true); // поиск нового сегмента для записи (pack)
+	uint32 fnewseg = get_addr_bscfg(true); // РїРѕРёСЃРє РЅРѕРІРѕРіРѕ СЃРµРіРјРµРЅС‚Р° РґР»СЏ Р·Р°РїРёСЃРё (pack)
 	if(fnewseg < 4) return fnewseg; // error
-	uint32 foldseg = get_addr_bscfg(false); // поиск текушего сегмента
+	uint32 foldseg = get_addr_bscfg(false); // РїРѕРёСЃРє С‚РµРєСѓС€РµРіРѕ СЃРµРіРјРµРЅС‚Р°
 	if(foldseg < 4) return fnewseg; // error
 	uint32 faddr = foldseg;
 	uint32 xaddr;
@@ -153,20 +153,20 @@ LOCAL ICACHE_FLASH_ATTR uint32 pack_cfg_fmem(fobj_head obj)
 	if(spi_flash_erase_sector(fnewseg>>12) != SPI_FLASH_RESULT_OK) return 1;
 	faddr += 4;
 	do {
-		if(spi_flash_read(faddr, (uint32 *) &fobj, fobj_head_size) != SPI_FLASH_RESULT_OK) return 1; // последовательное чтение id из старого сегмента
+		if(spi_flash_read(faddr, (uint32 *) &fobj, fobj_head_size) != SPI_FLASH_RESULT_OK) return 1; // РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ С‡С‚РµРЅРёРµ id РёР· СЃС‚Р°СЂРѕРіРѕ СЃРµРіРјРµРЅС‚Р°
 		if(fobj.x == fobj_x_free) break;
 		if(fobj.n.size > MAX_FOBJ_SIZE) len = align(MAX_FOBJ_SIZE + fobj_head_size);
 		else len = align(fobj.n.size + fobj_head_size);
-		if(fobj.n.id != obj.n.id &&  fobj.n.size <= MAX_FOBJ_SIZE) { // объект валидный
-			if(get_addr_fobj(fnewseg, &fobj, true) == 0) { // найдем, сохранили ли мы его уже? нет
-				xaddr = get_addr_fobj(foldseg, &fobj, false); // найдем последнее сохранение объекта в старом сенгменте, size изменен
+		if(fobj.n.id != obj.n.id &&  fobj.n.size <= MAX_FOBJ_SIZE) { // РѕР±СЉРµРєС‚ РІР°Р»РёРґРЅС‹Р№
+			if(get_addr_fobj(fnewseg, &fobj, true) == 0) { // РЅР°Р№РґРµРј, СЃРѕС…СЂР°РЅРёР»Рё Р»Рё РјС‹ РµРіРѕ СѓР¶Рµ? РЅРµС‚
+				xaddr = get_addr_fobj(foldseg, &fobj, false); // РЅР°Р№РґРµРј РїРѕСЃР»РµРґРЅРµРµ СЃРѕС…СЂР°РЅРµРЅРёРµ РѕР±СЉРµРєС‚Р° РІ СЃС‚Р°СЂРѕРј СЃРµРЅРіРјРµРЅС‚Рµ, size РёР·РјРµРЅРµРЅ
 				if(xaddr < 4) return xaddr; // ???
-				// прочитаем заголовок с телом объекта в буфер
+				// РїСЂРѕС‡РёС‚Р°РµРј Р·Р°РіРѕР»РѕРІРѕРє СЃ С‚РµР»РѕРј РѕР±СЉРµРєС‚Р° РІ Р±СѓС„РµСЂ
 				os_memcpy(buf, &fobj, fobj_head_size);
 				if((spi_flash_read(xaddr + fobj_head_size,(uint32 *) &buf[fobj_head_size], fobj.n.size) != SPI_FLASH_RESULT_OK)) return 1;
-				xaddr = get_addr_fobj_save(fnewseg, fobj); // адрес для записи объекта
+				xaddr = get_addr_fobj_save(fnewseg, fobj); // Р°РґСЂРµСЃ РґР»СЏ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р°
 				if(xaddr < 4) return xaddr; // ???
-				// запишем заголовок с телом объекта во flash
+				// Р·Р°РїРёС€РµРј Р·Р°РіРѕР»РѕРІРѕРє СЃ С‚РµР»РѕРј РѕР±СЉРµРєС‚Р° РІРѕ flash
 				if((spi_flash_write(xaddr, (uint32 *)buf, align(fobj.n.size + fobj_head_size)) != SPI_FLASH_RESULT_OK)) return 1;
 			};
 		};
@@ -176,10 +176,10 @@ LOCAL ICACHE_FLASH_ATTR uint32 pack_cfg_fmem(fobj_head obj)
 	if(spi_flash_read(foldseg, &xaddr, 4) != SPI_FLASH_RESULT_OK)	return 1;
 	xaddr--;
 	if(spi_flash_write(fnewseg, &xaddr, 4) != SPI_FLASH_RESULT_OK)	return 1;
-	return get_addr_fobj_save(fnewseg, obj); // адрес для записи объекта;
+	return get_addr_fobj_save(fnewseg, obj); // Р°РґСЂРµСЃ РґР»СЏ Р·Р°РїРёСЃРё РѕР±СЉРµРєС‚Р°;
 }
 //=============================================================================
-//- Сохранить объект в flash --------------------------------------------------
+//- РЎРѕС…СЂР°РЅРёС‚СЊ РѕР±СЉРµРєС‚ РІ flash --------------------------------------------------
 //  Returns	: false/true
 //-----------------------------------------------------------------------------
 bool ICACHE_FLASH_ATTR flash_save_cfg(void *ptr, uint16 id, uint16 size)
@@ -196,7 +196,7 @@ bool ICACHE_FLASH_ATTR flash_save_cfg(void *ptr, uint16 id, uint16 size)
 		uint32 xfaddr = get_addr_fobj(faddr, &fobj, false);
 		if(xfaddr > 3 && size == fobj.n.size) {
 			if((size)&&(spi_flash_read(xfaddr, (uint32 *) buf, size + fobj_head_size) != SPI_FLASH_RESULT_OK)) return false; // error
-			if(!os_memcmp(ptr, &buf[fobj_head_size], size)) return true; // уже записано то-же самое
+			if(!os_memcmp(ptr, &buf[fobj_head_size], size)) return true; // СѓР¶Рµ Р·Р°РїРёСЃР°РЅРѕ С‚Рѕ-Р¶Рµ СЃР°РјРѕРµ
 		}
 	}
 	fobj.n.size = size;
@@ -219,16 +219,16 @@ bool ICACHE_FLASH_ATTR flash_save_cfg(void *ptr, uint16 id, uint16 size)
 	return true;
 }
 //=============================================================================
-//- Прочитать объект из flash -------------------------------------------------
-//  Параметры:
-//   prt - указатель, куда сохранить
-//   id - идентификатор искомого объекта
-//   maxsize - сколько байт сохранить максимум из найденного объекта, по ptr
+//- РџСЂРѕС‡РёС‚Р°С‚СЊ РѕР±СЉРµРєС‚ РёР· flash -------------------------------------------------
+//  РџР°СЂР°РјРµС‚СЂС‹:
+//   prt - СѓРєР°Р·Р°С‚РµР»СЊ, РєСѓРґР° СЃРѕС…СЂР°РЅРёС‚СЊ
+//   id - РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РёСЃРєРѕРјРѕРіРѕ РѕР±СЉРµРєС‚Р°
+//   maxsize - СЃРєРѕР»СЊРєРѕ Р±Р°Р№С‚ СЃРѕС…СЂР°РЅРёС‚СЊ РјР°РєСЃРёРјСѓРј РёР· РЅР°Р№РґРµРЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р°, РїРѕ ptr
 //  Returns:
 //  -3 - error
 //  -2 - flash rd/wr/clr error
-//  -1 - не найден
-//   0..MAX_FOBJ_SIZE - ok, сохраненный размер объекта
+//  -1 - РЅРµ РЅР°Р№РґРµРЅ
+//   0..MAX_FOBJ_SIZE - ok, СЃРѕС…СЂР°РЅРµРЅРЅС‹Р№ СЂР°Р·РјРµСЂ РѕР±СЉРµРєС‚Р°
 //-----------------------------------------------------------------------------
 sint16 ICACHE_FLASH_ATTR flash_read_cfg(void *ptr, uint16 id, uint16 maxsize)
 {
@@ -251,11 +251,11 @@ sint16 ICACHE_FLASH_ATTR flash_read_cfg(void *ptr, uint16 id, uint16 maxsize)
 	return fobj.n.size;
 }
 //=============================================================================
-//-- Сохранение системных настроек -------------------------------------------
+//-- РЎРѕС…СЂР°РЅРµРЅРёРµ СЃРёСЃС‚РµРјРЅС‹С… РЅР°СЃС‚СЂРѕРµРє -------------------------------------------
 //=============================================================================
 struct SystemCfg syscfg;
 //-----------------------------------------------------------------------------
-// Чтение системных настроек
+// Р§С‚РµРЅРёРµ СЃРёСЃС‚РµРјРЅС‹С… РЅР°СЃС‚СЂРѕРµРє
 //-----------------------------------------------------------------------------
 bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 	if(flash_read_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg)) != sizeof(syscfg)) {
@@ -297,7 +297,7 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 	return true;
 }
 //-----------------------------------------------------------------------------
-// Сохранение системных настроек
+// РЎРѕС…СЂР°РЅРµРЅРёРµ СЃРёСЃС‚РµРјРЅС‹С… РЅР°СЃС‚СЂРѕРµРє
 //-----------------------------------------------------------------------------
 bool ICACHE_FLASH_ATTR sys_write_cfg(void) {
 //	set_gpio_io_pin();

@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: tcp_srv_conn.c
- * TCP сервачек для ESP8266
+ * TCP СЃРµСЂРІР°С‡РµРє РґР»СЏ ESP8266
  * PV` ver1.0 20/12/2014
  ******************************************************************************/
 #include "user_config.h"
@@ -19,10 +19,10 @@
 
 // Lwip funcs - http://www.ecoscentric.com/ecospro/doc/html/ref/lwip.html
 
-TCP_SERV_CFG *phcfg = NULL; // начальный указатель в памяти на структуры открытых сервачков
+TCP_SERV_CFG *phcfg = NULL; // РЅР°С‡Р°Р»СЊРЅС‹Р№ СѓРєР°Р·Р°С‚РµР»СЊ РІ РїР°РјСЏС‚Рё РЅР° СЃС‚СЂСѓРєС‚СѓСЂС‹ РѕС‚РєСЂС‹С‚С‹С… СЃРµСЂРІР°С‡РєРѕРІ
 
 #define mMIN(a, b)  ((a<b)?a:b)
-// пред.описание...
+// РїСЂРµРґ.РѕРїРёСЃР°РЅРёРµ...
 static void tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
 static void tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
 static void tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
@@ -34,7 +34,7 @@ static void tcpsrv_client_err(void *arg, err_t err) ICACHE_FLASH_ATTR;
 
 /******************************************************************************
  * FunctionName : tcpsrv_print_remote_info
- * Description  : выводит remote_ip:remote_port [conn_count] os_printf("srv x.x.x.x:x [n] ")
+ * Description  : РІС‹РІРѕРґРёС‚ remote_ip:remote_port [conn_count] os_printf("srv x.x.x.x:x [n] ")
  * Parameters   : TCP_SERV_CONN * ts_conn
  * Returns      : none
  *******************************************************************************/
@@ -94,7 +94,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_received_data_default(TCP_SERV_CONN *ts_conn) {
 }
 /******************************************************************************
  * FunctionName : find_pcb
- * Description  : поиск pcb в списках lwip
+ * Description  : РїРѕРёСЃРє pcb РІ СЃРїРёСЃРєР°С… lwip
  * Parameters   : TCP_SERV_CONN * ts_conn
  * Returns      : *pcb or NULL
  *******************************************************************************/
@@ -122,26 +122,26 @@ struct tcp_pcb * ICACHE_FLASH_ATTR find_tcp_pcb(TCP_SERV_CONN * ts_conn) {
  * Returns      : none
  *******************************************************************************/
 void ICACHE_FLASH_ATTR tcpsrv_disconnect(TCP_SERV_CONN * ts_conn) {
-	if (ts_conn == NULL || ts_conn->state == SRVCONN_CLOSEWAIT) return; // уже закрывается
-	ts_conn->pcb = find_tcp_pcb(ts_conn); // ещё жива данная pcb ?
+	if (ts_conn == NULL || ts_conn->state == SRVCONN_CLOSEWAIT) return; // СѓР¶Рµ Р·Р°РєСЂС‹РІР°РµС‚СЃСЏ
+	ts_conn->pcb = find_tcp_pcb(ts_conn); // РµС‰С‘ Р¶РёРІР° РґР°РЅРЅР°СЏ pcb ?
 	if (ts_conn->pcb != NULL) {
 		tcpsrv_server_close(ts_conn);
 	}
 }
 /******************************************************************************
  * FunctionName : internal fun: tcpsrv_int_sent_data
- * Description  : передача данных (не буферизированная! только передача в tcp Lwip-у)
- * 				  вызывать только из call back с текущим pcb!
+ * Description  : РїРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С… (РЅРµ Р±СѓС„РµСЂРёР·РёСЂРѕРІР°РЅРЅР°СЏ! С‚РѕР»СЊРєРѕ РїРµСЂРµРґР°С‡Р° РІ tcp Lwip-Сѓ)
+ * 				  РІС‹Р·С‹РІР°С‚СЊ С‚РѕР»СЊРєРѕ РёР· call back СЃ С‚РµРєСѓС‰РёРј pcb!
  * Parameters   : TCP_SERV_CONN * ts_conn
- *                uint8* psent - буфер с данными
- *                uint16 length - кол-во передаваемых байт
+ *                uint8* psent - Р±СѓС„РµСЂ СЃ РґР°РЅРЅС‹РјРё
+ *                uint16 length - РєРѕР»-РІРѕ РїРµСЂРµРґР°РІР°РµРјС‹С… Р±Р°Р№С‚
  * Returns      : tcp error
  ******************************************************************************/
 err_t ICACHE_FLASH_ATTR tcpsrv_int_sent_data(TCP_SERV_CONN * ts_conn, uint8 *psent, uint16 length) {
 	err_t err = ERR_ARG;
 	if(ts_conn == NULL) return err;
 	if(ts_conn->pcb == NULL || ts_conn->state == SRVCONN_CLOSEWAIT) return ERR_CONN;
-	ts_conn->flag.busy_bufo = 1; // буфер bufo занят
+	ts_conn->flag.busy_bufo = 1; // Р±СѓС„РµСЂ bufo Р·Р°РЅСЏС‚
 	struct tcp_pcb *pcb = ts_conn->pcb;  // find_tcp_pcb(ts_conn);
 	if(tcp_sndbuf(pcb) < length) {
 #if DEBUGSOO > 1
@@ -155,8 +155,8 @@ err_t ICACHE_FLASH_ATTR tcpsrv_int_sent_data(TCP_SERV_CONN * ts_conn, uint8 *pse
 		if (err == ERR_OK) {
 			ts_conn->ptrtx = psent + length;
 			ts_conn->cntro -= length;
-			ts_conn->flag.wait_sent = 1; // ожидать завершения передачи (sent_cb)
-			err = tcp_output(pcb); // передать что влезло
+			ts_conn->flag.wait_sent = 1; // РѕР¶РёРґР°С‚СЊ Р·Р°РІРµСЂС€РµРЅРёСЏ РїРµСЂРµРґР°С‡Рё (sent_cb)
+			err = tcp_output(pcb); // РїРµСЂРµРґР°С‚СЊ С‡С‚Рѕ РІР»РµР·Р»Рѕ
 		} else { // ts_conn->state = SRVCONN_CLOSE;
 #if DEBUGSOO > 1
 			os_printf("tcp_write(%p, %p, %u) = %d! pbuf = %u\n", pcb, psent, length, err, tcp_sndbuf(pcb));
@@ -164,11 +164,11 @@ err_t ICACHE_FLASH_ATTR tcpsrv_int_sent_data(TCP_SERV_CONN * ts_conn, uint8 *pse
 			ts_conn->flag.wait_sent = 0;
 			tcpsrv_server_close(ts_conn);
 		};
-	} else { // создать вызов tcpsrv_server_sent()
+	} else { // СЃРѕР·РґР°С‚СЊ РІС‹Р·РѕРІ tcpsrv_server_sent()
 		tcp_nagle_enable(pcb);
-		err = tcp_output(pcb); // передать пустое
+		err = tcp_output(pcb); // РїРµСЂРµРґР°С‚СЊ РїСѓСЃС‚РѕРµ
 	}
-	ts_conn->flag.busy_bufo = 0; // буфер bufo свободен
+	ts_conn->flag.busy_bufo = 0; // Р±СѓС„РµСЂ bufo СЃРІРѕР±РѕРґРµРЅ
 	return err;
 }
 /******************************************************************************
@@ -185,10 +185,10 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_sent(void *arg, struct tcp_pcb *pcb
 	sint8 ret_err = ERR_OK;
 	TCP_SERV_CONN * ts_conn = arg;
 	if (ts_conn == NULL || pcb == NULL)	return ERR_ARG;
-	ts_conn->pcb = pcb; // запомнить pcb
+	ts_conn->pcb = pcb; // Р·Р°РїРѕРјРЅРёС‚СЊ pcb
 	ts_conn->state = SRVCONN_CONNECT;
 	ts_conn->recv_check = 0;
-	ts_conn->flag.wait_sent = 0; // блок передан
+	ts_conn->flag.wait_sent = 0; // Р±Р»РѕРє РїРµСЂРµРґР°РЅ
 	if ((ts_conn->flag.tx_null == 0)
 			&& (ts_conn->pcfg->func_sent_cb != NULL)) {
 		ret_err = ts_conn->pcfg->func_sent_cb(ts_conn);
@@ -217,22 +217,22 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 		tcpsrv_server_close(ts_conn);
 		return err;
 	};
-	// если нет функции обработки или ожидаем закрытия соединения, то принимаем данные в трубу
+	// РµСЃР»Рё РЅРµС‚ С„СѓРЅРєС†РёРё РѕР±СЂР°Р±РѕС‚РєРё РёР»Рё РѕР¶РёРґР°РµРј Р·Р°РєСЂС‹С‚РёСЏ СЃРѕРµРґРёРЅРµРЅРёСЏ, С‚Рѕ РїСЂРёРЅРёРјР°РµРј РґР°РЅРЅС‹Рµ РІ С‚СЂСѓР±Сѓ
 	if ((ts_conn->flag.rx_null != 0) || (ts_conn->pcfg->func_recv == NULL)
-			|| (ts_conn->state == SRVCONN_CLOSEWAIT)) { // соединение закрыто? нет.
-		tcp_recved(pcb, p->tot_len + ts_conn->unrecved_bytes); // сообщает стеку, что съели len и можно посылать ACK и принимать новые данные.
+			|| (ts_conn->state == SRVCONN_CLOSEWAIT)) { // СЃРѕРµРґРёРЅРµРЅРёРµ Р·Р°РєСЂС‹С‚Рѕ? РЅРµС‚.
+		tcp_recved(pcb, p->tot_len + ts_conn->unrecved_bytes); // СЃРѕРѕР±С‰Р°РµС‚ СЃС‚РµРєСѓ, С‡С‚Рѕ СЃСЉРµР»Рё len Рё РјРѕР¶РЅРѕ РїРѕСЃС‹Р»Р°С‚СЊ ACK Рё РїСЂРёРЅРёРјР°С‚СЊ РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ.
 		ts_conn->unrecved_bytes = 0;
 #if DEBUGSOO > 3
 		os_printf("rec_null %d of %d\n", ts_conn->cntri, p->tot_len);
 #endif
-		pbuf_free(p); // данные выели
+		pbuf_free(p); // РґР°РЅРЅС‹Рµ РІС‹РµР»Рё
 		return ERR_OK;
 	};
-	ts_conn->state = SRVCONN_CONNECT; // был прием
-	ts_conn->recv_check = 0; // счет времени до авто-закрытия с нуля
+	ts_conn->state = SRVCONN_CONNECT; // Р±С‹Р» РїСЂРёРµРј
+	ts_conn->recv_check = 0; // СЃС‡РµС‚ РІСЂРµРјРµРЅРё РґРѕ Р°РІС‚Рѕ-Р·Р°РєСЂС‹С‚РёСЏ СЃ РЅСѓР»СЏ
 
 	int len = 0;
-	ts_conn->flag.busy_bufi = 1; // идет обработка bufi
+	ts_conn->flag.busy_bufi = 1; // РёРґРµС‚ РѕР±СЂР°Р±РѕС‚РєР° bufi
 	if(ts_conn->pbufi != NULL && (ts_conn->flag.rx_buf) && ts_conn->cntri < ts_conn->sizei) {
 			len = ts_conn->sizei - ts_conn->cntri;
 	}
@@ -241,15 +241,15 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 		ts_conn->pbufi = NULL;
 	}
 	{
-		uint8 * newbufi = (uint8 *) os_malloc(len + p->tot_len + 1); // подготовка буфера
+		uint8 * newbufi = (uint8 *) os_malloc(len + p->tot_len + 1); // РїРѕРґРіРѕС‚РѕРІРєР° Р±СѓС„РµСЂР°
 	#if DEBUGSOO > 2
 		os_printf("memi[%d] %p ", len + p->tot_len, ts_conn->pbufi);
 	#endif
 		if (newbufi == NULL) {
-			ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
+			ts_conn->flag.busy_bufi = 0; // РѕР±СЂР°Р±РѕС‚РєР° bufi РѕРєРѕРЅС‡РµРЅР°
 			return ERR_MEM;
 		}
-		newbufi[len + p->tot_len] = '\0'; // вместо os_zalloc
+		newbufi[len + p->tot_len] = '\0'; // РІРјРµСЃС‚Рѕ os_zalloc
 		if(len)	{
 			os_memcpy(newbufi, &ts_conn->pbufi[ts_conn->cntri], len);
 			os_free(ts_conn->pbufi);
@@ -258,13 +258,13 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 		ts_conn->cntri = 0;
 		ts_conn->sizei = len;
 	};
-	// добавление всего что отдал Lwip в буфер
+	// РґРѕР±Р°РІР»РµРЅРёРµ РІСЃРµРіРѕ С‡С‚Рѕ РѕС‚РґР°Р» Lwip РІ Р±СѓС„РµСЂ
 	len = pbuf_copy_partial(p, &ts_conn->pbufi[len], p->tot_len, 0);
 
 	ts_conn->sizei += len;
-	pbuf_free(p); // все данные выели
+	pbuf_free(p); // РІСЃРµ РґР°РЅРЅС‹Рµ РІС‹РµР»Рё
 	if(!ts_conn->flag.rx_buf) {
-		 tcp_recved(pcb, len); // сообщает стеку, что съели len и можно посылать ACK и принимать новые данные.
+		 tcp_recved(pcb, len); // СЃРѕРѕР±С‰Р°РµС‚ СЃС‚РµРєСѓ, С‡С‚Рѕ СЃСЉРµР»Рё len Рё РјРѕР¶РЅРѕ РїРѕСЃС‹Р»Р°С‚СЊ ACK Рё РїСЂРёРЅРёРјР°С‚СЊ РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ.
 	}
 	else ts_conn->unrecved_bytes += len;
 #if DEBUGSOO > 3
@@ -274,7 +274,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 	if((!ts_conn->flag.rx_buf) || ts_conn->cntri >= ts_conn->sizei)  {
 		ts_conn->sizei = 0;
 		if (ts_conn->pbufi != NULL) {
-			os_free(ts_conn->pbufi);  // освободить буфер.
+			os_free(ts_conn->pbufi);  // РѕСЃРІРѕР±РѕРґРёС‚СЊ Р±СѓС„РµСЂ.
 			ts_conn->pbufi = NULL;
 		};
 	}
@@ -285,7 +285,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 		ts_conn->pbufi = (uint8 *)mem_realloc(ts_conn->pbufi, len);	//mem_trim(ts_conn->pbufi, len);
 	}
 	ts_conn->cntri = 0;
-	ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
+	ts_conn->flag.busy_bufi = 0; // РѕР±СЂР°Р±РѕС‚РєР° bufi РѕРєРѕРЅС‡РµРЅР°
 	return err;
 }
 /******************************************************************************
@@ -295,7 +295,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
  * programmed to flash and data is received faster than programmed).
  * Parameters   : TCP_SERV_CONN * ts_conn
  * Returns      : none
- * После включения throttle, будет принято до 5840 (MAX WIN) + 1460 (MSS) байт?
+ * РџРѕСЃР»Рµ РІРєР»СЋС‡РµРЅРёСЏ throttle, Р±СѓРґРµС‚ РїСЂРёРЅСЏС‚Рѕ РґРѕ 5840 (MAX WIN) + 1460 (MSS) Р±Р°Р№С‚?
  ******************************************************************************/
 void ICACHE_FLASH_ATTR tcpsrv_unrecved_win(TCP_SERV_CONN *ts_conn) {
 	if (ts_conn->unrecved_bytes) {
@@ -306,7 +306,7 @@ void ICACHE_FLASH_ATTR tcpsrv_unrecved_win(TCP_SERV_CONN *ts_conn) {
 #if 1
 		if(ts_conn->pcb != NULL) tcp_recved(ts_conn->pcb, ts_conn->unrecved_bytes);
 #else
-		struct tcp_pcb *pcb = find_tcp_pcb(ts_conn); // уже закрыто?
+		struct tcp_pcb *pcb = find_tcp_pcb(ts_conn); // СѓР¶Рµ Р·Р°РєСЂС‹С‚Рѕ?
 		if(pcb != NULL)	tcp_recved(ts_conn->pcb, ts_conn->unrecved_bytes);
 #endif
 	}
@@ -320,7 +320,7 @@ void ICACHE_FLASH_ATTR tcpsrv_unrecved_win(TCP_SERV_CONN *ts_conn) {
  ******************************************************************************/
 static void ICACHE_FLASH_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) {
 	struct tcp_pcb *pcb = ts_conn->pcb;
-	if (pcb != NULL && ts_conn->flag.pcb_time_wait_free && pcb->state == TIME_WAIT) { // убить TIME_WAIT?
+	if (pcb != NULL && ts_conn->flag.pcb_time_wait_free && pcb->state == TIME_WAIT) { // СѓР±РёС‚СЊ TIME_WAIT?
 		// http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html
 #if DEBUGSOO > 3
 		tcpsrv_print_remote_info(ts_conn);
@@ -346,7 +346,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) {
 		/*remove the node from the server's active connection list*/
 		tcpsrv_disconnect_successful(ts_conn);
 	} else {
-		if (++ts_conn->recv_check > TCP_SRV_CLOSE_WAIT) { // счет до принудительного закрытия  120*0.25 = 30 cек
+		if (++ts_conn->recv_check > TCP_SRV_CLOSE_WAIT) { // СЃС‡РµС‚ РґРѕ РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕРіРѕ Р·Р°РєСЂС‹С‚РёСЏ  120*0.25 = 30 cРµРє
 #if DEBUGSOO > 2
 			tcpsrv_print_remote_info(ts_conn);
 			os_printf("tcp_abandon!\n");
@@ -358,7 +358,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) {
 			// remove the node from the server's active connection list
 			tcpsrv_disconnect_successful(ts_conn);
 		} else
-			os_timer_arm(&ts_conn->ptimer, TCP_FAST_INTERVAL*2, 0); // ждем ещё 250 ms
+			os_timer_arm(&ts_conn->ptimer, TCP_FAST_INTERVAL*2, 0); // Р¶РґРµРј РµС‰С‘ 250 ms
 	}
 }
 /******************************************************************************
@@ -375,12 +375,12 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 	ts_conn->state = SRVCONN_CLOSEWAIT;
 	ts_conn->recv_check = 0;
 
-	ts_conn->flag.wait_sent = 0; // блок передан
-	ts_conn->flag.rx_null = 1; // отключение вызова func_received_data() и прием в null
-	ts_conn->flag.tx_null = 1; // отключение вызова func_sent_callback() и передача в null
-	tcp_recv(pcb, NULL); // отключение приема
-	tcp_sent(pcb, NULL); // отключение передачи
-	tcp_poll(pcb, NULL, 0); // отключение poll
+	ts_conn->flag.wait_sent = 0; // Р±Р»РѕРє РїРµСЂРµРґР°РЅ
+	ts_conn->flag.rx_null = 1; // РѕС‚РєР»СЋС‡РµРЅРёРµ РІС‹Р·РѕРІР° func_received_data() Рё РїСЂРёРµРј РІ null
+	ts_conn->flag.tx_null = 1; // РѕС‚РєР»СЋС‡РµРЅРёРµ РІС‹Р·РѕРІР° func_sent_callback() Рё РїРµСЂРµРґР°С‡Р° РІ null
+	tcp_recv(pcb, NULL); // РѕС‚РєР»СЋС‡РµРЅРёРµ РїСЂРёРµРјР°
+	tcp_sent(pcb, NULL); // РѕС‚РєР»СЋС‡РµРЅРёРµ РїРµСЂРµРґР°С‡Рё
+	tcp_poll(pcb, NULL, 0); // РѕС‚РєР»СЋС‡РµРЅРёРµ poll
 	if (ts_conn->pbufo != NULL) {
 		os_free(ts_conn->pbufo);
 		ts_conn->pbufo = NULL;
@@ -397,7 +397,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 		tcp_recved(ts_conn->pcb, ts_conn->unrecved_bytes);
 		ts_conn->unrecved_bytes = 0;
 	}
-	err_t err = tcp_close(pcb); // послать закрытие соединения
+	err_t err = tcp_close(pcb); // РїРѕСЃР»Р°С‚СЊ Р·Р°РєСЂС‹С‚РёРµ СЃРѕРµРґРёРЅРµРЅРёСЏ
 	// The function may return ERR_MEM if no memory was available for closing the connection.
 	// If so, the application should wait and try again either by using the acknowledgment callback or the polling functionality.
 	// If the close succeeds, the function returns ERR_OK.
@@ -411,7 +411,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 		// closing failed, try again later
 	}
 //	else { } // closing succeeded
-	os_timer_arm(&ts_conn->ptimer, TCP_FAST_INTERVAL*2, 0); // если менее, то Lwip не успевает pcb->state = TIME_WAIT ?
+	os_timer_arm(&ts_conn->ptimer, TCP_FAST_INTERVAL*2, 0); // РµСЃР»Рё РјРµРЅРµРµ, С‚Рѕ Lwip РЅРµ СѓСЃРїРµРІР°РµС‚ pcb->state = TIME_WAIT ?
 }
 /******************************************************************************
  * FunctionName : espconn_server_poll
@@ -455,7 +455,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_poll(void *arg, struct tcp_pcb *pcb
 		} else
 			tcpsrv_server_close(ts_conn);
 	} else
-		tcp_poll(pcb, NULL, 0); // отключить tcpsrv_server_poll
+		tcp_poll(pcb, NULL, 0); // РѕС‚РєР»СЋС‡РёС‚СЊ tcpsrv_server_poll
 	return ERR_OK;
 }
 /******************************************************************************
@@ -467,10 +467,10 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_poll(void *arg, struct tcp_pcb *pcb
 static void ICACHE_FLASH_ATTR tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) {
 //	if (ts_conn == NULL) return;
 	if(ts_conn->state != SRVCONN_CLOSED) {
-		ts_conn->state = SRVCONN_CLOSED; // исключить повторное вхождение из запросов в func_discon_cb()
+		ts_conn->state = SRVCONN_CLOSED; // РёСЃРєР»СЋС‡РёС‚СЊ РїРѕРІС‚РѕСЂРЅРѕРµ РІС…РѕР¶РґРµРЅРёРµ РёР· Р·Р°РїСЂРѕСЃРѕРІ РІ func_discon_cb()
 		if (ts_conn->pcfg->func_discon_cb != NULL)
 			ts_conn->pcfg->func_discon_cb(ts_conn);
-		if(phcfg == NULL || ts_conn->pcfg == NULL) return;  // если в func_discon_cb() было вызвано tcpsrv_close_all() и т.д.
+		if(phcfg == NULL || ts_conn->pcfg == NULL) return;  // РµСЃР»Рё РІ func_discon_cb() Р±С‹Р»Рѕ РІС‹Р·РІР°РЅРѕ tcpsrv_close_all() Рё С‚.Рґ.
 	}
 	TCP_SERV_CONN ** p = &ts_conn->pcfg->conn_links;
 	TCP_SERV_CONN *tcpsrv_cmp = ts_conn->pcfg->conn_links;
@@ -658,7 +658,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_client_err(void *arg, err_t err) {
 				os_printf("next tcp_connect() ...\n");
 #endif
 				os_timer_setfn(&ts_conn->ptimer, (ETSTimerFunc *)tcpsrv_client_connect, ts_conn);
-				os_timer_arm(&ts_conn->ptimer, TCP_CLIENT_NEXT_CONNECT_MS, 0); // попробовать соединиться через 3 секунды
+				os_timer_arm(&ts_conn->ptimer, TCP_CLIENT_NEXT_CONNECT_MS, 0); // РїРѕРїСЂРѕР±РѕРІР°С‚СЊ СЃРѕРµРґРёРЅРёС‚СЊСЃСЏ С‡РµСЂРµР· 3 СЃРµРєСѓРЅРґС‹
 			}
 			else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
 		}
@@ -738,7 +738,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *p
 		return ERR_MEM;
 	}
 	ts_conn->pcfg = p;
-	// перенести флаги по умолчанию на данное соединение
+	// РїРµСЂРµРЅРµСЃС‚Рё С„Р»Р°РіРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РЅР° РґР°РЅРЅРѕРµ СЃРѕРµРґРёРЅРµРЅРёРµ
 	ts_conn->flag = p->flag;
 	tcp_accepted(lpcb); // Decrease the listen backlog counter
 	//  tcp_setprio(pcb, TCP_PRIO_MIN); // Set priority ?
@@ -767,9 +767,9 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *p
 }
 /******************************************************************************
  * FunctionName : tcpsrv_port2conn
- * Description  : поиск конфига по порту
- * Parameters   : номер порта
- * Returns      : указатель на TCP_SERV_CFG или NULL
+ * Description  : РїРѕРёСЃРє РєРѕРЅС„РёРіР° РїРѕ РїРѕСЂС‚Сѓ
+ * Parameters   : РЅРѕРјРµСЂ РїРѕСЂС‚Р°
+ * Returns      : СѓРєР°Р·Р°С‚РµР»СЊ РЅР° TCP_SERV_CFG РёР»Рё NULL
  *******************************************************************************/
 TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_port2pcfg(uint16 portn) {
 	TCP_SERV_CFG * p;
@@ -821,7 +821,7 @@ TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_init(uint16 portn) {
 	}
 	else {
 		p->max_conn = TCP_CLIENT_MAX_CONNECT_RETRY;
-		p->flag.client = 1; // данное соединение не сервер, а клиент!
+		p->flag.client = 1; // РґР°РЅРЅРѕРµ СЃРѕРµРґРёРЅРµРЅРёРµ РЅРµ СЃРµСЂРІРµСЂ, Р° РєР»РёРµРЅС‚!
 		// insert new tcpsrv_config
 		p->next = phcfg;
 		phcfg = p;
@@ -970,7 +970,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, 
 	if (system_get_free_heap_size() >= p->min_heap) {
 		TCP_SERV_CONN * ts_conn = (TCP_SERV_CONN *) os_zalloc(sizeof(TCP_SERV_CONN));
 		if (ts_conn != NULL) {
-			ts_conn->flag = p->flag; // перенести флаги по умолчанию на данное соединение
+			ts_conn->flag = p->flag; // РїРµСЂРµРЅРµСЃС‚Рё С„Р»Р°РіРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РЅР° РґР°РЅРЅРѕРµ СЃРѕРµРґРёРЅРµРЅРёРµ
 			ts_conn->pcfg = p;
 			ts_conn->state = SRVCONN_CLIENT;
 			ts_conn->remote_port = remote_port;

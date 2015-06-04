@@ -297,7 +297,7 @@ netbios_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *addr, u
 		        os_printf("nbx:" IPSTR ",\t'%s'\n", IP2STR(&ip), netbios_name );
 #endif
        		};
-			if((ip != 0) && (((ip^addr->addr) & ip_current_netif()->netmask.addr) == 0)) { // запрет ответа другой подсети
+			if((ip != 0) && (((ip^addr->addr) & ip_current_netif()->netmask.addr) == 0)) { // Р·Р°РїСЂРµС‚ РѕС‚РІРµС‚Р° РґСЂСѓРіРѕР№ РїРѕРґСЃРµС‚Рё
 				char   netbiosname[NETBIOS_NAME_LEN+1];
 				struct netbios_hdr*      netbios_hdr      = (struct netbios_hdr*)p->payload;
 				struct netbios_name_hdr* netbios_name_hdr = (struct netbios_name_hdr*)(netbios_hdr+1);

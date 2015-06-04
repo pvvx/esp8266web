@@ -44,7 +44,7 @@ bool system_restoreclock(void); // if(cpu_overclock) system_update_cpu_freq(80) 
 //bool system_rtc_mem_write(uint8 des_addr, const void *src_addr, uint16 save_size); // user_interface.h
 //void system_set_os_print(uint8 onoff); // user_interface.h
 //?system_station_got_ip_set(a,b,c); // print"ip:%d.%d.%d.%d,mask:%d.%d.%d.%d,gw:%d.%", ets_timer_disarm(sta_con_timer)
-//void system_timer_reinit(void); // user_interface.h // устанавливает делитель таймера на :16 вместо :256 и т.д.
+//void system_timer_reinit(void); // user_interface.h // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РґРµР»РёС‚РµР»СЊ С‚Р°Р№РјРµСЂР° РЅР° :16 РІРјРµСЃС‚Рѕ :256 Рё С‚.Рґ.
 //void system_uart_swap(void); // user_interface.h
 //bool system_update_cpu_freq(uint32 cpu_freq); // ets_update_cpu_frequency + bit0 0x3FF00014 // user_interface.h
 //uint8 system_upgrade_flag_check(); // user_interface.h

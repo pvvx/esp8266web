@@ -462,7 +462,7 @@ uart0 and uart1 intr combine together, when interrupt occur */
 /* GPIOx_MUX:	0x60000800 */
 #define GPIO_MUX_CFG	iomux_[0]
 #define MUX_CFG_MASK	0xFFF
-#define MUX_SPI0_CLK_BIT	8 // =1 при 80 MHz, =0 при 40, 26, 20 MHz на SPI Flash
+#define MUX_SPI0_CLK_BIT	8 // =1 РїСЂРё 80 MHz, =0 РїСЂРё 40, 26, 20 MHz РЅР° SPI Flash
 
 #define GPIO0_MUX		iomux_[IDX_MUX0]
 #define GPIO1_MUX		iomux_[IDX_MUX1]
@@ -526,19 +526,19 @@ uart0 and uart1 intr combine together, when interrupt occur */
 #define VAL_MUX_GPIO14_IOPORT	((1<<GPIO_MUX_FUN_BIT0) | (1<<GPIO_MUX_FUN_BIT1) | (1<<GPIO_MUX_PULLUP_BIT))	// GPIO14, input
 #define VAL_MUX_GPIO15_IOPORT	((1<<GPIO_MUX_FUN_BIT0) | (1<<GPIO_MUX_FUN_BIT1) | (1<<GPIO_MUX_PULLUP_BIT))	// GPIO15, input
 
-// таблица (по 4 бита на номер пина) адресов IO_MUX в соответствии с номерами GPIOn
+// С‚Р°Р±Р»РёС†Р° (РїРѕ 4 Р±РёС‚Р° РЅР° РЅРѕРјРµСЂ РїРёРЅР°) Р°РґСЂРµСЃРѕРІ IO_MUX РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РЅРѕРјРµСЂР°РјРё GPIOn
 #define _IO_MUX_GPIO ((uint64_t)0x3210BA9876FE4D5Cull)
-// получить адрес IO_MUX в соответствии с номером GPIOn
+// РїРѕР»СѓС‡РёС‚СЊ Р°РґСЂРµСЃ IO_MUX РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РЅРѕРјРµСЂРѕРј GPIOn
 #define GPIOx_MUX(PIN_NUM) iomux_[1 + (uint32)((_IO_MUX_GPIO>>((PIN_NUM)<<2)) & 0x0F)]
 
-// таблица (по 2 бита на номер пина) номеров функций пинов для установки в режим GPIO
+// С‚Р°Р±Р»РёС†Р° (РїРѕ 2 Р±РёС‚Р° РЅР° РЅРѕРјРµСЂ РїРёРЅР°) РЅРѕРјРµСЂРѕРІ С„СѓРЅРєС†РёР№ РїРёРЅРѕРІ РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё РІ СЂРµР¶РёРј GPIO
 #define _FUN_IO_PORT  ((uint32_t)0xFFFFF0CCul)
-// таблица (по 4 бита на номер пина) номеров функций пинов для установки в режим по умочанию в SDK
+// С‚Р°Р±Р»РёС†Р° (РїРѕ 4 Р±РёС‚Р° РЅР° РЅРѕРјРµСЂ РїРёРЅР°) РЅРѕРјРµСЂРѕРІ С„СѓРЅРєС†РёР№ РїРёРЅРѕРІ РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё РІ СЂРµР¶РёРј РїРѕ СѓРјРѕС‡Р°РЅРёСЋ РІ SDK
 #define _FUN_DEF_SDK  ((uint64_t)0x3333111111000200ull)
 
-// получить номер функции для установки I/O пина в режим порта GPIOn
+// РїРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ С„СѓРЅРєС†РёРё РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё I/O РїРёРЅР° РІ СЂРµР¶РёРј РїРѕСЂС‚Р° GPIOn
 #define MUX_FUN_IO_PORT(PIN_NUM) ((uint32_t)(_FUN_IO_PORT >> (PIN_NUM<<1)) & 0x03)
-// получить номер функции для установки I/O пина в режим по умочанию в SDK
+// РїРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ С„СѓРЅРєС†РёРё РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё I/O РїРёРЅР° РІ СЂРµР¶РёРј РїРѕ СѓРјРѕС‡Р°РЅРёСЋ РІ SDK
 #define MUX_FUN_DEF_SDK(PIN_NUM) ((uint32_t)(_FUN_DEF_SDK >> (PIN_NUM<<2)) & 0x07)
 
 #define SET_PIN_FUNC(PIN_NUM, FUN) GPIOx_MUX(PIN_NUM) = (GPIOx_MUX(PIN_NUM) & (~GPIO_MUX_FUN_MASK)) | ((FUN&3)<<GPIO_MUX_FUN_BIT0) | ((FUN&4)<<(GPIO_MUX_FUN_BIT2-2))
@@ -550,9 +550,9 @@ uart0 and uart1 intr combine together, when interrupt occur */
 #define SET_PIN_PULLDOWN_DIS(PIN_NUM) GPIOx_MUX(PIN_NUM) &= ~(1 << GPIO_MUX_PULLDOWN_BIT)
 
 
-// установить функцию GPIOn как I/O port
+// СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С„СѓРЅРєС†РёСЋ GPIOn РєР°Рє I/O port
 #define SET_PIN_FUNC_IOPORT(PIN_NUM) SET_PIN_FUNC(PIN_NUM, MUX_FUN_IO_PORT(PIN_NUM))
-// установить функцию GPIOn по умолчанию для SDK
+// СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С„СѓРЅРєС†РёСЋ GPIOn РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РґР»СЏ SDK
 #define SET_PIN_FUNC_DEF_SDK(PIN_NUM) SET_PIN_FUNC(PIN_NUM, MUX_FUN_DEF_SDK(PIN_NUM))
 
 /* USER RTC RAM:	0x60001100 */

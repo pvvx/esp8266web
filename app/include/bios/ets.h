@@ -13,8 +13,8 @@
 
 /* This copies characters from the string from (up to and including the terminating null character) into the string
   to. Like memcpy, this function has undefined results if the strings overlap. The return value is the value of to. */
-//char * ets_strcpy(char *restrict to, const char *restrict from); /* копируемые области не должны пересекаться */
-char *ets_strcpy(char *to, const char *from); /* копируемые области не должны пересекаться */
+//char * ets_strcpy(char *restrict to, const char *restrict from); /* РєРѕРїРёСЂСѓРµРјС‹Рµ РѕР±Р»Р°СЃС‚Рё РЅРµ РґРѕР»Р¶РЅС‹ РїРµСЂРµСЃРµРєР°С‚СЊСЃСЏ */
+char *ets_strcpy(char *to, const char *from); /* РєРѕРїРёСЂСѓРµРјС‹Рµ РѕР±Р»Р°СЃС‚Рё РЅРµ РґРѕР»Р¶РЅС‹ РїРµСЂРµСЃРµРєР°С‚СЊСЃСЏ */
 /* This function is similar to strcpy but always copies exactly size characters into to.
  If the length of from is more than size, then strncpy copies just the first size characters. Note that in this case
  there is no null terminator written into to.
@@ -26,7 +26,7 @@ char *ets_strcpy(char *to, const char *from); /* копируемые области не должны пе
  which is probably small into a potentially large buffer. In this case, size may be large, and when it is, strncpy will
  waste a considerable amount of time copying null characters. */
 //char *ets_strncpy(char *restrict to, const char *restrict from, size_t size);
-char *ets_strncpy(char *to, const char *from, size_t size); /* копируемые области не должны пересекаться */
+char *ets_strncpy(char *to, const char *from, size_t size); /* РєРѕРїРёСЂСѓРµРјС‹Рµ РѕР±Р»Р°СЃС‚Рё РЅРµ РґРѕР»Р¶РЅС‹ РїРµСЂРµСЃРµРєР°С‚СЊСЃСЏ */
 /* The strlen function returns the length of the null-terminated string
  s in bytes. (In other words, it returns the offset of the terminating
  null character within the array.) */
@@ -57,7 +57,7 @@ int ets_memcmp(const void *a1, const void *a2, size_t size);
  is possible.
 The value returned by memcpy is the value of to. */
 //void *ets_memcpy(void *restrict to, const void *restrict from, size_t size);
-void *ets_memcpy(void *to, const void *from, size_t size); /* копируемые области не должны пересекаться */
+void *ets_memcpy(void *to, const void *from, size_t size); /* РєРѕРїРёСЂСѓРµРјС‹Рµ РѕР±Р»Р°СЃС‚Рё РЅРµ РґРѕР»Р¶РЅС‹ РїРµСЂРµСЃРµРєР°С‚СЊСЃСЏ */
 /* memmove copies the size bytes at from into the size bytes at to, even if those two blocks of space overlap. In the
  case of overlap, memmove is careful to copy the original values of the bytes in the block at from, including those
  bytes which also belong to the block at to.
@@ -82,7 +82,7 @@ void ets_write_char(char ch); // { if(putc1_routine != NULL) putc1_routine(ch); 
 void ets_update_cpu_frequency(uint32_t clk_mhz); // { cpu_clk_mhz = clk_mhz; }
 uint32_t ets_get_cpu_frequency(void); // { return cpu_clk_mhz; }
 void ets_set_user_start(void *routine); // { user_start_proc = routine; } user_start_proc 0x3FFFDCD0
-// idle_cb(idle_arg) вызывает ets_run()
+// idle_cb(idle_arg) РІС‹Р·С‹РІР°РµС‚ ets_run()
 void ets_set_idle_cb(void *routine, void *arg); // { idle_cb = routine; idle_arg = opt } // idle_cb 0x3FFFDAB0, idle_arg 0x3FFFDAB4
 void ets_run(void);
 void ets_delay_us(uint32 us); /*{
@@ -239,8 +239,8 @@ void ets_timer_done(ETSTimer *ptimer);
 
 struct swdt_info{
 	int wdt_mode; // 0xFFFFFFFF
-	uint32 a; 	  // 0x06 // ~ равно периоду в WDT_REG1
-	uint32 b;	  // 0x0C // ~ равно периоду в WDT_REG2
+	uint32 a; 	  // 0x06 // ~ СЂР°РІРЅРѕ РїРµСЂРёРѕРґСѓ РІ WDT_REG1
+	uint32 b;	  // 0x0C // ~ СЂР°РІРЅРѕ РїРµСЂРёРѕРґСѓ РІ WDT_REG2
 };
 // RAM_BIOS:3FFFC708
 extern struct swdt_info wdt_info;

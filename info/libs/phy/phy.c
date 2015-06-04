@@ -53,7 +53,7 @@ uint32 phy_get_mactime(void)
 }
 #endif
 
-/* â phy_chip_v6.o
+/* Ð² phy_chip_v6.o
 extern void chip_v6_set_chan(int frch);
 int ICACHE_FLASH_ATTR chip_v6_set_chanfreq(uint32 chfr)
 {

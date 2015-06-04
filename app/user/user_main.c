@@ -141,7 +141,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
 #ifdef UDP_TEST_PORT
 	if(syscfg.udp_port) udp_test_port_init(syscfg.udp_port);
 #endif
-	// инициализация и запуск tcp серверa(ов)
+	// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Рё Р·Р°РїСѓСЃРє tcp СЃРµСЂРІРµСЂa(РѕРІ)
 #ifdef USE_SRV_WEB_PORT
     if(syscfg.web_port) webserver_init(syscfg.web_port);
 #endif

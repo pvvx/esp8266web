@@ -14,7 +14,7 @@
 #include "add_sdk_func.h"
 
 ETSTimer SoftWdtTimer;
-int soft_wdt_interval = 1600; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
+int soft_wdt_interval = 1600; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 РёР»Рё 3000 РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂРµР¶РёРјР° sleep WiFi (РїРµСЂРёРѕРґР° timeouts_timer, noise_timer)
 bool wdt_flg;
 uint8 t0x3FFEB460[16]; // 16?
 
@@ -71,7 +71,7 @@ void pp_soft_wdt_init(void)
 	ets_timer_arm_new(SoftWdtTimer, soft_wdt_interval, 0, 1);
 }
 
-void wdt_init(int flg) // wdt_init(1) вызывается в стартовом блоке libmain.a
+void wdt_init(int flg) // wdt_init(1) РІС‹Р·С‹РІР°РµС‚СЃСЏ РІ СЃС‚Р°СЂС‚РѕРІРѕРј Р±Р»РѕРєРµ libmain.a
 {
 	if(flg) {
 		WDT_CTRL &= 0x7e; // Disable WDT  // 0x60000900

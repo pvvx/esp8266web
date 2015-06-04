@@ -53,36 +53,36 @@ const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
 //=============================================================================
 // IRAM code
 //=============================================================================
-// call_user_start() - вызов из заголовка, загрузчиком
+// call_user_start() - РІС‹Р·РѕРІ РёР· Р·Р°РіРѕР»РѕРІРєР°, Р·Р°РіСЂСѓР·С‡РёРєРѕРј
 // ENTRY(call_user_start) in eagle.app.v6.ld
 //-----------------------------------------------------------------------------
 void call_user_start(void)
 {
-	    // Загрзука заголовка flash
+	    // Р—Р°РіСЂСѓР·РєР° Р·Р°РіРѕР»РѕРІРєР° flash
 	    struct SPIFlashHead fhead;
-		SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS
+		SPI0_USER |= SPI_CS_SETUP; // +1 С‚Р°РєС‚ РїРµСЂРµРґ CS
 		SPIRead(0, (uint32_t *)&fhead, sizeof(fhead));
-		// Установка размера Flash от 256Kbytes до 32Mbytes
+		// РЈСЃС‚Р°РЅРѕРІРєР° СЂР°Р·РјРµСЂР° Flash РѕС‚ 256Kbytes РґРѕ 32Mbytes
 		// High four bits fhead.hsz.flash_size: 0 = 512K, 1 = 256K, 2 = 1M, 3 = 2M, 4 = 4M, ... 7 = 32M
 	    uint32 fsize = fhead.hsz.flash_size & 7;
 		if(fsize < 2) flashchip->chip_size = (8 >> fsize) << 16;
 		else flashchip->chip_size = (4 << fsize) << 16;
 	    uint32 fspeed = fhead.hsz.spi_freg;
-		// Установка:
+		// РЈСЃС‚Р°РЅРѕРІРєР°:
 		// SPI Flash Interface (0 = QIO, 1 = QOUT, 2 = DIO, 0x3 = DOUT)
 		// and Speed QSPI: 0 = 40MHz, 1= 26MHz, 2 = 20MHz, ... = 80MHz
 		sflash_something(fspeed);
 		// SPIFlashCnfig(fhead.spi_interface & 3, (speed > 2)? 1 : speed + 2);
 		// SPIReadModeCnfig(5); // in ROM
-		// Всё - включаем кеширование, далее можно вызывать процедуры из flash
+		// Р’СЃС‘ - РІРєР»СЋС‡Р°РµРј РєРµС€РёСЂРѕРІР°РЅРёРµ, РґР°Р»РµРµ РјРѕР¶РЅРѕ РІС‹Р·С‹РІР°С‚СЊ РїСЂРѕС†РµРґСѓСЂС‹ РёР· flash
 		Cache_Read_Enable(0,0,1);
-		// Инициализация
+		// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
 		startup();
-		// Передача управления ROM-BIOS
+		// РџРµСЂРµРґР°С‡Р° СѓРїСЂР°РІР»РµРЅРёСЏ ROM-BIOS
 		ets_run();
 }
 //-----------------------------------------------------------------------------
-// Установка скорости QSPI
+// РЈСЃС‚Р°РЅРѕРІРєР° СЃРєРѕСЂРѕСЃС‚Рё QSPI
 //  0 = 40MHz, 1 = 26MHz, 2 = 20MHz, >2 = 80MHz
 //-----------------------------------------------------------------------------
 void sflash_something(uint32 flash_speed)
@@ -109,7 +109,7 @@ void sflash_something(uint32 flash_speed)
 //=============================================================================
 // FLASH code (ICACHE_FLASH_ATTR)
 //=============================================================================
-// Чтение MAC из OTP
+// Р§С‚РµРЅРёРµ MAC РёР· OTP
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 {
@@ -128,7 +128,7 @@ void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 	}
 }
 //-----------------------------------------------------------------------------
-// Очистка сегмента bss
+// РћС‡РёСЃС‚РєР° СЃРµРіРјРµРЅС‚Р° bss
 //-----------------------------------------------------------------------------
 /*void ICACHE_FLASH_ATTR mem_clr_bss(void)
 {
@@ -136,7 +136,7 @@ void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 	while(ptr < &_bss_end) *ptr++ = 0;
 }*/
 //-----------------------------------------------------------------------------
-// Тест конфигурации для WiFi (будет переделан)
+// РўРµСЃС‚ РєРѕРЅС„РёРіСѓСЂР°С†РёРё РґР»СЏ WiFi (Р±СѓРґРµС‚ РїРµСЂРµРґРµР»Р°РЅ)
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 {
@@ -168,9 +168,9 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 	if(wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
 }
 //=============================================================================
-// Чтение wifi_config (последние сектора в заданном заголовком размере flash)
+// Р§С‚РµРЅРёРµ wifi_config (РїРѕСЃР»РµРґРЅРёРµ СЃРµРєС‚РѕСЂР° РІ Р·Р°РґР°РЅРЅРѕРј Р·Р°РіРѕР»РѕРІРєРѕРј СЂР°Р·РјРµСЂРµ flash)
 //-----------------------------------------------------------------------------
-/* system_get_checksum() находится в другом модуле
+/* system_get_checksum() РЅР°С…РѕРґРёС‚СЃСЏ РІ РґСЂСѓРіРѕРј РјРѕРґСѓР»Рµ
 uint32 ICACHE_FLASH_ATTR system_get_checksum(uint8 *ptr, uint32 len)
 {
 	uint8 checksum = 0xEF;
@@ -199,7 +199,7 @@ void ICACHE_FLASH_ATTR read_wifi_config(void)
 void ICACHE_FLASH_ATTR startup(void)
 {
 	ets_set_user_start(call_user_start);
-	// Очистка сегмента bss //	mem_clr_bss();
+	// РћС‡РёСЃС‚РєР° СЃРµРіРјРµРЅС‚Р° bss //	mem_clr_bss();
 	uint8 * ptr = &_bss_start;
 	while(ptr < &_bss_end) *ptr++ = 0;
 //	user_init_flag = false; // mem_clr_bss
@@ -211,7 +211,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	_xtos_set_exception_handler(28, default_exception_handler);
 	_xtos_set_exception_handler(29, default_exception_handler);
 	_xtos_set_exception_handler(8, default_exception_handler);
-	// cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
+	// cС‚Р°СЂС‚ РЅР° РјРѕРґСѓР»Рµ СЃ РєРІР°СЂС†РµРј РІ 26MHz, Р° ROM-BIOS РІС‹СЃС‚Р°РІРёР» 40MHz?
 	if(rom_i2c_readReg(103,4,1) == 8) { // 8: 40MHz, 136: 26MHz
 #ifdef DEBUG_UART
 		if(read_sys_const(sys_const_soc_param0) == 1) { // soc_param0: 0: 40MHz, 1: 26MHz, 2: 24MHz
@@ -224,7 +224,7 @@ void ICACHE_FLASH_ATTR startup(void)
 			ets_delay_us(150);
 //			ets_update_cpu_frequency(80); // set clk cpu (rom-bios set default 80)
 #else
-			ets_update_cpu_frequency(80); // указание правильной частоты для подсчета времени в ets_delay_us(), т.к. она считает такты CPU и множит на указанное число в MHz...
+			ets_update_cpu_frequency(80); // СѓРєР°Р·Р°РЅРёРµ РїСЂР°РІРёР»СЊРЅРѕР№ С‡Р°СЃС‚РѕС‚С‹ РґР»СЏ РїРѕРґСЃС‡РµС‚Р° РІСЂРµРјРµРЅРё РІ ets_delay_us(), С‚.Рє. РѕРЅР° СЃС‡РёС‚Р°РµС‚ С‚Р°РєС‚С‹ CPU Рё РјРЅРѕР¶РёС‚ РЅР° СѓРєР°Р·Р°РЅРЅРѕРµ С‡РёСЃР»Рѕ РІ MHz...
 			if(UART0_CLKDIV == CALK_UART_CLKDIV(115200)) {
 				UART0_CLKDIV = CALK_UART_CLKDIV_26QZ(DEFAULT_BIOS_UART_BAUD);
 				UART1_CLKDIV = CALK_UART_CLKDIV_26QZ(DEFAULT_BIOS_UART_BAUD);
@@ -236,18 +236,18 @@ void ICACHE_FLASH_ATTR startup(void)
 	}
 /*	//
 	if(rtc_get_reset_reason() < 2) { // 1 - power/ch_pd, 2 - reset, 3 - software, 4 - wdt ...)
-		if((RTC_RAM_BASE[24] & 0xffff) == 0) { // *((uint32 *)0x60001060 bit0..15: старт был по =1 reset, =0 ch_pd, bit16..31: deep_sleep_option
-		// старт со сбитыми в RTC данными, если не подключен VCC_RTC
+		if((RTC_RAM_BASE[24] & 0xffff) == 0) { // *((uint32 *)0x60001060 bit0..15: СЃС‚Р°СЂС‚ Р±С‹Р» РїРѕ =1 reset, =0 ch_pd, bit16..31: deep_sleep_option
+		// СЃС‚Р°СЂС‚ СЃРѕ СЃР±РёС‚С‹РјРё РІ RTC РґР°РЅРЅС‹РјРё, РµСЃР»Рё РЅРµ РїРѕРґРєР»СЋС‡РµРЅ VCC_RTC
 		}
 	} */
 //	os_printf("Reset reason: %u/%u, rf/deep_sleep option: %u.\n", rtc_get_reset_reason(), RTC_RAM_BASE[0x60>>2]&0xFFFF, RTC_RAM_BASE[0x60>>2]>>16);
-	// Тест системных данных в RTС
-	if((RTC_RAM_BASE[0x60>>2]>>16) > 4) { // проверка опции phy_rfoption = deep_sleep_option
+	// РўРµСЃС‚ СЃРёСЃС‚РµРјРЅС‹С… РґР°РЅРЅС‹С… РІ RTРЎ
+	if((RTC_RAM_BASE[0x60>>2]>>16) > 4) { // РїСЂРѕРІРµСЂРєР° РѕРїС†РёРё phy_rfoption = deep_sleep_option
 #ifdef DEBUG_UART
 		os_printf("\nError phy_rfoption! Set default = 0.\n");
 #endif
 		RTC_RAM_BASE[0x60>>2] &= 0xFFFF;
-		RTC_RAM_BASE[0x78>>2] = 0; // обнулить Espressif OR контрольку области 0..0x78 RTC_RAM
+		RTC_RAM_BASE[0x78>>2] = 0; // РѕР±РЅСѓР»РёС‚СЊ Espressif OR РєРѕРЅС‚СЂРѕР»СЊРєСѓ РѕР±Р»Р°СЃС‚Рё 0..0x78 RTC_RAM
 	}
 	//
 	read_wifi_config();
@@ -270,7 +270,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	//
 	tst_cfg_wifi();
 #ifdef USE_DUAL_FLASH
-	overlap_hspi_init(); // не используется для модулей с одной flash!
+	overlap_hspi_init(); // РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РјРѕРґСѓР»РµР№ СЃ РѕРґРЅРѕР№ flash!
 #endif
 	//
 	uint8 *buf = (uint8 *)pvPortMalloc(esp_init_data_default_size); // esp_init_data_default.bin
@@ -288,7 +288,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #ifdef DEBUG_UART
 	os_printf("\nOpenLoaderSDK v1.2\n");
 	//
-	os_print_reset_error(); // вывод фатальных ошибок, вызвавших рестарт. см. в модуле wdt
+	os_print_reset_error(); // РІС‹РІРѕРґ С„Р°С‚Р°Р»СЊРЅС‹С… РѕС€РёР±РѕРє, РІС‹Р·РІР°РІС€РёС… СЂРµСЃС‚Р°СЂС‚. СЃРј. РІ РјРѕРґСѓР»Рµ wdt
 	//
 #endif
 //	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F; // ??

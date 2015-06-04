@@ -61,7 +61,7 @@ SpiFlashOpResult spi_flash_attach(void){
 }
 
 // ROM:40004B44
-// ВНИМАНИЕ! имеет внутренную ошибку. Не используйте SPIEraseArea() функцию ROM-BIOS!
+// Р’РќРРњРђРќРР•! РёРјРµРµС‚ РІРЅСѓС‚СЂРµРЅРЅСѓСЋ РѕС€РёР±РєСѓ. РќРµ РёСЃРїРѕР»СЊР·СѓР№С‚Рµ SPIEraseArea() С„СѓРЅРєС†РёСЋ ROM-BIOS!
 SpiFlashOpResult SPIEraseArea (uint32 start_addr, uint32 lenght)
 {
     uint32 num_sec_in_block;	// *(a1 + 0xC) = SP + 0xC
@@ -82,21 +82,21 @@ SpiFlashOpResult SPIEraseArea (uint32 start_addr, uint32 lenght)
 				first_sec_erase = start_addr / flashchip.sector_size; 			// First sector to erase
 				num_sec_in_block = flashchip.block_size / flashchip.sector_size; 	// Number of sectors in block
 				num_sec_erase = lenght / flashchip.sector_size;				// Number of sectors to erase
-				// Округляем количество секторов для стирания в большую сторону.
+				// РћРєСЂСѓРіР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРµРєС‚РѕСЂРѕРІ РґР»СЏ СЃС‚РёСЂР°РЅРёСЏ РІ Р±РѕР»СЊС€СѓСЋ СЃС‚РѕСЂРѕРЅСѓ.
 				if ((lenght % flashchip.sector_size) != 0) num_sec_erase ++; //
 				var_r_13 = num_sec_erase;  // 9
-				// Стираем посекторно до адреса кратного блочному стиранию.
-				var_r_0 = num_sec_in_block - (first_sec_erase % num_sec_in_block); // кол-во секторов до адреса кратного блочному стиранию.
-				if (var_r_0 < num_sec_erase) var_r_13 = var_r_0; // запомнить кол-во секторов до стирания
+				// РЎС‚РёСЂР°РµРј РїРѕСЃРµРєС‚РѕСЂРЅРѕ РґРѕ Р°РґСЂРµСЃР° РєСЂР°С‚РЅРѕРіРѕ Р±Р»РѕС‡РЅРѕРјСѓ СЃС‚РёСЂР°РЅРёСЋ.
+				var_r_0 = num_sec_in_block - (first_sec_erase % num_sec_in_block); // РєРѕР»-РІРѕ СЃРµРєС‚РѕСЂРѕРІ РґРѕ Р°РґСЂРµСЃР° РєСЂР°С‚РЅРѕРіРѕ Р±Р»РѕС‡РЅРѕРјСѓ СЃС‚РёСЂР°РЅРёСЋ.
+				if (var_r_0 < num_sec_erase) var_r_13 = var_r_0; // Р·Р°РїРѕРјРЅРёС‚СЊ РєРѕР»-РІРѕ СЃРµРєС‚РѕСЂРѕРІ РґРѕ СЃС‚РёСЂР°РЅРёСЏ
 
 				for ( ; var_r_13 != 0; first_sec_erase++, var_r_13--)
 					if (SPIEraseSector (first_sec_erase) != 0) return 1;
-				// Если оставшеестя количество секторов для стирания помещается в n-блоков,
-				// то стираем n-блоков.
+				// Р•СЃР»Рё РѕСЃС‚Р°РІС€РµРµСЃС‚СЏ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРµРєС‚РѕСЂРѕРІ РґР»СЏ СЃС‚РёСЂР°РЅРёСЏ РїРѕРјРµС‰Р°РµС‚СЃСЏ РІ n-Р±Р»РѕРєРѕРІ,
+				// С‚Рѕ СЃС‚РёСЂР°РµРј n-Р±Р»РѕРєРѕРІ.
 				var_r_13 = num_sec_erase - var_r_13; // var_r_13 = num_sec_erase - 0
 				for ( ; num_sec_in_block < var_r_13; first_sec_erase += num_sec_in_block, var_r_13 -= num_sec_in_block)
 					if (SPIEraseBlock(first_sec_erase / num_sec_in_block) != 0) return 1;
-				// Стираем оставшиеся сектора в конце.
+				// РЎС‚РёСЂР°РµРј РѕСЃС‚Р°РІС€РёРµСЃСЏ СЃРµРєС‚РѕСЂР° РІ РєРѕРЅС†Рµ.
 				for ( ; var_r_13 != 0; first_sec_erase ++,  var_r_13 --)
 					if (SPIEraseSector (first_sec_erase) != 0) return 1;
                 return SPI_FLASH_RESULT_OK;

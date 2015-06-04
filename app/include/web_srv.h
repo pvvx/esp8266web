@@ -50,7 +50,7 @@ typedef struct
     uint16 httpStatus;        // Request method/status
     HTTP_FILE_TYPE fileType;       // File type to return with Content-Type
     uint8 pFilename[FileNameSize];
-	uint8 *puri; 		// указатель на строку с переменными запроса к файлу
+	uint8 *puri; 		// СѓРєР°Р·Р°С‚РµР»СЊ РЅР° СЃС‚СЂРѕРєСѓ СЃ РїРµСЂРµРјРµРЅРЅС‹РјРё Р·Р°РїСЂРѕСЃР° Рє С„Р°Р№Р»Сѓ
 	uint16 uri_len;
 	uint8 *phead; 		// HTTP Headers
 	uint16 head_len;
@@ -58,26 +58,26 @@ typedef struct
 	uint16 cookie_len;
 	uint8 *pcontent; 	// content
 	uint32 content_len; //
-	uint8 httpver;  // версия HTTP клиента в BCD (0x00 = неизвестен; 0x09 = HTTP/0.9; 0x10 = HTTP/1.0; 0x11 = HTTP/1.1)
+	uint8 httpver;  // РІРµСЂСЃРёСЏ HTTP РєР»РёРµРЅС‚Р° РІ BCD (0x00 = РЅРµРёР·РІРµСЃС‚РµРЅ; 0x09 = HTTP/0.9; 0x10 = HTTP/1.0; 0x11 = HTTP/1.1)
 } HTTP_CONN;
 
 
 typedef void (* web_func_cb)(TCP_SERV_CONN *ts_conn);
-typedef uint32 (* web_func_disc_cb)(uint32 flg); // отложенная функция, когда соединение закрыто
+typedef uint32 (* web_func_disc_cb)(uint32 flg); // РѕС‚Р»РѕР¶РµРЅРЅР°СЏ С„СѓРЅРєС†РёСЏ, РєРѕРіРґР° СЃРѕРµРґРёРЅРµРЅРёРµ Р·Р°РєСЂС‹С‚Рѕ
 
 typedef struct
 {
-	uint32 webflag;		// флаги для http/web сервера
-	uint8  bffiles[4];	// четырые Files pointers для оработки вложенных файлов include
+	uint32 webflag;		// С„Р»Р°РіРё РґР»СЏ http/web СЃРµСЂРІРµСЂР°
+	uint8  bffiles[4];	// С‡РµС‚С‹СЂС‹Рµ Files pointers РґР»СЏ РѕСЂР°Р±РѕС‚РєРё РІР»РѕР¶РµРЅРЅС‹С… С„Р°Р№Р»РѕРІ include
 	uint32 udata_start;	// udata "start=0x..."
 	uint32 udata_stop;	// udata "stop=0x..."
-	uint8  *msgbuf;		// указатель на текущий буфер вывода
-	uint16 msgbuflen;	// кол-во занятых байт в буфере msgbuf
-	uint16 msgbufsize;	// размер буфера
-	web_func_cb func_web_cb; // calback функция у httpd для обработки приема/передачи кусками
-	uint32 content_len; // размер файла для передачи (GET/POST) или приема, если принимается внешний файл (POST + SCB_RXDATA)
-	web_func_disc_cb web_disc_cb; // функция вызываемая по закрытию соединения
-	uint32 web_disc_par; // параметры функции вызываемой по закрытию соединения
+	uint8  *msgbuf;		// СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСѓС‰РёР№ Р±СѓС„РµСЂ РІС‹РІРѕРґР°
+	uint16 msgbuflen;	// РєРѕР»-РІРѕ Р·Р°РЅСЏС‚С‹С… Р±Р°Р№С‚ РІ Р±СѓС„РµСЂРµ msgbuf
+	uint16 msgbufsize;	// СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР°
+	web_func_cb func_web_cb; // calback С„СѓРЅРєС†РёСЏ Сѓ httpd РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё РїСЂРёРµРјР°/РїРµСЂРµРґР°С‡Рё РєСѓСЃРєР°РјРё
+	uint32 content_len; // СЂР°Р·РјРµСЂ С„Р°Р№Р»Р° РґР»СЏ РїРµСЂРµРґР°С‡Рё (GET/POST) РёР»Рё РїСЂРёРµРјР°, РµСЃР»Рё РїСЂРёРЅРёРјР°РµС‚СЃСЏ РІРЅРµС€РЅРёР№ С„Р°Р№Р» (POST + SCB_RXDATA)
+	web_func_disc_cb web_disc_cb; // С„СѓРЅРєС†РёСЏ РІС‹Р·С‹РІР°РµРјР°СЏ РїРѕ Р·Р°РєСЂС‹С‚РёСЋ СЃРѕРµРґРёРЅРµРЅРёСЏ
+	uint32 web_disc_par; // РїР°СЂР°РјРµС‚СЂС‹ С„СѓРЅРєС†РёРё РІС‹Р·С‹РІР°РµРјРѕР№ РїРѕ Р·Р°РєСЂС‹С‚РёСЋ СЃРѕРµРґРёРЅРµРЅРёСЏ
 } WEB_SRV_CONN;
 
 typedef enum
@@ -90,24 +90,24 @@ typedef enum
 
 // webflag:
 
-#define  SCB_CLOSED		0x00001 // соединение закрыто
-#define  SCB_DISCONNECT	0x00002 // выход на DISCONNECT
-#define  SCB_FCLOSE		0x00004 // закрыть файлы
-#define  SCB_FOPEN		0x00008 // файл(ы) открыт(ы)
+#define  SCB_CLOSED		0x00001 // СЃРѕРµРґРёРЅРµРЅРёРµ Р·Р°РєСЂС‹С‚Рѕ
+#define  SCB_DISCONNECT	0x00002 // РІС‹С…РѕРґ РЅР° DISCONNECT
+#define  SCB_FCLOSE		0x00004 // Р·Р°РєСЂС‹С‚СЊ С„Р°Р№Р»С‹
+#define  SCB_FOPEN		0x00008 // С„Р°Р№Р»(С‹) РѕС‚РєСЂС‹С‚(С‹)
 #define  SCB_FCALBACK	0x00010 // file use ~calback~
-#define  SCB_FGZIP		0x00020 // файл GZIP
-#define  SCB_CHUNKED	0x00040 // передача шинковкой
-#define  SCB_RETRYCB	0x00080 // вызвать повтор CalBack
+#define  SCB_FGZIP		0x00020 // С„Р°Р№Р» GZIP
+#define  SCB_CHUNKED	0x00040 // РїРµСЂРµРґР°С‡Р° С€РёРЅРєРѕРІРєРѕР№
+#define  SCB_RETRYCB	0x00080 // РІС‹Р·РІР°С‚СЊ РїРѕРІС‚РѕСЂ CalBack
 #define  SCB_POST		0x00100 // POST
 #define  SCB_GET		0x00200 // GET
-#define  SCB_AUTH		0x00400 // необходима авторизация
-#define  SCB_FINDCB		0x00800 // используется парсингом ~calback~
-#define  SCB_RXDATA		0x01000 // прием данных (файла)
-#define  SCB_HEAD_OK	0x02000 // заголовок HTTP принят и обработан
-#define  SCB_BNDR		0x04000 // прилеплен Content-Type: multipart/form-data; boundary="..."
+#define  SCB_AUTH		0x00400 // РЅРµРѕР±С…РѕРґРёРјР° Р°РІС‚РѕСЂРёР·Р°С†РёСЏ
+#define  SCB_FINDCB		0x00800 // РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїР°СЂСЃРёРЅРіРѕРј ~calback~
+#define  SCB_RXDATA		0x01000 // РїСЂРёРµРј РґР°РЅРЅС‹С… (С„Р°Р№Р»Р°)
+#define  SCB_HEAD_OK	0x02000 // Р·Р°РіРѕР»РѕРІРѕРє HTTP РїСЂРёРЅСЏС‚ Рё РѕР±СЂР°Р±РѕС‚Р°РЅ
+#define  SCB_BNDR		0x04000 // РїСЂРёР»РµРїР»РµРЅ Content-Type: multipart/form-data; boundary="..."
 #define  SCB_REDIR		0x08000 // Redirect 302
 #define  SCB_WEBSOC		0x10000 // WebSocket
-#define  SCB_SYSSAVE	0x20000 // по закрытию соединения вызвать sys_write_cfg()
+#define  SCB_SYSSAVE	0x20000 // РїРѕ Р·Р°РєСЂС‹С‚РёСЋ СЃРѕРµРґРёРЅРµРЅРёСЏ РІС‹Р·РІР°С‚СЊ sys_write_cfg()
 
 
 #define  SCB_OPEN       0

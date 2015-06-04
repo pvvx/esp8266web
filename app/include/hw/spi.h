@@ -124,7 +124,7 @@
 #define SPI_AHB_ENDIAN_MODE_S			8
 #define SPI_CK_OUT_EDGE					(BIT(7))
 #define SPI_CK_I_EDGE					(BIT(6))
-#define SPI_CS_SETUP					(BIT(5)) // +1 такт перед CS
+#define SPI_CS_SETUP					(BIT(5)) // +1 С‚Р°РєС‚ РїРµСЂРµРґ CS
 #define SPI_CS_HOLD						(BIT(4))
 #define SPI_AHB_USR_COMMAND				(BIT(3))
 #define SPI_FLASH_MODE					(BIT(2))

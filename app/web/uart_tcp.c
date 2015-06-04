@@ -14,7 +14,7 @@
 #include "tcp2uart.h"
 //=============================================================================
 //=============================================================================
-// Функции для установки pins в режим UART
+// Р¤СѓРЅРєС†РёРё РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё pins РІ СЂРµР¶РёРј UART
 #define VAL_FUNC_U1TX   (1<<GPIO_MUX_FUN_BIT1)
 #define VAL_FUNC_U0TX	0
 #define VAL_FUNC_U0RX	0
@@ -26,19 +26,19 @@
 #define PULLUP		(1<<GPIO_MUX_PULLUP_BIT)
 #define PULLDOWN	(1<<GPIO_MUX_PULLDOWN_BIT)
 #define PULLDIS		0
-// Функции для установки pins в режим SDK
+// Р¤СѓРЅРєС†РёРё РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё pins РІ СЂРµР¶РёРј SDK
 #define VAL_MUX_TX_UART1_OFF	VAL_MUX_GPIO2_IOPORT
 #define VAL_MUX_TX_UART0_OFF	VAL_MUX_GPIO1_IOPORT
 #define VAL_MUX_RX_UART0_OFF	VAL_MUX_GPIO3_IOPORT
 #define VAL_MUX_RTS_UART0_OFF	VAL_MUX_GPIO15_IOPORT
 #define VAL_MUX_CTS_UART0_OFF	VAL_MUX_GPIO13_IOPORT
-// Регистры MUX для используемых pins
+// Р РµРіРёСЃС‚СЂС‹ MUX РґР»СЏ РёСЃРїРѕР»СЊР·СѓРµРјС‹С… pins
 #define MUX_TX_UART1	GPIO2_MUX
 #define MUX_TX_UART0	GPIO1_MUX
 #define MUX_RX_UART0	GPIO3_MUX
 #define MUX_RTS_UART0	GPIO15_MUX
 #define MUX_CTS_UART0	GPIO13_MUX
-// Маска MUX
+// РњР°СЃРєР° MUX
 #define MASK_MUX ((1<<GPIO_MUX_FUN_BIT0)|(1<<GPIO_MUX_FUN_BIT1)|(1<<GPIO_MUX_FUN_BIT2)|(1<<GPIO_MUX_PULLDOWN_BIT)|(1<<GPIO_MUX_PULLUP_BIT))
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -83,12 +83,12 @@ void ICACHE_FLASH_ATTR update_rts0(void)
 	}
 }
 //=============================================================================
-// Обновить mux выводов UART0
+// РћР±РЅРѕРІРёС‚СЊ mux РІС‹РІРѕРґРѕРІ UART0
 // update_mux_txd1()
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR update_mux_uart0(void)
 {
-	if(syscfg.tcp2uart_port == 0) { // UART0 не включена на pins. Все pins используемые UART0 - ioport.
+	if(syscfg.tcp2uart_port == 0) { // UART0 РЅРµ РІРєР»СЋС‡РµРЅР° РЅР° pins. Р’СЃРµ pins РёСЃРїРѕР»СЊР·СѓРµРјС‹Рµ UART0 - ioport.
 		MUX_TX_UART0 = VAL_MUX_TX_UART0_OFF;
 		MUX_RX_UART0 = VAL_MUX_RX_UART0_OFF;
 		MUX_RTS_UART0 = VAL_MUX_RTS_UART0_OFF;
@@ -97,7 +97,7 @@ void ICACHE_FLASH_ATTR update_mux_uart0(void)
 	else {
 		MUX_TX_UART0 = VAL_FUNC_U0TX; // GPIO1/TX0, output
 		MUX_RX_UART0 = VAL_FUNC_U0RX | ((UART0_CONF0 & UART_RXD_INV)? PULLDOWN : PULLUP);  // GPIO3/RX0, input
-		if(uart0_flow_ctrl_flg) { // включен flow
+		if(uart0_flow_ctrl_flg) { // РІРєР»СЋС‡РµРЅ flow
 	    	update_rts0();
 	    	MUX_RTS_UART0 = VAL_FUNC_U0RTS | PULLDIS; // GPIO15/RTS, output
 	    	MUX_CTS_UART0 = VAL_FUNC_U0CTS | ((UART0_CONF0 & UART_CTS_INV)? PULLDOWN : PULLUP); // GPIO13/CTS, input
@@ -110,7 +110,7 @@ void ICACHE_FLASH_ATTR update_mux_uart0(void)
 }
 
 //=============================================================================
-// Обновить вывод TXD1
+// РћР±РЅРѕРІРёС‚СЊ РІС‹РІРѕРґ TXD1
 // update_mux_txd1()
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR update_mux_txd1(void)
@@ -126,7 +126,7 @@ void ICACHE_FLASH_ATTR update_mux_txd1(void)
 	MUX_TX_UART1 = x;
 }
 //=============================================================================
-// Инверсия входов/выходов RXD, TXD, RTS, CTS, DTR, DSR
+// РРЅРІРµСЂСЃРёСЏ РІС…РѕРґРѕРІ/РІС‹С…РѕРґРѕРІ RXD, TXD, RTS, CTS, DTR, DSR
 // set_uartx_invx()
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask)
@@ -145,7 +145,7 @@ void ICACHE_FLASH_ATTR set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask)
     ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
 }
 //=============================================================================
-// Стандартный вывод putc (UART0)
+// РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РІС‹РІРѕРґ putc (UART0)
 //-----------------------------------------------------------------------------
 void uart0_write_char(char c)
 {
@@ -162,7 +162,7 @@ void uart0_write_char(char c)
 	}
 }
 //=============================================================================
-// Стандартный вывод putc (UART1)
+// РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РІС‹РІРѕРґ putc (UART1)
 //-----------------------------------------------------------------------------
 void uart1_write_char(char c)
 {
@@ -294,23 +294,23 @@ void uart_intr_handler(void *para)
 	MEMW();
     uint32 ints = UART0_INT_ST;
     if(ints) {
-    	if (ints & UART_TXFIFO_EMPTY_INT_ST) { // fifo tx пусто?
+    	if (ints & UART_TXFIFO_EMPTY_INT_ST) { // fifo tx РїСѓСЃС‚Рѕ?
     		UART0_INT_ENA &= ~UART_TXFIFO_EMPTY_INT_ENA;
     		if(tcp2uart_conn != NULL) ets_timer_arm_new(&uart0_tx_buf_timer, 10, 0, 0); // 10 us
     	};
-    	if (ints & UART_RXFIFO_FULL_INT_ST) { // прерывание по приему символов? да
+    	if (ints & UART_RXFIFO_FULL_INT_ST) { // РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїСЂРёРµРјСѓ СЃРёРјРІРѕР»РѕРІ? РґР°
     		UART0_INT_ENA &= ~UART_RXFIFO_FULL_INT_ENA;
        		if(tcp2uart_conn != NULL && (!tcp2uart_conn->flag.user_flg1)) {
        			ets_timer_disarm(&uart0_rx_buf_timer);
-       			uint32 buftimeout = (UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT; // кол-во принятых символов в rx fifo
-       			if(buftimeout < (128 - RST_FIFO_CNT_SET - 1)) { // можем ещё принять до выставления RTS? да.
-       				buftimeout = (128 - RST_FIFO_CNT_SET - 1) - buftimeout; // сколько символов можем принять до выставления RTS
-       				buftimeout = ((UART0_CLKDIV & UART_CLKDIV_CNT) * buftimeout) >> 3; // время передачи символа (10 бит) в us =  UART_CLKDIV / 8
-       				if(buftimeout < 128) buftimeout = 128; // быстрее работать не стоит
-       				else if(buftimeout > MAX_WAIT_TX_BUF) buftimeout = MAX_WAIT_TX_BUF; // низкая скорость и буфер будет заполнен более чем через 0.05 сек? ограничить
-       				// buftimeout -= 16; // вычесть время исполнения?
+       			uint32 buftimeout = (UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT; // РєРѕР»-РІРѕ РїСЂРёРЅСЏС‚С‹С… СЃРёРјРІРѕР»РѕРІ РІ rx fifo
+       			if(buftimeout < (128 - RST_FIFO_CNT_SET - 1)) { // РјРѕР¶РµРј РµС‰С‘ РїСЂРёРЅСЏС‚СЊ РґРѕ РІС‹СЃС‚Р°РІР»РµРЅРёСЏ RTS? РґР°.
+       				buftimeout = (128 - RST_FIFO_CNT_SET - 1) - buftimeout; // СЃРєРѕР»СЊРєРѕ СЃРёРјРІРѕР»РѕРІ РјРѕР¶РµРј РїСЂРёРЅСЏС‚СЊ РґРѕ РІС‹СЃС‚Р°РІР»РµРЅРёСЏ RTS
+       				buftimeout = ((UART0_CLKDIV & UART_CLKDIV_CNT) * buftimeout) >> 3; // РІСЂРµРјСЏ РїРµСЂРµРґР°С‡Рё СЃРёРјРІРѕР»Р° (10 Р±РёС‚) РІ us =  UART_CLKDIV / 8
+       				if(buftimeout < 128) buftimeout = 128; // Р±С‹СЃС‚СЂРµРµ СЂР°Р±РѕС‚Р°С‚СЊ РЅРµ СЃС‚РѕРёС‚
+       				else if(buftimeout > MAX_WAIT_TX_BUF) buftimeout = MAX_WAIT_TX_BUF; // РЅРёР·РєР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ Рё Р±СѓС„РµСЂ Р±СѓРґРµС‚ Р·Р°РїРѕР»РЅРµРЅ Р±РѕР»РµРµ С‡РµРј С‡РµСЂРµР· 0.05 СЃРµРє? РѕРіСЂР°РЅРёС‡РёС‚СЊ
+       				// buftimeout -= 16; // РІС‹С‡РµСЃС‚СЊ РІСЂРµРјСЏ РёСЃРїРѕР»РЅРµРЅРёСЏ?
 				}
-    			else buftimeout = 32; // буфер rx fifo заполнен
+    			else buftimeout = 32; // Р±СѓС„РµСЂ rx fifo Р·Р°РїРѕР»РЅРµРЅ
    				ets_timer_arm_new(&uart0_rx_buf_timer, buftimeout, 0, 0);
        		};
         };

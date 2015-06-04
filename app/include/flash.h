@@ -23,7 +23,7 @@ SpiFlashOpResult spi_flash_erase_block(uint32 blk);
 
 uint32 spi_flash_real_size(void) ICACHE_FLASH_ATTR;
 
-#define USE_MSPI_FLASH_O 1 // включена "песочница" для SDK в 512 килобайт flash. Включить доступ к flash до 16Мбайт включительно
+#define USE_MSPI_FLASH_O 1 // РІРєР»СЋС‡РµРЅР° "РїРµСЃРѕС‡РЅРёС†Р°" РґР»СЏ SDK РІ 512 РєРёР»РѕР±Р°Р№С‚ flash. Р’РєР»СЋС‡РёС‚СЊ РґРѕСЃС‚СѓРї Рє flash РґРѕ 16РњР±Р°Р№С‚ РІРєР»СЋС‡РёС‚РµР»СЊРЅРѕ
 
 #define MASK_ADDR_FLASH_ICACHE_DATA	0xfffff
 

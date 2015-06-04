@@ -45,7 +45,7 @@ err_t tcp2uart_close(uint16 portn) ICACHE_FLASH_ATTR;
 
 void tcp2uart_int_rxtx_disable(void) ICACHE_FLASH_ATTR;
 
-#define RST_FIFO_CNT_SET 16 // при остатке в fifo места для 16 символов срабатывает RTS
+#define RST_FIFO_CNT_SET 16 // РїСЂРё РѕСЃС‚Р°С‚РєРµ РІ fifo РјРµСЃС‚Р° РґР»СЏ 16 СЃРёРјРІРѕР»РѕРІ СЃСЂР°Р±Р°С‚С‹РІР°РµС‚ RTS
 
 #define MAX_WAIT_TX_BUF 50000ul // 50 ms
 

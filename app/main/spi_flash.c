@@ -11,7 +11,7 @@
 
 #ifdef USE_DUAL_FLASH
 int	dual_flash_flag;
-#error "не доделанно под dual_flash !"
+#error "РЅРµ РґРѕРґРµР»Р°РЅРЅРѕ РїРѕРґ dual_flash !"
 #endif
 
 #define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 1)
@@ -30,12 +30,12 @@ void Cache_Read_Enable_New(void)
 }
 /******************************************************************************
  * FunctionName : spi_flash_read
- * Description  : чтение массива байт из flash
- *  			  читает из flash по QSPI блоками по SPI_FBLK байт
- *  			  в ROM-BIOS SPI_FBLK = 32 байта, 64 - предел SPI буфера
- * Parameters   : flash Addr, pointer, кол-во
+ * Description  : С‡С‚РµРЅРёРµ РјР°СЃСЃРёРІР° Р±Р°Р№С‚ РёР· flash
+ *  			  С‡РёС‚Р°РµС‚ РёР· flash РїРѕ QSPI Р±Р»РѕРєР°РјРё РїРѕ SPI_FBLK Р±Р°Р№С‚
+ *  			  РІ ROM-BIOS SPI_FBLK = 32 Р±Р°Р№С‚Р°, 64 - РїСЂРµРґРµР» SPI Р±СѓС„РµСЂР°
+ * Parameters   : flash Addr, pointer, РєРѕР»-РІРѕ
  * Returns      : SpiFlashOpResult 0 - ok
- * Опции gcc: -mno-serialize-volatile !
+ * РћРїС†РёРё gcc: -mno-serialize-volatile !
  *******************************************************************************/
 #define SPI_FBLK 32
 SpiFlashOpResult __attribute__((optimize("O3"))) spi_flash_read(uint32 faddr, void *des, uint32 size)

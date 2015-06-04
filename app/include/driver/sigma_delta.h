@@ -1,7 +1,7 @@
 /*
  * sigma_delta.h
  *
- *  Created on: 14/02/2015 ã.
+ *  Created on: 14/02/2015 Ð³.
  *      Author: PV`
  */
 

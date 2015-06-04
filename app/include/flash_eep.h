@@ -11,8 +11,8 @@
 //-----------------------------------------------------------------------------
 
 #define FMEMORY_SCFG_BASE_ADDR 0x79000 // 0x3B000, 0x3C000, 0x3D000 / 0x79000, 0x7A000, 0x7B000
-#define FMEMORY_SCFG_BANK_SIZE 0x01000 // размер сектора, 4096 bytes
-#define FMEMORY_SCFG_BANKS 3 // кол-во секторов для сохранения
+#define FMEMORY_SCFG_BANK_SIZE 0x01000 // СЂР°Р·РјРµСЂ СЃРµРєС‚РѕСЂР°, 4096 bytes
+#define FMEMORY_SCFG_BANKS 3 // РєРѕР»-РІРѕ СЃРµРєС‚РѕСЂРѕРІ РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ
 
 //-----------------------------------------------------------------------------
 
@@ -57,7 +57,7 @@ struct uartx_bits_config {
 #define UART0_DEFBAUD  115200
 #define UART1_DEFBAUD  230400
 
-struct  UartxCfg { // структура сохранения настроек Uart в Flash
+struct  UartxCfg { // СЃС‚СЂСѓРєС‚СѓСЂР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РЅР°СЃС‚СЂРѕРµРє Uart РІ Flash
 	uint32 baud;
 	union {
 	struct uartx_bits_config b;
@@ -67,40 +67,40 @@ struct  UartxCfg { // структура сохранения настроек Uart в Flash
 
 struct sys_bits_config {
 	uint16 hi_speed_enable		: 1;	//0  0x0000001 =1 Set CPU 160 MHz ...
-	uint16 pin_clear_cfg_enable : 1;	//1  0x0000002 =1 Проверять ножку RX на сброс конфигурации WiFi
-	uint16 debug_print_enable	: 1;	//2  0x0000004 =1 Вывод отладочной информации на GPIO2
-	uint16 web_time_wait_delete	: 1;	//3  0x0000008 =1 Закрывать соединение и убивать pcb c TIME_WAIT
-	uint16 netbios_ena			: 1;	//4  0x0000010 =1 включить NetBios
-	uint16 sntp_ena				: 1;	//5  0x0000020 =1 включить SNTP
+	uint16 pin_clear_cfg_enable : 1;	//1  0x0000002 =1 РџСЂРѕРІРµСЂСЏС‚СЊ РЅРѕР¶РєСѓ RX РЅР° СЃР±СЂРѕСЃ РєРѕРЅС„РёРіСѓСЂР°С†РёРё WiFi
+	uint16 debug_print_enable	: 1;	//2  0x0000004 =1 Р’С‹РІРѕРґ РѕС‚Р»Р°РґРѕС‡РЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё РЅР° GPIO2
+	uint16 web_time_wait_delete	: 1;	//3  0x0000008 =1 Р—Р°РєСЂС‹РІР°С‚СЊ СЃРѕРµРґРёРЅРµРЅРёРµ Рё СѓР±РёРІР°С‚СЊ pcb c TIME_WAIT
+	uint16 netbios_ena			: 1;	//4  0x0000010 =1 РІРєР»СЋС‡РёС‚СЊ NetBios
+	uint16 sntp_ena				: 1;	//5  0x0000020 =1 РІРєР»СЋС‡РёС‚СЊ SNTP
 };
 
 #define SYS_CFG_HI_SPEED	0x0000001 // Set CPU 160 MHz ...
-#define SYS_CFG_PIN_CLR_ENA	0x0000002 // Проверять ножку RX на сброс конфигурации WiFi
-#define SYS_CFG_DEBUG_ENA 	0x0000004 // Вывод отладочной информации на GPIO2
-#define SYS_CFG_TWPCB_DEL 	0x0000008 // Закрывать соединение и убивать pcb c TIME_WAIT
-#define SYS_CFG_NETBIOS_ENA	0x0000010 // включить NetBios
-#define SYS_CFG_SNTP_ENA	0x0000020 // включить SNTP
+#define SYS_CFG_PIN_CLR_ENA	0x0000002 // РџСЂРѕРІРµСЂСЏС‚СЊ РЅРѕР¶РєСѓ RX РЅР° СЃР±СЂРѕСЃ РєРѕРЅС„РёРіСѓСЂР°С†РёРё WiFi
+#define SYS_CFG_DEBUG_ENA 	0x0000004 // Р’С‹РІРѕРґ РѕС‚Р»Р°РґРѕС‡РЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё РЅР° GPIO2
+#define SYS_CFG_TWPCB_DEL 	0x0000008 // Р—Р°РєСЂС‹РІР°С‚СЊ СЃРѕРµРґРёРЅРµРЅРёРµ Рё СѓР±РёРІР°С‚СЊ pcb c TIME_WAIT
+#define SYS_CFG_NETBIOS_ENA	0x0000010 // РІРєР»СЋС‡РёС‚СЊ NetBios
+#define SYS_CFG_SNTP_ENA	0x0000020 // РІРєР»СЋС‡РёС‚СЊ SNTP
 
-struct SystemCfg { // структура сохранения системных настроек в Flash
+struct SystemCfg { // СЃС‚СЂСѓРєС‚СѓСЂР° СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃРёСЃС‚РµРјРЅС‹С… РЅР°СЃС‚СЂРѕРµРє РІ Flash
 	union {
 		struct sys_bits_config b;
 		uint16 w;
 	}cfg;
-	uint16 tcp2uart_port;	// номер порта TCP-UART
-	uint16 tcp2uart_twrec;	// время (сек) стартового ожидания приема/передачи первого пакета, до авто-закрытия соединения
-	uint16 tcp2uart_twcls;	// время (сек) до авто-закрытия соединения после приема или передачи
-	uint16 web_port;	// номер порта WEB
-	uint16 udp_port;	// номер порта UDP (sample-debug-test)
+	uint16 tcp2uart_port;	// РЅРѕРјРµСЂ РїРѕСЂС‚Р° TCP-UART
+	uint16 tcp2uart_twrec;	// РІСЂРµРјСЏ (СЃРµРє) СЃС‚Р°СЂС‚РѕРІРѕРіРѕ РѕР¶РёРґР°РЅРёСЏ РїСЂРёРµРјР°/РїРµСЂРµРґР°С‡Рё РїРµСЂРІРѕРіРѕ РїР°РєРµС‚Р°, РґРѕ Р°РІС‚Рѕ-Р·Р°РєСЂС‹С‚РёСЏ СЃРѕРµРґРёРЅРµРЅРёСЏ
+	uint16 tcp2uart_twcls;	// РІСЂРµРјСЏ (СЃРµРє) РґРѕ Р°РІС‚Рѕ-Р·Р°РєСЂС‹С‚РёСЏ СЃРѕРµРґРёРЅРµРЅРёСЏ РїРѕСЃР»Рµ РїСЂРёРµРјР° РёР»Рё РїРµСЂРµРґР°С‡Рё
+	uint16 web_port;	// РЅРѕРјРµСЂ РїРѕСЂС‚Р° WEB
+	uint16 udp_port;	// РЅРѕРјРµСЂ РїРѕСЂС‚Р° UDP (sample-debug-test)
 } __attribute__((packed));
 
 
 //-----------------------------------------------------------------------------
 
-sint16 flash_read_cfg(void *ptr, uint16 id, uint16 maxsize) ICACHE_FLASH_ATTR; // возврат: размер объекта последнего сохранения, -1 - не найден, -2 - error
+sint16 flash_read_cfg(void *ptr, uint16 id, uint16 maxsize) ICACHE_FLASH_ATTR; // РІРѕР·РІСЂР°С‚: СЂР°Р·РјРµСЂ РѕР±СЉРµРєС‚Р° РїРѕСЃР»РµРґРЅРµРіРѕ СЃРѕС…СЂР°РЅРµРЅРёСЏ, -1 - РЅРµ РЅР°Р№РґРµРЅ, -2 - error
 bool flash_save_cfg(void *ptr, uint16 id, uint16 size) ICACHE_FLASH_ATTR;
 extern struct SystemCfg syscfg;
-bool sys_write_cfg(void) ICACHE_FLASH_ATTR; // пишет из struct SystemCfg *scfg
-bool sys_read_cfg(void) ICACHE_FLASH_ATTR; // читет в struct SystemCfg *scfg
+bool sys_write_cfg(void) ICACHE_FLASH_ATTR; // РїРёС€РµС‚ РёР· struct SystemCfg *scfg
+bool sys_read_cfg(void) ICACHE_FLASH_ATTR; // С‡РёС‚РµС‚ РІ struct SystemCfg *scfg
 
 
 #endif /* __FLASH_EEP_H_ */

@@ -16,7 +16,7 @@ struct SPIFlashHsz {
 	uint8 flash_size: 4; // High four bits: 0 = 512K, 1 = 256K, 2 = 1M, 3 = 2M, 4 = 4M,
 }__attribute__((packed));
 
-struct SPIFlashHead { // заголовок flash (использует загрузчик BIOS)
+struct SPIFlashHead { // п╙п▒п≈п÷п°п÷п╖п÷п⌡ flash (п≥пёп═п÷п°п╗п╙п╔п∙п╓ п╙п▒п≈п╒п╔п╙п╝п≥п⌡ BIOS)
 	uint8 id; // = 0xE9
 	uint8 number_segs; // Number of segments
 	uint8 spi_interface; // SPI Flash Interface (0 = QIO, 1 = QOUT, 2 = DIO, 0x3 = DOUT)
@@ -28,7 +28,7 @@ struct SPIFlashHeadSegment {
 	uint32 segment_size; // Segment size
 };
 
-struct SPIFlashHeader { // полный заголовок flash (использует загрузчик BIOS)
+struct SPIFlashHeader { // п═п÷п°п·п╘п  п╙п▒п≈п÷п°п÷п╖п÷п⌡ flash (п≥пёп═п÷п°п╗п╙п╔п∙п╓ п╙п▒п≈п╒п╔п╙п╝п≥п⌡ BIOS)
 	struct SPIFlashHead head;
 	uint32 entry_point; // Entry point
 	struct SPIFlashHeadSegment seg; // Segment
@@ -60,7 +60,7 @@ SpiFlashOpResult SPI_write_enable(SpiFlashChip *sflashchip);
 
 SpiFlashOpResult Wait_SPI_Idle(SpiFlashChip *sflashchip);
 
-SpiFlashOpResult SPIEraseArea(uint32_t start_addr, size_t lenght); // бмхлюмхе! ХЛЕЕР БМСРПЕММСЧ НЬХАЙС. мЕ ХЯОНКЭГСИРЕ ЩРС ТСМЙЖХЧ ROM-BIOS!
+SpiFlashOpResult SPIEraseArea(uint32_t start_addr, size_t lenght); // п▓п²п≤п°п░п²п≤п∙! п╦п╪п╣п╣я┌ п╡п╫я┐я┌я─п╣п╫п╫я┐я▌ п╬я┬п╦п╠п╨я┐. п²п╣ п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ я█я┌я┐ я└я┐п╫п╨я├п╦я▌ ROM-BIOS!
 SpiFlashOpResult SPIEraseBlock(uint32_t blocknum);
 SpiFlashOpResult SPIEraseSector(uint32_t sectornum);
 SpiFlashOpResult SPIEraseChip(void);

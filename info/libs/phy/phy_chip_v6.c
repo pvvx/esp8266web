@@ -11,7 +11,7 @@
 #include "phy/phy.h"
 
 extern uint8 periodic_cal_sat;
-extern uint8 soc_param0; // chip6_phy_init_ctrl +1, áåðåòñÿ èç esp_init_data_default.bin +50, 0: 40MHz, 1: 26MHz, 2: 24MHz
+extern uint8 soc_param0; // chip6_phy_init_ctrl +1, Ð±ÐµÑ€ÐµÑ‚ÑÑ Ð¸Ð· esp_init_data_default.bin +50, 0: 40MHz, 1: 26MHz, 2: 24MHz
 
 void ICACHE_FLASH_ATTR ram_tx_mac_enable(void)
 {
@@ -99,7 +99,7 @@ uint32 ICACHE_FLASH_ATTR rtc_mem_recovery(uint32 *mem_start, uint32 *mem_end, ui
 // get_adc_rand()
 // phy_get_rand()
 
-// âûçûâàåòñÿ, äëÿ äâóõ âàðèàíòîâ soc_param0 = 1: 26MHz è soc_param0 = 2: 24MHz
+// Ð²Ñ‹Ð·Ñ‹Ð²Ð°ÐµÑ‚ÑÑ, Ð´Ð»Ñ Ð´Ð²ÑƒÑ… Ð²Ð°Ñ€Ð¸Ð°Ð½Ñ‚Ð¾Ð² soc_param0 = 1: 26MHz Ð¸ soc_param0 = 2: 24MHz
 void ICACHE_FLASH_ATTR change_bbpll160_sleep(void)
 {
 	RTC_BASE[0x24>>2] = 0x7F;

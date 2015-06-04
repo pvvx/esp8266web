@@ -85,7 +85,7 @@ void _wdt_timer_proc(void)
 	int mode = ets_wdt_get_mode();
 	if(mode == 1)	{
 		WDT_FEED = WDT_FEED_MAGIC;
-		WDT_BASE[4]; // просто чтение 0x60000910
+		WDT_BASE[4]; // РїСЂРѕСЃС‚Рѕ С‡С‚РµРЅРёРµ 0x60000910
 	}
 	else if(mode == 2) {
 		if(WDT_BASE[4] == 1) {

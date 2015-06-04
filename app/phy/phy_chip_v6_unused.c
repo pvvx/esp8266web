@@ -9,9 +9,9 @@
 #include "hw/esp8266.h"
 #include "phy/phy.h"
 
-// (!) закоменитрованы неиспользуемые функции
+// (!) Р·Р°РєРѕРјРµРЅРёС‚СЂРѕРІР°РЅС‹ РЅРµРёСЃРїРѕР»СЊР·СѓРµРјС‹Рµ С„СѓРЅРєС†РёРё
 
-// вызывается из phy_chip_v6.o
+// РІС‹Р·С‹РІР°РµС‚СЃСЏ РёР· phy_chip_v6.o
 void ICACHE_FLASH_ATTR chip_v6_set_sense(void)
 {
 	// ret.n
@@ -24,7 +24,7 @@ void ICACHE_FLASH_ATTR chip_v6_get_sense(void)
 }
 */
 
-// вызывается из phy_chip_v6.o
+// РІС‹Р·С‹РІР°РµС‚СЃСЏ РёР· phy_chip_v6.o
 int ICACHE_FLASH_ATTR chip_v6_unset_chanfreq(void)
 {
 	return 0;
@@ -42,7 +42,7 @@ void ICACHE_FLASH_ATTR operation_test(void)
 }
 
 
-// используется из slop_test()
+// РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РёР· slop_test()
 void ICACHE_FLASH_ATTR slop_wdt_feed(void)
 {
 	WDT_FEED = WDT_FEED_MAGIC;

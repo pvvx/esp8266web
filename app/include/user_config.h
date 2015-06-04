@@ -16,7 +16,7 @@
 //	#define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 #endif
 
-// #define USE_DUAL_FLASH // èñïîëüçóþòñÿ äâå flash
+// #define USE_DUAL_FLASH // Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑŽÑ‚ÑÑ Ð´Ð²Ðµ flash
 
 #ifndef USE_OPTIMIZE_PRINTF
 	#define USE_OPTIMIZE_PRINTF
@@ -31,7 +31,7 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define DEBUGSOO	2  // 0 - îòêë âûâîäà, 1 - ìèíèìóì, 2 - íîðìà, >3 - òåêóøàÿ îòëàäêà, >4 - óäàëèòü ÷òî íàéäåòñÿ :)
+#define DEBUGSOO	2  // 0 - Ð¾Ñ‚ÐºÐ» Ð²Ñ‹Ð²Ð¾Ð´Ð°, 1 - Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼, 2 - Ð½Ð¾Ñ€Ð¼Ð°, >3 - Ñ‚ÐµÐºÑƒÑˆÐ°Ñ Ð¾Ñ‚Ð»Ð°Ð´ÐºÐ°, >4 - ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ Ñ‡Ñ‚Ð¾ Ð½Ð°Ð¹Ð´ÐµÑ‚ÑÑ :)
 
 #if DEBUGSOO > 0
 	#define UDP_TEST_PORT		1025

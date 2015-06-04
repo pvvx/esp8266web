@@ -193,7 +193,7 @@ void sta_con_timer_fn(void *timer_arg)
 }
 
 
-/* Никчемные функции
+/* РќРёРєС‡РµРјРЅС‹Рµ С„СѓРЅРєС†РёРё
 uint8 system_get_boot_version(void)
 {
 	return *((uint8 *)(0x3FFF1769+0x80)) & 0x1F;
@@ -394,7 +394,7 @@ bool system_deep_sleep_set_option(uint8 option)
 	}
 	return false;
 }
-/* Никчемные функции
+/* РќРёРєС‡РµРјРЅС‹Рµ С„СѓРЅРєС†РёРё
 bool system_update_cpu_freq(uint8 freq)
 {
 	if(freq == 80) {
@@ -515,7 +515,7 @@ const char *system_get_sdk_version(void)
 	return "1.0.0";
 }
 
-/* WiFi функции
+/* WiFi С„СѓРЅРєС†РёРё
 system_get_checksum
 system_station_got_ip_set
 wifi_softap_dhcps_start

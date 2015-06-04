@@ -1,5 +1,5 @@
 /*
- * adc.c Тест на определение скорости работы АЦП
+ * adc.c РўРµСЃС‚ РЅР° РѕРїСЂРµРґРµР»РµРЅРёРµ СЃРєРѕСЂРѕСЃС‚Рё СЂР°Р±РѕС‚С‹ РђР¦Рџ
  *
  *  Created on: 12/02/2015
  *      Author: PV`
@@ -40,7 +40,7 @@ extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, i
 
 void ICACHE_FLASH_ATTR mread_sar_dout(uint16 * buf)
 {
-	volatile uint32 * sar_regs = &SAR_BASE[32]; // 8 шт. с адреса 0x60000D80
+	volatile uint32 * sar_regs = &SAR_BASE[32]; // 8 С€С‚. СЃ Р°РґСЂРµСЃР° 0x60000D80
 	int i;
 	for(i = 0; i < 8; i++) {
 		int x = ~(*sar_regs++);
@@ -102,7 +102,7 @@ void ICACHE_FLASH_ATTR read_adcs(uint16 *ptr, uint16 len)
 {
     if(len != 0 && ptr != NULL) {
     	uint16 sar_dout, sardata[8];
-#if (0) // в web этой инициализации из system_read_adc() (= test_tout(0)) / не требуется // при test_tout(1) - в SDK выводится отладка сумм SAR
+#if (0) // РІ web СЌС‚РѕР№ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РёР· system_read_adc() (= test_tout(0)) / РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ // РїСЂРё test_tout(1) - РІ SDK РІС‹РІРѕРґРёС‚СЃСЏ РѕС‚Р»Р°РґРєР° СЃСѓРјРј SAR
 		uint32 store_reg710 = READ_PERI_REG(0x60000710);
 		uint32 store_reg58e = READ_PERI_REG(0x600005e8);
 		uint32 store018 = READ_PERI_REG(0x3FF00018);
@@ -140,7 +140,7 @@ void ICACHE_FLASH_ATTR read_adcs(uint16 *ptr, uint16 len)
     	uint32 x = SAR_BASE[24] & (~1); //	CLEAR_PERI_REG_MASK(0x60000D60,1);
     	SAR_BASE[24] = x;
     	SAR_BASE[24] = x | 1;	// SET_PERI_REG_MASK(0x60000D60,1);
-#if (0) // в web этой деинициализации не требуется
+#if (0) // РІ web СЌС‚РѕР№ РґРµРёРЅРёС†РёР°Р»РёР·Р°С†РёРё РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ
 		if((store_reg710 & 0xfe000000) != 0xfe000000) {
 			WRITE_PERI_REG(0x600005e8,((READ_PERI_REG(0x600005e8) & 0xfe7fffff) | 0x00800000));
 			rom_i2c_writeReg_Mask(98,1,3,7,4,0);

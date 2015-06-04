@@ -15,8 +15,8 @@
 #define WEBFS_DISK_ADDR_MINFLASH      0x0a000 // SDK < 0.9.5 = 0x1E000, SDK 0.9.5 = 0x0a000
 #define WEBFS_DISK_ADDR_BIGFLASH      0x80000
 
-#define WEBFS_DISK_ID 	0x42455746 // заголовок WEBFiles.bin
-#define WEBFS_DISK_VER 	0x0001	   // версия
+#define WEBFS_DISK_ID 	0x42455746 // Р·Р°РіРѕР»РѕРІРѕРє WEBFiles.bin
+#define WEBFS_DISK_VER 	0x0001	   // РІРµСЂСЃРёСЏ
 
 #define MAX_FILE_NAME_SIZE  64
 

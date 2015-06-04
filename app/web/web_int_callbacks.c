@@ -45,9 +45,9 @@ extern uint8 phy_in_vdd33_offset;
 #define mMIN(a, b)  ((a<b)?a:b)
 //-------------------------------------------------------------------------------
 // Test adc
-// ◊ËÚ‡ÂÚ adc ‚ Ó‰ËÌÓ˜Ì˚È ·ÛÙÂ (~2ÍËÎÓ·‡ÈÚ‡) Ì‡ ~20ksps Ë ÒÓı‡ÌˇÂÚ ‚ ‚Ë‰Â WAV
-// œ‡‚ËÎ¸ÌÓÂ ˜ÚÂÌËÂ Ó„‡ÌËÁÛÂÚÒˇ ÔÓ ÔÂ˚‚‡ÌË˛ Ú‡ÈÏÂ‡(!).
-// “ÛÚ ÚÓÎ¸ÍÓ ‰ÂÏÓ!
+// –ß–∏—Ç–∞–µ—Ç adc –≤ –æ–¥–∏–Ω–æ—á–Ω—ã–π –±—É—Ñ–µ—Ä (~2–∫–∏–ª–æ–±–∞–π—Ç–∞) –Ω–∞ ~20ksps –∏ —Å–æ—Ö—Ä–∞–Ω—è–µ—Ç –≤ –≤–∏–¥–µ WAV
+// –ü—Ä–∞–≤–∏–ª—å–Ω–æ–µ —á—Ç–µ–Ω–∏–µ –æ—Ä–≥–∞–Ω–∏–∑—É–µ—Ç—Å—è –ø–æ –ø—Ä–µ—Ä—ã–≤–∞–Ω–∏—é —Ç–∞–π–º–µ—Ä–∞(!).
+// –¢—É—Ç —Ç–æ–ª—å–∫–æ –¥–µ–º–æ!
 //-------------------------------------------------------------------------------
 typedef struct
 { // https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
@@ -55,15 +55,15 @@ typedef struct
   unsigned long int size8;/* +04 file size - 8    */
   unsigned long int WAVE ;/* +08 'WAVE'           */
   unsigned long int fmt  ;/* +12 'fmt '           */
-  unsigned long int fsize;/* +16 ÛÍ‡Á‡ÚÂÎ¸ ‰Ó 'fact' ËÎË 'data' */
+  unsigned long int fsize;/* +16 —É–∫–∞–∑–∞—Ç–µ–ª—å –¥–æ 'fact' –∏–ª–∏ 'data' */
   unsigned short int ccod;/* +20 01 00  Compression code: 1 - PCM/uncompressed */
-  unsigned short int mono;/* +22 00 01 ËÎË 00 02  */
-  unsigned long int freq ;/* +24 ˜‡ÒÚÓÚ‡          */
+  unsigned short int mono;/* +22 00 01 –∏–ª–∏ 00 02  */
+  unsigned long int freq ;/* +24 —á–∞—Å—Ç–æ—Ç–∞          */
   unsigned long int bps  ;/* +28                  */
   unsigned short int blka;/* +32 1/2/4  BlockAlign*/
-  unsigned short int bits;/* +34 ‡Áˇ‰ÌÓÒÚ¸ 8/16 */
+  unsigned short int bits;/* +34 —Ä–∞–∑—Ä—è–¥–Ω–æ—Å—Ç—å 8/16 */
   unsigned long int data ;/* +36 'data'           */
-  unsigned long int dsize;/* +40 ‡ÁÏÂ ‰‡ÌÌ˚ı    */
+  unsigned long int dsize;/* +40 —Ä–∞–∑–º–µ—Ä –¥–∞–Ω–Ω—ã—Ö    */
 } WAV_HEADER;
 const WAV_HEADER ICACHE_RODATA_ATTR wav_header =
 {0x46464952L,
@@ -229,7 +229,7 @@ void ICACHE_FLASH_ATTR web_get_ram(TCP_SERV_CONN *ts_conn)
 {
     WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
     // Check if this is a first round call
-    if(CheckSCB(SCB_RETRYCB)==0) { // On initial call, ÔÓ‚ÂÍ‡ Ô‡‡ÏÂÚÓ‚
+    if(CheckSCB(SCB_RETRYCB)==0) { // On initial call, –ø—Ä–æ–≤–µ—Ä–∫–∞ –ø–∞—Ä–∞–º–µ—Ç—Ä–æ–≤
 		if(web_conn->udata_start == web_conn->udata_stop) {
 //    	    SetSCB(SCB_FCLOSE | SCB_DISCONNECT);
     	    return;
@@ -343,7 +343,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           else if(!os_memcmp((void*)cstr, "adc", 3)) {
         	  uint16 x[4];
         	  read_adcs(x, 4);
-        	  tcp_puts("%u", x[0]+x[1]+x[2]+x[3]); // 16 ·ËÚ ADC :)
+        	  tcp_puts("%u", x[0]+x[1]+x[2]+x[3]); // 16 –±–∏—Ç ADC :)
 //        	  tcp_puts("%u", system_adc_read());
           }
           else if(!os_memcmp((void*)cstr, "time", 4)) tcp_puts("%u", system_get_time());
@@ -351,9 +351,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           else if(!os_memcmp((void*)cstr, "vdd33", 5)) tcp_puts("%u", readvdd33()); // system_get_vdd33() phy_get_vdd33();
           else if(!os_memcmp((void*)cstr, "wdt", 3)) tcp_puts("%u", ets_wdt_get_mode());
           else if(!os_memcmp((void*)cstr, "res_event", 9)) tcp_puts("%u", rtc_get_reset_reason()); // 1 - power/ch_pd, 2 - reset, 3 - software, 4 - wdt ...
-          else if(!os_memcmp((void*)cstr, "rst", 3)) tcp_puts("%u", RTC_RAM_BASE[24] & 0xffff); // *((uint32 *)0x60001060 bit0..15: ÒÚ‡Ú ·˚Î ÔÓ =1 reset, =0 ch_pd, bit16..31: deep_sleep_option
+          else if(!os_memcmp((void*)cstr, "rst", 3)) tcp_puts("%u", RTC_RAM_BASE[24] & 0xffff); // *((uint32 *)0x60001060 bit0..15: —Å—Ç–∞—Ä—Ç –±—ã–ª –ø–æ =1 reset, =0 ch_pd, bit16..31: deep_sleep_option
           else if(!os_memcmp((void*)cstr, "clkcpu", 6)) tcp_puts("%u", ets_get_cpu_frequency());
-          else if(!os_memcmp((void*)cstr, "sleep_old", 9)) tcp_puts("%u",(*((uint32 *)0x60001060))>>16 ); // ÂÒÎË ÌÂÚ ÓÚ‰ÂÎ¸ÌÓ„Ó ÔËÚ‡ÌËˇ RTC Ë deep_sleep ÌÂ ÛÒÚ‡Ì‡‚ÎË‚‡ÎÒˇ/ÔËÏÂÌˇÎÒˇ ÔË ÚÂÍÛ˘ÂÏ ‚ÍÎ˛˜ÂÌËˇ ÔËÚ‡ÌËˇ ˜ËÔ‡, ÚÓ ÁÌ‡˜ÂÌËÂ ÌÂÓÔÂ‰ÂÎÂÌÌÓ (Ú‡Ï ıÎ‡Ï).
+          else if(!os_memcmp((void*)cstr, "sleep_old", 9)) tcp_puts("%u",(*((uint32 *)0x60001060))>>16 ); // –µ—Å–ª–∏ –Ω–µ—Ç –æ—Ç–¥–µ–ª—å–Ω–æ–≥–æ –ø–∏—Ç–∞–Ω–∏—è RTC –∏ deep_sleep –Ω–µ —É—Å—Ç–∞–Ω–∞–≤–ª–∏–≤–∞–ª—Å—è/–ø—Ä–∏–º–µ–Ω—è–ª—Å—è –ø—Ä–∏ —Ç–µ–∫—É—â–µ–º –≤–∫–ª—é—á–µ–Ω–∏—è –ø–∏—Ç–∞–Ω–∏—è —á–∏–ø–∞, —Ç–æ –∑–Ω–∞—á–µ–Ω–∏–µ –Ω–µ–æ–ø—Ä–µ–¥–µ–ª–µ–Ω–Ω–æ (—Ç–∞–º —Ö–ª–∞–º).
 //          else if(!os_memcmp((void*)cstr, "test", 4)) tcp_puts("%d", cal_rf_ana_gain() ); //
 #ifdef USE_ESPCONN
           else if(!os_memcmp((void*)cstr, "maxcns", 6)) tcp_puts("%d", espconn_tcp_get_max_con());

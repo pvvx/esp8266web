@@ -53,51 +53,51 @@ void ICACHE_FLASH_ATTR tcp2uart_int_rxtx_disable(void)
 }
 //===============================================================================
 // Timer: UART->TCP (UART->bufo->TCP)
-// loading_rx_buf() чтение fifo UART rx в буфер передачи TCP
-// Сигнал CTS/RTS пока не огранизован в связи с неясностью,
-// на какую ногу модуля его делать
+// loading_rx_buf() С‡С‚РµРЅРёРµ fifo UART rx РІ Р±СѓС„РµСЂ РїРµСЂРµРґР°С‡Рё TCP
+// РЎРёРіРЅР°Р» CTS/RTS РїРѕРєР° РЅРµ РѕРіСЂР°РЅРёР·РѕРІР°РЅ РІ СЃРІСЏР·Рё СЃ РЅРµСЏСЃРЅРѕСЃС‚СЊСЋ,
+// РЅР° РєР°РєСѓСЋ РЅРѕРіСѓ РјРѕРґСѓР»СЏ РµРіРѕ РґРµР»Р°С‚СЊ
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR loading_rx_buf(void)
 {
 	TCP_SERV_CONN *conn = tcp2uart_conn;
-	if(conn == NULL || conn->pbufo == NULL || conn->flag.user_flg1) return; // нет буфера + тест на повторное вхождение
+	if(conn == NULL || conn->pbufo == NULL || conn->flag.user_flg1) return; // РЅРµС‚ Р±СѓС„РµСЂР° + С‚РµСЃС‚ РЅР° РїРѕРІС‚РѕСЂРЅРѕРµ РІС…РѕР¶РґРµРЅРёРµ
 	conn->flag.user_flg1 = 1;
 	ets_intr_lock(); //	ETS_UART_INTR_DISABLE();
 	MEMW();
-	UART0_INT_ENA &= ~ UART_RXFIFO_FULL_INT_ENA; // запретить прерывание по приему символа
+	UART0_INT_ENA &= ~ UART_RXFIFO_FULL_INT_ENA; // Р·Р°РїСЂРµС‚РёС‚СЊ РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїСЂРёРµРјСѓ СЃРёРјРІРѕР»Р°
 	ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
 	os_timer_disarm(&uart0_rx_buf_timer);
-	if(conn->flag.busy_bufo) { // в данный момент bufo обрабатывается (передается LwIP-у)?
-		// попробовать повторить через время
+	if(conn->flag.busy_bufo) { // РІ РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ bufo РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ (РїРµСЂРµРґР°РµС‚СЃСЏ LwIP-Сѓ)?
+		// РїРѕРїСЂРѕР±РѕРІР°С‚СЊ РїРѕРІС‚РѕСЂРёС‚СЊ С‡РµСЂРµР· РІСЂРµРјСЏ
 		ets_timer_arm_new(&uart0_rx_buf_timer, 10, 0, 0); // 10us
 		conn->flag.user_flg1 = 0;
 		return;
 	}
 	uint8 *pend = conn->pbufo + conn->sizeo;
-	// дополнить буфер передачи символами из rx fifo
+	// РґРѕРїРѕР»РЅРёС‚СЊ Р±СѓС„РµСЂ РїРµСЂРµРґР°С‡Рё СЃРёРјРІРѕР»Р°РјРё РёР· rx fifo
 	while((conn->ptrtx + conn->cntro) < pend) {
 		MEMW();
 		if((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT) conn->ptrtx[conn->cntro++] = UART0_FIFO;
 		else break;
 	}
-//	UART0_INT_CLR &= ~UART_RXFIFO_FULL_INT_CLR; // сбросить флаг прерывания приема (нет смысла)
-	// если передача ещё не идет и есть данные для передачи размером с буфер у Lwip, то передать
+//	UART0_INT_CLR &= ~UART_RXFIFO_FULL_INT_CLR; // СЃР±СЂРѕСЃРёС‚СЊ С„Р»Р°Рі РїСЂРµСЂС‹РІР°РЅРёСЏ РїСЂРёРµРјР° (РЅРµС‚ СЃРјС‹СЃР»Р°)
+	// РµСЃР»Рё РїРµСЂРµРґР°С‡Р° РµС‰С‘ РЅРµ РёРґРµС‚ Рё РµСЃС‚СЊ РґР°РЅРЅС‹Рµ РґР»СЏ РїРµСЂРµРґР°С‡Рё СЂР°Р·РјРµСЂРѕРј СЃ Р±СѓС„РµСЂ Сѓ Lwip, С‚Рѕ РїРµСЂРµРґР°С‚СЊ
 	if((!conn->flag.wait_sent) && (conn->cntro)) {
 		uint32 len = conn->pcb->snd_buf;
 		uint32 time_ms = IOREG(0x3FF20C00); // phy_get_mactime();
 		if(((time_ms - wait_send_tx) > (MAX_WAIT_TX_BUF/1000)) || len  <= conn->cntro) {
    			wait_send_tx = time_ms;
-			conn->flag.busy_bufo = 1; // в данный момент bufo обрабатывается (передается LwIP-у)
+			conn->flag.busy_bufo = 1; // РІ РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ bufo РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ (РїРµСЂРµРґР°РµС‚СЃСЏ LwIP-Сѓ)
 	#if DEBUGSOO > 3
 			os_printf("usnt: %u ", conn->cntro);
 	#endif
 			if(tcpsrv_int_sent_data(conn, conn->pbufo, mMIN(len, conn->cntro)) == ERR_OK) {
-				// удалить из буфера переданные данные
+				// СѓРґР°Р»РёС‚СЊ РёР· Р±СѓС„РµСЂР° РїРµСЂРµРґР°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ
 				if(conn->ptrtx != conn->pbufo && conn->cntro != 0) os_memcpy(conn->pbufo, conn->ptrtx, conn->cntro);
-				conn->ptrtx = conn->pbufo; // указатель на начало не переданных данных (начало буфера)
+				conn->ptrtx = conn->pbufo; // СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РЅР°С‡Р°Р»Рѕ РЅРµ РїРµСЂРµРґР°РЅРЅС‹С… РґР°РЅРЅС‹С… (РЅР°С‡Р°Р»Рѕ Р±СѓС„РµСЂР°)
 			}
-			else { // ошибка (значит соединение закрыто в tcpsrv_int_sent_data() ) и обрабатывать нет смысла
-				conn->flag.user_flg1 = 0; // в данный момент bufo не обрабатывается
+			else { // РѕС€РёР±РєР° (Р·РЅР°С‡РёС‚ СЃРѕРµРґРёРЅРµРЅРёРµ Р·Р°РєСЂС‹С‚Рѕ РІ tcpsrv_int_sent_data() ) Рё РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РЅРµС‚ СЃРјС‹СЃР»Р°
+				conn->flag.user_flg1 = 0; // РІ РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ bufo РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ
 	#if DEBUGSOO > 1
 				os_printf("tcp2uart: err sent!\n");
 	#endif
@@ -105,49 +105,49 @@ void ICACHE_FLASH_ATTR loading_rx_buf(void)
 			};
 		};
 	};
-	conn->flag.user_flg1 = 0; // в данный момент bufo не обрабатывается
+	conn->flag.user_flg1 = 0; // РІ РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ bufo РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ
 	MEMW();
-	uint32 buftimeout = (UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT; // получить кол-во символов в FIFO RX uart
+	uint32 buftimeout = (UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT; // РїРѕР»СѓС‡РёС‚СЊ РєРѕР»-РІРѕ СЃРёРјРІРѕР»РѕРІ РІ FIFO RX uart
 	if(buftimeout) {
-		// если буфер полон, ждем передачи буфера иначе ждем набора fifo
-		if(conn->cntro < conn->sizeo) { // буфер не забит
-			if(buftimeout < (128 - RST_FIFO_CNT_SET - 1)) { // можем ещё принять до выставления RTS? да.
-   				buftimeout = (128 - RST_FIFO_CNT_SET - 1) - buftimeout; // сколько символов можем принять до выставления RTS
-				buftimeout = ((UART0_CLKDIV & UART_CLKDIV_CNT) * buftimeout) >> 3; // время передачи символа (10 бит) в us =  UART_CLKDIV / 8
-				if(buftimeout < 128) buftimeout = 128; // быстрее работать не стоит
-				else if(buftimeout > MAX_WAIT_TX_BUF) buftimeout = MAX_WAIT_TX_BUF; // низкая скорость и буфер будет заполнен более чем через 0.05 сек? ограничить
-				// buftimeout -= 16; // вычесть время исполнения?
+		// РµСЃР»Рё Р±СѓС„РµСЂ РїРѕР»РѕРЅ, Р¶РґРµРј РїРµСЂРµРґР°С‡Рё Р±СѓС„РµСЂР° РёРЅР°С‡Рµ Р¶РґРµРј РЅР°Р±РѕСЂР° fifo
+		if(conn->cntro < conn->sizeo) { // Р±СѓС„РµСЂ РЅРµ Р·Р°Р±РёС‚
+			if(buftimeout < (128 - RST_FIFO_CNT_SET - 1)) { // РјРѕР¶РµРј РµС‰С‘ РїСЂРёРЅСЏС‚СЊ РґРѕ РІС‹СЃС‚Р°РІР»РµРЅРёСЏ RTS? РґР°.
+   				buftimeout = (128 - RST_FIFO_CNT_SET - 1) - buftimeout; // СЃРєРѕР»СЊРєРѕ СЃРёРјРІРѕР»РѕРІ РјРѕР¶РµРј РїСЂРёРЅСЏС‚СЊ РґРѕ РІС‹СЃС‚Р°РІР»РµРЅРёСЏ RTS
+				buftimeout = ((UART0_CLKDIV & UART_CLKDIV_CNT) * buftimeout) >> 3; // РІСЂРµРјСЏ РїРµСЂРµРґР°С‡Рё СЃРёРјРІРѕР»Р° (10 Р±РёС‚) РІ us =  UART_CLKDIV / 8
+				if(buftimeout < 128) buftimeout = 128; // Р±С‹СЃС‚СЂРµРµ СЂР°Р±РѕС‚Р°С‚СЊ РЅРµ СЃС‚РѕРёС‚
+				else if(buftimeout > MAX_WAIT_TX_BUF) buftimeout = MAX_WAIT_TX_BUF; // РЅРёР·РєР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ Рё Р±СѓС„РµСЂ Р±СѓРґРµС‚ Р·Р°РїРѕР»РЅРµРЅ Р±РѕР»РµРµ С‡РµРј С‡РµСЂРµР· 0.05 СЃРµРє? РѕРіСЂР°РЅРёС‡РёС‚СЊ
+				// buftimeout -= 16; // РІС‹С‡РµСЃС‚СЊ РІСЂРµРјСЏ РёСЃРїРѕР»РЅРµРЅРёСЏ?
 			}
-			else buftimeout = 16; // буфер rx fifo заполнен
+			else buftimeout = 16; // Р±СѓС„РµСЂ rx fifo Р·Р°РїРѕР»РЅРµРЅ
 		}
-		else  buftimeout = 1024; //если буфер забит, то это шаг ожидания передачи буфера. 1024us выбрано наобум
+		else  buftimeout = 1024; //РµСЃР»Рё Р±СѓС„РµСЂ Р·Р°Р±РёС‚, С‚Рѕ СЌС‚Рѕ С€Р°Рі РѕР¶РёРґР°РЅРёСЏ РїРµСЂРµРґР°С‡Рё Р±СѓС„РµСЂР°. 1024us РІС‹Р±СЂР°РЅРѕ РЅР°РѕР±СѓРј
 		ets_timer_arm_new(&uart0_rx_buf_timer, buftimeout, 0, 0);
 	}
-	else  { // пока не приняты новые символы в fifo rx UART
-		// ожидать приема или если в буфере ещё есть символы, то и таймера раз буфер не заполнется за 0.05 секунды.
-		if(conn->cntro) { // буфер ещё не пуст
+	else  { // РїРѕРєР° РЅРµ РїСЂРёРЅСЏС‚С‹ РЅРѕРІС‹Рµ СЃРёРјРІРѕР»С‹ РІ fifo rx UART
+		// РѕР¶РёРґР°С‚СЊ РїСЂРёРµРјР° РёР»Рё РµСЃР»Рё РІ Р±СѓС„РµСЂРµ РµС‰С‘ РµСЃС‚СЊ СЃРёРјРІРѕР»С‹, С‚Рѕ Рё С‚Р°Р№РјРµСЂР° СЂР°Р· Р±СѓС„РµСЂ РЅРµ Р·Р°РїРѕР»РЅРµС‚СЃСЏ Р·Р° 0.05 СЃРµРєСѓРЅРґС‹.
+		if(conn->cntro) { // Р±СѓС„РµСЂ РµС‰С‘ РЅРµ РїСѓСЃС‚
 #if DEBUGSOO > 3
 				os_printf("term_flg2: %u\n", tcp2uart_conn->cntro);
 #endif
-				// ограничить время до отсылки неполного буфера, если символы передаются редко или низкая скорость UART
+				// РѕРіСЂР°РЅРёС‡РёС‚СЊ РІСЂРµРјСЏ РґРѕ РѕС‚СЃС‹Р»РєРё РЅРµРїРѕР»РЅРѕРіРѕ Р±СѓС„РµСЂР°, РµСЃР»Рё СЃРёРјРІРѕР»С‹ РїРµСЂРµРґР°СЋС‚СЃСЏ СЂРµРґРєРѕ РёР»Рё РЅРёР·РєР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ UART
 				ets_timer_arm_new(&uart0_rx_buf_timer, MAX_WAIT_TX_BUF, 0, 0);
 		}
 		ets_intr_lock(); //	ETS_UART_INTR_DISABLE();
 		MEMW();
-		UART0_INT_ENA |= UART_RXFIFO_FULL_INT_ENA; // зарядить прерывание UART rx
+		UART0_INT_ENA |= UART_RXFIFO_FULL_INT_ENA; // Р·Р°СЂСЏРґРёС‚СЊ РїСЂРµСЂС‹РІР°РЅРёРµ UART rx
 		ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
-		// <-- тут, сразу после ets_intr_unlock() прерывание и сработет :)
+		// <-- С‚СѓС‚, СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ ets_intr_unlock() РїСЂРµСЂС‹РІР°РЅРёРµ Рё СЃСЂР°Р±РѕС‚РµС‚ :)
 	}
 }
 //===============================================================================
 // Timer: TCP->UART (TCP->bufi->UART)
-// uart0_tx_buf_timer (передача буфера TCP в fifo UART (tx)
+// uart0_tx_buf_timer (РїРµСЂРµРґР°С‡Р° Р±СѓС„РµСЂР° TCP РІ fifo UART (tx)
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR send_tx_buf(void)
 {
 	ets_intr_lock(); //	ETS_UART_INTR_DISABLE();
 	MEMW();
-	UART0_INT_ENA &= ~UART_TXFIFO_EMPTY_INT_ENA; // запретить прерывание по передаче fifo tx
+	UART0_INT_ENA &= ~UART_TXFIFO_EMPTY_INT_ENA; // Р·Р°РїСЂРµС‚РёС‚СЊ РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ РїРµСЂРµРґР°С‡Рµ fifo tx
 	ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
 	os_timer_disarm(&uart0_tx_buf_timer);
    	TCP_SERV_CONN * conn = tcp2uart_conn;
@@ -158,10 +158,10 @@ void ICACHE_FLASH_ATTR send_tx_buf(void)
 	while(pbuf < pend){
 		MEMW();
 		if (((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) >= 127) {
-			// не всё передано - не лезет в буфер fifo UART tx.
+			// РЅРµ РІСЃС‘ РїРµСЂРµРґР°РЅРѕ - РЅРµ Р»РµР·РµС‚ РІ Р±СѓС„РµСЂ fifo UART tx.
 			ets_intr_lock(); //	ETS_UART_INTR_DISABLE();
 			MEMW();
-	    	UART0_INT_ENA |= UART_TXFIFO_EMPTY_INT_ENA; // установим прерывание на пустой fifo tx
+	    	UART0_INT_ENA |= UART_TXFIFO_EMPTY_INT_ENA; // СѓСЃС‚Р°РЅРѕРІРёРј РїСЂРµСЂС‹РІР°РЅРёРµ РЅР° РїСѓСЃС‚РѕР№ fifo tx
     		ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
 			break;
 		}
@@ -183,7 +183,7 @@ err_t ICACHE_FLASH_ATTR term_sent_cb(TCP_SERV_CONN *conn) {
 	tcpsrv_sent_callback_default(conn);
 #endif
 	tcp2uart_conn = conn;
-	loading_rx_buf(); // если в буфере приема UART0 есть новые символы, то передать
+	loading_rx_buf(); // РµСЃР»Рё РІ Р±СѓС„РµСЂРµ РїСЂРёРµРјР° UART0 РµСЃС‚СЊ РЅРѕРІС‹Рµ СЃРёРјРІРѕР»С‹, С‚Рѕ РїРµСЂРµРґР°С‚СЊ
 #if DEBUGSOO > 3
 	os_printf("term_cb: %u # %u\n", tcp2uart_conn->cntro, tcp2uart_conn->pcb->snd_buf);
 #endif
@@ -198,7 +198,7 @@ err_t ICACHE_FLASH_ATTR term_recv(TCP_SERV_CONN *conn) {
 	tcpsrv_received_data_default(conn);
 #endif
 	tcp2uart_conn = conn;
-	send_tx_buf(); // передать в fifo tx UART0
+	send_tx_buf(); // РїРµСЂРµРґР°С‚СЊ РІ fifo tx UART0
 	return ERR_OK;
 }
 //-------------------------------------------------------------------------------
@@ -208,10 +208,10 @@ err_t ICACHE_FLASH_ATTR term_listen(TCP_SERV_CONN *conn) {
 #if DEBUGSOO > 1
 	tcpsrv_listen_default(conn);
 #endif
-	// инициировать процесс передачи и приема с UART0 в TCP
+	// РёРЅРёС†РёРёСЂРѕРІР°С‚СЊ РїСЂРѕС†РµСЃСЃ РїРµСЂРµРґР°С‡Рё Рё РїСЂРёРµРјР° СЃ UART0 РІ TCP
 	tcp2uart_int_rxtx_disable();
     tcp2uart_conn = conn;
-	if(conn->sizeo == 0) { // создать буфер передачи UART->TCP
+	if(conn->sizeo == 0) { // СЃРѕР·РґР°С‚СЊ Р±СѓС„РµСЂ РїРµСЂРµРґР°С‡Рё UART->TCP
 		if(conn->pbufo == NULL) {
 			conn->pbufo = os_malloc(TCP_SRV_SERVER_DEF_TXBUF);
 #if DEBUGSOO > 2
@@ -271,12 +271,12 @@ err_t ICACHE_FLASH_ATTR tcp2uart_init(uint16 portn) {
 	TCP_SERV_CFG *p = tcpsrv_init(portn);
 	if (p != NULL) {
 		tcp2uart_int_rxtx_disable();
-		// изменим конфиг на наше усмотрение:
-		p->flag.rx_buf = 1; // прием в буфер с его автосозданием.
-		p->flag.nagle_disabled = 1; // отмена nagle
-		p->max_conn = 1; // одно соединение (порт UART не многопользовательский!)
-		p->time_wait_rec = syscfg.tcp2uart_twrec; // =0 -> вечное ожидание
-		p->time_wait_cls = syscfg.tcp2uart_twcls; // =0 -> вечное ожидание
+		// РёР·РјРµРЅРёРј РєРѕРЅС„РёРі РЅР° РЅР°С€Рµ СѓСЃРјРѕС‚СЂРµРЅРёРµ:
+		p->flag.rx_buf = 1; // РїСЂРёРµРј РІ Р±СѓС„РµСЂ СЃ РµРіРѕ Р°РІС‚РѕСЃРѕР·РґР°РЅРёРµРј.
+		p->flag.nagle_disabled = 1; // РѕС‚РјРµРЅР° nagle
+		p->max_conn = 1; // РѕРґРЅРѕ СЃРѕРµРґРёРЅРµРЅРёРµ (РїРѕСЂС‚ UART РЅРµ РјРЅРѕРіРѕРїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёР№!)
+		p->time_wait_rec = syscfg.tcp2uart_twrec; // =0 -> РІРµС‡РЅРѕРµ РѕР¶РёРґР°РЅРёРµ
+		p->time_wait_cls = syscfg.tcp2uart_twcls; // =0 -> РІРµС‡РЅРѕРµ РѕР¶РёРґР°РЅРёРµ
 #if DEBUGSOO > 0
 		os_printf("Max connection %d, time waits %d & %d, min heap size %d\n",
 				p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);

@@ -32,10 +32,10 @@
 #define CRLF "\r\n"
 
 //#if (SDK_VERSION >= 1000) && (SDK_VERSION <= 1012)
-//#define max_len_buf_write_flash 1024 // размер буфера при записи flash. Увеличение/уменньшение размера (до сектора 4096) ускорения не дает (1..2%)
+//#define max_len_buf_write_flash 1024 // СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РїСЂРё Р·Р°РїРёСЃРё flash. РЈРІРµР»РёС‡РµРЅРёРµ/СѓРјРµРЅРЅСЊС€РµРЅРёРµ СЂР°Р·РјРµСЂР° (РґРѕ СЃРµРєС‚РѕСЂР° 4096) СѓСЃРєРѕСЂРµРЅРёСЏ РЅРµ РґР°РµС‚ (1..2%)
 //#else
 //#error "lmac.c 599 remove?"
-#define max_len_buf_write_flash 2048 // размер буфера при записи flash. Увеличение/уменньшение размера (до сектора 4096) ускорения не дает (1..2%)
+#define max_len_buf_write_flash 2048 // СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РїСЂРё Р·Р°РїРёСЃРё flash. РЈРІРµР»РёС‡РµРЅРёРµ/СѓРјРµРЅРЅСЊС€РµРЅРёРµ СЂР°Р·РјРµСЂР° (РґРѕ СЃРµРєС‚РѕСЂР° 4096) СѓСЃРєРѕСЂРµРЅРёСЏ РЅРµ РґР°РµС‚ (1..2%)
 //#endif
 
 #define mMIN(a, b)  ((a<b)?a:b)
@@ -102,72 +102,72 @@ const HTTP_RESPONSE HTTPResponse[] = {
         { 200, HTTP_RESP_FLG_NONE,
                 "OK",
                 NULL },
-         // успешный запрос. Если клиентом были запрошены какие-либо данные, то они находятся в заголовке и/или теле сообщения.
+         // СѓСЃРїРµС€РЅС‹Р№ Р·Р°РїСЂРѕСЃ. Р•СЃР»Рё РєР»РёРµРЅС‚РѕРј Р±С‹Р»Рё Р·Р°РїСЂРѕС€РµРЅС‹ РєР°РєРёРµ-Р»РёР±Рѕ РґР°РЅРЅС‹Рµ, С‚Рѕ РѕРЅРё РЅР°С…РѕРґСЏС‚СЃСЏ РІ Р·Р°РіРѕР»РѕРІРєРµ Рё/РёР»Рё С‚РµР»Рµ СЃРѕРѕР±С‰РµРЅРёСЏ.
         { 302, HTTP_RESP_FLG_NONE | HTTP_RESP_FLG_REDIRECT,
                 "Found",
                 NULL },
 // "HTTP/1.1 302 Found\r\nConnection: close\r\nLocation: ",
-         // 302 Found, 302 Moved Temporarily - запрошенный документ временно
-         // доступен по другому URI, указанному в заголовке в поле Location.
-         // Этот код может быть использован, например, при управляемом сервером
-         // согласовании содержимого. Некоторые клиенты некорректно ведут себя
-         // при обработке данного кода.
+         // 302 Found, 302 Moved Temporarily - Р·Р°РїСЂРѕС€РµРЅРЅС‹Р№ РґРѕРєСѓРјРµРЅС‚ РІСЂРµРјРµРЅРЅРѕ
+         // РґРѕСЃС‚СѓРїРµРЅ РїРѕ РґСЂСѓРіРѕРјСѓ URI, СѓРєР°Р·Р°РЅРЅРѕРјСѓ РІ Р·Р°РіРѕР»РѕРІРєРµ РІ РїРѕР»Рµ Location.
+         // Р­С‚РѕС‚ РєРѕРґ РјРѕР¶РµС‚ Р±С‹С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅ, РЅР°РїСЂРёРјРµСЂ, РїСЂРё СѓРїСЂР°РІР»СЏРµРјРѕРј СЃРµСЂРІРµСЂРѕРј
+         // СЃРѕРіР»Р°СЃРѕРІР°РЅРёРё СЃРѕРґРµСЂР¶РёРјРѕРіРѕ. РќРµРєРѕС‚РѕСЂС‹Рµ РєР»РёРµРЅС‚С‹ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ РІРµРґСѓС‚ СЃРµР±СЏ
+         // РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РґР°РЅРЅРѕРіРѕ РєРѕРґР°.
         { 304, HTTP_RESP_FLG_NONE,
                 "Not Modified",
                 NULL },
 ///"304 Redirect: ",   // If-Modified-Since If-None-Match
-         // сервер возвращает такой код, если клиент запросил документ методом GET,
-         // использовал заголовок If-Modified-Since или If-None-Match и документ
-         // не изменился с указанного момента. При этом сообщение сервера не должно содержать тела.
+         // СЃРµСЂРІРµСЂ РІРѕР·РІСЂР°С‰Р°РµС‚ С‚Р°РєРѕР№ РєРѕРґ, РµСЃР»Рё РєР»РёРµРЅС‚ Р·Р°РїСЂРѕСЃРёР» РґРѕРєСѓРјРµРЅС‚ РјРµС‚РѕРґРѕРј GET,
+         // РёСЃРїРѕР»СЊР·РѕРІР°Р» Р·Р°РіРѕР»РѕРІРѕРє If-Modified-Since РёР»Рё If-None-Match Рё РґРѕРєСѓРјРµРЅС‚
+         // РЅРµ РёР·РјРµРЅРёР»СЃСЏ СЃ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РјРѕРјРµРЅС‚Р°. РџСЂРё СЌС‚РѕРј СЃРѕРѕР±С‰РµРЅРёРµ СЃРµСЂРІРµСЂР° РЅРµ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ С‚РµР»Р°.
         { 400, HTTP_RESP_FLG_FINDFILE,
                 "Bad Request",
                 NULL} ,
-         // сервер обнаружил в запросе клиента синтаксическую ошибку.
+         // СЃРµСЂРІРµСЂ РѕР±РЅР°СЂСѓР¶РёР» РІ Р·Р°РїСЂРѕСЃРµ РєР»РёРµРЅС‚Р° СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєСѓСЋ РѕС€РёР±РєСѓ.
         { 401, HTTP_RESP_FLG_FINDFILE,
                 "Unauthorized\r\nWWW-Authenticate: Basic realm=\"Protected\"",
                 "401 Unauthorized: Password required\r\n" },
-         // для доступа к запрашиваемому ресурсу требуется аутентификация.
-         // В заголовке ответ должен содержать поле WWW-Authenticate с перечнем
-         // условий аутентификации. Клиент может повторить запрос,
-         // включив в заголовок сообщения поле Authorization с требуемыми для аутентификации данными.
+         // РґР»СЏ РґРѕСЃС‚СѓРїР° Рє Р·Р°РїСЂР°С€РёРІР°РµРјРѕРјСѓ СЂРµСЃСѓСЂСЃСѓ С‚СЂРµР±СѓРµС‚СЃСЏ Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ.
+         // Р’ Р·Р°РіРѕР»РѕРІРєРµ РѕС‚РІРµС‚ РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РїРѕР»Рµ WWW-Authenticate СЃ РїРµСЂРµС‡РЅРµРј
+         // СѓСЃР»РѕРІРёР№ Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё. РљР»РёРµРЅС‚ РјРѕР¶РµС‚ РїРѕРІС‚РѕСЂРёС‚СЊ Р·Р°РїСЂРѕСЃ,
+         // РІРєР»СЋС‡РёРІ РІ Р·Р°РіРѕР»РѕРІРѕРє СЃРѕРѕР±С‰РµРЅРёСЏ РїРѕР»Рµ Authorization СЃ С‚СЂРµР±СѓРµРјС‹РјРё РґР»СЏ Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё РґР°РЅРЅС‹РјРё.
 //"HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n403 Forbidden: SSL Required - use HTTPS\r\n"
         { 404, HTTP_RESP_FLG_FINDFILE,
                 "Not found",
                 "404: File not found\r\n" },
-         // Сервер понял запрос, но не нашёл соответствующего ресурса по указанному URI.
+         // РЎРµСЂРІРµСЂ РїРѕРЅСЏР» Р·Р°РїСЂРѕСЃ, РЅРѕ РЅРµ РЅР°С€С‘Р» СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРіРѕ СЂРµСЃСѓСЂСЃР° РїРѕ СѓРєР°Р·Р°РЅРЅРѕРјСѓ URI.
         { 411, HTTP_RESP_FLG_FINDFILE,
                 "Length Required",
                 "411 The request must have a content length\r\n" },
-         // для указанного ресурса клиент должен указать Content-Length в заголовке запроса.
-         // Без указания этого поля не стоит делать повторную попытку запроса к серверу по данному URI.
-         // Такой ответ естественен для запросов типа POST и PUT.
-         // Например, если по указанному URI производится загрузка файлов, а на сервере стоит
-         // ограничение на их объём. Тогда разумней будет проверить в самом начале заголовок
-         // Content-Length и сразу отказать в загрузке, чем провоцировать бессмысленную нагрузку,
-         // разрывая соединение, когда клиент действительно пришлёт слишком объёмное сообщение.
+         // РґР»СЏ СѓРєР°Р·Р°РЅРЅРѕРіРѕ СЂРµСЃСѓСЂСЃР° РєР»РёРµРЅС‚ РґРѕР»Р¶РµРЅ СѓРєР°Р·Р°С‚СЊ Content-Length РІ Р·Р°РіРѕР»РѕРІРєРµ Р·Р°РїСЂРѕСЃР°.
+         // Р‘РµР· СѓРєР°Р·Р°РЅРёСЏ СЌС‚РѕРіРѕ РїРѕР»СЏ РЅРµ СЃС‚РѕРёС‚ РґРµР»Р°С‚СЊ РїРѕРІС‚РѕСЂРЅСѓСЋ РїРѕРїС‹С‚РєСѓ Р·Р°РїСЂРѕСЃР° Рє СЃРµСЂРІРµСЂСѓ РїРѕ РґР°РЅРЅРѕРјСѓ URI.
+         // РўР°РєРѕР№ РѕС‚РІРµС‚ РµСЃС‚РµСЃС‚РІРµРЅРµРЅ РґР»СЏ Р·Р°РїСЂРѕСЃРѕРІ С‚РёРїР° POST Рё PUT.
+         // РќР°РїСЂРёРјРµСЂ, РµСЃР»Рё РїРѕ СѓРєР°Р·Р°РЅРЅРѕРјСѓ URI РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»РѕРІ, Р° РЅР° СЃРµСЂРІРµСЂРµ СЃС‚РѕРёС‚
+         // РѕРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РёС… РѕР±СЉС‘Рј. РўРѕРіРґР° СЂР°Р·СѓРјРЅРµР№ Р±СѓРґРµС‚ РїСЂРѕРІРµСЂРёС‚СЊ РІ СЃР°РјРѕРј РЅР°С‡Р°Р»Рµ Р·Р°РіРѕР»РѕРІРѕРє
+         // Content-Length Рё СЃСЂР°Р·Сѓ РѕС‚РєР°Р·Р°С‚СЊ РІ Р·Р°РіСЂСѓР·РєРµ, С‡РµРј РїСЂРѕРІРѕС†РёСЂРѕРІР°С‚СЊ Р±РµСЃСЃРјС‹СЃР»РµРЅРЅСѓСЋ РЅР°РіСЂСѓР·РєСѓ,
+         // СЂР°Р·СЂС‹РІР°СЏ СЃРѕРµРґРёРЅРµРЅРёРµ, РєРѕРіРґР° РєР»РёРµРЅС‚ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ РїСЂРёС€Р»С‘С‚ СЃР»РёС€РєРѕРј РѕР±СЉС‘РјРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ.
         { 413, HTTP_RESP_FLG_FINDFILE,
                 "Request Entity Too Large",
                 "413 Request Entity Too Large: There's too many letters :)" },
-         // возвращается в случае, если сервер отказывается обработать запрос
-         // по причине слишком большого размера тела запроса. Сервер может закрыть соединение,
-         // чтобы прекратить дальнейшую передачу запроса.
+         // РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ РІ СЃР»СѓС‡Р°Рµ, РµСЃР»Рё СЃРµСЂРІРµСЂ РѕС‚РєР°Р·С‹РІР°РµС‚СЃСЏ РѕР±СЂР°Р±РѕС‚Р°С‚СЊ Р·Р°РїСЂРѕСЃ
+         // РїРѕ РїСЂРёС‡РёРЅРµ СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕРіРѕ СЂР°Р·РјРµСЂР° С‚РµР»Р° Р·Р°РїСЂРѕСЃР°. РЎРµСЂРІРµСЂ РјРѕР¶РµС‚ Р·Р°РєСЂС‹С‚СЊ СЃРѕРµРґРёРЅРµРЅРёРµ,
+         // С‡С‚РѕР±С‹ РїСЂРµРєСЂР°С‚РёС‚СЊ РґР°Р»СЊРЅРµР№С€СѓСЋ РїРµСЂРµРґР°С‡Сѓ Р·Р°РїСЂРѕСЃР°.
         { 414, HTTP_RESP_FLG_FINDFILE,
                 "Request-URI Too Long",
                 "414 Request-URI Too Long: Buffer overflow detected\r\n" },
-         // сервер не может обработать запрос из-за слишком длинного указанного URL.
-         // Такую ошибку можно спровоцировать, например, когда клиент пытается передать длинные
-         // параметры через метод GET, а не POST.
+         // СЃРµСЂРІРµСЂ РЅРµ РјРѕР¶РµС‚ РѕР±СЂР°Р±РѕС‚Р°С‚СЊ Р·Р°РїСЂРѕСЃ РёР·-Р·Р° СЃР»РёС€РєРѕРј РґР»РёРЅРЅРѕРіРѕ СѓРєР°Р·Р°РЅРЅРѕРіРѕ URL.
+         // РўР°РєСѓСЋ РѕС€РёР±РєСѓ РјРѕР¶РЅРѕ СЃРїСЂРѕРІРѕС†РёСЂРѕРІР°С‚СЊ, РЅР°РїСЂРёРјРµСЂ, РєРѕРіРґР° РєР»РёРµРЅС‚ РїС‹С‚Р°РµС‚СЃСЏ РїРµСЂРµРґР°С‚СЊ РґР»РёРЅРЅС‹Рµ
+         // РїР°СЂР°РјРµС‚СЂС‹ С‡РµСЂРµР· РјРµС‚РѕРґ GET, Р° РЅРµ POST.
         { 429, HTTP_RESP_FLG_NONE,
                 "Too Many Requests\r\nRetry-After: 30",
                 NULL },
-         // клиент попытался отправить слишком много запросов за короткое время, что может указывать,
-         // например, на попытку DoS-атаки. Может сопровождаться заголовком Retry-After, указывающим,
-         // через какое время можно повторить запрос.
+         // РєР»РёРµРЅС‚ РїРѕРїС‹С‚Р°Р»СЃСЏ РѕС‚РїСЂР°РІРёС‚СЊ СЃР»РёС€РєРѕРј РјРЅРѕРіРѕ Р·Р°РїСЂРѕСЃРѕРІ Р·Р° РєРѕСЂРѕС‚РєРѕРµ РІСЂРµРјСЏ, С‡С‚Рѕ РјРѕР¶РµС‚ СѓРєР°Р·С‹РІР°С‚СЊ,
+         // РЅР°РїСЂРёРјРµСЂ, РЅР° РїРѕРїС‹С‚РєСѓ DoS-Р°С‚Р°РєРё. РњРѕР¶РµС‚ СЃРѕРїСЂРѕРІРѕР¶РґР°С‚СЊСЃСЏ Р·Р°РіРѕР»РѕРІРєРѕРј Retry-After, СѓРєР°Р·С‹РІР°СЋС‰РёРј,
+         // С‡РµСЂРµР· РєР°РєРѕРµ РІСЂРµРјСЏ РјРѕР¶РЅРѕ РїРѕРІС‚РѕСЂРёС‚СЊ Р·Р°РїСЂРѕСЃ.
         { 501, HTTP_RESP_FLG_FINDFILE,
                 "Not Implemented\r\nAllow: GET, POST",
                 "501 Not Implemented: Only GET and POST supported\r\n" },
-         // сервер не поддерживает возможностей, необходимых для обработки запроса.
-         // Типичный ответ для случаев, когда сервер не понимает указанный в запросе метод. + см 405
+         // СЃРµСЂРІРµСЂ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ РІРѕР·РјРѕР¶РЅРѕСЃС‚РµР№, РЅРµРѕР±С…РѕРґРёРјС‹С… РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё Р·Р°РїСЂРѕСЃР°.
+         // РўРёРїРёС‡РЅС‹Р№ РѕС‚РІРµС‚ РґР»СЏ СЃР»СѓС‡Р°РµРІ, РєРѕРіРґР° СЃРµСЂРІРµСЂ РЅРµ РїРѕРЅРёРјР°РµС‚ СѓРєР°Р·Р°РЅРЅС‹Р№ РІ Р·Р°РїСЂРѕСЃРµ РјРµС‚РѕРґ. + СЃРј 405
         { 418, HTTP_RESP_FLG_FINDFILE,
                 "I'm a teapot",
                 "418: Out of Coffee\r\n" },
@@ -175,7 +175,7 @@ const HTTP_RESPONSE HTTPResponse[] = {
 		{ 500, HTTP_RESP_FLG_END,
 				"Internal Server Error",
 		        "500 Internal Server Error\r\n" }
-		// любая внутренняя ошибка сервера, которая не входит в рамки остальных ошибок класса.
+		// Р»СЋР±Р°СЏ РІРЅСѓС‚СЂРµРЅРЅСЏСЏ РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°, РєРѕС‚РѕСЂР°СЏ РЅРµ РІС…РѕРґРёС‚ РІ СЂР°РјРєРё РѕСЃС‚Р°Р»СЊРЅС‹С… РѕС€РёР±РѕРє РєР»Р°СЃСЃР°.
 };
 /*
 #ifdef WEBSOCKET_ENA
@@ -261,7 +261,7 @@ LOCAL WEB_SRV_CONN * ICACHE_FLASH_ATTR ReNew_web_conn(TCP_SERV_CONN *ts_conn)
 			web_conn->bffiles[3] = 0xff;
 		//  web_conn->webflag = 0; //zalloc
 		//  web_conn->func_web_cb = NULL; //zalloc
-			OpenSCB(); // сбросить флаги
+			OpenSCB(); // СЃР±СЂРѕСЃРёС‚СЊ С„Р»Р°РіРё
 			ts_conn->linkd = (void *)web_conn;
 		};
 	}
@@ -306,11 +306,11 @@ LOCAL bool ICACHE_FLASH_ATTR CheckAuthorization(uint8* base64str)
 }
 //=============================================================================
 #ifdef WEBSOCKET_ENA
-// 1) взять строковое значение из заголовка Sec-WebSocket-Key и объединить со
-//	строкой 258EAFA5-E914-47DA-95CA-C5AB0DC85B11
-// 2) вычислить бинарный хеш SHA-1 (бинарная строка из 20 символов) от полученной
-//	в первом пункте строки
-// 3) закодировать хеш в Base64
+// 1) РІР·СЏС‚СЊ СЃС‚СЂРѕРєРѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ РёР· Р·Р°РіРѕР»РѕРІРєР° Sec-WebSocket-Key Рё РѕР±СЉРµРґРёРЅРёС‚СЊ СЃРѕ
+//	СЃС‚СЂРѕРєРѕР№ 258EAFA5-E914-47DA-95CA-C5AB0DC85B11
+// 2) РІС‹С‡РёСЃР»РёС‚СЊ Р±РёРЅР°СЂРЅС‹Р№ С…РµС€ SHA-1 (Р±РёРЅР°СЂРЅР°СЏ СЃС‚СЂРѕРєР° РёР· 20 СЃРёРјРІРѕР»РѕРІ) РѕС‚ РїРѕР»СѓС‡РµРЅРЅРѕР№
+//	РІ РїРµСЂРІРѕРј РїСѓРЅРєС‚Рµ СЃС‚СЂРѕРєРё
+// 3) Р·Р°РєРѕРґРёСЂРѕРІР°С‚СЊ С…РµС€ РІ Base64
 //=============================================================================
 const uint8 WebSocketAddKey[] ICACHE_RODATA_ATTR = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 #define sizeWebSocketAddKey 36
@@ -408,9 +408,9 @@ web_parse_content(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 	} while(pcmp != NULL);
 }
 //=============================================================================
-// Разбор имени файла и перевод в вид относительного URI.
-// (выкидывание HTTP://Host)
-// Проверка на обращение в папку или имя файла требующее пароль
+// Р Р°Р·Р±РѕСЂ РёРјРµРЅРё С„Р°Р№Р»Р° Рё РїРµСЂРµРІРѕРґ РІ РІРёРґ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕРіРѕ URI.
+// (РІС‹РєРёРґС‹РІР°РЅРёРµ HTTP://Host)
+// РџСЂРѕРІРµСЂРєР° РЅР° РѕР±СЂР°С‰РµРЅРёРµ РІ РїР°РїРєСѓ РёР»Рё РёРјСЏ С„Р°Р№Р»Р° С‚СЂРµР±СѓСЋС‰РµРµ РїР°СЂРѕР»СЊ
 //=============================================================================
 LOCAL void ICACHE_FLASH_ATTR
 web_parse_fname(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
@@ -431,7 +431,7 @@ web_parse_fname(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
     	};
         cmpcpystr(CurHTTP->pFilename, pcbuf, '\0', '?', FileNameSize);
     };
-    { // Проверка на обращение в папку или имя файла требующее пароль
+    { // РџСЂРѕРІРµСЂРєР° РЅР° РѕР±СЂР°С‰РµРЅРёРµ РІ РїР°РїРєСѓ РёР»Рё РёРјСЏ С„Р°Р№Р»Р° С‚СЂРµР±СѓСЋС‰РµРµ РїР°СЂРѕР»СЊ
     	uint8 *pcmp = web_strnstr(CurHTTP->pFilename, ProtectedFilesName, os_strlen(CurHTTP->pFilename));
         if(pcmp != NULL) {
         	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
@@ -462,8 +462,8 @@ uint8 * ICACHE_FLASH_ATTR head_find_ctr(HTTP_CONN *CurHTTP, const uint8 * c, int
 }
 //=============================================================================
 // Func: parse_header
-// Разбирает докачан или нет заголовок HTTP, что там принято, GET или POST,
-// открывает файл и проверяет content, если это POST и не прием файла.
+// Р Р°Р·Р±РёСЂР°РµС‚ РґРѕРєР°С‡Р°РЅ РёР»Рё РЅРµС‚ Р·Р°РіРѕР»РѕРІРѕРє HTTP, С‡С‚Рѕ С‚Р°Рј РїСЂРёРЅСЏС‚Рѕ, GET РёР»Рё POST,
+// РѕС‚РєСЂС‹РІР°РµС‚ С„Р°Р№Р» Рё РїСЂРѕРІРµСЂСЏРµС‚ content, РµСЃР»Рё СЌС‚Рѕ POST Рё РЅРµ РїСЂРёРµРј С„Р°Р№Р»Р°.
 //=============================================================================
 LOCAL bool ICACHE_FLASH_ATTR
 parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
@@ -487,7 +487,7 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
        return false;
     };
     pnext += 2;
-    if(pnext - pstr < MIN_REQ_LEN) return false; // 501 размер строки запроса менее "GET /"
+    if(pnext - pstr < MIN_REQ_LEN) return false; // 501 СЂР°Р·РјРµСЂ СЃС‚СЂРѕРєРё Р·Р°РїСЂРѕСЃР° РјРµРЅРµРµ "GET /"
     if(os_strncmp(pstr, "GET ", 4) == 0) {
       SetSCB(SCB_GET);
       CurHTTP->httpStatus = 200;
@@ -519,12 +519,12 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 			return false; // HTTP/0.9
 	    };
 	};
-	// здесь уже надо глядеть - следует или нет докачивать данные
+	// Р·РґРµСЃСЊ СѓР¶Рµ РЅР°РґРѕ РіР»СЏРґРµС‚СЊ - СЃР»РµРґСѓРµС‚ РёР»Рё РЅРµС‚ РґРѕРєР°С‡РёРІР°С‚СЊ РґР°РЅРЅС‹Рµ
 	pstr = web_strnstr(pnext-2, CRLF CRLF, pend - pnext + 2 ); // find "\r\n\r\n"
-	if(pstr == NULL) return true; // докачивать!
-	// разбираем дальше Header, раз уже скачан
+	if(pstr == NULL) return true; // РґРѕРєР°С‡РёРІР°С‚СЊ!
+	// СЂР°Р·Р±РёСЂР°РµРј РґР°Р»СЊС€Рµ Header, СЂР°Р· СѓР¶Рµ СЃРєР°С‡Р°РЅ
 	pstr += 2;
-	if(pstr != pnext) { // есть Headers
+	if(pstr != pnext) { // РµСЃС‚СЊ Headers
 		CurHTTP->phead = pnext;
 		CurHTTP->head_len = pstr - pnext;
 		if(CheckSCB(SCB_POST)){
@@ -533,7 +533,7 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 			CurHTTP->content_len = pend - pstr;
 		};
 	};
-	if(!CheckSCB(SCB_FOPEN)) { // файл уже открыт? нет
+	if(!CheckSCB(SCB_FOPEN)) { // С„Р°Р№Р» СѓР¶Рµ РѕС‚РєСЂС‹С‚? РЅРµС‚
 		web_parse_fname(CurHTTP, ts_conn);
 		if(!webserver_open_file(CurHTTP, ts_conn)) {
 			CurHTTP->httpStatus = 404; // "404: File not found"
@@ -541,9 +541,9 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 		};
 	};
 	if((CurHTTP->phead == NULL)||(CurHTTP->head_len == 0)) {
-		// если требуется авторизация, но нет передачи пароля...
+		// РµСЃР»Рё С‚СЂРµР±СѓРµС‚СЃСЏ Р°РІС‚РѕСЂРёР·Р°С†РёСЏ, РЅРѕ РЅРµС‚ РїРµСЂРµРґР°С‡Рё РїР°СЂРѕР»СЏ...
 		if(CheckSCB(SCB_AUTH)) CurHTTP->httpStatus = 401; // 401 Unauthorized
-		return false; // нет Header
+		return false; // РЅРµС‚ Header
 	};
 	if(CheckSCB(SCB_POST)) {
     	pstr = head_find_ctr(CurHTTP, HTTPContentLength, sizeHTTPContentLength, 1);
@@ -556,7 +556,7 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
         os_printf("content_len = %d of %d ", cnlen, CurHTTP->content_len);
 #endif
         if(cnlen) {
-    		web_conn->content_len = cnlen; // запомнить размер, для приема файла
+    		web_conn->content_len = cnlen; // Р·Р°РїРѕРјРЅРёС‚СЊ СЂР°Р·РјРµСЂ, РґР»СЏ РїСЂРёРµРјР° С„Р°Р№Р»Р°
         	if(!CheckSCB(SCB_BNDR) && (CurHTTP->head_len > sizeHTTPContentType + sizeHTTPmultipartformdata + sizeHTTPboundary + 2 + 2)) { //"x\r\n"
             	pstr = head_find_ctr(CurHTTP, HTTPContentType, sizeHTTPContentType, sizeHTTPmultipartformdata + sizeHTTPboundary + 2);
             	if(CurHTTP->httpStatus != 200) return false;
@@ -567,7 +567,7 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
                     	pstr += sizeHTTPmultipartformdata;
                         pstr = web_strnstr(pstr, HTTPboundary, pend - pstr);
                         if(pstr != NULL) {
-                        	// сохраним этот "мультипаспорт" (с) 5-ый элемент :)
+                        	// СЃРѕС…СЂР°РЅРёРј СЌС‚РѕС‚ "РјСѓР»СЊС‚РёРїР°СЃРїРѕСЂС‚" (СЃ) 5-С‹Р№ СЌР»РµРјРµРЅС‚ :)
                    			pstr += sizeHTTPboundary;
                    			HTTP_UPLOAD *pupload = (HTTP_UPLOAD *)os_zalloc(sizeof(HTTP_UPLOAD));
                    			if(pupload == NULL) {
@@ -591,16 +591,16 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
                     };
             	};
             };
-        	if((!CheckSCB(SCB_BNDR)) && cnlen > CurHTTP->content_len) { // обычный контент и недокачан заголовок? да.
+        	if((!CheckSCB(SCB_BNDR)) && cnlen > CurHTTP->content_len) { // РѕР±С‹С‡РЅС‹Р№ РєРѕРЅС‚РµРЅС‚ Рё РЅРµРґРѕРєР°С‡Р°РЅ Р·Р°РіРѕР»РѕРІРѕРє? РґР°.
         		CurHTTP->content_len = cnlen;
 #if DEBUGSOO > 2
             	os_printf("wait content ");
 #endif
-        		CurHTTP->httpStatus = 413; // 413 Request Entity Too Large // пока так
-        		return true; // докачивать
+        		CurHTTP->httpStatus = 413; // 413 Request Entity Too Large // РїРѕРєР° С‚Р°Рє
+        		return true; // РґРѕРєР°С‡РёРІР°С‚СЊ
            	};
         }
-        else CurHTTP->content_len = cnlen; // уточнить, что Content Length = 0
+        else CurHTTP->content_len = cnlen; // СѓС‚РѕС‡РЅРёС‚СЊ, С‡С‚Рѕ Content Length = 0
     };
     if(CheckSCB(SCB_AUTH)) {
     	pstr = head_find_ctr(CurHTTP, HTTPAuthorization, sizeHTTPAuthorization, 5 + 3); // "Authorization: Basic 1234\r\n"
@@ -682,7 +682,7 @@ LOCAL void ICACHE_FLASH_ATTR web_inc_fp(WEB_SRV_CONN *web_conn, WEBFS_HANDLE fp)
     web_conn->bffiles[2] = web_conn->bffiles[1];
     web_conn->bffiles[1] = web_conn->bffiles[0];
 	web_conn->bffiles[0] = fp;
-	SetSCB(SCB_FOPEN); // файл открыт
+	SetSCB(SCB_FOPEN); // С„Р°Р№Р» РѕС‚РєСЂС‹С‚
 }
 /******************************************************************************
  * FunctionName : web_inc_fopen
@@ -693,25 +693,25 @@ LOCAL void ICACHE_FLASH_ATTR web_inc_fp(WEB_SRV_CONN *web_conn, WEBFS_HANDLE fp)
 bool ICACHE_FLASH_ATTR web_inc_fopen(TCP_SERV_CONN *ts_conn, uint8 *cFile)
 {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
-	if(CheckSCB(SCB_FOPEN) && (!CheckSCB(SCB_FCALBACK))) { // файл уже открыт и он не парсится?
-	    return false; // такое не поддерживается в "~inc:filename~"
+	if(CheckSCB(SCB_FOPEN) && (!CheckSCB(SCB_FCALBACK))) { // С„Р°Р№Р» СѓР¶Рµ РѕС‚РєСЂС‹С‚ Рё РѕРЅ РЅРµ РїР°СЂСЃРёС‚СЃСЏ?
+	    return false; // С‚Р°РєРѕРµ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ РІ "~inc:filename~"
 	};
 	WEBFS_HANDLE fp = WEBFSOpen(cFile);
 #if DEBUGSOO > 1
 	os_printf("of%d[%s] ", fp, cFile);
 #endif
 	if(fp != WEBFS_INVALID_HANDLE) {
-		if(fatCache.flags & WEBFS_FLAG_HASINDEX) SetSCB(SCB_FCALBACK); // файл надо парсить
-		web_conn->content_len += WEBFSGetBytesRem(fp); // указать размер файла для вывода
+		if(fatCache.flags & WEBFS_FLAG_HASINDEX) SetSCB(SCB_FCALBACK); // С„Р°Р№Р» РЅР°РґРѕ РїР°СЂСЃРёС‚СЊ
+		web_conn->content_len += WEBFSGetBytesRem(fp); // СѓРєР°Р·Р°С‚СЊ СЂР°Р·РјРµСЂ С„Р°Р№Р»Р° РґР»СЏ РІС‹РІРѕРґР°
 		if(fatCache.flags & WEBFS_FLAG_ISZIPPED) {
-			if(CheckSCB(SCB_FOPEN)) { // файл уже открыт и "~inc:filename~" не поддерживает GZIP!
+			if(CheckSCB(SCB_FOPEN)) { // С„Р°Р№Р» СѓР¶Рµ РѕС‚РєСЂС‹С‚ Рё "~inc:filename~" РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ GZIP!
 				WEBFSClose(fp);
 #if DEBUGSOO > 1
 				os_printf("Not inc GZIP! ");
 #endif
 				return false;
 			};
-			SetSCB(SCB_FGZIP); // файл сжат GZIP
+			SetSCB(SCB_FGZIP); // С„Р°Р№Р» СЃР¶Р°С‚ GZIP
 		}
 	}
 	else { // File not found
@@ -724,7 +724,7 @@ bool ICACHE_FLASH_ATTR web_inc_fopen(TCP_SERV_CONN *ts_conn, uint8 *cFile)
  * FunctionName : web_inc_file
  * Description  : web include file close
  * Parameters   : struct
- * Returns      : true - все файлы закрыты
+ * Returns      : true - РІСЃРµ С„Р°Р№Р»С‹ Р·Р°РєСЂС‹С‚С‹
 *******************************************************************************/
 bool ICACHE_FLASH_ATTR web_inc_fclose(WEB_SRV_CONN *web_conn)
 {
@@ -743,7 +743,7 @@ bool ICACHE_FLASH_ATTR web_inc_fclose(WEB_SRV_CONN *web_conn)
    		if(web_conn->bffiles[0] != WEBFS_INVALID_HANDLE) return false;
 	};
 	ClrSCB(SCB_FOPEN | SCB_FGZIP | SCB_FCALBACK);
-	return true; // больше нет файлов
+	return true; // Р±РѕР»СЊС€Рµ РЅРµС‚ С„Р°Р№Р»РѕРІ
 };
 /******************************************************************************
  * FunctionName : webserver_open_file
@@ -807,11 +807,11 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 			}
 		}
 		if(isWEBFSLocked) return false;
-		// поиск файла на диске
+		// РїРѕРёСЃРє С„Р°Р№Р»Р° РЅР° РґРёСЃРєРµ
 		if(!web_inc_fopen(ts_conn, pstr)) {
 			uint16 i = os_strlen(pbuf);
 			if(i + sizeHTTP_DEFAULT_FILE < MAX_FILE_NAME_SIZE - 1) {
-				// добавить к имени папки "/index.htm"
+				// РґРѕР±Р°РІРёС‚СЊ Рє РёРјРµРЅРё РїР°РїРєРё "/index.htm"
 				pbuf[i] = '/';
 				os_sprintf(&pbuf[i+1], HTTP_DEFAULT_FILE);
 				if(!web_inc_fopen(ts_conn, pstr)) return false;
@@ -827,7 +827,7 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 		}; */
 		return true;
 	};
-	return false; // файл не открыт
+	return false; // С„Р°Р№Р» РЅРµ РѕС‚РєСЂС‹С‚
 }
 /******************************************************************************
 *******************************************************************************/
@@ -890,7 +890,7 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 	if (web_conn->msgbufsize < MIN_SEND_SIZE) {
 #if DEBUGSOO > 1
 		os_printf("sndbuf=%u! ", web_conn->msgbufsize);
-		if(ts_conn->flag.wait_sent) os_printf("wait_sent! "); // блок передан?
+		if(ts_conn->flag.wait_sent) os_printf("wait_sent! "); // Р±Р»РѕРє РїРµСЂРµРґР°РЅ?
 #endif
 		ts_conn->pcb->flags &= ~TF_NODELAY;
 		tcpsrv_int_sent_data(ts_conn, (uint8 *)ts_conn, 0);
@@ -916,41 +916,41 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 		web_conn->msgbuf += RESCHKS_SEND_SIZE;
 		web_conn->msgbufsize -= RESCHK_SEND_SIZE;
 	};
-	if(CheckSCB(SCB_FCALBACK) == 0) { // передача файла без парсинга
+	if(CheckSCB(SCB_FCALBACK) == 0) { // РїРµСЂРµРґР°С‡Р° С„Р°Р№Р»Р° Р±РµР· РїР°СЂСЃРёРЅРіР°
 		// Get/put as many bytes as possible
 		web_conn->msgbuflen = WEBFSGetArray(web_conn->webfile, web_conn->msgbuf, web_conn->msgbufsize);
 		if(web_conn->msgbuflen < web_conn->msgbufsize ) SetSCB(SCB_FCLOSE | SCB_DISCONNECT);
 	}
-	else { // парсинг потока передачи
-		do { // начинаем с пустого буфера
-			if(CheckSCB(SCB_RETRYCB)) { // повторный callback? да
+	else { // РїР°СЂСЃРёРЅРі РїРѕС‚РѕРєР° РїРµСЂРµРґР°С‡Рё
+		do { // РЅР°С‡РёРЅР°РµРј СЃ РїСѓСЃС‚РѕРіРѕ Р±СѓС„РµСЂР°
+			if(CheckSCB(SCB_RETRYCB)) { // РїРѕРІС‚РѕСЂРЅС‹Р№ callback? РґР°
 #if DEBUGSOO > 2
 				os_printf("rcb ");
 #endif
 				if(web_conn->func_web_cb != NULL) web_conn->func_web_cb(ts_conn);
-				if(CheckSCB(SCB_RETRYCB)) break; // повторить ещё раз? да.
+				if(CheckSCB(SCB_RETRYCB)) break; // РїРѕРІС‚РѕСЂРёС‚СЊ РµС‰С‘ СЂР°Р·? РґР°.
 			}
 			else {
-				uint8 *pstr = &web_conn->msgbuf[web_conn->msgbuflen]; // указатель в буфере
-				// запомнить указатель в файле. ftell(fp)
-				uint16 max = mMIN(web_conn->msgbufsize - web_conn->msgbuflen, SCB_SEND_SIZE); // читаем по 128 байт ?
+				uint8 *pstr = &web_conn->msgbuf[web_conn->msgbuflen]; // СѓРєР°Р·Р°С‚РµР»СЊ РІ Р±СѓС„РµСЂРµ
+				// Р·Р°РїРѕРјРЅРёС‚СЊ СѓРєР°Р·Р°С‚РµР»СЊ РІ С„Р°Р№Р»Рµ. ftell(fp)
+				uint16 max = mMIN(web_conn->msgbufsize - web_conn->msgbuflen, SCB_SEND_SIZE); // С‡РёС‚Р°РµРј РїРѕ 128 Р±Р°Р№С‚ ?
 				uint16 len = WEBFSGetArray(web_conn->webfile, pstr, max);
-				// прочитано len байт в буфер по указателю &sendbuf[msgbuflen]
-				if(len) { // есть байты для передачи, ищем string "~calback~"
+				// РїСЂРѕС‡РёС‚Р°РЅРѕ len Р±Р°Р№С‚ РІ Р±СѓС„РµСЂ РїРѕ СѓРєР°Р·Р°С‚РµР»СЋ &sendbuf[msgbuflen]
+				if(len) { // РµСЃС‚СЊ Р±Р°Р№С‚С‹ РґР»СЏ РїРµСЂРµРґР°С‡Рё, РёС‰РµРј string "~calback~"
 					int cmp = web_find_cbs(pstr, len);
-					if(cmp >= 0) { // найден calback
-						// откат файла
+					if(cmp >= 0) { // РЅР°Р№РґРµРЅ calback
+						// РѕС‚РєР°С‚ С„Р°Р№Р»Р°
 						WEBFSStubs[web_conn->webfile].addr -= len;
 						WEBFSStubs[web_conn->webfile].bytesRem += len;
-						// передвинуть указатель в файле на считанные байты с учетом маркера, без добавки длины для передачи
+						// РїРµСЂРµРґРІРёРЅСѓС‚СЊ СѓРєР°Р·Р°С‚РµР»СЊ РІ С„Р°Р№Р»Рµ РЅР° СЃС‡РёС‚Р°РЅРЅС‹Рµ Р±Р°Р№С‚С‹ СЃ СѓС‡РµС‚РѕРј РјР°СЂРєРµСЂР°, Р±РµР· РґРѕР±Р°РІРєРё РґР»РёРЅС‹ РґР»СЏ РїРµСЂРµРґР°С‡Рё
 						WEBFSStubs[web_conn->webfile].addr += cmp+1;
 						WEBFSStubs[web_conn->webfile].bytesRem -= cmp+1;
-						// это второй маркер?
-						if(CheckSCB(SCB_FINDCB)) { // в файле найден закрывающий маркер calback
-							ClrSCB(SCB_FINDCB); // прочитали string calback-а
-							if(cmp != 0) { // это дубль маркера ? нет.
-								// запустить calback
-								pstr[cmp] = '\0'; // закрыть string calback-а
+						// СЌС‚Рѕ РІС‚РѕСЂРѕР№ РјР°СЂРєРµСЂ?
+						if(CheckSCB(SCB_FINDCB)) { // РІ С„Р°Р№Р»Рµ РЅР°Р№РґРµРЅ Р·Р°РєСЂС‹РІР°СЋС‰РёР№ РјР°СЂРєРµСЂ calback
+							ClrSCB(SCB_FINDCB); // РїСЂРѕС‡РёС‚Р°Р»Рё string calback-Р°
+							if(cmp != 0) { // СЌС‚Рѕ РґСѓР±Р»СЊ РјР°СЂРєРµСЂР° ? РЅРµС‚.
+								// Р·Р°РїСѓСЃС‚РёС‚СЊ calback
+								pstr[cmp] = '\0'; // Р·Р°РєСЂС‹С‚СЊ string calback-Р°
 								if(!os_memcmp((void*)pstr, "inc:", 4)) { // "inc:file_name"
 									if(!web_inc_fopen(ts_conn, &pstr[4])) {
 										tcp_strcpy_fd("file not found!");
@@ -958,26 +958,26 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 								}
 								else web_int_callback(ts_conn);
 							}
-							else { // Дубль маркера.
-								web_conn->msgbuflen++; // передать только маркер ('~')
+							else { // Р”СѓР±Р»СЊ РјР°СЂРєРµСЂР°.
+								web_conn->msgbuflen++; // РїРµСЂРµРґР°С‚СЊ С‚РѕР»СЊРєРѕ РјР°СЂРєРµСЂ ('~')
 							};
 						}
 						else {
-							SetSCB(SCB_FINDCB); // в файле найден стартовый маркер calback
-							web_conn->msgbuflen += cmp;  // передать до стартового маркера calback
+							SetSCB(SCB_FINDCB); // РІ С„Р°Р№Р»Рµ РЅР°Р№РґРµРЅ СЃС‚Р°СЂС‚РѕРІС‹Р№ РјР°СЂРєРµСЂ calback
+							web_conn->msgbuflen += cmp;  // РїРµСЂРµРґР°С‚СЊ РґРѕ СЃС‚Р°СЂС‚РѕРІРѕРіРѕ РјР°СЂРєРµСЂР° calback
 						};
 					}
-					else {  // просто данные
+					else {  // РїСЂРѕСЃС‚Рѕ РґР°РЅРЅС‹Рµ
 						ClrSCB(SCB_FINDCB);
 						if(len < max) {
-							if(web_inc_fclose(web_conn)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // файл(ы) закончилсь совсем? да.
+							if(web_inc_fclose(web_conn)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // С„Р°Р№Р»(С‹) Р·Р°РєРѕРЅС‡РёР»СЃСЊ СЃРѕРІСЃРµРј? РґР°.
 						};
-						web_conn->msgbuflen += len; // добавить кол-во считанных байт для передачи.
+						web_conn->msgbuflen += len; // РґРѕР±Р°РІРёС‚СЊ РєРѕР»-РІРѕ СЃС‡РёС‚Р°РЅРЅС‹С… Р±Р°Р№С‚ РґР»СЏ РїРµСЂРµРґР°С‡Рё.
 					};
 				}
-				else if(web_inc_fclose(web_conn)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // файл(ы) закончилсь совсем? да.
+				else if(web_inc_fclose(web_conn)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // С„Р°Р№Р»(С‹) Р·Р°РєРѕРЅС‡РёР»СЃСЊ СЃРѕРІСЃРµРј? РґР°.
 			};  // not SCB_RETRYCB
-		} // набираем буфер
+		} // РЅР°Р±РёСЂР°РµРј Р±СѓС„РµСЂ
 		while((web_conn->msgbufsize - web_conn->msgbuflen >= SCB_SEND_SIZE)&&(!CheckSCB(SCB_FCLOSE | SCB_RETRYCB | SCB_DISCONNECT)));
 	};
 #if DEBUGSOO > 3
@@ -986,7 +986,7 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 	os_printf("%u ", web_conn->msgbuflen);
 #endif
 	if(web_conn->msgbuflen) {
-		web_conn->content_len -= web_conn->msgbuflen; // пока только для инфы
+		web_conn->content_len -= web_conn->msgbuflen; // РїРѕРєР° С‚РѕР»СЊРєРѕ РґР»СЏ РёРЅС„С‹
 		if(CheckSCB(SCB_CHUNKED)) { // greate chunked
 			uint8 cbuf[16];
 			unsigned int len = os_sprintf(cbuf,"\r\n%X\r\n", web_conn->msgbuflen);
@@ -1032,7 +1032,7 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
     web_conn->msgbuflen = 0;
 
     if(CheckSCB(SCB_REDIR)) {
-    	CurHTTP->httpStatus = 302; // редирект
+    	CurHTTP->httpStatus = 302; // СЂРµРґРёСЂРµРєС‚
     }
 	while(!(CurResp->flag & HTTP_RESP_FLG_END)) {
       if(CurResp->status == CurHTTP->httpStatus) break;
@@ -1050,7 +1050,7 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
             if(CurResp->flag & HTTP_RESP_FLG_FINDFILE) {
               os_sprintf(CurHTTP->pFilename, "/%u.htm", CurResp->status);
               webserver_open_file(CurHTTP, ts_conn);
-        //      CurHTTP->httpStatus = CurResp->status; // вернуть статус!
+        //      CurHTTP->httpStatus = CurResp->status; // РІРµСЂРЅСѓС‚СЊ СЃС‚Р°С‚СѓСЃ!
             };
         }
         if((!CheckSCB(SCB_FOPEN)) && (CurResp->default_content != NULL) ) {
@@ -1060,19 +1060,19 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
         }
         else if(CheckSCB(SCB_FOPEN)) {
         	if(web_conn->content_len) {
-            	// Указать, что данные могут пользовать все (очень актуально для XML)
+            	// РЈРєР°Р·Р°С‚СЊ, С‡С‚Рѕ РґР°РЅРЅС‹Рµ РјРѕРіСѓС‚ РїРѕР»СЊР·РѕРІР°С‚СЊ РІСЃРµ (РѕС‡РµРЅСЊ Р°РєС‚СѓР°Р»СЊРЅРѕ РґР»СЏ XML)
         		tcp_strcpy_fd("Access-Control-Allow-Origin: *\r\n");
                 if(CurHTTP->fileType != HTTP_UNKNOWN) {
                 	if(web_conn->bffiles[0] == WEBFS_WEBCGI_HANDLE && CheckSCB(SCB_FCALBACK)) CurHTTP->fileType = HTTP_TXT;
                 	tcp_puts_fd("Content-Type: %s\r\n", httpContentTypes[CurHTTP->fileType]);
                 };
                 // Output the cache-control + ContentLength
-                if(CheckSCB(SCB_FCALBACK)) { // длина неизветсна
+                if(CheckSCB(SCB_FCALBACK)) { // РґР»РёРЅР° РЅРµРёР·РІРµС‚СЃРЅР°
                 	// file is callback index
                 	tcp_strcpy_fd("Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\n");
                 	if(CurHTTP->httpver >= 0x11) SetSCB(SCB_CHUNKED);
                 }
-                else { // длина изветсна
+                else { // РґР»РёРЅР° РёР·РІРµС‚СЃРЅР°
                 	tcp_puts("%s %d\r\n", HTTPContentLength, web_conn->content_len);
                 	if(CurResp->status == 200 && (!isWEBFSLocked) && web_conn->bffiles[0] != WEBFS_WEBCGI_HANDLE) {
                 		// lifetime (sec) of static responses as string 60*60*24*14=1209600"
@@ -1114,14 +1114,14 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 /******************************************************************************/
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// поиск boundary
-// 0 - разделитель (boundary) не найден, докачивать или ...
-// 1 - boundary найден
-// 200 - найден завершаюший boundary
-// 400 - неверный формат
+// РїРѕРёСЃРє boundary
+// 0 - СЂР°Р·РґРµР»РёС‚РµР»СЊ (boundary) РЅРµ РЅР°Р№РґРµРЅ, РґРѕРєР°С‡РёРІР°С‚СЊ РёР»Рё ...
+// 1 - boundary РЅР°Р№РґРµРЅ
+// 200 - РЅР°Р№РґРµРЅ Р·Р°РІРµСЂС€Р°СЋС€РёР№ boundary
+// 400 - РЅРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚
 // ...
 //-----------------------------------------------------------------------------
-/* Пример M-Explorer: Load blk len: 399
+/* РџСЂРёРјРµСЂ M-Explorer: Load blk len: 399
 -----------------------------7df22f37711be\r\n
 Content-Disposition: form-data; name="test"; filename="readme.txt"\r\n
 Content-Type: text/plain\r\n\r\n
@@ -1133,7 +1133,7 @@ Content-Disposition: form-data; name="start"\r\n\r\n
 Content-Disposition: form-data; name="stop"\r\n\r\n
 0x1B000\r\n
 -----------------------------7df22f37711be--\r\n */
-/* Пример Google Chrome: Load blk len: 391
+/* РџСЂРёРјРµСЂ Google Chrome: Load blk len: 391
 ------WebKitFormBoundaryugGNBVFOk6qxfe22\r\n
 Content-Disposition: form-data; name="test"; filename="readme.txt"\r\n
 Content-Type: text/plain\r\n\r\n
@@ -1149,43 +1149,43 @@ Content-Disposition: form-data; name="stop"\r\n\r\n
 LOCAL int ICACHE_FLASH_ATTR find_boundary(HTTP_UPLOAD *pupload, uint8 *pstr, uint16 len)
 {
 	int x = len - 6 - pupload->sizeboundary;
-	if(x <= 0) return 0; // разделитель (boundary) не найден - докачивать буфер
+	if(x <= 0) return 0; // СЂР°Р·РґРµР»РёС‚РµР»СЊ (boundary) РЅРµ РЅР°Р№РґРµРЅ - РґРѕРєР°С‡РёРІР°С‚СЊ Р±СѓС„РµСЂ
 	int i;
 	uint8 *pcmp;
 	for(i = 0; i <= x; i++) {
 		if(pstr[i] == '-' && pstr[i+1] == '-') {
 			pcmp = pstr + i;
-//			if((pstr + len - pcmp) < pupload->sizeboundary + 6) return 0; // разделитель (boundary) не найден - докачивать буфер
-			pupload->pbndr = pcmp; // указатель на заголовок boundary (конец блока данных);
+//			if((pstr + len - pcmp) < pupload->sizeboundary + 6) return 0; // СЂР°Р·РґРµР»РёС‚РµР»СЊ (boundary) РЅРµ РЅР°Р№РґРµРЅ - РґРѕРєР°С‡РёРІР°С‚СЊ Р±СѓС„РµСЂ
+			pupload->pbndr = pcmp; // СѓРєР°Р·Р°С‚РµР»СЊ РЅР° Р·Р°РіРѕР»РѕРІРѕРє boundary (РєРѕРЅРµС† Р±Р»РѕРєР° РґР°РЅРЅС‹С…);
 			pcmp += 2;
-			if(os_memcmp(pcmp, pupload->boundary, pupload->sizeboundary)) return 0; // разделитель (boundary) не найден
+			if(os_memcmp(pcmp, pupload->boundary, pupload->sizeboundary)) return 0; // СЂР°Р·РґРµР»РёС‚РµР»СЊ (boundary) РЅРµ РЅР°Р№РґРµРЅ
 			pcmp += pupload->sizeboundary;
 			if(os_memcmp("--" CRLF, pcmp, 4)==0) {
 				pcmp += 4;
-				pupload->pnext = pcmp; // указатель в заголовке boundary (описание новых данных);
-				return 200; // найден завершающий разделитель
+				pupload->pnext = pcmp; // СѓРєР°Р·Р°С‚РµР»СЊ РІ Р·Р°РіРѕР»РѕРІРєРµ boundary (РѕРїРёСЃР°РЅРёРµ РЅРѕРІС‹С… РґР°РЅРЅС‹С…);
+				return 200; // РЅР°Р№РґРµРЅ Р·Р°РІРµСЂС€Р°СЋС‰РёР№ СЂР°Р·РґРµР»РёС‚РµР»СЊ
 			}
-			if(pcmp[0] != '\r' || pcmp[1] != '\n') return 400; // неверный формат
+			if(pcmp[0] != '\r' || pcmp[1] != '\n') return 400; // РЅРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚
 			pcmp += 2;
-			pupload->pnext = pcmp; // указатель в заголовке boundary (описание новых данных);
+			pupload->pnext = pcmp; // СѓРєР°Р·Р°С‚РµР»СЊ РІ Р·Р°РіРѕР»РѕРІРєРµ boundary (РѕРїРёСЃР°РЅРёРµ РЅРѕРІС‹С… РґР°РЅРЅС‹С…);
 			return 1;
 		};
 	};
-	return 0; // разделитель (boundary) не найден - докачивать буфер
+	return 0; // СЂР°Р·РґРµР»РёС‚РµР»СЊ (boundary) РЅРµ РЅР°Р№РґРµРЅ - РґРѕРєР°С‡РёРІР°С‚СЊ Р±СѓС„РµСЂ
 }
 //-----------------------------------------------------------------------------
 // Function: cmp_next_boundary
 // return:
-// 0 - разделитель (boundary) не найден, докачивать
-// 1 - далее обработка данных
-// 200 - найден завершающий разделитель: "\r\n--boundary--"
-// 400 - неизвестный формат content-а
+// 0 - СЂР°Р·РґРµР»РёС‚РµР»СЊ (boundary) РЅРµ РЅР°Р№РґРµРЅ, РґРѕРєР°С‡РёРІР°С‚СЊ
+// 1 - РґР°Р»РµРµ РѕР±СЂР°Р±РѕС‚РєР° РґР°РЅРЅС‹С…
+// 200 - РЅР°Р№РґРµРЅ Р·Р°РІРµСЂС€Р°СЋС‰РёР№ СЂР°Р·РґРµР»РёС‚РµР»СЊ: "\r\n--boundary--"
+// 400 - РЅРµРёР·РІРµСЃС‚РЅС‹Р№ С„РѕСЂРјР°С‚ content-Р°
 //-----------------------------------------------------------------------------
 LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLOAD pupload, uint8 pstr, uint16 len)
 {
 	HTTP_UPLOAD *pupload = (HTTP_UPLOAD *)ts_conn->pbufo;
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
-	if(pupload == NULL) return 500; // ошибка сервера
+	if(pupload == NULL) return 500; // РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°
 	uint16 ret;
 	uint16 len;
 	uint8 *pnext;
@@ -1196,38 +1196,38 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #if DEBUGSOO > 4
 		os_printf("bufi[%u]%u, cont:%u ", ts_conn->sizei, ts_conn->cntri, web_conn->content_len);
 #endif
-		if(len < (8 + pupload->sizeboundary)) return 0; // разделитель (boundary) не влезет - докачивать буфер
+		if(len < (8 + pupload->sizeboundary)) return 0; // СЂР°Р·РґРµР»РёС‚РµР»СЊ (boundary) РЅРµ РІР»РµР·РµС‚ - РґРѕРєР°С‡РёРІР°С‚СЊ Р±СѓС„РµСЂ
 		switch(pupload->status) {
-			case 0: // поиск boundary
+			case 0: // РїРѕРёСЃРє boundary
 			{
 #if DEBUGSOO > 4
 				os_printf("find_bndr ");
 #endif
 				pnext = web_strnstr(pstr, CRLF CRLF , len);
-				if(pnext == NULL) return 0; // докачивать
+				if(pnext == NULL) return 0; // РґРѕРєР°С‡РёРІР°С‚СЊ
 				len = pnext - pstr;
 				ret = find_boundary(pupload, pstr, len);
 #if DEBUGSOO > 4
 				os_printf("len=%u,ret=%u ", len, ret );
 #endif
 				if(ret != 1) return ret;
-				pstr = pupload->pnext; // +"\r\n" адрес за заголовком boundary
+				pstr = pupload->pnext; // +"\r\n" Р°РґСЂРµСЃ Р·Р° Р·Р°РіРѕР»РѕРІРєРѕРј boundary
 				pupload->name[0] = '\0';
 				pupload->filename[0] = '\0';
 				pstr = web_strnstr(pstr, "name=", pnext - pstr);
-				if(pstr == NULL) return 400; // неизвестный формат content-а
+				if(pstr == NULL) return 400; // РЅРµРёР·РІРµСЃС‚РЅС‹Р№ С„РѕСЂРјР°С‚ content-Р°
 				pstr += 5;
-				if(pstr >= pnext) return 400; // неизвестный формат content-а
+				if(pstr >= pnext) return 400; // РЅРµРёР·РІРµСЃС‚РЅС‹Р№ С„РѕСЂРјР°С‚ content-Р°
 				uint8 *pcmp = cmpcpystr(pupload->name, pstr, '"', '"', VarNameSize);
 				if(pcmp == NULL) {
 				 	pcmp = cmpcpystr(pupload->name, pstr, 0x22, 0x22, VarNameSize);
-				 	if(pcmp == NULL) return 400; // неизвестный формат content-а
+				 	if(pcmp == NULL) return 400; // РЅРµРёР·РІРµСЃС‚РЅС‹Р№ С„РѕСЂРјР°С‚ content-Р°
 				};
 				pstr = pcmp;
 #if DEBUGSOO > 4
 				os_printf("name:'%s' ", pupload->name);
 #endif
-				if(pstr >= pnext) return 400; // неизвестный формат content-а
+				if(pstr >= pnext) return 400; // РЅРµРёР·РІРµСЃС‚РЅС‹Р№ С„РѕСЂРјР°С‚ content-Р°
 				pcmp = web_strnstr(pstr, "filename=", pnext - pstr);
 				if(pcmp != NULL) {
 					pcmp += 9;
@@ -1244,31 +1244,31 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #if DEBUGSOO > 4
 					os_printf("trim#%u\n", len );
 #endif
-				ts_conn->cntri += len; // далее идут данные
+				ts_conn->cntri += len; // РґР°Р»РµРµ РёРґСѓС‚ РґР°РЅРЅС‹Рµ
 				if(!web_trim_bufi(ts_conn, &ts_conn->pbufi[len], ts_conn->sizei - len)) return 500;
 				web_conn->content_len -= len;
 				break;
 			}
-			case 1: // прием данных, первый заход, проверка форматов и т.д.
+			case 1: // РїСЂРёРµРј РґР°РЅРЅС‹С…, РїРµСЂРІС‹Р№ Р·Р°С…РѕРґ, РїСЂРѕРІРµСЂРєР° С„РѕСЂРјР°С‚РѕРІ Рё С‚.Рґ.
 			{
 #if DEBUGSOO > 4
 				os_printf("tst,fn='%s' ", pupload->filename);
 #endif
-				if(pupload->filename[0]!='\0') { // загрузка файла?
+				if(pupload->filename[0]!='\0') { // Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р°?
 					if(!os_memcmp((void*)pupload->name, "file", 4)) {
-						if(len < sizeof(WEBFS_DISK_HEADER)) return 0; // докачивать
+						if(len < sizeof(WEBFS_DISK_HEADER)) return 0; // РґРѕРєР°С‡РёРІР°С‚СЊ
 						WEBFS_DISK_HEADER *dhead = (WEBFS_DISK_HEADER *)pstr;
 						if(dhead->id != WEBFS_DISK_ID || dhead->ver != WEBFS_DISK_VER
 								|| (web_conn->content_len - pupload->sizeboundary - 8 < dhead->disksize)) {
 							if(isWEBFSLocked) return 400;
 							SetSCB(SCB_REDIR);
-							os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // неверный формат
+							os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // РЅРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚
 							return 200;
 						};
 						if(dhead->disksize > WEBFS_max_size()) {
 							if(isWEBFSLocked) return 400;
 							SetSCB(SCB_REDIR);
-							os_memcpy(pupload->filename,"/disk_er2.htm\0",14); // не влезет
+							os_memcpy(pupload->filename,"/disk_er2.htm\0",14); // РЅРµ РІР»РµР·РµС‚
 							return 200;
 						};
 						pupload->fsize = dhead->disksize;
@@ -1276,66 +1276,66 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #if DEBUGSOO > 4
 						os_printf("updisk[%u]=ok,m=%u ", dhead->disksize, disk_max_size );
 #endif
-						pupload->status = 3; // = 3 загрузка WebFileSystem во flash
+						pupload->status = 3; // = 3 Р·Р°РіСЂСѓР·РєР° WebFileSystem РІРѕ flash
 						isWEBFSLocked = true;
 						break;
 					}
 					else if(!os_memcmp((void*)pupload->name, "sysconst", 8)) {
 						pupload->fsize = SIZE_USER_CONST;
 						pupload->faddr = esp_init_data_default_addr;
-						pupload->status = 2; // = 2 загрузка файла во flash
+						pupload->status = 2; // = 2 Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р° РІРѕ flash
 						break;
 					}
 					else if(!os_memcmp((void*)pupload->name, "fsec_", 5)){
 						pupload->fsize = SPI_FLASH_SEC_SIZE;
 						pupload->faddr = ahextoul(&pupload->name[5]) << 12;
-						pupload->status = 2; // = 2 загрузка файла сектора во flash
+						pupload->status = 2; // = 2 Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р° СЃРµРєС‚РѕСЂР° РІРѕ flash
 						break;
 					};
 					if(isWEBFSLocked) return 400;
 					SetSCB(SCB_REDIR);
-					os_memcpy(pupload->filename,"/disk_er3.htm\0",14); // неизвестный тип
+					os_memcpy(pupload->filename,"/disk_er3.htm\0",14); // РЅРµРёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї
 					return 200;
 				}
 				else {
 					uint8 *pcmp = web_strnstr(pstr, CRLF, len);
-					if(pcmp == NULL) return 0; // докачивать
+					if(pcmp == NULL) return 0; // РґРѕРєР°С‡РёРІР°С‚СЊ
 					ret = find_boundary(pupload, pstr, len);
 #if DEBUGSOO > 4
 					os_printf("ret=%u ", ret );
 #endif
-					if((ret != 1 && ret != 200)) { // не найден конец или новый boundary?
-						return ret; // догружать
+					if((ret != 1 && ret != 200)) { // РЅРµ РЅР°Р№РґРµРЅ РєРѕРЅРµС† РёР»Рё РЅРѕРІС‹Р№ boundary?
+						return ret; // РґРѕРіСЂСѓР¶Р°С‚СЊ
 					}
 					*pcmp = '\0';
 					web_int_vars(ts_conn, pupload->name, pstr);
 					if(ret == 200) return ret;
-					// найден следующий boundary
+					// РЅР°Р№РґРµРЅ СЃР»РµРґСѓСЋС‰РёР№ boundary
 					len = pupload->pbndr - ts_conn->pbufi;
-					pupload->status = 0; // = 0 найден следующий boundary
+					pupload->status = 0; // = 0 РЅР°Р№РґРµРЅ СЃР»РµРґСѓСЋС‰РёР№ boundary
 #if DEBUGSOO > 4
 					os_printf("trim#%u\n", len );
 #endif
-					ts_conn->cntri += len; // далее идут данные
+					ts_conn->cntri += len; // РґР°Р»РµРµ РёРґСѓС‚ РґР°РЅРЅС‹Рµ
 					if(!web_trim_bufi(ts_conn, &ts_conn->pbufi[len], ts_conn->sizei - len)) return 500;
 					web_conn->content_len -= len;
 					break;
 				}
 //				return 400;
 			}
-			case 2: // загрузка файла во flash
-			case 3: // загрузка WebFileSystem во flash (скорость записи W25Q128 ~175 килобайт в сек, полный диск на 15,5МБ пишется 90..100 сек )
+			case 2: // Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р° РІРѕ flash
+			case 3: // Р·Р°РіСЂСѓР·РєР° WebFileSystem РІРѕ flash (СЃРєРѕСЂРѕСЃС‚СЊ Р·Р°РїРёСЃРё W25Q128 ~175 РєРёР»РѕР±Р°Р№С‚ РІ СЃРµРє, РїРѕР»РЅС‹Р№ РґРёСЃРє РЅР° 15,5РњР‘ РїРёС€РµС‚СЃСЏ 90..100 СЃРµРє )
 			{
 #if DEBUGSOO > 4
 				os_printf("fdata ");
 #endif
 				uint16 block_size = mMIN(max_len_buf_write_flash + 8 + pupload->sizeboundary, web_conn->content_len);
-				if(ts_conn->sizei < block_size) return 0; // докачивать
+				if(ts_conn->sizei < block_size) return 0; // РґРѕРєР°С‡РёРІР°С‚СЊ
 				ret = find_boundary(pupload, pstr, block_size);
 #if DEBUGSOO > 4
 				os_printf("ret=%u ", ret);
 #endif
-				if((ret == 1 || ret == 200)) { // найден конец или новый boundary?
+				if((ret == 1 || ret == 200)) { // РЅР°Р№РґРµРЅ РєРѕРЅРµС† РёР»Рё РЅРѕРІС‹Р№ boundary?
 					len = mMIN(block_size, pupload->pbndr - 2 - ts_conn->pbufi);
 				}
 				else {
@@ -1355,8 +1355,8 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 					ets_intr_unlock();
 				}
 #endif
-				if(block_size) { // идут данные файла
-					tcpsrv_unrecved_win(ts_conn); // для ускорения, пока стрирается-пишется уже обновит окно
+				if(block_size) { // РёРґСѓС‚ РґР°РЅРЅС‹Рµ С„Р°Р№Р»Р°
+					tcpsrv_unrecved_win(ts_conn); // РґР»СЏ СѓСЃРєРѕСЂРµРЅРёСЏ, РїРѕРєР° СЃС‚СЂРёСЂР°РµС‚СЃСЏ-РїРёС€РµС‚СЃСЏ СѓР¶Рµ РѕР±РЅРѕРІРёС‚ РѕРєРЅРѕ
 					if(pupload->faddr >= FLASH_MIN_SIZE && pupload->status == 3) {
 						if((pupload->faddr & 0x0000FFFF)==0) {
 
@@ -1391,15 +1391,15 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #ifdef SET_CPU_CLK_SPEED
 				if(syscfg.cfg.b.hi_speed_enable) set_cpu_clk();
 #endif
-				if((ret == 1 || ret == 200)) { // найден конец или новый boundary?
+				if((ret == 1 || ret == 200)) { // РЅР°Р№РґРµРЅ РєРѕРЅРµС† РёР»Рё РЅРѕРІС‹Р№ boundary?
 					if(pupload->status == 3) WEBFSInit();
 					if(pupload->fsize != 0) {
 						if(!isWEBFSLocked) {
 							SetSCB(SCB_REDIR);
-							os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // не всё передано или неверный формат
+							os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // РЅРµ РІСЃС‘ РїРµСЂРµРґР°РЅРѕ РёР»Рё РЅРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚
 							return 200;
 						}
-						return 400; //  не всё передано или неверный формат
+						return 400; //  РЅРµ РІСЃС‘ РїРµСЂРµРґР°РЅРѕ РёР»Рё РЅРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚
 					}
 					else {
 						if(!isWEBFSLocked) {
@@ -1407,7 +1407,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 							os_memcpy(pupload->filename,"/disk_ok.htm\0",13);
 						};
 					};
-					if(ret == 1) pupload->status = 0; // = 0 найден следующий boundary
+					if(ret == 1) pupload->status = 0; // = 0 РЅР°Р№РґРµРЅ СЃР»РµРґСѓСЋС‰РёР№ boundary
 					if(ret == 200)	return ret;
 				}
 				break;
@@ -1423,16 +1423,16 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
-	ts_conn->flag.rx_buf = 1; // указать, что всегда в режиме докачивать
+	ts_conn->flag.rx_buf = 1; // СѓРєР°Р·Р°С‚СЊ, С‡С‚Рѕ РІСЃРµРіРґР° РІ СЂРµР¶РёРјРµ РґРѕРєР°С‡РёРІР°С‚СЊ
 //	CurHTTP->fileType = HTTP_UNKNOWN;
 //	ts_conn->pbufi, ts_conn->cntri;
 #if DEBUGSOO > 2
 	os_printf("rx:%u[%u] ", web_conn->content_len, ts_conn->sizei);
 #endif
-	if(ts_conn->sizei == 0) return true; // докачивать
+	if(ts_conn->sizei == 0) return true; // РґРѕРєР°С‡РёРІР°С‚СЊ
 #ifdef WEBSOCKET_ENA
 	if(CheckSCB(SCB_WEBSOC)) {
-	 // прием ...
+	 // РїСЂРёРµРј ...
 
 	}
 #endif
@@ -1459,13 +1459,13 @@ LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_co
 			}
 		}
 		SetSCB(SCB_DISCONNECT);
-		return false; // неизвестный content или end
+		return false; // РЅРµРёР·РІРµСЃС‚РЅС‹Р№ content РёР»Рё end
 	}
-	if(web_conn->content_len > ts_conn->cntri) return true; // докачивать
+	if(web_conn->content_len > ts_conn->cntri) return true; // РґРѕРєР°С‡РёРІР°С‚СЊ
 	CurHTTP->httpStatus = 400;
 	SetSCB(SCB_DISCONNECT);
 	web_conn->content_len = 0;
-	return false; // неизвестный content
+	return false; // РЅРµРёР·РІРµСЃС‚РЅС‹Р№ content
 }
 //-----------------------------------------------------------------------------
 //--- web_trim_bufi -----------------------------------------------------------
@@ -1473,10 +1473,10 @@ LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_co
 LOCAL bool ICACHE_FLASH_ATTR web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint16 data_len)
 {
     if(pdata != NULL && data_len != 0 && ts_conn->sizei > data_len) {
-        	os_memcpy(ts_conn->pbufi, pdata, data_len); // переместим кусок в начало буфера
+        	os_memcpy(ts_conn->pbufi, pdata, data_len); // РїРµСЂРµРјРµСЃС‚РёРј РєСѓСЃРѕРє РІ РЅР°С‡Р°Р»Рѕ Р±СѓС„РµСЂР°
         	ts_conn->pbufi = (uint8 *)mem_realloc(ts_conn->pbufi, data_len + 1); // mem_trim(ts_conn->pbufi, data_len + 1);
         	if(ts_conn->pbufi != NULL) {
-            	ts_conn->sizei = data_len; // размер куска
+            	ts_conn->sizei = data_len; // СЂР°Р·РјРµСЂ РєСѓСЃРєР°
             	ts_conn->cntri = 0;
         	}
         	else return false; // CurHTTP.httpStatus = 500; // 500 Internal Server Error
@@ -1491,7 +1491,7 @@ LOCAL bool ICACHE_FLASH_ATTR web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata,
 }
 /******************************************************************************
  * web_feee_bufi
- *  освободить приемный буфер
+ *  РѕСЃРІРѕР±РѕРґРёС‚СЊ РїСЂРёРµРјРЅС‹Р№ Р±СѓС„РµСЂ
 *******************************************************************************/
 LOCAL bool ICACHE_FLASH_ATTR web_feee_bufi(TCP_SERV_CONN *ts_conn)
 {
@@ -1528,7 +1528,7 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
 #endif
     	return ERR_MEM;
     }
-    if(CheckSCB(SCB_CLOSED | SCB_DISCONNECT | SCB_FCLOSE )) // обрабатывать нечего
+    if(CheckSCB(SCB_CLOSED | SCB_DISCONNECT | SCB_FCLOSE )) // РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РЅРµС‡РµРіРѕ
     	return ERR_OK;
 
     web_conn->udata_start = 0;
@@ -1537,12 +1537,12 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
     os_memset(&CurHTTP, 0, sizeof(CurHTTP));
     CurHTTP.httpStatus = 200; // OK
     CurHTTP.fileType = HTTP_UNKNOWN;
-    // прием и обработка заголовка HHTP
-    if(!CheckSCB(SCB_HEAD_OK)) { // заголовок уже принят и обработан? нет
-		ts_conn->flag.rx_buf = 1; // докачивать буфер
+    // РїСЂРёРµРј Рё РѕР±СЂР°Р±РѕС‚РєР° Р·Р°РіРѕР»РѕРІРєР° HHTP
+    if(!CheckSCB(SCB_HEAD_OK)) { // Р·Р°РіРѕР»РѕРІРѕРє СѓР¶Рµ РїСЂРёРЅСЏС‚ Рё РѕР±СЂР°Р±РѕС‚Р°РЅ? РЅРµС‚
+		ts_conn->flag.rx_buf = 1; // РґРѕРєР°С‡РёРІР°С‚СЊ Р±СѓС„РµСЂ
 		tcpsrv_unrecved_win(ts_conn);
-		// разбираем докачан или нет заголовок HTTP, что там принято GET или POST и открываем файл и прием content, если это POST и не прием файла.
-    	if(parse_header(&CurHTTP, ts_conn)) { // заголовок полный? нет
+		// СЂР°Р·Р±РёСЂР°РµРј РґРѕРєР°С‡Р°РЅ РёР»Рё РЅРµС‚ Р·Р°РіРѕР»РѕРІРѕРє HTTP, С‡С‚Рѕ С‚Р°Рј РїСЂРёРЅСЏС‚Рѕ GET РёР»Рё POST Рё РѕС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» Рё РїСЂРёРµРј content, РµСЃР»Рё СЌС‚Рѕ POST Рё РЅРµ РїСЂРёРµРј С„Р°Р№Р»Р°.
+    	if(parse_header(&CurHTTP, ts_conn)) { // Р·Р°РіРѕР»РѕРІРѕРє РїРѕР»РЅС‹Р№? РЅРµС‚
     		if(ts_conn->sizei < MAX_HTTP_HEAD_BUF) {
 #if DEBUGSOO > 4
 				os_printf("buf");
@@ -1550,11 +1550,11 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
 #if DEBUGSOO > 1
 				os_printf("...\n");
 #endif
-				return ERR_OK; // будем принимать ещё.
+				return ERR_OK; // Р±СѓРґРµРј РїСЂРёРЅРёРјР°С‚СЊ РµС‰С‘.
     		};
-    	   	CurHTTP.httpStatus = 413; // 413 Request Entity Too Large // пока так
+    	   	CurHTTP.httpStatus = 413; // 413 Request Entity Too Large // РїРѕРєР° С‚Р°Рє
 		};
-    	// разбор заголовка
+    	// СЂР°Р·Р±РѕСЂ Р·Р°РіРѕР»РѕРІРєР°
 #if DEBUGSOO > 1
 #ifdef WEBSOCKET_ENA
 		os_printf("%s f[%s] ", (CheckSCB(SCB_POST))? "POST" : (CheckSCB(SCB_WEBSOC))? "WEBSOC" : "GET", CurHTTP.pFilename);
@@ -1565,12 +1565,12 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
 #if DEBUGSOO > 3
 		os_printf("hcn:%p[%d],wcn:%d ", CurHTTP.pcontent, CurHTTP.content_len, web_conn->content_len);
 #endif
-	    if(CurHTTP.httpStatus == 200) { // && CheckSCB(SCB_FOPEN)) { // если файл открыт и всё OK
+	    if(CurHTTP.httpStatus == 200) { // && CheckSCB(SCB_FOPEN)) { // РµСЃР»Рё С„Р°Р№Р» РѕС‚РєСЂС‹С‚ Рё РІСЃС‘ OK
 			if(CurHTTP.cookie_len != 0) web_parse_cookie(&CurHTTP, ts_conn);
 			web_parse_uri_vars(&CurHTTP, ts_conn);
 			if(CurHTTP.pcontent != NULL) {
 				if(CheckSCB(SCB_RXDATA)) {
-					if(web_conn->content_len) { // с заголовком приняли кусок данных файла?
+					if(web_conn->content_len) { // СЃ Р·Р°РіРѕР»РѕРІРєРѕРј РїСЂРёРЅСЏР»Рё РєСѓСЃРѕРє РґР°РЅРЅС‹С… С„Р°Р№Р»Р°?
 #if DEBUGSOO > 3
 						os_printf("trim:%u[%u] ", web_conn->content_len, CurHTTP.content_len);
 #endif
@@ -1584,7 +1584,7 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
 				};
 			};
 		};
-    	SetSCB(SCB_HEAD_OK); // заголовок принят и обработан
+    	SetSCB(SCB_HEAD_OK); // Р·Р°РіРѕР»РѕРІРѕРє РїСЂРёРЅСЏС‚ Рё РѕР±СЂР°Р±РѕС‚Р°РЅ
 	};
 #if DEBUGSOO > 3
    	os_printf("tst_rx: %u, %u, %u ", CurHTTP.httpStatus, (CheckSCB(SCB_RXDATA) != 0), web_conn->content_len );
@@ -1593,28 +1593,28 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
 #if DEBUGSOO > 1
     	os_printf("...\n");
 #endif
-    	return ERR_OK; // докачивать content
+    	return ERR_OK; // РґРѕРєР°С‡РёРІР°С‚СЊ content
     };
-    ts_conn->flag.rx_null = 1; // всё - больше не принимаем!
-	ts_conn->flag.rx_buf = 0; // не докачивать буфер
-	if(web_feee_bufi(ts_conn)) tcpsrv_unrecved_win(ts_conn); // уничтожим буфер
+    ts_conn->flag.rx_null = 1; // РІСЃС‘ - Р±РѕР»СЊС€Рµ РЅРµ РїСЂРёРЅРёРјР°РµРј!
+	ts_conn->flag.rx_buf = 0; // РЅРµ РґРѕРєР°С‡РёРІР°С‚СЊ Р±СѓС„РµСЂ
+	if(web_feee_bufi(ts_conn)) tcpsrv_unrecved_win(ts_conn); // СѓРЅРёС‡С‚РѕР¶РёРј Р±СѓС„РµСЂ
 
     if(tcp_sndbuf(ts_conn->pcb) >= HTTP_SEND_SIZE) {
 
 #ifdef WEBSOCKET_ENA
 			if(CheckSCB(SCB_WEBSOC)) {
-				// вывод ответа websoc и переключение tcp callback у tcpsrv
+				// РІС‹РІРѕРґ РѕС‚РІРµС‚Р° websoc Рё РїРµСЂРµРєР»СЋС‡РµРЅРёРµ tcp callback Сѓ tcpsrv
 				websoc_headers(&CurHTTP, ts_conn);
 			}
 			else
 #else
 			{
-				// создание и вывод заголовка ответа.
+				// СЃРѕР·РґР°РЅРёРµ Рё РІС‹РІРѕРґ Р·Р°РіРѕР»РѕРІРєР° РѕС‚РІРµС‚Р°.
 				web_print_headers(&CurHTTP, ts_conn);
 			}
 #endif
 
-        // начало предачи файла, если есть
+        // РЅР°С‡Р°Р»Рѕ РїСЂРµРґР°С‡Рё С„Р°Р№Р»Р°, РµСЃР»Рё РµСЃС‚СЊ
         if((!CheckSCB(SCB_CLOSED | SCB_DISCONNECT | SCB_FCLOSE))&&CheckSCB(SCB_FOPEN)) webserver_send_fdata(ts_conn);
     }
     else {
@@ -1707,28 +1707,28 @@ LOCAL void ICACHE_FLASH_ATTR webserver_disconnect(TCP_SERV_CONN *ts_conn)
 }
 /******************************************************************************
  * FunctionName : webserver_init
- * Description  : Открытие сервера
+ * Description  : РћС‚РєСЂС‹С‚РёРµ СЃРµСЂРІРµСЂР°
  * Parameters   : arg -- port N
  * Returns      : none
 *******************************************************************************/
 err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 {
-	WEBFSInit(); // файловая система
+	WEBFSInit(); // С„Р°Р№Р»РѕРІР°СЏ СЃРёСЃС‚РµРјР°
 
 	err_t err = ERR_OK;
 
 	TCP_SERV_CFG *p = tcpsrv_init(portn);
 	if (p != NULL) {
-		// изменим конфиг на наше усмотрение:
-		if(syscfg.cfg.b.web_time_wait_delete) p->flag.pcb_time_wait_free = 1; // пусть убивает, для теста и проксей
-		p->max_conn = 99; // сработает по heap_size
+		// РёР·РјРµРЅРёРј РєРѕРЅС„РёРі РЅР° РЅР°С€Рµ СѓСЃРјРѕС‚СЂРµРЅРёРµ:
+		if(syscfg.cfg.b.web_time_wait_delete) p->flag.pcb_time_wait_free = 1; // РїСѓСЃС‚СЊ СѓР±РёРІР°РµС‚, РґР»СЏ С‚РµСЃС‚Р° Рё РїСЂРѕРєСЃРµР№
+		p->max_conn = 99; // СЃСЂР°Р±РѕС‚Р°РµС‚ РїРѕ heap_size
 #if DEBUGSOO > 0
 		os_printf("Max connection %d, time waits %d & %d, min heap size %d\n",
 				p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);
 #endif
-		// слинкуем с желаемыми процедурами:
+		// СЃР»РёРЅРєСѓРµРј СЃ Р¶РµР»Р°РµРјС‹РјРё РїСЂРѕС†РµРґСѓСЂР°РјРё:
 	 	p->func_discon_cb = webserver_disconnect;
-//	 	p->func_listen = webserver_listen; // не требуется
+//	 	p->func_listen = webserver_listen; // РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ
 	 	p->func_sent_cb = webserver_sent_callback;
 		p->func_recv = webserver_received_data;
 		err = tcpsrv_start(p);
@@ -1740,7 +1740,7 @@ err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 
 /******************************************************************************
  * FunctionName : webserver_close
- * Description  : закрытие сервера
+ * Description  : Р·Р°РєСЂС‹С‚РёРµ СЃРµСЂРІРµСЂР°
  * Parameters   : arg -- port N
  * Returns      : none
 *******************************************************************************/
@@ -1750,15 +1750,15 @@ err_t ICACHE_FLASH_ATTR webserver_close(uint16 portn)
 }
 /******************************************************************************
  * FunctionName : webserver_reinit
- * Description  : закрытие сервера и открытие нового
- * Parameters   : arg -- port N открытого порта
+ * Description  : Р·Р°РєСЂС‹С‚РёРµ СЃРµСЂРІРµСЂР° Рё РѕС‚РєСЂС‹С‚РёРµ РЅРѕРІРѕРіРѕ
+ * Parameters   : arg -- port N РѕС‚РєСЂС‹С‚РѕРіРѕ РїРѕСЂС‚Р°
  * Returns      : none
 *******************************************************************************/
 err_t ICACHE_FLASH_ATTR webserver_reinit(uint16 portn)
 {
 	err_t err = ERR_OK;
 //	if(portn == syscfg.web_port) return err;
-	if(portn) err = tcpsrv_close(tcpsrv_port2pcfg(portn)); // зарыть старый порт
-	if(syscfg.web_port) err = webserver_init(syscfg.web_port); // открыть новый
+	if(portn) err = tcpsrv_close(tcpsrv_port2pcfg(portn)); // Р·Р°СЂС‹С‚СЊ СЃС‚Р°СЂС‹Р№ РїРѕСЂС‚
+	if(syscfg.web_port) err = webserver_init(syscfg.web_port); // РѕС‚РєСЂС‹С‚СЊ РЅРѕРІС‹Р№
 	return err;
 }

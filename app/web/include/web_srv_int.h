@@ -16,21 +16,21 @@
 // #define WEBSOCKET_ENA 1
 
 // lifetime (sec) of static responses as string 60*60*24*14=1209600"
-#define FILE_CACHE_MAX_AGE_SEC  3600 // время для кеша файлов, ставить 0 пока тест!
+#define FILE_CACHE_MAX_AGE_SEC  3600 // РІСЂРµРјСЏ РґР»СЏ РєРµС€Р° С„Р°Р№Р»РѕРІ, СЃС‚Р°РІРёС‚СЊ 0 РїРѕРєР° С‚РµСЃС‚!
 #define HTTP_DEFAULT_FILE		"index.htm"
 #define sizeHTTP_DEFAULT_FILE	9
 
-#define MAX_HTTP_HEAD_BUF 3070 // максимальный размер HTTP запроса (GET)
+#define MAX_HTTP_HEAD_BUF 3070 // РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ HTTP Р·Р°РїСЂРѕСЃР° (GET)
 
 #define RESCHKS_SEND_SIZE 16
 #define RESCHKE_SEND_SIZE 8
 #define RESCHK_SEND_SIZE (RESCHKS_SEND_SIZE + RESCHKE_SEND_SIZE)
 
-#define MIN_SEND_SIZE (256 + RESCHK_SEND_SIZE) // минимальный размер буфера для передачи файла
-#define MAX_SEND_SIZE ((TCP_MSS*4) + RESCHK_SEND_SIZE) // максимальный размер буфера для передачи 4*MSS = 5840 (MSS=1460)
+#define MIN_SEND_SIZE (256 + RESCHK_SEND_SIZE) // РјРёРЅРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РґР»СЏ РїРµСЂРµРґР°С‡Рё С„Р°Р№Р»Р°
+#define MAX_SEND_SIZE ((TCP_MSS*4) + RESCHK_SEND_SIZE) // РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РґР»СЏ РїРµСЂРµРґР°С‡Рё 4*MSS = 5840 (MSS=1460)
 
-#define HTTP_SEND_SIZE 384 // минимальный размер буфера для передачи заголовка HTTP
-#define SCB_SEND_SIZE  128 // минимальный резерв в буфере для callback
+#define HTTP_SEND_SIZE 384 // РјРёРЅРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РґР»СЏ РїРµСЂРµРґР°С‡Рё Р·Р°РіРѕР»РѕРІРєР° HTTP
+#define SCB_SEND_SIZE  128 // РјРёРЅРёРјР°Р»СЊРЅС‹Р№ СЂРµР·РµСЂРІ РІ Р±СѓС„РµСЂРµ РґР»СЏ callback
 
 #define ProtectedFilesName		"protect"
 

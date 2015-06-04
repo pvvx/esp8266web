@@ -37,7 +37,7 @@ extern uint8 dhcpc_flag;
 extern struct dhcps_lease dhcps_lease;  // use new liblwip.a
 
 
-struct bits_wifi_chg { // структура передачи изменений или ошибок
+struct bits_wifi_chg { // СЃС‚СЂСѓРєС‚СѓСЂР° РїРµСЂРµРґР°С‡Рё РёР·РјРµРЅРµРЅРёР№ РёР»Рё РѕС€РёР±РѕРє
 	unsigned mode		: 1;	//0  0x00000001
 	unsigned phy		: 1;	//1  0x00000002
 	unsigned chl		: 1;	//2  0x00000004
@@ -76,14 +76,14 @@ struct bits_wifi_chg { // структура передачи изменений или ошибок
 #define WIFI_MASK_SAVE		0x00010000
 #define WIFI_MASK_REBOOT	0x00020000
 
-struct wifi_bits_cfg { // общие установки wifi
+struct wifi_bits_cfg { // РѕР±С‰РёРµ СѓСЃС‚Р°РЅРѕРІРєРё wifi
 	unsigned mode	: 2;
 	unsigned phy	: 2;
 	unsigned chl	: 4;
 	unsigned sleep	: 2;
 	unsigned ap_dhcp_enable	: 1;
 	unsigned st_dhcp_enable	: 1;
-//	unsigned wait_reboot	: 1; // WiFi требет перезагрузки, после последних установок
+//	unsigned wait_reboot	: 1; // WiFi С‚СЂРµР±РµС‚ РїРµСЂРµР·Р°РіСЂСѓР·РєРё, РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРёС… СѓСЃС‚Р°РЅРѕРІРѕРє
 } __attribute__((packed));
 
 typedef union {
@@ -91,7 +91,7 @@ typedef union {
 	unsigned int ui;
 }uwifi_chg;
 
-struct wifi_config {	// структура конфигурации wifi
+struct wifi_config {	// СЃС‚СЂСѓРєС‚СѓСЂР° РєРѕРЅС„РёРіСѓСЂР°С†РёРё wifi
 //	uwifi_chg err;
 	struct wifi_bits_cfg b;
 //	uint8 phy_max_tpw; // unit: 0.25dBm, range [0, 82], 34th byte esp_init_data_default.bin
@@ -110,7 +110,7 @@ struct wifi_config {	// структура конфигурации wifi
 	}st;
 };
 
-struct bss_scan_info { // структуры, сохранямые для вывода scan.xml (в iram)
+struct bss_scan_info { // СЃС‚СЂСѓРєС‚СѓСЂС‹, СЃРѕС…СЂР°РЅСЏРјС‹Рµ РґР»СЏ РІС‹РІРѕРґР° scan.xml (РІ iram)
     uint8 bssid[6];
     uint8 ssid[32];
     uint8 channel;

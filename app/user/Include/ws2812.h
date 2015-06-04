@@ -1,7 +1,7 @@
 /*
  * ws2812.h
  *
- *  Created on: 04 мая 2015 г.
+ *  Created on: 04 РјР°СЏ 2015 Рі.
  *      Author: PVV
  */
 

@@ -184,7 +184,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			update_mux_txd1();
 		}
 		else if(!os_memcmp((void*)cstr, "save", 4)) {
-			if(val == 2) SetSCB(SCB_SYSSAVE); // по закрытию соединения вызвать sys_write_cfg()
+			if(val == 2) SetSCB(SCB_SYSSAVE); // РїРѕ Р·Р°РєСЂС‹С‚РёСЋ СЃРѕРµРґРёРЅРµРЅРёСЏ РІС‹Р·РІР°С‚СЊ sys_write_cfg()
 			else if(val == 1) sys_write_cfg();
 		}
 #ifdef USE_NETBIOS

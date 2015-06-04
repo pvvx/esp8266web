@@ -20,7 +20,7 @@
 
 bool wdt_flg;
 
-// каждые 1680403 us
+// РєР°Р¶РґС‹Рµ 1680403 us
 void wdt_feed(void)
 {
 	if (RTC_MEM(0) < RST_EVENT_WDT) {
@@ -55,7 +55,7 @@ void ICACHE_FLASH_ATTR wdt_init(void)
 #else
 
 extern ETSTimer SoftWdtTimer;
-extern int soft_wdt_interval; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
+extern int soft_wdt_interval; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 РёР»Рё 3000 РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂРµР¶РёРјР° sleep WiFi (РїРµСЂРёРѕРґР° timeouts_timer, noise_timer)
 #define wdt_flg ((int *)&SoftWdtTimer)[-1]
 // extern void system_restart_local(void);
 extern void pp_post(int);

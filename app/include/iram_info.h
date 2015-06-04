@@ -11,11 +11,11 @@
 
 #define IRAM1_BASE	0x40100000
 #define IRAM1_SIZE	0x00008000
-#define MIN_GET_IRAM 2048 // минимальный размер iram, чтобы с ним возиться
+#define MIN_GET_IRAM 2048 // РјРёРЅРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ iram, С‡С‚РѕР±С‹ СЃ РЅРёРј РІРѕР·РёС‚СЊСЃСЏ
 
-typedef struct t_eraminfo // описание свободной области iram
+typedef struct t_eraminfo // РѕРїРёСЃР°РЅРёРµ СЃРІРѕР±РѕРґРЅРѕР№ РѕР±Р»Р°СЃС‚Рё iram
 {
-//	bool	use; // true - есть минмум MIN_GET_IRAM байт
+//	bool	use; // true - РµСЃС‚СЊ РјРёРЅРјСѓРј MIN_GET_IRAM Р±Р°Р№С‚
 	uint32 *base;
 	uint32 size;
 }ERAMInfo;

@@ -61,7 +61,7 @@ void ICACHE_FLASH_ATTR set_cpu_clk(void)
 	ets_intr_unlock();
 }
 //=============================================================================
-//  Пристартовый тест пина RX для сброса конфигурации
+//  РџСЂРёСЃС‚Р°СЂС‚РѕРІС‹Р№ С‚РµСЃС‚ РїРёРЅР° RX РґР»СЏ СЃР±СЂРѕСЃР° РєРѕРЅС„РёРіСѓСЂР°С†РёРё
 //=============================================================================
 
 #define GPIO_TEST 3 // GPIO3 (RX)
@@ -82,8 +82,8 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 	if(flash_read_cfg(&ucfg, ID_CFG_UART0, sizeof(ucfg)) == sizeof(ucfg)) {
 		if(ucfg.cfg.b.rxd_inv) x = 1 << GPIO_TEST;
 	}
-	gpio_output_set(0,0,0, 1 << GPIO_TEST); // GPIO OUTPUT DISABLE отключить вывод в порту GPIO3
-	set_gpiox_mux_func_ioport(GPIO_TEST); // установить RX (GPIO3) в режим порта i/o
+	gpio_output_set(0,0,0, 1 << GPIO_TEST); // GPIO OUTPUT DISABLE РѕС‚РєР»СЋС‡РёС‚СЊ РІС‹РІРѕРґ РІ РїРѕСЂС‚Сѓ GPIO3
+	set_gpiox_mux_func_ioport(GPIO_TEST); // СѓСЃС‚Р°РЅРѕРІРёС‚СЊ RX (GPIO3) РІ СЂРµР¶РёРј РїРѕСЂС‚Р° i/o
 	if((GPIO_IN & (1 << GPIO_TEST)) == x) {
 		ets_isr_mask(1 << ETS_GPIO_INUM);
 		ets_isr_attach(ETS_GPIO_INUM, GPIO_intr_handler, (void *)&test_edge);
@@ -95,11 +95,11 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 #endif
 		ets_delay_us(25000); //25 ms
 		ets_isr_mask(1 << ETS_GPIO_INUM);
-	    if(test_edge == 0) { // изменений не было
+	    if(test_edge == 0) { // РёР·РјРµРЅРµРЅРёР№ РЅРµ Р±С‹Р»Рѕ
 #if DEBUGSOO > 0
 			os_printf("WiFi configuration reset\n");
 #endif
-	    	flash_save_cfg(&x, ID_CFG_WIFI, 0); // создать запись нулевой длины
+	    	flash_save_cfg(&x, ID_CFG_WIFI, 0); // СЃРѕР·РґР°С‚СЊ Р·Р°РїРёСЃСЊ РЅСѓР»РµРІРѕР№ РґР»РёРЅС‹
 	//    	flash_save_cfg(&x, ID_CFG_UART0, 0);
 	//    	flash_save_cfg(&x, ID_CFG_SYS, 0);
 	    }
@@ -107,7 +107,7 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 	    else os_printf("No clear (%d)\n", count_gpio_test_edge);
 #endif
 	}
-	set_uartx_invx(UART0, ucfg.cfg.b.rxd_inv, UART_RXD_INV); // установить RX (GPIO3) в режим RX UART, если требуется
+	set_uartx_invx(UART0, ucfg.cfg.b.rxd_inv, UART_RXD_INV); // СѓСЃС‚Р°РЅРѕРІРёС‚СЊ RX (GPIO3) РІ СЂРµР¶РёРј RX UART, РµСЃР»Рё С‚СЂРµР±СѓРµС‚СЃСЏ
 }
 
 

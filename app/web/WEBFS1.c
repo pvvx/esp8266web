@@ -17,21 +17,21 @@ uint32 disk_base_addr;
 /*
  * PVFS Structure:
  *
- *     [F][W][E][B][uint8 Ver Hi][uint8 Ver Lo] // заголовок диска
- *     [uint16 Number of Files] // кол-во файлов на диске
+ *     [F][W][E][B][uint8 Ver Hi][uint8 Ver Lo] // Р·Р°РіРѕР»РѕРІРѕРє РґРёСЃРєР°
+ *     [uint16 Number of Files] // РєРѕР»-РІРѕ С„Р°Р№Р»РѕРІ РЅР° РґРёСЃРєРµ
  *
- *     [Name Hash 0][Name Hash 1]...[Name Hash N] // uint16 типа хеш на каждое имя файла :)
+ *     [Name Hash 0][Name Hash 1]...[Name Hash N] // uint16 С‚РёРїР° С…РµС€ РЅР° РєР°Р¶РґРѕРµ РёРјСЏ С„Р°Р№Р»Р° :)
  *
- *     [File Record 0][File Record 1]...[File Record N] // uint32 указатели на адреса структур файлов, относительно начала диска
+ *     [File Record 0][File Record 1]...[File Record N] // uint32 СѓРєР°Р·Р°С‚РµР»Рё РЅР° Р°РґСЂРµСЃР° СЃС‚СЂСѓРєС‚СѓСЂ С„Р°Р№Р»РѕРІ, РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РЅР°С‡Р°Р»Р° РґРёСЃРєР°
  *
  *     Pointers are absolute addresses within the WEBFS image.
  *
  * File Record Structure:
- *     [uint32 Len] размер файла с заголовком
- *     [uint16 HeadLen] длина заголовка, включая размер, флаг, имя (адрес данных - адрес позиции len)
- *     [uint16 Flags] бит 0 =1 - файл сжат GZIP, бит 1 = 1 - парсится - имеет динамические переменные
- *     [File Name, 0] Имя файла с "СИ" терминатором
- *     [File Data] данные файла
+ *     [uint32 Len] СЂР°Р·РјРµСЂ С„Р°Р№Р»Р° СЃ Р·Р°РіРѕР»РѕРІРєРѕРј
+ *     [uint16 HeadLen] РґР»РёРЅР° Р·Р°РіРѕР»РѕРІРєР°, РІРєР»СЋС‡Р°СЏ СЂР°Р·РјРµСЂ, С„Р»Р°Рі, РёРјСЏ (Р°РґСЂРµСЃ РґР°РЅРЅС‹С… - Р°РґСЂРµСЃ РїРѕР·РёС†РёРё len)
+ *     [uint16 Flags] Р±РёС‚ 0 =1 - С„Р°Р№Р» СЃР¶Р°С‚ GZIP, Р±РёС‚ 1 = 1 - РїР°СЂСЃРёС‚СЃСЏ - РёРјРµРµС‚ РґРёРЅР°РјРёС‡РµСЃРєРёРµ РїРµСЂРµРјРµРЅРЅС‹Рµ
+ *     [File Name, 0] РРјСЏ С„Р°Р№Р»Р° СЃ "РЎР" С‚РµСЂРјРёРЅР°С‚РѕСЂРѕРј
+ *     [File Data] РґР°РЅРЅС‹Рµ С„Р°Р№Р»Р°
  *
  * Name hash (2 uint8s) is calculated as follows:
  *     hash = 0
@@ -91,7 +91,7 @@ void ICACHE_FLASH_ATTR WEBFSInit(void)
 #if DEBUGSOO > 0
 	os_printf("\nDisk init: %d files, addr = %p\n", numFiles, disk_base_addr);
 #endif
-	// тут надо расчет контрольки тела диска или другой контроль...
+	// С‚СѓС‚ РЅР°РґРѕ СЂР°СЃС‡РµС‚ РєРѕРЅС‚СЂРѕР»СЊРєРё С‚РµР»Р° РґРёСЃРєР° РёР»Рё РґСЂСѓРіРѕР№ РєРѕРЅС‚СЂРѕР»СЊ...
 	if(numFiles == 0) isWEBFSLocked = true;
 	else isWEBFSLocked = false;
 }
@@ -561,7 +561,7 @@ void WEBFSPutEnd(bool final)
 	{
 /*
 #ifdef HTTP_WEBFS_DOWNLOAD
-	  XEEWriteArray(FRAWEBFS2SIZE, (unsigned char *)&WEBFSStubs[0].addr, 4); // б®еа ­Ёвм а §¬Ґа WEBFS2
+	  XEEWriteArray(FRAWEBFS2SIZE, (unsigned char *)&WEBFSStubs[0].addr, 4); // Р±В®РµР°В В­РЃРІРј Р°В В§В¬ТђР° WEBFS2
 #endif
 */
 	  _Validate();
