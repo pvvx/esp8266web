@@ -1,7 +1,7 @@
 /******************************************************************************
  * FileName: xtos_bios.h
- * Description: xtruntime funcs in ROM-BIOS
- * Alternate SDK ver 0.0.0 (b0)
+ * Description: xtos funcs in ROM-BIOS
+ * Alternate SDK
  * Author: PV`
  * (c) PV` 2015
 *******************************************************************************/

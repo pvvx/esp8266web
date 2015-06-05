@@ -1,7 +1,7 @@
 /******************************************************************************
  * FileName: Vectors.h
  * Description: Vectors funcs in ROM-BIOS
- * Alternate SDK ver 0.0.0 (b0)
+ * Alternate SDK
  * Author: PV`
  * (c) PV` 2015
 *******************************************************************************/

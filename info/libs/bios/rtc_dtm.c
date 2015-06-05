@@ -9,12 +9,13 @@
 #include "bios/rtc_dtm.h"
 
 
-
+// ROM:4000264C
 void software_reset(void)
 {
 	rtc_[0] |= 1 << 31; // IOREG(0x60000700) |= 0x80000000;
 }
 
+// ROM:40002668
 void rtc_set_sleep_mode(uint32 a, uint32 t, uint32 m)
 {
 
@@ -23,6 +24,7 @@ void rtc_set_sleep_mode(uint32 a, uint32 t, uint32 m)
 	rtc_[2] |= a; // 0x60000708
 }
 
+// ROM:400025E0 
 uint32 rtc_get_reset_reason(void)
 {
 	uint32 x = rtc_[5] & 7; // IOREG(0x60000714) & 7;
@@ -37,8 +39,6 @@ uint32 rtc_get_reset_reason(void)
 	rtc_[2] &= ~(1<<21); // IOREG(0x60000708) &= ~(1<<21);
 	return x;
 }
-
-
 
 //ROM:400027A4
 void save_rxbcn_mactime(uint32 t)
@@ -136,7 +136,7 @@ void ets_rtc_int_register(void)
 }
 
 //RAM_BIOS:3FFFC700
-uint32 rtc_claib; // ~ = 0x7073
+uint32 rtc_claib; // ~ = 0x7073 
 
 //ROM:40002870
 void rtc_enter_sleep(void)
@@ -144,13 +144,13 @@ void rtc_enter_sleep(void)
 	rtc_[4] = 0; // IOREG(0x60000710) = 0;
 	RTC_CALIB_SYNC = 9;
 	RTC_CALIB_SYNC |= 1<<31;
-	uint32 x = dtm_params.intr_mask;
+	uint32 intr_mask = dtm_params.intr_mask;
 	if(x) ets_isr_mask(x);
 	if(gpio_input_get() & 2) gpio_pin_wakeup_enable(2, 4);
 	else gpio_pin_wakeup_enable(2, 5);
 	rtc_[6]  = 0x18; // IOREG(0x60000718)
 	RTC_GPIO5_CFG  = 1; //	IOREG(0x600007A8) = 0x1;
-	while((RTC_CALIB_VALUE & (1<<31))==0) // IOREG(0x60000370)
+	while((RTC_CALIB_VALUE & 1<<31)==0) // IOREG(0x60000370)
 	rtc_claib = RTC_CALIB_VALUE & 0xFFFFF;
 	if(dtm_params.sleep_func != NULL) dtm_params.sleep_func();
 	x = dtm_params.time_ms;
@@ -171,6 +171,7 @@ void rtc_enter_sleep(void)
 	rtc_[2] |= 1 << 20; // 0x60000708
 }
 
+// ROM:400027B8
 void ets_enter_sleep(void)
 {
 	ets_set_idle_cb(rtc_enter_sleep, NULL);

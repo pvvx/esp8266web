@@ -1,7 +1,7 @@
 /******************************************************************************
  * FileName: add_funcs.h
- * Description:  + funcs in ROM-BIOS
- * Alternate SDK ver 0.0.0 (b0)
+ * Description: Do not sorted functions ROM-BIOS
+ * Alternate SDK
  * Author: PV`
  * (c) PV` 2015
 *******************************************************************************/

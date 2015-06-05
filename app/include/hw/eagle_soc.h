@@ -1,5 +1,5 @@
 /*
- *
+ * ESP8266 registers
  */
 
 #ifndef _EAGLE_SOC_H_

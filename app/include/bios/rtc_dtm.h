@@ -1,7 +1,7 @@
 /******************************************************************************
  * FileName: gpio_bios.h
  * Description: rtc & dtm funcs in ROM-BIOS
- * Alternate SDK ver 0.0.0 (b0)
+ * Alternate SDK
  * Author: PV`
  * (c) PV` 2015
 *******************************************************************************/
@@ -26,7 +26,7 @@
  PROVIDE ( save_tsf_us = 0x400027ac );
  */
 
-struct sdtm_params
+struct sdtm_params // RAM_BIOS:3FFFDD64
 {
 	ETSTimer timer;//+0x00..0x14
 	uint32 dtm_14;//+0x14 // a6 dtm_set_params
@@ -46,6 +46,8 @@ struct sdtm_params
 
 // RAM_BIOS:3FFFDD64
 extern struct sdtm_params dtm_params; // 64 bytes
+// RAM_BIOS:3FFFC700
+extern uint32 rtc_claib; // ~ = 0x7073
 
 void software_reset(void);
 void rtc_set_sleep_mode(uint32 a, uint32 t, uint32 m);
@@ -54,11 +56,12 @@ void save_rxbcn_mactime(uint32 t);
 void save_tsf_us(uint32 us);
 void dtm_set_intr_mask(uint32 mask);
 uint32 dtm_get_intr_mask(void);
-void dtm_params_init(int a, int b);
-void dtm_set_params(int a2, int a3, int a4, int a5, int a6);
+void dtm_params_init(void * sleep_func, void * int_func);
+void dtm_set_params(int mode, int time_ms_a3, int a4, int cycles, int a6);
 void rtc_intr_handler(void);
 void rtc_enter_sleep(void);
 void ets_rtc_int_register(void);
-void ets_enter_sleep(void); // { ets_set_idle_cb(rtc_enter_sleep, 0); }
+/* { ets_set_idle_cb(rtc_enter_sleep, 0); } */
+void ets_enter_sleep(void); 
 
 #endif /* _BIOS_RTC_DTM_H_ */

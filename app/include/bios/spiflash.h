@@ -1,7 +1,7 @@
 /******************************************************************************
  * FileName: spiflash_bios.h
  * Description: SPI in ROM-BIOS
- * Alternate SDK ver 0.0.0 (b0)
+ * Alternate SDK
  * Author: PV`
  * (c) PV` 2015
 *******************************************************************************/
@@ -16,7 +16,7 @@ struct SPIFlashHsz {
 	uint8 flash_size: 4; // High four bits: 0 = 512K, 1 = 256K, 2 = 1M, 3 = 2M, 4 = 4M,
 }__attribute__((packed));
 
-struct SPIFlashHead { // ЪБЗПМПЧПЛ flash (ЙУРПМШЪХЕФ ЪБЗТХЪЮЙЛ BIOS)
+struct SPIFlashHead { // заголовок flash (использует загрузчик BIOS)
 	uint8 id; // = 0xE9
 	uint8 number_segs; // Number of segments
 	uint8 spi_interface; // SPI Flash Interface (0 = QIO, 1 = QOUT, 2 = DIO, 0x3 = DOUT)
@@ -28,7 +28,7 @@ struct SPIFlashHeadSegment {
 	uint32 segment_size; // Segment size
 };
 
-struct SPIFlashHeader { // РПМОЩК ЪБЗПМПЧПЛ flash (ЙУРПМШЪХЕФ ЪБЗТХЪЮЙЛ BIOS)
+struct SPIFlashHeader { // полный заголовок flash (использует загрузчик BIOS)
 	struct SPIFlashHead head;
 	uint32 entry_point; // Entry point
 	struct SPIFlashHeadSegment seg; // Segment

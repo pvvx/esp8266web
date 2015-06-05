@@ -344,6 +344,7 @@ PROVIDE ( xthal_window_spill_nw = 0x4000e320 );
 
 PROVIDE ( Te0 = 0x3fffccf0 );
 PROVIDE ( UartDev = 0x3fffde10 );
+PROVIDE ( rtc_calib = 0x3fffc700 );
 PROVIDE ( cpu_clk_mhz = 0x3fffc704 );
 PROVIDE ( wdt_info = 0x3fffc708 );
 PROVIDE ( flashchip = 0x3fffc714 );
@@ -358,6 +359,8 @@ PROVIDE ( _putc2_def = 0x400024A8 );
 PROVIDE ( printf_buf_len = 0x3FFFDD58 );
 PROVIDE ( printf_pbuf = 0x3FFFDD5C );
 PROVIDE ( user_start_proc = 0x3FFFDCD0 );
+PROVIDE ( dtm_params = 0x3FFFDD64 );
+
 
 /* 0x3FFFE360..0x3FFFEA80 ram buf max 1824 bytes */
 PROVIDE ( _sprintf_buf = 0x3FFFE360 ); /* char * _sprintf_buf; - use ets_sprintf */
