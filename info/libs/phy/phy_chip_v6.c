@@ -105,13 +105,13 @@ void ICACHE_FLASH_ATTR change_bbpll160_sleep(void)
 	RTC_BASE[0x24>>2] = 0x7F;
 	RTC_BASE[0x0C>>2] = 0;
 	rom_i2c_writeReg(106,2,8,0); // g_phyFuns->i2c_writeReg(106,2,8,0);
-	pm_set_sleep_cycles(3);
+	pm_set_sleep_cycles(3); // IO_RTC_SLP_VAL = IO_RTC_SLP_CNT_VAL + 3;
 	RTC_BASE[0x40>>2] = 0;
 	RTC_BASE[0x44>>2] = 0;
 	RTC_BASE[0xA8>>2] &= 0x7E;
 	uint32 save_04 = RTC_BASE[0];
 	RTC_BASE[0] = 0x800070;
-	pm_wakeup_opt(8,0);
+	pm_wakeup_opt(8,0); // RTC_BASE[0x18>>2] = (RTC_BASE[0x18>>2] & 0xFC0) | 8;	RTC_BASE[0xA8>>2] = RTC_BASE[0xA8>>2] & 0x7E;
 	uint32 save_00 = RTC_BASE[0x08>>2] | 0x100000;
 	if(soc_param0 == 1) { // 1: 26MHz
 		rom_i2c_writeReg(103,4,1,136); // g_phyFuns->i2c_writeReg(103,4,1,136);
@@ -122,7 +122,7 @@ void ICACHE_FLASH_ATTR change_bbpll160_sleep(void)
 		// rom_i2c_writeReg_Mask(block, host_id, reg_add, Msb, Lsb, indata)
 	}
 	RTC_BASE[0x08>>2] = save_00;
-	pm_wait4wakeup(1);
+	pm_wait4wakeup(1); // while((RTC_BASE[0x28>>2] & 3) == 0);
 	RTC_BASE[0] = save_04;
 }
 
