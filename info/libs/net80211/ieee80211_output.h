@@ -1,3 +1,8 @@
+/*
+https://github.com/freebsd/freebsd/blob/master/sys/net80211/ieee80211_proto.h
+https://github.com/freebsd/freebsd/blob/master/sys/net80211/ieee80211_output.c
+*/
+
 
 struct ieee80211vap;
 
