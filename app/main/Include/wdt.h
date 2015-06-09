@@ -12,9 +12,15 @@
 #include "ets_sys.h"
 #include "fatal_errs.h"
 
-void wdt_feed(void);
+
+#if SDK_VERSION == 1119 // (SDK 1.1.1)
+void wdt_init(int flg) ICACHE_FLASH_ATTR;
+#else
 void wdt_init(void) ICACHE_FLASH_ATTR;
+void wdt_feed(void);
 void wdt_task(ETSEvent *e);
+#endif
+
 void default_exception_handler(void);
 void store_exception_error(uint32_t errn);
 

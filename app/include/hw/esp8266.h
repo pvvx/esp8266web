@@ -352,9 +352,13 @@ typedef enum {
 #define	NOW()			TIMER1_COUNT // FRC2_COUNT
 
 /* WDT:0x60000900 registers */
+/* WDT_CTRL:0x60000900 registers */
 #define WDT_CTRL		wdt_[0]
+/* WDT_REG1:0x60000904 registers */
 #define WDT_REG1		wdt_[1]
+/* WDT_REG2:0x60000908 registers */
 #define WDT_REG2		wdt_[2]
+/* WDT_FEED:0x60000914 registers */
 #define WDT_FEED		wdt_[5]
 #define WDT_FEED_MAGIC	0x73
 

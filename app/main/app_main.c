@@ -44,7 +44,7 @@ const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
 	 0xE1,  0xA,    0,    0,    0,    0,    0,    0,    0,    0,    1, 0x93, 0x43,    0,    0,    0,
 	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0
+	    3,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0
 };
 #define esp_init_data_default_size 128
 //=============================================================================
@@ -292,10 +292,14 @@ void ICACHE_FLASH_ATTR startup(void)
 	//
 #endif
 //	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F; // ??
+#if SDK_VERSION == 1119 // (SDK 1.1.1)
+	wdt_init(1);
+#else
 	wdt_init();
+#endif
 	user_init();
 	user_init_flag = true;
-//	WDT_FEED = WDT_FEED_MAGIC; // WDT
+	WDT_FEED = WDT_FEED_MAGIC; // WDT
 	//
 	int wfmode = g_ic.g.wifi_store.wfmode[0];
 	wifi_mode_set(wfmode);

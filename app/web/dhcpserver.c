@@ -834,8 +834,10 @@ void ICACHE_FLASH_ATTR dhcps_start(struct ip_info *info)
 
 void ICACHE_FLASH_ATTR dhcps_stop(void)
 {
+//	struct netif * nif = eagle_lwip_getif(1);
 	udp_disconnect(pcb_dhcps);
 	udp_remove(pcb_dhcps);
+//	nif->dhcp = NULL;
 	list_node *pnode = NULL;
 	list_node *pback_node = NULL;
 	pnode = plist;

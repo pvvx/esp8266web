@@ -47,8 +47,12 @@ void pp_soft_wdt_feed()
 		system_restart_local();
 	}
 	else {
+#if SDK_VERSION == 1119
+		wDev_MacTim1Arm(soft_wdt_interval);
+#else
 		ets_timer_disarm(SoftWdtTimer);
 		ets_timer_arm_new(SoftWdtTimer, soft_wdt_interval, 0, 1);
+#endif
 		wdt_flg = true;
 		pp_post(12);
 	}
@@ -56,19 +60,42 @@ void pp_soft_wdt_feed()
 
 void pp_soft_wdt_stop(void)
 {
+#if SDK_VERSION == 1119
+	WDT_FEED = WDT_FEED_MAGIC;
+	wdt_flg = false;
+	wDev_MacTim1Arm(70000000);
+#else
 	// ret.n
+#endif
 }
 
 
 void pp_soft_wdt_restart(void)
 {
+#if SDK_VERSION == 1119
+	wDev_MacTim1SetFunc(pp_soft_wdt_feed);
+	wDev_MacTim1Arm(soft_wdt_interval);
+	WDT_FEED = WDT_FEED_MAGIC;
+#else
 	// ret.n
+#endif
 }
 
 void pp_soft_wdt_init(void)
 {
+#if SDK_VERSION < 1109 // (SDK 1.1.0 no patch)
 	ets_timer_setfn(SoftWdtTimer, (ETSTimerFunc *)pp_soft_wdt_feed, NULL);
 	ets_timer_arm_new(SoftWdtTimer, soft_wdt_interval, 0, 1);
+#elif SDK_VERSION == 1119
+	wDev_MacTim1SetFunc(pp_soft_wdt_feed);
+	wDev_MacTim1Arm(soft_wdt_interval);
+#endif
+}
+
+void PPWdtReset(void)
+{
+	WDT_FEED = WDT_FEED_MAGIC;
+	wDev_MacTim1Arm(soft_wdt_interval);
 }
 
 void wdt_init(int flg) // wdt_init(1) вызывается в стартовом блоке libmain.a
@@ -84,7 +111,6 @@ void wdt_init(int flg) // wdt_init(1) вызывается в стартовом
 	}
 	pp_soft_wdt_init();
 }
-
 
 void slop_wdt_feed(void)
 {
