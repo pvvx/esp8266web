@@ -276,11 +276,11 @@ void Cache_Read_Enable(uint32 a2, uint32 a3, uint32 a4)
 	while(DPORT_BASE[3] & (1<<8)) { // 0x3FF0000C
 		 DPORT_BASE[3] &= 0xEFF;
 	}
-	SPI0_CTRL &= ~SPI_ENABLE_AHB;
+	SPI0_CTRL &= ~SPI_ENABLE_AHB; // отключить аппарат "кеширования" flash
 	DPORT_BASE[3] |= 1;
 	while((DPORT_BASE[3] & 1) == 0);
 	DPORT_BASE[3] &= 0x7E;
-	SPI0_CTRL |= SPI_ENABLE_AHB;
+	SPI0_CTRL |= SPI_ENABLE_AHB; // включить аппарат "кеширования" flash
 	uint32 a6 = DPORT_BASE[3];
 	if(a2 == 0) {
 		DPORT_BASE[3] &= 0xFCFFFFFF;

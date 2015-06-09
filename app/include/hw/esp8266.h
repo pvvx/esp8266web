@@ -80,7 +80,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define ETS_MAX_INUM        6
 #define ETS_SOFT_INUM       7
 #define ETS_WDT_INUM        8
-#define ETS_FRC_TIMER1_INUM 9
+#define ETS_FRC_TIMER0_INUM 9
 
 /* IO helper macro */
 //#define HWREG(BASE, OFF) 	(((volatile unsigned int *)(BASE))[OFF>>2])
@@ -299,9 +299,12 @@ uart0 and uart1 intr combine together, when interrupt occur */
 #define UART1_DATE		uart1_[IDX_UART_DATE]
 #define UART1_ID		uart1_[IDX_UART_ID]
 
-/* TIMER0:0x60000600 controller registers */
+/* TIMER0_LOAD: 0x60000600 controller registers */
 #define TIMER0_LOAD		timer_[0]	// the load value into the counter
+#define TIMER0_LOAD_DATA_MASK	0x007fffff
+/* TIMER0_COUNT: 0x60000600 */
 #define TIMER0_COUNT	timer_[1]	// the current value of the counter. It is a decreasing counter.
+#define TIMER0_COUNT_DATA_MASK	0x007fffff
 /* 	TIMER0_CTRL: 0x60000608
 	bit[8]: the status of the interrupt, when the count is dereased to zero
 	bit[7]: timer enable
@@ -309,10 +312,26 @@ uart0 and uart1 intr combine together, when interrupt occur */
 	bit[3:2]: prescale-divider, 0: divided by 1, 1: divided by 16, 2 or 3: divided by 256
 	bit[0]: interrupt type, 0:edge, 1:level */
 #define TIMER0_CTRL		timer_[2]
+#define TIMER0_CTRL_DATA_MASK 0x0FF
+#define TM_ENABLE_TIMER		BIT(7)
+#define TM_AUTO_RELOAD_CNT	BIT(6)
+typedef enum {
+    TM_DIVDED_BY_1 = 0,
+	TM_DIVDED_BY_16 = 4,
+	TM_DIVDED_BY_256 = 8,
+} TIMER_PREDIVED_MODE;
+typedef enum {
+    TM_EDGE_INT	= 0,
+    TM_LEVEL_INT = 1
+} TIMER_INT_MODE;
+/* TIMER0_INT:  0x6000060C */
 #define TIMER0_INT		timer_[3]
+#define TIMER0_INT_CLR_MASK 1
 
-/* TIMER2:0x60000620 controller registers */
+/* TIMER1_LOAD: 0x60000620 */
 #define TIMER1_LOAD		timer_[8]
+#define TIMER1_LOAD_DATA_MASK	0xffffffff
+/* TIMER1_COUNT: 0x60000624 */
 #define TIMER1_COUNT	timer_[9]
 /* 	TIMER1_CTRL: 0x60000628
     bit[8]: the status of the interrupt, when the count is dereased to zero
@@ -321,10 +340,14 @@ uart0 and uart1 intr combine together, when interrupt occur */
 	bit[3:2]: prescale-divider, 0: divided by 1, 1: divided by 16, 2 or 3: divided by 256
 	bit[0]: interrupt type, 0:edge, 1:level */
 #define TIMER1_CTRL		timer_[10]
+#define TIMER1_CTRL_DATA_MASK 0x0FF
+/* TIMER1_INT: 0x6000062C */
 #define TIMER1_INT		timer_[11]
+#define TIMER0_INT_CLR_MASK 1
 /* TIMER1_ALARM: 0x60000630
 	bit[0]: write to clear the status of the interrupt, if the interrupt type is "level" */
 #define TIMER1_ALARM	timer_[12] // the alarm value for the counter
+#define TIMER1_ALARM_DATA_MASK	0xffffffff
 /*	Returns	the	current	time	according	to	the	timer	timer. */
 #define	NOW()			TIMER1_COUNT // FRC2_COUNT
 

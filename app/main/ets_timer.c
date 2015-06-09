@@ -31,7 +31,7 @@ void ICACHE_FLASH_ATTR ets_timer_arm_new(ETSTimer *ptimer, uint32_t us_ms, int r
 		if(timer2_ms_flag == 0) { // us_timer
 			if(isMstimer) us_ms *= 1000;
 #if ((APB_CLK_FREQ>>4)%1000000)
-			 us_ms = XS_TO_RTC_TIMER_TICKS(us_ms, 4, 1000000);
+			us_ms = XS_TO_RTC_TIMER_TICKS(us_ms, 4, 1000000);
 #else
 			us_ms *= (APB_CLK_FREQ>>4)/1000000;
 #endif
