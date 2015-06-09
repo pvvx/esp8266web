@@ -361,6 +361,10 @@ PROVIDE ( printf_pbuf = 0x3FFFDD5C );
 PROVIDE ( user_start_proc = 0x3FFFDCD0 );
 PROVIDE ( dtm_params = 0x3FFFDD64 );
 
+PROVIDE ( timer_list = 0x3FFFDDB0 );
+/*
+PROVIDE ( debug_timer = 0x3FFFDDB4 );
+PROVIDE ( debug_timerfn = 0x3FFFDDB8 ); */
 
 /* 0x3FFFE360..0x3FFFEA80 ram buf max 1824 bytes */
 PROVIDE ( _sprintf_buf = 0x3FFFE360 ); /* char * _sprintf_buf; - use ets_sprintf */

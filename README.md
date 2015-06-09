@@ -1,6 +1,11 @@
 # esp8266web
 Small web server on ESP8266
 ---
+Used only: 
+libpp.a, libwpa.a, libnet80211.a, parts libphy.a, 
+eagle_lib.o, mem_manager.o, user_interface.o
+from SDK 1.1.1
+---
 Make WEBFS CmdLine:
 PVFS2.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib" ./WEBFiles ./webbin ./WEBFiles.bin
 
