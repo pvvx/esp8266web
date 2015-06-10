@@ -556,7 +556,7 @@ if __name__ == '__main__':
 
     # Create the ESPROM connection object, if needed
     esp = None
-    if args.operation not in ('image_info','make_image','elf2image','elf2osl'):
+    if args.operation not in ('image_info','make_image','elf2image'):
         esp = ESPROM(args.port, args.baud)
         esp.connect()
 
