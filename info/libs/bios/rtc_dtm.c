@@ -145,9 +145,9 @@ void rtc_enter_sleep(void)
 	RTC_CALIB_SYNC = 9;
 	RTC_CALIB_SYNC |= 1<<31;
 	uint32 intr_mask = dtm_params.intr_mask;
-	if(x) ets_isr_mask(x);
-	if(gpio_input_get() & 2) gpio_pin_wakeup_enable(2, 4);
-	else gpio_pin_wakeup_enable(2, 5);
+	if(intr_mask) ets_isr_mask(intr_mask);
+	if(gpio_input_get() & 2) gpio_pin_wakeup_enable(2, GPIO_PIN_INTR_LOLEVEL);
+	else gpio_pin_wakeup_enable(2, GPIO_PIN_INTR_HILEVEL);
 	rtc_[6]  = 0x18; // IOREG(0x60000718)
 	RTC_GPIO5_CFG  = 1; //	IOREG(0x600007A8) = 0x1;
 	while((RTC_CALIB_VALUE & 1<<31)==0) // IOREG(0x60000370)
