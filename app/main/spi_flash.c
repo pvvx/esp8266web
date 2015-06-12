@@ -9,9 +9,10 @@
 #include "flash.h"
 #include "user_interface.h"
 
-#ifdef USE_DUAL_FLASH
+#ifdef USE_OVERLAP_MODE
 int	dual_flash_flag;
-#error "не доделанно под dual_flash !"
+#else
+	void *flash_read;
 #endif
 
 #define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 1)
@@ -22,7 +23,7 @@ int	dual_flash_flag;
  *******************************************************************************/
 void Cache_Read_Enable_New(void)
 {
-#ifdef USE_DUAL_FLASH
+#ifdef USE_OVERLAP_MODE
 	if(dual_flash_flag) Cache_Read_Enable(1,0,1);
 	else
 #endif
@@ -44,6 +45,9 @@ SpiFlashOpResult __attribute__((optimize("O3"))) spi_flash_read(uint32 faddr, vo
 	ets_printf("fread:%p<-%p[%u]\n", des, faddr, size);
 #endif
 	if(des == NULL) return SPI_FLASH_RESULT_ERR;
+#ifdef USE_OVERLAP_MODE
+	if(flash_read != NULL) return flash_read(flashchip, faddr, des, size);
+#endif
 	if(size != 0) {
 		faddr <<= 8; faddr >>= 8; //	faddr &= (1 << 24) - 1; //	if((faddr >> 24) || ((faddr + size) >> 24)) return SPI_FLASH_RESULT_ERR;
 		Cache_Read_Disable();

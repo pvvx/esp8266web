@@ -38,7 +38,7 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
-
+#include "user_config.h"
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------
@@ -668,7 +668,11 @@
  * LWIP_AUTOIP==1: Enable AUTOIP module.
  */
 #ifndef LWIP_AUTOIP
+#if  SDK_VERSION >= 1126
+#define LWIP_AUTOIP                     1 // неизвестная вставка в netif для совместимости с SDK 1.1.2
+#else
 #define LWIP_AUTOIP                     0
+#endif
 #endif
 
 /**

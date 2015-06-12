@@ -23,6 +23,21 @@ SpiFlashOpResult spi_flash_erase_block(uint32 blk);
 
 uint32 spi_flash_real_size(void) ICACHE_FLASH_ATTR;
 
+#ifdef USE_OVERLAP_MODE
+
+typedef SpiFlashOpResult (* user_spi_flash_read)(
+		SpiFlashChip *spi,
+		uint32 src_addr,
+		uint32 *des_addr,
+        uint32 size);
+
+extern user_spi_flash_read flash_read;
+
+void spi_flash_set_read_func(user_spi_flash_read read);
+
+#endif
+
+
 #define USE_MSPI_FLASH_O 1 // включена "песочница" для SDK в 512 килобайт flash. Включить доступ к flash до 16Мбайт включительно
 
 #define MASK_ADDR_FLASH_ICACHE_DATA	0xfffff

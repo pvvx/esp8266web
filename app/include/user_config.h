@@ -16,7 +16,7 @@
 //	#define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 #endif
 
-// #define USE_DUAL_FLASH // используются две flash
+#define USE_OVERLAP_MODE // используются две и более flash
 
 #ifndef USE_OPTIMIZE_PRINTF
 	#define USE_OPTIMIZE_PRINTF
@@ -26,7 +26,7 @@
 	#define USE_US_TIMER
 #endif
 
-#define SDK_VERSION 1119   // 1119 = 1.1.1 release // 1.0.1 b1 = 1011
+#define SDK_VERSION 1128   // 1119 = 1.1.1 release // 1.0.1 b1 = 1011
 #define SYS_VERSION "0.3.3"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

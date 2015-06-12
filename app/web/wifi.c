@@ -230,7 +230,7 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 			ets_timer_arm_new(&check_timeouts_timer, 100, 1, 1);
 		}
 #elif SDK_VERSION > 1019
-//#error "LIGHT mode?"
+// #warning "Test LIGHT mode?"
 #endif
 	}
 	if (wset.b.st_dhcp) {

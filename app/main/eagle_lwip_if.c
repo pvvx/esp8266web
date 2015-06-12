@@ -28,6 +28,10 @@ err_t ICACHE_FLASH_ATTR ieee80211_output_pbuf(struct netif *netif, struct pbuf *
 extern uint8 dhcps_flag;
 extern void ppRecycleRxPkt(void *esf_buf); // struct pbuf -> eb
 
+
+uint8 * * hostname;
+bool default_hostname; //  = true;
+
 ETSEvent *lwip_if_queues[2];
 
 struct netif *eagle_lwip_getif(int n);
@@ -94,13 +98,18 @@ eagle_lwip_if_alloc(struct myif_state *state, u8_t hw[6], struct ip_info * ips)
         state->myif = myif;
     }
     myif->state = state; // +28
-    myif->name[0] = 'e'; // +50
-    myif->name[1] = 'w'; // +51
+    myif->name[0] = 'e'; // +50 // SDK 1.1.2 + 54
+    myif->name[1] = 'w'; // +51 // SDK 1.1.2 + 55
     myif->linkoutput = ieee80211_output_pbuf; // +24
     myif->output = etharp_output; // +20
     ets_memcpy(myif->hwaddr, hw, 6); // +43
 
 	ETSEvent *queue = (void *) pvPortMalloc(sizeof(struct ETSEventTag) * QUEUE_LEN); // pvPortZalloc(80)
+	if(queue == NULL) return NULL;
+	if(default_hostname != true) {
+		wifi_station_set_default_hostname(hw);
+	}
+
     if (state->dhcps_if != 0) { // +176
 	    lwip_if_queues[1] = queue;
 	    netif_set_addr(myif, &ips->ip, &ips->netmask, &ips->gw);
@@ -138,8 +147,8 @@ eagle_lwip_if_alloc(struct myif_state *state, u8_t hw[6], struct ip_info * ips)
         state->myif = myif;
     }
     myif->state = state; // +28
-    myif->name[0] = 'e'; // +50
-    myif->name[1] = 'w'; // +51
+    myif->name[0] = 'e'; // +50 // SDK 1.1.1 + 54
+    myif->name[1] = 'w'; // +51 // SDK 1.1.1 + 55
     myif->linkoutput = ieee80211_output_pbuf; // +24
     myif->output = etharp_output; // +20
     ets_memcpy(myif->hwaddr, hw, 6); // +43

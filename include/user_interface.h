@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2013 -2014  Espressif System
  *
  */
 
@@ -22,22 +23,25 @@
 #endif
 
 enum rst_reason {
-	DEFAULT_RST_FLAG	= 0,
-	WDT_RST_FLAG	= 1,
-	EXCEPTION_RST_FLAG    = 2,
-	SOFT_RST_FLAG   = 3,
-	DEEP_SLEEP_AWAKE_FLAG	= 4
+	REASON_DEFAULT_RST		= 0,
+	REASON_WDT_RST			= 1,
+	REASON_EXCEPTION_RST	= 2,
+	REASON_SOFT_WDT_RST   	= 3,
+	REASON_SOFT_RESTART 	= 4,
+	REASON_DEEP_SLEEP_AWAKE	= 5
 };
 
 struct rst_info{
-	uint32 reason;		//+00
-	uint32 exccause;	//+04
-	uint32 epc1;		//+08
-	uint32 epc2;		//+12
-	uint32 epc3;		//+16
-	uint32 excvaddr;	//+20
-	uint32 depc;		//+24
-}; // [28]
+	uint32 reason;
+	uint32 exccause;
+	uint32 epc1;
+	uint32 epc2;
+	uint32 epc3;
+	uint32 excvaddr;
+	uint32 depc;
+};
+
+struct rst_info* system_get_rst_info(void);
 
 #define UPGRADE_FW_BIN1         0x00
 #define UPGRADE_FW_BIN2         0x01
@@ -127,6 +131,9 @@ enum flash_size_map system_get_flash_size_map(void);
 void system_phy_set_max_tpw(uint8 max_tpw);
 void system_phy_set_tpw_via_vdd33(uint16 vdd33);
 void system_phy_set_rfoption(uint8 option);
+
+bool system_param_save_with_protect(uint16 start_sec, void *param, uint16 len);
+bool system_param_load(uint16 start_sec, uint16 offset, void *param, uint16 len);
 
 #define NULL_MODE       0x00
 #define STATION_MODE    0x01

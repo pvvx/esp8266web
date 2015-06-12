@@ -3,15 +3,25 @@
  * Description: Alternate SDK (libmain.a)
  * Author: PV`
  * (c) PV` 2015
- * ver 0.0.1
+ * disasm SDK 1.1.2
 *******************************************************************************/
 #include "user_config.h"
-#ifdef USE_DUAL_FLASH
+
+#ifdef USE_OVERLAP_MODE
 // не используется для модулей с одной flash!
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "hw/spi_register.h"
-//#include "flash.h"
+#include "flash.h"
+
+user_spi_flash_read flash_read;
+//=============================================================================
+// overlap_hspi_read_data()
+//-----------------------------------------------------------------------------
+void spi_flash_set_read_func(user_spi_flash_read read)
+{
+	flash_read = read;
+}
 //=============================================================================
 // overlap_hspi_init()
 //-----------------------------------------------------------------------------

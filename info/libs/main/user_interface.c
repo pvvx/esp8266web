@@ -22,6 +22,58 @@ uint8_t os_flg[4];
 #define dhcps_flag 		os_flg[2]
 #define dhcpc_flag 		os_flg[3]
 
+struct shostname {
+	uint8 * phostname;
+} hostname;
+
+bool default_hostname = true;
+
+uint8 * wifi_station_get_hostname(void)
+{
+	uint32 opmode = wifi_get_opmode();
+	if(opmode == 1 || opmode == 3) {
+		return hostname.phostname;
+	}
+	return NULL;
+}
+
+void wifi_station_set_default_hostname(uint8 * mac)
+{
+	if(hostname.phostname != NULL)	{
+		vPortFree(hostname);
+		hostname.phostname = NULL;
+	}
+	hostname.phostname = pvPortMalloc(32);
+	if(hostname.phostname == NULL) {
+		ets_sprintf(hostname.phostname,"ESP_%02X%02X%02X", mac[3], mac[4], mac[5]);
+	}
+}
+
+bool wifi_station_set_hostname(uint8 * name)
+{
+	if(name == NULL) return false;
+	uint32 len = ets_strlen(name);
+	if(len > 32) return false;
+	uint32 opmode = wifi_get_opmode();
+	if(opmode == 1 || opmode == 3) {
+		default_hostname = false;
+		if(hostname.phostname != NULL) {
+			vPortFree(hostname.phostname);
+			hostname.phostname = NULL;
+		}
+		hostname.phostname = pvPortMalloc(len);
+		if(hostname.phostname == NULL) return false;
+		struct netif * nif = eagle_lwip_getif(0);
+		ets_strcpy(hostname.phostname, name);
+		if(nif != NULL) {
+			nif->hostname = hostname.phostname;
+		}
+		return true;
+	}
+	return false;
+}
+
+
 uint32 system_phy_temperature_alert(void)
 {
 	return phy_get_check_flag(); // in libphy.a
@@ -512,7 +564,7 @@ void system_uart_swap(void)
 }
 const char *system_get_sdk_version(void)
 {
-	return "1.0.0";
+	return "1.1.2";
 }
 
 /* WiFi функции

@@ -120,8 +120,8 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 	bit3: swap uart1 pins (u1rxd <-> u1cts), (u1txd <-> u1rts)
 	bit5: hspi is with the higher prior
 	bit6: two spi masters on hspi
-	bit7: two spi masters on cspi */
-#define PERI_IO_SWAP	dport_[10]
+	bit7: two spi masters on cspi (reg_cspi_overlap) */
+#define PERI_IO_SWAP	dport_[10] // HOST_INF_SEL (eagle_soc.h)
 
 /* OTP:0x3FF00050 registers */
 #define OTP_MAC0	dport_[20]

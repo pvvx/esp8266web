@@ -15,7 +15,7 @@ TCP transfer speed > 1 Mbytes/sec (debug off).
 
 Supported 512k..16 MBytes Flash (Web Disk).
 
-From SDK 1.1.1 used only: 
+From SDK 1.1.2 used only: 
 libpp.a, libwpa.a, libnet80211.a, parts libphy.a, eagle_lib.o, mem_manager.o, user_interface.o
 
 Make WEBFS CmdLine:

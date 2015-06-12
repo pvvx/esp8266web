@@ -49,7 +49,7 @@ typedef enum {
     SPI_FLASH_RESULT_TIMEOUT
 } SpiFlashOpResult;
 
-extern SpiFlashChip * flashchip; // in ram ROM-BIOS
+extern SpiFlashChip * flashchip; // in RAM-BIOS: 0x3fffc714
 
 void Cache_Read_Disable(void);
 void Cache_Read_Enable(uint32_t a, uint32_t b, uint32_t c);

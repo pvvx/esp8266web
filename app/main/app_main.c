@@ -31,6 +31,8 @@
 struct s_info info; // ip,mask,gw,mac AP, ST
 ETSTimer check_timeouts_timer; // timer_lwip
 uint8 user_init_flag;
+
+extern bool default_hostname; // in eagle_lwip_if.c
 //=============================================================================
 // Init data (flash)
 //=============================================================================
@@ -251,6 +253,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	}
 	//
 	read_wifi_config();
+	default_hostname = true;
 	//
 	sleep_reset_analog_rtcreg_8266();
 	//
@@ -292,7 +295,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	//
 #endif
 //	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F; // ??
-#if SDK_VERSION == 1119 // (SDK 1.1.1)
+#if SDK_VERSION >= 1119 // (SDK 1.1.1)
 	wdt_init(1);
 #else
 	wdt_init();
