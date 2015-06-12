@@ -18,7 +18,7 @@ XTENSA_TOOLS_ROOT ?= c:/Espressif/xtensa-lx106-elf/bin
 #PATH := $(XTENSA_TOOLS_ROOT);$(PATH)
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= c:/Espressif/ESP8266_SDK
+#SDK_BASE	?= c:/Espressif/ESP8266_SDK
 
 # select which tools to use as compiler, librarian and linker
 CC := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
