@@ -16,6 +16,11 @@
 //	#define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
 #endif
 
+#ifndef USE_OPEN_LWIP
+// #define USE_OPEN_LWIP 140
+#endif
+
+
 #define USE_OVERLAP_MODE // используются две и более flash
 
 #ifndef USE_OPTIMIZE_PRINTF
@@ -38,6 +43,7 @@
 #endif
 
 #define USE_CPU_SPEED  160 // 80
+
 
 #define USE_NETBIOS		1
 

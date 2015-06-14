@@ -144,15 +144,15 @@ struct netif {
 
   /** This function is called by the network device driver
    *  to pass a packet up the TCP/IP stack. ��IP���������ݰ�*/
-  netif_input_fn input; // +16
+  netif_input_fn input; // +20
   /** This function is called by the IP module when it wants
    *  to send a packet on the interface. This function typically
    *  first resolves the hardware address, then sends the packet. ����IP���ݰ�*/
-  netif_output_fn output; // +20
+  netif_output_fn output; // +24
   /** This function is called by the ARP module when it wants
    *  to send a packet on the interface. This function outputs
    *  the pbuf as-is on the link medium. �ײ����ݰ�����*/
-  netif_linkoutput_fn linkoutput; // +24
+  netif_linkoutput_fn linkoutput; // +28
 #if LWIP_NETIF_STATUS_CALLBACK
   /** This function is called when the netif state is set to up or down
    */
@@ -165,27 +165,30 @@ struct netif {
 #endif /* LWIP_NETIF_LINK_CALLBACK */
   /** This field can be set by the device driver and could point
    *  to state information for the device. ���������ֶΣ�����ָ��ײ��豸�����Ϣ*/
-  void *state; // +28
+  void *state; // +32
 #if LWIP_DHCP
   /** the DHCP client state information for this netif */
-  struct dhcp *dhcp; // +32
+  struct dhcp *dhcp; // +36
 #endif /* LWIP_DHCP */
+#if 1
+  int add_sdk_int; // +16
+#endif
 #if LWIP_AUTOIP
   /** the AutoIP client state information for this netif */
   struct autoip *autoip;
 #endif
 #if LWIP_NETIF_HOSTNAME
   /* the hostname for this netif, NULL is a valid value */
-  char*  hostname;
+  char*  hostname; // + 40
 #endif /* LWIP_NETIF_HOSTNAME */
   /** maximum transfer unit (in bytes) �ýӿ������������ݰ����ȣ�����1500*/
-  u16_t mtu; // +36
+  u16_t mtu; // + 44
   /** number of bytes used in hwaddr�ýӿ������ַ���� */
-  u8_t hwaddr_len; // +40
+  u8_t hwaddr_len; // +46
   /** link level hardware address of this interface �ýӿ������ַ*/
-  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +44 [6]
+  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +48 [6]
   /** flags (see NETIF_FLAG_ above) �ýӿ�״̬�������ֶ�*/
-  u8_t flags; // +46
+  u8_t flags; // +54
   /** descriptive abbreviation �ýӿڵ�����*/
   char name[2]; // +48
   /** number of this interface �ýӿڵı��*/

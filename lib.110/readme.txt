@@ -1,1 +1,0 @@
-libs SDK ver 1.1.0 (ver: 1.1.0 no patch)

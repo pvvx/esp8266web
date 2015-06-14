@@ -13,11 +13,23 @@
 #
 TARGET = eagle
 
+USE_OPEN_LWIP = 140
+
+
 #EXTRA_CCFLAGS += -u
 
 ifndef PDIR # {
 GEN_IMAGES= eagle.app.v6.out
 GEN_BINS = eagle.app.v6.bin
+
+ifndef USE_OPEN_LWIP
+SUBDIRS =	\
+	main	\
+	phy		\
+	user	\
+	driver	\
+	web
+else
 SUBDIRS =	\
 	main	\
 	phy		\
@@ -25,6 +37,8 @@ SUBDIRS =	\
 	driver	\
 	lwip	\
 	web
+endif
+	
 endif # } PDIR
 
 APPDIR = .
@@ -40,14 +54,52 @@ ifeq ($(APP), 2)
 	LD_FILE = $(LDDIR)/eagle.app.v6.app2.ld
 endif
 
+ifndef USE_OPEN_LWIP
+
 COMPONENTS_eagle.app.v6 = \
 	main/libaddmmain.a	\
 	phy/libaddmphy.a	\
 	driver/libdriver.a \
-	lwip/liblwip.a \
 	web/libweb.a	\
 	user/libuser.a
+	
+LINKFLAGS_eagle.app.v6 = \
+	-L../lib	\
+	-nostdlib \
+    -T$(LD_FILE) \
+	-Wl,--no-check-sections	\
+    -u call_user_start \
+	-Wl,-static \
+	-Wl,-Map -Wl,$(@:.out=.map) \
+	-Wl,--start-group \
+	-lmc	\
+	-lmgcc	\
+	-lmphy	\
+	-lpp	\
+	-lnet80211 \
+	-lwpa	\
+	-llwipif	\
+	-lmlwip	\
+	-lmmain	\
+	$(DEP_LIBS_eagle.app.v6) \
+	-Wl,--end-group
 
+CONFIGURATION_DEFINES =	-D__ets__ \
+			-DICACHE_FLASH	\
+			-DPBUF_RSV_FOR_WLAN	\
+			-DLWIP_OPEN_SRC	\
+			-DEBUF_LWIP
+
+else	
+
+COMPONENTS_eagle.app.v6 = \
+	main/libaddmmain.a	\
+	phy/libaddmphy.a	\
+	driver/libdriver.a \
+	web/libweb.a	\
+	lwip/liblwip.a \
+	user/libuser.a
+	
 LINKFLAGS_eagle.app.v6 = \
 	-L../lib	\
 	-nostdlib \
@@ -67,29 +119,20 @@ LINKFLAGS_eagle.app.v6 = \
 	$(DEP_LIBS_eagle.app.v6) \
 	-Wl,--end-group
 
+CONFIGURATION_DEFINES =	-D__ets__ \
+			-DICACHE_FLASH	\
+			-DPBUF_RSV_FOR_WLAN	\
+			-DLWIP_OPEN_SRC	\
+			-DEBUF_LWIP	\
+			-DUSE_OPEN_LWIP
+
+endif 
+
 DEPENDS_eagle.app.v6 = \
                 $(LD_FILE) \
                 $(LDDIR)/eagle.rom.addr.v6.ld
 
-#############################################################
-# Configuration i.e. compile options etc.
-# Target specific stuff (defines etc.) goes in here!
-# Generally values applying to a tree are captured in the
-#   makefile at its root level - these are then overridden
-#   for a subtree within the makefile rooted therein
-#
 
-#UNIVERSAL_TARGET_DEFINES =		\
-
-# Other potential configuration flags include:
-#	-DTXRX_TXBUF_DEBUG
-#	-DTXRX_RXBUF_DEBUG
-#	-DWLAN_CONFIG_CCX
-CONFIGURATION_DEFINES =	-D__ets__ \
-			-DICACHE_FLASH	\
-			-DLWIP_OPEN_SRC	\
-			-DPBUF_RSV_FOR_WLAN	\
-			-DEBUF_LWIP
 
 DEFINES +=				\
 	$(UNIVERSAL_TARGET_DEFINES)	\

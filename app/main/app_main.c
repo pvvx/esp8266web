@@ -32,7 +32,9 @@ struct s_info info; // ip,mask,gw,mac AP, ST
 ETSTimer check_timeouts_timer; // timer_lwip
 uint8 user_init_flag;
 
+#ifdef USE_OPEN_LWIP
 extern bool default_hostname; // in eagle_lwip_if.c
+#endif
 //=============================================================================
 // Init data (flash)
 //=============================================================================
@@ -253,7 +255,9 @@ void ICACHE_FLASH_ATTR startup(void)
 	}
 	//
 	read_wifi_config();
+#ifdef USE_OPEN_LWIP	
 	default_hostname = true;
+#endif	
 	//
 	sleep_reset_analog_rtcreg_8266();
 	//

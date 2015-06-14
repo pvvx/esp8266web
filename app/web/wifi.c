@@ -501,7 +501,7 @@ LOCAL void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.auth_change.new_mode);
 			break;
 		case EVENT_STAMODE_GOT_IP:
-			os_printf("Station ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR "\n",
+			os_printf("Station ip:" IPSTR ", mask:" IPSTR ", gw:" IPSTR "\n",
 					IP2STR(&evt->event_info.got_ip.ip),
 					IP2STR(&evt->event_info.got_ip.mask),
 					IP2STR(&evt->event_info.got_ip.gw));
