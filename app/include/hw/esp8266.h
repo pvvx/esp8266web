@@ -30,7 +30,9 @@ extern volatile uint32 timer_[64];		// 0x60000600
 extern volatile uint32 rtc_[64];		// 0x60000700
 extern volatile uint32 iomux_[64];		// 0x60000800
 extern volatile uint32 wdt_[64];		// 0x60000900
+extern volatile uint32 scl_[64];		// 0x60000B00
 extern volatile uint32 sar_[64];		// 0x60000D00
+extern volatile uint32 i2s_[64];		// 0x60000E00
 extern volatile uint32 uart1_[64];		// 0x60000F00
 extern volatile uint32 rtc_ram_[64];	// 0x60001000
 extern volatile uint32 rtc_mem_[192];	// 0x60001100
@@ -42,7 +44,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define DPORT_BASE		dport_		// 0x3ff00000
 
 /* io2 section */
-#define IO2_BASE		io2_regs_	// 0x3ff20000
+#define IO2_BASE		io2_regs_	// 0x3ff20000	// Size: 6144 bytes
 
 /* io3 section */
 #define UART0_BASE		uart0_		// 0x60000000
@@ -53,13 +55,15 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define RTC_BASE		rtc_		// 0x60000700
 #define IOMUX_BASE		iomux_		// 0x60000800
 #define WDT_BASE		wdt_		// 0x60000900
+#define SCL_BASE		scl_		// 0x60000B00
 #define SAR_BASE		sar_		// 0x60000D00
+#define I2S_BASE		i2s_		// 0x60000E00
 #define UART1_BASE		uart1_		// 0x60000F00
 #define RTC_RAM_BASE	rtc_ram_	// 0x60001000	// Size: 1024 bytes
 #define RTC_MEM_BASE	rtc_mem_	// 0x60001100
 
 /* io4 section */
-#define IO4_BASE		io4_regs_	// 0x60009800
+#define IO4_BASE		io4_regs_	// 0x60009800	// Size: 1536 bytes
 
 /* RAM */
 #define RAM_BASE		0x3FFE8000
@@ -122,6 +126,10 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 	bit6: two spi masters on hspi
 	bit7: two spi masters on cspi (reg_cspi_overlap) */
 #define PERI_IO_SWAP	dport_[10] // HOST_INF_SEL (eagle_soc.h)
+
+/* SLC_TX_DESC_DEBUG_REG: 0x3ff0002c  
+	[15:0] set to 0xcccc */
+#define SLC_TX_DESC_DEBUG_REG dport_[11] 
 
 /* OTP:0x3FF00050 registers */
 #define OTP_MAC0	dport_[20]
@@ -351,16 +359,131 @@ typedef enum {
 /*	Returns	the	current	time	according	to	the	timer	timer. */
 #define	NOW()			TIMER1_COUNT // FRC2_COUNT
 
+/* SCL:0x60000B00 registers */
+/* SLC_CONF0:0x60000B00 */
+#define SLC_CONF0		scl_[0]
+/* SLC_INT_RAW:0x60000B04 */
+#define SLC_INT_RAW		scl_[1]
+/* SLC_INT_STATUS:0x60000B08 */
+#define SLC_INT_STATUS	scl_[2]
+/* SLC_INT_ENA:0x60000B0C */
+#define SLC_INT_ENA		scl_[3]
+/* SLC_INT_CLR:0x60000B10 */
+#define SLC_INT_CLR		scl_[4]
+/* SLC_RX_STATUS:0x60000B14 */
+#define SLC_RX_STATUS	scl_[5]
+/* SLC_RX_FIFO_PUSH:0x60000B18 */
+#define SLC_RX_FIFO_PUSH	scl_[6]
+/* SLC_TX_STATUS:0x60000B1C */
+#define SLC_TX_STATUS	scl_[7]
+/* SLC_TX_FIFO_POP:0x60000B20 */
+#define SLC_TX_FIFO_POP		scl_[8]
+/* SLC_RX_LINK:0x60000B24 */
+#define SLC_RX_LINK		scl_[9]
+/* SLC_TX_LINK:0x60000B28 */
+#define SLC_TX_LINK		scl_[10]
+/* SLC_INTVEC_TOHOST:0x60000B2C */
+#define SLC_INTVEC_TOHOST	scl_[11]
+/* SLC_TOKEN0:0x60000B30 */
+#define SLC_TOKEN0		scl_[12]
+/* SLC_TOKEN1:0x60000B34 */
+#define SLC_TOKEN1		scl_[13]
+/* SLC_CONF1:0x60000B38 */
+#define SLC_CONF1		scl_[14]
+/* SLC_STATE0:0x60000B3C */
+#define SLC_STATE0		scl_[15]
+/* SLC_STATE1:0x60000B40 */
+#define SLC_STATE1		scl_[16]
+/* SLC_BRIDGE_CONF:0x60000B44 */
+#define SLC_BRIDGE_CONF	scl_[17]
+/* SLC_RX_EOF_DES_ADDR:0x60000B48 */
+#define SLC_RX_EOF_DES_ADDR	scl_[18]
+/* SLC_TX_EOF_DES_ADDR:0x60000B4C */
+#define SLC_TX_EOF_DES_ADDR	scl_[19]
+/* SLC_RX_EOF_BFR_DES_ADDR:0x60000B50 */
+#define SLC_RX_EOF_BFR_DES_ADDR		scl_[20]
+/* SLC_AHB_TEST:0x60000B54 */
+#define SLC_AHB_TEST scl_[21]
+/* SLC_SDIO_ST:0x60000B58 */
+#define SLC_SDIO_ST		scl_[22]
+/* SLC_RX_DSCR_CONF:0x60000B5C */
+#define SLC_RX_DSCR_CONF	scl_[23]
+/* SLC_TXLINK_DSCR:0x60000B60 */
+#define SLC_TXLINK_DSCR	scl_[24]
+/* SLC_TXLINK_DSCR_BF0:0x60000B64 */
+#define SLC_TXLINK_DSCR_BF0	scl_[25]
+/* SLC_TXLINK_DSCR_BF1:0x60000B68 */
+#define SLC_TXLINK_DSCR_BF1		scl_[26]
+/* SLC_RXLINK_DSCR:0x60000B6C */
+#define SLC_RXLINK_DSCR		scl_[27]
+/* SLC_RXLINK_DSCR_BF0:0x60000B70 */
+#define SLC_RXLINK_DSCR_BF0	scl_[28]
+/* SLC_RXLINK_DSCR_BF1:0x60000B74 */
+#define SLC_RXLINK_DSCR_BF1	scl_[29]
+/* SLC_DATE:0x60000B78 */
+#define SLC_DATE		scl_[30]
+/* SLC_ID:0x60000B7C */
+#define SLC_ID		scl_[31]
+
+/* SLC_HOST_INTR_RAW:0x60000B88 */
+#define SLC_HOST_INTR_RAW	scl_[34]
+
+/* SLC_HOST_CONF_W0:0x60000B94 */
+#define SLC_HOST_CONF_W0	scl_[37]
+/* SLC_HOST_CONF_W1:0x60000B98 */
+#define SLC_HOST_CONF_W1	scl_[38]
+/* SLC_HOST_INTR_ST:0x60000B9C */
+#define SLC_HOST_INTR_ST	scl_[39]
+/* SLC_HOST_CONF_W2:0x60000BA0 */
+#define SLC_HOST_CONF_W2	scl_[40]
+/* SLC_HOST_CONF_W3:0x60000BA4 */
+#define SLC_HOST_CONF_W3	scl_[41]
+/* SLC_HOST_CONF_W4:0x60000BA8 */
+#define SLC_HOST_CONF_W4	scl_[42]
+
+/* SLC_HOST_INTR_CLR:0x60000BB0 */
+#define SLC_HOST_INTR_CLR	scl_[44]
+/* SLC_HOST_INTR_ENA:0x60000BB4 */
+#define SLC_HOST_INTR_ENA	scl_[45]
+/* SLC_HOST_CONF_W5:0x60000BB8 */
+#define SLC_HOST_CONF_W5	scl_[46]
+
 /* WDT:0x60000900 registers */
-/* WDT_CTRL:0x60000900 registers */
+/* WDT_CTRL:0x60000900 register */
 #define WDT_CTRL		wdt_[0]
-/* WDT_REG1:0x60000904 registers */
+/* WDT_REG1:0x60000904 register */
 #define WDT_REG1		wdt_[1]
-/* WDT_REG2:0x60000908 registers */
+/* WDT_REG2:0x60000908 register */
 #define WDT_REG2		wdt_[2]
-/* WDT_FEED:0x60000914 registers */
+/* WDT_FEED:0x60000914 register */
 #define WDT_FEED		wdt_[5]
 #define WDT_FEED_MAGIC	0x73
+
+/* I2S:0x60000E00 registers */
+/* I2STXFIFO:0x60000E00 */
+#define I2STXFIFO	i2s_[0]
+/* I2SRXFIFO:0x60000E04 */
+#define I2SRXFIFO	i2s_[1]
+/* I2SCONF:0x60000E08 */
+#define I2SCONF		i2s_[2]
+/* I2SINT_RAW:0x60000E0C */
+#define I2SINT_RAW	i2s_[3]
+/* I2SINT_ST:0x60000E10 */
+#define I2SINT_ST	i2s_[4]
+/* I2SINT_ENA:0x60000E14 */
+#define I2SINT_ENA	i2s_[5]
+/* I2SINT_CLR:0x60000E18 */
+#define I2SINT_CLR	i2s_[6]
+/* I2STIMING:0x60000E1C */
+#define I2STIMING	i2s_[7]
+/* I2S_FIFO_CONF:0x60000E20 */
+#define I2S_FIFO_CONF	i2s_[8]
+/* I2SRXEOF_NUM:0x60000E24 */
+#define I2SRXEOF_NUM	i2s_[9]
+/* I2SCONF_SIGLE_DATA:0x60000E28 */
+#define I2SCONF_SIGLE_DATA	i2s_[10]
+/* I2SCONF_CHAN:0x60000E2C */
+#define I2SCONF_CHAN	i2s_[11]
 
 #define IDX_GPIO_PIN	10
 /* GPIO:0x60000300 registers */
