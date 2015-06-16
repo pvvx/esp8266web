@@ -995,6 +995,10 @@ dhcp_bind(struct netif *netif)
   }
 #endif /* LWIP_DHCP_AUTOIP_COOP */
 
+  ip_addr_t old_ip = netif->ip_addr;
+  ip_addr_t old_mask = netif->netmask;
+  ip_addr_t old_gw = netif->gw;
+
   LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_STATE, ("dhcp_bind(): IP: 0x%08"X32_F"\n",
     ip4_addr_get_u32(&dhcp->offered_ip_addr)));
   netif_set_ipaddr(netif, &dhcp->offered_ip_addr);
@@ -1004,11 +1008,13 @@ dhcp_bind(struct netif *netif)
   LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_STATE, ("dhcp_bind(): GW: 0x%08"X32_F"\n",
     ip4_addr_get_u32(&gw_addr)));
 
-  system_station_got_ip_set(&dhcp->offered_ip_addr, &sn_mask, &gw_addr);
-
   netif_set_gw(netif, &gw_addr);
   /* bring the interface up */
   netif_set_up(netif);
+
+//  system_station_got_ip_set(&dhcp->offered_ip_addr, &sn_mask, &gw_addr);
+  system_station_got_ip_set(&old_ip, &old_mask, &old_gw);
+
   /* netif is now bound to DHCP leased address */
   dhcp_set_state(dhcp, DHCP_BOUND);
 }

@@ -135,9 +135,9 @@ void ICACHE_FLASH_ATTR user_init(void) {
 #ifdef USE_NETBIOS
 	if(syscfg.cfg.b.netbios_ena) netbios_init();
 #endif
-#ifdef USE_SNTP
+/* #ifdef USE_SNTP перенесено в wifi_events
 	if(syscfg.cfg.b.sntp_ena) sntp_init();
-#endif
+#endif */
 #ifdef UDP_TEST_PORT
 	if(syscfg.udp_port) udp_test_port_init(syscfg.udp_port);
 #endif

@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: eagle_lwip_if.c (libmain.a)
- * Description: eagle_lwip_if for SDK 1.1.0
+ * Description: eagle_lwip_if for SDK 1.1.2
  * Author: PV`
  * Old ver: kadamski
  * https://github.com/kadamski/esp-lwip/blob/esp8266-1.4.1/our/eagle_lwip_if.c
@@ -34,7 +34,7 @@
 extern uint8 dhcps_flag;
 extern void ppRecycleRxPkt(void *esf_buf); // struct pbuf -> eb
 
-uint8 * * hostname;
+uint8 * hostname;
 bool default_hostname; //  = true;
 
 ETSEvent *lwip_if_queues[2];
@@ -73,9 +73,9 @@ static void ICACHE_FLASH_ATTR task_if1(struct ETSEventTag *e)
 
 static err_t ICACHE_FLASH_ATTR init_fn(struct netif *myif)
 {
-    myif->hwaddr_len = 6; //+42 // +46 SDK 1.1.1
-    myif->mtu = DEFAULT_MTU; //+40 1500 // +44 SDK 1.1.1
-    myif->flags = NETIF_FLAG_IGMP | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_BROADCAST; // +49 = 0x0B2 // +53 SDK 1.1.1
+    myif->hwaddr_len = 6; // +46
+    myif->mtu = DEFAULT_MTU; //+44 1500
+    myif->flags = NETIF_FLAG_IGMP | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_BROADCAST; // +53 = 0x0B2
     return 0;
 }
 
@@ -94,25 +94,30 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_getif(int index)
 }
 
 struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn, uint8 *macaddr, struct ip_info *info)
-//struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct myif_state *state, u8_t hw[6], struct ip_info * ips)
 {
-    struct netif *myif = conn->myif;
+	struct netif *myif = conn->myif;
     if (myif == NULL) {
-        myif = (void *) pvPortMalloc(sizeof(struct netif)); // pvPortZalloc(60)
+        myif = (void *) pvPortMalloc(sizeof(struct netif)); // SDK 1.1.2 : pvPortZalloc(64)
         conn->myif = myif;
     }
+    if(myif == NULL) return NULL;
+    if (conn->dhcps_if == 0) { // +176
+        if(default_hostname) {
+    		wifi_station_set_default_hostname(macaddr);
+    	}
+    	myif->hostname = hostname; // +40
+    }
+    else myif->hostname = NULL; // +40
+
     myif->state = conn; // +28
-    myif->name[0] = 'e'; // +50 // SDK 1.1.2 + 54
-    myif->name[1] = 'w'; // +51 // SDK 1.1.2 + 55
+    myif->name[0] = 'e'; // + 54
+    myif->name[1] = 'w'; // + 55
     myif->output = etharp_output; // +20
     myif->linkoutput = ieee80211_output_pbuf; // +24
-    ets_memcpy(myif->hwaddr, macaddr, 6); // +43
+    ets_memcpy(myif->hwaddr, macaddr, 6); // +47
 
 	ETSEvent *queue = (void *) pvPortMalloc(sizeof(struct ETSEventTag) * QUEUE_LEN); // pvPortZalloc(80)
 	if(queue == NULL) return NULL;
-	if(default_hostname != true) {
-		wifi_station_set_default_hostname(macaddr);
-	}
 
     if (conn->dhcps_if != 0) { // +176
 	    lwip_if_queues[1] = queue;
@@ -121,7 +126,7 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn
 	    netif_add(myif, &info->ip, &info->netmask, &info->gw, conn, init_fn, ethernet_input);
 	    if(dhcps_flag) {
 	    	dhcps_start(info);
-//	    	os_printf("dhcp server start:(ip:%08x,mask:%08x,gw:%08x)\n", info->ip.addr, info->netmask.addr, info->gw.addr);
+	    	os_printf("dhcp server start:(ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR ")\n", IP2STR(&info->ip), IP2STR(&info->netmask), IP2STR(&info->gw));
 	    }
     }
     else {
@@ -129,12 +134,12 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn
 	    ets_task(task_if0, LWIP_IF0_PRIO, (ETSEvent *)lwip_if_queues[0], QUEUE_LEN);
 	    struct ip_info ipn;
 		if(wifi_station_dhcpc_status()) {
-			ipn =  *info;
-		}
-		else {
 		    ipn.ip.addr = 0;
 		    ipn.netmask.addr = 0;
 		    ipn.gw.addr = 0;
+		}
+		else {
+			ipn =  *info;
 		}
 	    netif_add(myif, &ipn.ip, &ipn.netmask, &ipn.gw, conn, init_fn, ethernet_input);
     }

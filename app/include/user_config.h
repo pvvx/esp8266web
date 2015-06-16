@@ -17,7 +17,7 @@
 #endif
 
 #ifndef USE_OPEN_LWIP
-// #define USE_OPEN_LWIP 140
+ #define USE_OPEN_LWIP 140
 #endif
 
 

@@ -144,15 +144,15 @@ struct netif {
 
   /** This function is called by the network device driver
    *  to pass a packet up the TCP/IP stack. ��IP���������ݰ�*/
-  netif_input_fn input; // +20
+  netif_input_fn input; // +16
   /** This function is called by the IP module when it wants
    *  to send a packet on the interface. This function typically
    *  first resolves the hardware address, then sends the packet. ����IP���ݰ�*/
-  netif_output_fn output; // +24
+  netif_output_fn output; // +20
   /** This function is called by the ARP module when it wants
    *  to send a packet on the interface. This function outputs
    *  the pbuf as-is on the link medium. �ײ����ݰ�����*/
-  netif_linkoutput_fn linkoutput; // +28
+  netif_linkoutput_fn linkoutput; // +24
 #if LWIP_NETIF_STATUS_CALLBACK
   /** This function is called when the netif state is set to up or down
    */
@@ -165,13 +165,13 @@ struct netif {
 #endif /* LWIP_NETIF_LINK_CALLBACK */
   /** This field can be set by the device driver and could point
    *  to state information for the device. ���������ֶΣ�����ָ��ײ��豸�����Ϣ*/
-  void *state; // +32
+  void *state; // +28
 #if LWIP_DHCP
   /** the DHCP client state information for this netif */
-  struct dhcp *dhcp; // +36
+  struct dhcp *dhcp; // +32
 #endif /* LWIP_DHCP */
 #if 1
-  int add_sdk_int; // +16
+  struct udp_pcb *dhcps; // +36
 #endif
 #if LWIP_AUTOIP
   /** the AutoIP client state information for this netif */
@@ -186,13 +186,13 @@ struct netif {
   /** number of bytes used in hwaddr�ýӿ������ַ���� */
   u8_t hwaddr_len; // +46
   /** link level hardware address of this interface �ýӿ������ַ*/
-  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +48 [6]
+  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +47 [6]
   /** flags (see NETIF_FLAG_ above) �ýӿ�״̬�������ֶ�*/
-  u8_t flags; // +54
+  u8_t flags; // +53
   /** descriptive abbreviation �ýӿڵ�����*/
-  char name[2]; // +48
+  char name[2]; // +54
   /** number of this interface �ýӿڵı��*/
-  u8_t num;
+  u8_t num;		// +56
 #if LWIP_SNMP
   /** link type (from "snmp_ifType" enum from snmp.h) */
   u8_t link_type;
@@ -213,7 +213,7 @@ struct netif {
 #if LWIP_IGMP
   /** This function could be called to add or delete a entry in the multicast
       filter table of the ethernet MAC.*/
-  netif_igmp_mac_filter_fn igmp_mac_filter;
+  netif_igmp_mac_filter_fn igmp_mac_filter; // +60
 #endif /* LWIP_IGMP */
 #if LWIP_NETIF_HWADDRHINT
   u8_t *addr_hint;
@@ -226,7 +226,7 @@ struct netif {
   u16_t loop_cnt_current;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
 #endif /* ENABLE_LOOPBACK */
-};
+}; // [64]
 
 #if LWIP_SNMP
 #define NETIF_INIT_SNMP(netif, type, speed) \

@@ -43,9 +43,9 @@ struct ets_store_wifi_hdr { // Sector flash addr flashchip->chip_size-0x1000  (0
 // Extern data
 //-----------------------------------------------------------------------------
 struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 or -0x2000
-	uint8	field_000[8];	//+000  boot_version g_ic+0x1D9
-	uint8 	wfmode[4];		//+008 // g_ic +496 +0x1F0 // SDK1.1.0
-	uint32	st_ssid_len;	//+012
+	uint8	field_000[8];	//+000  g_ic+488 boot_version g_ic+0x1D9
+	uint8 	wfmode[4];		//+008  g_ic+496 +0x1F0 // SDK1.1.0
+	uint32	st_ssid_len;	//+012  g_ic+500
 	uint8	st_ssid[32];	//+016
 	uint8	field_048[7];	//+048
 	uint8	st_passw[64];	//+055
