@@ -614,7 +614,6 @@ static void ICACHE_FLASH_ATTR tcpsrv_error(void *arg, err_t err) {
 		tcpsrv_print_remote_info(ts_conn);
 		os_printf("error %d\n", err);
 #endif
-		os_printf("ts_conn->state = %d\n", ts_conn->state);
 		if (ts_conn->state != SRVCONN_CLOSEWAIT) {
 			if(ts_conn->flag.client &&
 			(ts_conn->flag.client_reconnect
