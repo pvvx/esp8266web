@@ -28,10 +28,10 @@ static void tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_A
 static void tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
 static void tcpsrv_server_close(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
 static err_t tcpsrv_server_poll(void *arg, struct tcp_pcb *pcb) ICACHE_FLASH_ATTR;
-static void tcpsrv_server_err(void *arg, err_t err) ICACHE_FLASH_ATTR;
+static void tcpsrv_error(void *arg, err_t err) ICACHE_FLASH_ATTR;
 static err_t tcpsrv_connected(void *arg, struct tcp_pcb *tpcb, err_t err) ICACHE_FLASH_ATTR;
-static void tcpsrv_client_err(void *arg, err_t err) ICACHE_FLASH_ATTR;
-
+static void tcpsrv_client_connect(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
+static void tcpsrv_client_reconnect(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
 /******************************************************************************
  * FunctionName : tcpsrv_print_remote_info
  * Description  : выводит remote_ip:remote_port [conn_count] os_printf("srv x.x.x.x:x [n] ")
@@ -42,6 +42,7 @@ void ICACHE_FLASH_ATTR tcpsrv_print_remote_info(TCP_SERV_CONN *ts_conn) {
 //#if DEBUGSOO > 0
 	uint16 port;
 	if(ts_conn->pcb != NULL) port = ts_conn->pcb->local_port;
+//	else if(ts_conn->flag.client) port = ?;
 	else port = ts_conn->pcfg->port;
 	os_printf("srv[%u] " IPSTR ":%d [%d] ", port,
 			ts_conn->remote_ip.b[0], ts_conn->remote_ip.b[1],
@@ -330,7 +331,8 @@ static void ICACHE_FLASH_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_co
 		memp_free(MEMP_TCP_PCB, pcb);
 	};
 	// remove the node from the server's connection list
-	tcpsrv_list_delete(ts_conn);
+	if(ts_conn->flag.client && ts_conn->flag.client_reconnect) tcpsrv_client_reconnect(ts_conn);
+	else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
 }
 /******************************************************************************
  * FunctionName : tcpsrv_close_cb
@@ -499,7 +501,55 @@ static void ICACHE_FLASH_ATTR tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) {
 	};
 }
 /******************************************************************************
- * FunctionName : tcpsrv_server_err
+ *******************************************************************************/
+ static void ICACHE_FLASH_ATTR tcpsrv_client_reconnect(TCP_SERV_CONN * ts_conn)
+{
+	if (ts_conn != NULL) {
+		os_timer_disarm(&ts_conn->ptimer);
+		if(ts_conn->state != SRVCONN_CLIENT) {
+			if(ts_conn->state != SRVCONN_CLOSED) {
+				ts_conn->state = SRVCONN_CLOSED; // исключить повторное вхождение из запросов в func_discon_cb()
+				if (ts_conn->pcfg->func_discon_cb != NULL) ts_conn->pcfg->func_discon_cb(ts_conn);
+			}
+			if (ts_conn->linkd != NULL) {
+				os_free(ts_conn->linkd);
+				ts_conn->linkd = NULL;
+			}
+			if (ts_conn->pbufo != NULL) {
+				os_free(ts_conn->pbufo);
+				ts_conn->pbufo = NULL;
+			}
+			if (ts_conn->pbufi != NULL) {
+				os_free(ts_conn->pbufi);
+				ts_conn->pbufi = NULL;
+			}
+			ts_conn->cntri = 0;
+			ts_conn->cntro = 0;
+			ts_conn->sizei = 0;
+			ts_conn->sizeo = 0;
+			ts_conn->unrecved_bytes = 0;
+			ts_conn->ptrtx = NULL;
+			ts_conn->flag = ts_conn->pcfg->flag;
+		}
+		else {
+			struct tcp_pcb *pcb;
+			if(ts_conn->pcb != NULL) {
+				pcb = find_tcp_pcb(ts_conn);
+				if(pcb != NULL) {
+					tcp_abandon(ts_conn->pcb, 0);
+					ts_conn->pcb = NULL;
+				}
+			}
+		}
+#if DEBUGSOO > 1
+		os_printf("Waiting next connection %u ms...\n", TCP_CLIENT_NEXT_CONNECT_MS);
+#endif
+		os_timer_setfn(&ts_conn->ptimer, (ETSTimerFunc *)tcpsrv_client_connect, ts_conn);
+		os_timer_arm(&ts_conn->ptimer, TCP_CLIENT_NEXT_CONNECT_MS, 0); // попробовать соединиться через 5 секунды
+	}
+}
+/******************************************************************************
+ * FunctionName : tcpsrv_error (server and client)
  * Description  : The pcb had an error and is already deallocated.
  *		The argument might still be valid (if != NULL).
  * Parameters   : arg -- Additional argument to pass to the callback function
@@ -543,7 +593,7 @@ const char * srvContenErr[]  =  {
 	srvContenErr15
 };
 #endif
-static void ICACHE_FLASH_ATTR tcpsrv_server_err(void *arg, err_t err) {
+static void ICACHE_FLASH_ATTR tcpsrv_error(void *arg, err_t err) {
 	TCP_SERV_CONN * ts_conn = arg;
 //	struct tcp_pcb *pcb = NULL;
 	if (ts_conn != NULL) {
@@ -564,9 +614,17 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_err(void *arg, err_t err) {
 		tcpsrv_print_remote_info(ts_conn);
 		os_printf("error %d\n", err);
 #endif
+		os_printf("ts_conn->state = %d\n", ts_conn->state);
 		if (ts_conn->state != SRVCONN_CLOSEWAIT) {
-			// remove the node from the server's connection list
-			tcpsrv_list_delete(ts_conn);
+			if(ts_conn->flag.client &&
+			(ts_conn->flag.client_reconnect
+					|| (ts_conn->state == SRVCONN_CLIENT
+							&& (ts_conn->pcfg->max_conn == 0
+									|| ts_conn->recv_check < ts_conn->pcfg->max_conn)))) {
+				ts_conn->recv_check++;
+				tcpsrv_client_reconnect(ts_conn);
+			}
+			else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
 		};
 	}
 }
@@ -589,17 +647,19 @@ static void ICACHE_FLASH_ATTR tcpsrv_client_connect(TCP_SERV_CONN * ts_conn)
 		pcb = tcp_new();
 		if(pcb != NULL) {
 			ts_conn->pcb = pcb;
-			err_t err = tcp_bind(pcb, &netif_default->ip_addr, 0); // Binds pcb to a local IP address and new port number.
-#if DEBUGSOO > 1
+			ts_conn->state = SRVCONN_CLIENT;
+			ts_conn->recv_check = 0;
+			err_t err = tcp_bind(pcb, IP_ADDR_ANY, 0); // Binds pcb to a local IP address and new port number. // &netif_default->ip_addr
+#if DEBUGSOO > 2
 			os_printf("tcp_bind() = %d\n", err);
 #endif
 			if (err == ERR_OK) { // If another connection is bound to the same port, the function will return ERR_USE, otherwise ERR_OK is returned.
 				ts_conn->pcfg->port = ts_conn->pcb->local_port;
 				tcp_arg(pcb, ts_conn); // Allocate client-specific session structure, set as callback argument
 				// Set up the various callback functions
-				tcp_err(pcb, tcpsrv_client_err);
+				tcp_err(pcb, tcpsrv_error);
 				err = tcp_connect(pcb, (ip_addr_t *)&ts_conn->remote_ip, ts_conn->remote_port, tcpsrv_connected);
-#if DEBUGSOO > 1
+#if DEBUGSOO > 2
 				os_printf("tcp_connect() = %d\n", err);
 #endif
 				if(err == ERR_OK) {
@@ -616,56 +676,6 @@ static void ICACHE_FLASH_ATTR tcpsrv_client_connect(TCP_SERV_CONN * ts_conn)
 	}
 }
 /******************************************************************************
- * FunctionName : tcpsrv_client_err (connect err)
- * Description  : The pcb had an error and is already deallocated.
- *		The argument might still be valid (if != NULL).
- * Parameters   : arg -- Additional argument to pass to the callback function
- *		err -- Error code to indicate why the pcb has been closed
- * Returns      : none
- *******************************************************************************/
-static void ICACHE_FLASH_ATTR tcpsrv_client_err(void *arg, err_t err) {
-	TCP_SERV_CONN * ts_conn = arg;
-	if (ts_conn != NULL) {
-		os_timer_disarm(&ts_conn->ptimer);
-		if(ts_conn->pcb != NULL) {
-			ts_conn->pcb = find_tcp_pcb(ts_conn);
-			if(ts_conn->pcb != NULL) {
-				tcp_abandon(ts_conn->pcb, 0);
-				ts_conn->pcb = NULL;
-			}
-		}
-#if DEBUGSOO > 2
-		if(system_get_os_print()) {
-			tcpsrv_print_remote_info(ts_conn);
-			char serr[24];
-			if((err > -16) && (err < 1)) {
-				ets_memcpy(serr, srvContenErr[-err], 24);
-			}
-			else {
-				serr[0] = '?';
-				serr[1] = '\0';
-			}
-			os_printf("error %d (%s)\n", err, serr);
-		}
-#elif DEBUGSOO > 1
-		tcpsrv_print_remote_info(ts_conn);
-		os_printf("error %d\n", err);
-#endif
-		if(ts_conn->state == SRVCONN_CLIENT) {
-			ts_conn->recv_check++;
-			if(ts_conn->pcfg->max_conn != 0 && ts_conn->recv_check < ts_conn->pcfg->max_conn) {
-#if DEBUGSOO > 1
-				os_printf("next tcp_connect() ...\n");
-#endif
-				os_timer_setfn(&ts_conn->ptimer, (ETSTimerFunc *)tcpsrv_client_connect, ts_conn);
-				os_timer_arm(&ts_conn->ptimer, TCP_CLIENT_NEXT_CONNECT_MS, 0); // попробовать соединиться через 3 секунды
-			}
-			else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
-		}
-		else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
-	}
-}
-/******************************************************************************
  tcpsrv_connected_fn (client)
  *******************************************************************************/
 static err_t ICACHE_FLASH_ATTR tcpsrv_connected(void *arg, struct tcp_pcb *tpcb, err_t err)
@@ -674,7 +684,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_connected(void *arg, struct tcp_pcb *tpcb,
 	err_t merr = ERR_OK;
 	if (ts_conn != NULL) {
 		os_timer_disarm(&ts_conn->ptimer);
-		tcp_err(tpcb, tcpsrv_server_err);
+		tcp_err(tpcb, tcpsrv_error);
 		ts_conn->state = SRVCONN_LISTEN;
 		ts_conn->recv_check = 0;
 		tcp_sent(tpcb, tcpsrv_server_sent);
@@ -699,7 +709,8 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_connected(void *arg, struct tcp_pcb *tpcb,
 			tcpsrv_print_remote_info(ts_conn);
 			os_printf("connected, error %d\n", err);
 #endif
-			tcpsrv_int_sent_data(ts_conn, wificonfig.st.config.password, os_strlen(wificonfig.st.config.password));
+			// test
+			// tcpsrv_int_sent_data(ts_conn, wificonfig.st.config.password, os_strlen(wificonfig.st.config.password));
 		}
 	}
 	return merr;
@@ -714,7 +725,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_connected(void *arg, struct tcp_pcb *tpcb,
  *******************************************************************************/
 static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *pcb, err_t err) {
 	struct tcp_pcb_listen *lpcb = (struct tcp_pcb_listen*) arg;
-	TCP_SERV_CFG *p = tcpsrv_port2pcfg(pcb->local_port);
+	TCP_SERV_CFG *p = tcpsrv_server_port2pcfg(pcb->local_port);
 
 	if (p == NULL)	return ERR_ARG;
 
@@ -757,7 +768,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *p
 	// Tell TCP that this is the structure we wish to be passed for our callbacks.
 	tcp_arg(pcb, ts_conn);
 	// Set up the various callback functions
-	tcp_err(pcb, tcpsrv_server_err);
+	tcp_err(pcb, tcpsrv_error);
 	tcp_sent(pcb, tcpsrv_server_sent);
 	tcp_recv(pcb, tcpsrv_server_recv);
 	tcp_poll(pcb, tcpsrv_server_poll, 8); /* every 1 seconds (SDK 0.9.4) */
@@ -766,16 +777,33 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *p
 	return ERR_OK;
 }
 /******************************************************************************
- * FunctionName : tcpsrv_port2conn
- * Description  : поиск конфига по порту
+ * FunctionName : tcpsrv_server_port2pcfg
+ * Description  : поиск конфига servera по порту
  * Parameters   : номер порта
  * Returns      : указатель на TCP_SERV_CFG или NULL
  *******************************************************************************/
-TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_port2pcfg(uint16 portn) {
+TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_server_port2pcfg(uint16 portn) {
 	TCP_SERV_CFG * p;
 	for (p = phcfg; p != NULL; p = p->next)
-		if (p->port == portn)
+		if (p->port == portn
+		&& (!(p->flag.client)))
 			return p;
+	return NULL;
+}
+/******************************************************************************
+ * FunctionName : tcpsrv_client_ip_port2conn
+ * Description  : поиск конфига clienta по ip + порту
+ * Parameters   : номер порта
+ * Returns      : указатель на TCP_SERV_CFG или NULL
+ *******************************************************************************/
+TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_client_ip_port2conn(uint32 ip, uint16 portn) {
+	TCP_SERV_CFG * p;
+	for (p = phcfg; p != NULL; p = p->next)
+		if (p->flag.client
+		&& p->conn_links != NULL
+		&& p->conn_links->remote_ip.dw == ip
+		&& p->conn_links->remote_port == portn)
+				return p;
 	return NULL;
 }
 /******************************************************************************
@@ -786,7 +814,7 @@ TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_init(uint16 portn) {
 	//	if (portn == 0)	portn = 80;
 	if (portn == 0)	return NULL;
 #if DEBUGSOO > 0
-	if(portn == ID_CLIENTS_PORT) {
+	if(portn <= ID_CLIENTS_PORT) {
 		os_printf("\nTCP Client service init ");
 	}
 	else os_printf("\nTCP Server init on port %u - ", portn);
@@ -815,7 +843,7 @@ TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_init(uint16 portn) {
 	// p->phcfg->conn_links = NULL; // zalloc
 	// p->pcb = NULL; // zalloc
 	// p->lnk = NULL; // zalloc
-	if(portn != ID_CLIENTS_PORT) {
+	if(portn > ID_CLIENTS_PORT) {
 		p->max_conn = TCP_SRV_MAX_CONNECTIONS;
 		p->func_listen = tcpsrv_listen_default;
 	}
@@ -850,15 +878,16 @@ err_t ICACHE_FLASH_ATTR tcpsrv_start(TCP_SERV_CFG *p) {
 #if DEBUGSOO > 0
 		os_printf("NULL pointer!\n");
 #endif
-		return false;
+		return ERR_ARG;
 	}
 	if (p->pcb != NULL) {
 #if DEBUGSOO > 0
 		os_printf("already running!\n");
 #endif
-		return false;
+		return ERR_USE;
 	}
 	p->pcb = tcp_new();
+
 	if (p->pcb != NULL) {
 		err = tcp_bind(p->pcb, IP_ADDR_ANY, p->port); // Binds pcb to a local IP address and port number.
 		if (err == ERR_OK) { // If another connection is bound to the same port, the function will return ERR_USE, otherwise ERR_OK is returned.
@@ -891,6 +920,54 @@ err_t ICACHE_FLASH_ATTR tcpsrv_start(TCP_SERV_CFG *p) {
 #if DEBUGSOO > 0
 	os_printf("failed!\n");
 #endif
+	return err;
+}
+/******************************************************************************
+ tcpsrv_start_client
+ TCP_SERV_CFG * p = tcpsrv_init(ID_CLIENTS_PORT);
+			// insert new tcpsrv_config
+			p->next = phcfg;
+			phcfg = p;
+ *******************************************************************************/
+err_t ICACHE_FLASH_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, uint16 remote_port) {
+	err_t err = ERR_MEM;
+	if (p == NULL) return err;
+	if (system_get_free_heap_size() >= p->min_heap) {
+		TCP_SERV_CONN * ts_conn = (TCP_SERV_CONN *) os_zalloc(sizeof(TCP_SERV_CONN));
+		if (ts_conn != NULL) {
+			ts_conn->flag = p->flag; // перенести флаги по умолчанию на данное соединение
+			ts_conn->pcfg = p;
+			ts_conn->state = SRVCONN_CLIENT;
+			ts_conn->remote_port = remote_port;
+			ts_conn->remote_ip.dw = remote_ip;
+			tcpsrv_client_connect(ts_conn);
+			if(ts_conn->pcb != NULL) {
+				// Insert new ts_conn
+				ts_conn->next = p->conn_links;
+				p->conn_links = ts_conn;
+				p->conn_count++;
+				err = ERR_OK;
+			} else {
+#if DEBUGSOO > 0
+				tcpsrv_print_remote_info(ts_conn);
+				os_printf("tcp_connect - error %d\n", err);
+#endif
+				os_free(ts_conn);
+				err = ERR_OK;
+			};
+		}
+		else {
+#if DEBUGSOO > 0
+			os_printf("srv[tcp_new] - out of mem!\n");
+#endif
+			err = ERR_MEM;
+		};
+	} else {
+#if DEBUGSOO > 0
+		os_printf("srv[new client] - low heap size!\n");
+#endif
+		err = ERR_MEM;
+	};
 	return err;
 }
 /******************************************************************************
@@ -946,7 +1023,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_close(TCP_SERV_CFG *p) {
  *******************************************************************************/
 err_t ICACHE_FLASH_ATTR tcpsrv_close_port(uint16 portn)
 {
-	return tcpsrv_close(tcpsrv_port2pcfg(portn));
+	return tcpsrv_close(tcpsrv_server_port2pcfg(portn));
 }
 /******************************************************************************
  tcpsrv_close_all
@@ -955,51 +1032,5 @@ err_t ICACHE_FLASH_ATTR tcpsrv_close_all(void)
 {
 	err_t err = ERR_OK;
 	while(phcfg != NULL && err == ERR_OK) err = tcpsrv_close(phcfg);
-	return err;
-}
-/******************************************************************************
- tcpsrv_start_client
- TCP_SERV_CFG * p = tcpsrv_init(ID_CLIENTS_PORT);
-			// insert new tcpsrv_config
-			p->next = phcfg;
-			phcfg = p;
- *******************************************************************************/
-err_t ICACHE_FLASH_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, uint16 remote_port) {
-	err_t err = ERR_MEM;
-	if (p == NULL) return err;
-	if (system_get_free_heap_size() >= p->min_heap) {
-		TCP_SERV_CONN * ts_conn = (TCP_SERV_CONN *) os_zalloc(sizeof(TCP_SERV_CONN));
-		if (ts_conn != NULL) {
-			ts_conn->flag = p->flag; // перенести флаги по умолчанию на данное соединение
-			ts_conn->pcfg = p;
-			ts_conn->state = SRVCONN_CLIENT;
-			ts_conn->remote_port = remote_port;
-			ts_conn->remote_ip.dw = remote_ip;
-			tcpsrv_client_connect(ts_conn);
-			if(ts_conn->pcb != NULL) {
-				// Insert new ts_conn
-				ts_conn->next = p->conn_links;
-				p->conn_links = ts_conn;
-				p->conn_count++;
-			} else {
-#if DEBUGSOO > 0
-				tcpsrv_print_remote_info(ts_conn);
-				os_printf("tcp_connect - error %d\n", err);
-#endif
-				os_free(ts_conn);
-			};
-		}
-		else {
-#if DEBUGSOO > 0
-			os_printf("srv[tcp_new] - out of mem!\n");
-#endif
-			err = ERR_MEM;
-		};
-	} else {
-#if DEBUGSOO > 0
-		os_printf("srv[new client] - low heap size!\n");
-#endif
-		err = ERR_MEM;
-	};
 	return err;
 }

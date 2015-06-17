@@ -10,9 +10,12 @@
 #include "osapi.h"
 #include "user_interface.h"
 #include "flash_eep.h"
+#include "tcp2uart.h"
 #ifdef USE_SNTP
 #include "sntp.h"
 #endif
+
+
 
 
 /******************************************************************************
@@ -54,9 +57,9 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					IP2STR(&evt->event_info.got_ip.gw));
 #endif
 #ifdef USE_SNTP
-					if(syscfg.cfg.b.sntp_ena) sntp_init();
+					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
 #endif
-
+					tcp2uart_start(syscfg.tcp2uart_port);
 /*			os_printf("ST info ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR "\n",
 					IP2STR(((struct ip_addr *)&info.st_ip)),
 					IP2STR((struct ip_addr *)&info.st_mask),
@@ -69,18 +72,26 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					IP2STR((struct ip_addr *)&ipinfo.gw));
 			else os_printf("wifi_get_ip_info() error!"); */
 			break;
-#if DEBUGSOO > 1
 		case EVENT_SOFTAPMODE_STACONNECTED:
-			os_printf("Station: " MACSTR "join, AID = %d\n",
+#if DEBUGSOO > 1
+			os_printf("Station[%u]: " MACSTR "join, AID = %d\n",
+					wifi_softap_get_station_num(),
 					MAC2STR(evt->event_info.sta_connected.mac),
 					evt->event_info.sta_connected.aid);
 /*			os_printf("AP info ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR "\n",
 					IP2STR(((struct ip_addr *)&info.ap_ip)),
 					IP2STR((struct ip_addr *)&info.ap_mask),
 					IP2STR((struct ip_addr *)&info.ap_gw)); */
+#endif
+#ifdef USE_SNTP
+					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
+#endif
+					tcp2uart_start(syscfg.tcp2uart_port);
 			break;
+#if DEBUGSOO > 1
 		case EVENT_SOFTAPMODE_STADISCONNECTED:
-				os_printf("Station: " MACSTR "leave, AID = %d\n",
+				os_printf("Station[%u]: " MACSTR "leave, AID = %d\n",
+						wifi_softap_get_station_num(),
 						MAC2STR(evt->event_info.sta_disconnected.mac),
 						evt->event_info.sta_disconnected.aid);
 			break;

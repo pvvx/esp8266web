@@ -1012,11 +1012,10 @@ dhcp_bind(struct netif *netif)
   /* bring the interface up */
   netif_set_up(netif);
 
-//  system_station_got_ip_set(&dhcp->offered_ip_addr, &sn_mask, &gw_addr);
-  system_station_got_ip_set(&old_ip, &old_mask, &old_gw);
-
   /* netif is now bound to DHCP leased address */
   dhcp_set_state(dhcp, DHCP_BOUND);
+
+  system_station_got_ip_set(&old_ip, &old_mask, &old_gw);
 }
 
 /**

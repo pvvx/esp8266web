@@ -34,14 +34,17 @@ void set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask) ICACHE_FLASH_ATTR;
 extern os_timer_t uart0_rx_buf_timer;
 extern os_timer_t uart0_tx_buf_timer;
 extern TCP_SERV_CONN * tcp2uart_conn;
+extern TCP_SERV_CFG * tcp2uart_servcfg;
 extern uint32 wait_send_tx;
 
 void loading_rx_buf(void) ICACHE_FLASH_ATTR;
 void send_tx_buf(void) ICACHE_FLASH_ATTR;
 
 err_t tcp2uart_write(uint8 *pblk, uint16 len) ICACHE_FLASH_ATTR;
-err_t tcp2uart_init(uint16 portn) ICACHE_FLASH_ATTR;
-err_t tcp2uart_close(uint16 portn) ICACHE_FLASH_ATTR;
+err_t tcp2uart_server_init(uint16 portn) ICACHE_FLASH_ATTR;
+err_t tcp2uart_client_init(uint32 ip, uint16 portn);
+err_t tcp2uart_start(uint16 newportn) ICACHE_FLASH_ATTR;
+void tcp2uart_close(void) ICACHE_FLASH_ATTR;
 
 void tcp2uart_int_rxtx_disable(void) ICACHE_FLASH_ATTR;
 

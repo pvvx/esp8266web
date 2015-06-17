@@ -62,28 +62,33 @@ enum srvconn_state {
  #define TCP_SRV_SERVER_DEF_TXBUF (TCP_MSS*3) // 1460*2=2920, 1460*3=4380, 1460*4=5840
 #endif
 
-#define ID_CLIENTS_PORT 1
-#define TCP_CLIENT_NEXT_CONNECT_MS		30000 // через 3 сек
-#define TCP_CLIENT_MAX_CONNECT_RETRY	7 // 7 раз через 3 сек
+#define ID_CLIENTS_PORT 3 // до 3-х clients
+#define tcpsrv_init_client1() tcpsrv_init(1) // tcp2uart_client
+#define tcpsrv_init_client2() tcpsrv_init(2)
+#define tcpsrv_init_client3() tcpsrv_init(3)
+
+#define TCP_CLIENT_NEXT_CONNECT_MS		5000 // через 5 сек
+#define TCP_CLIENT_MAX_CONNECT_RETRY	7 // 7 раз через 5 сек
 
 //--------------------------------------------------------------------------
 // Структура соединения
 //
 typedef struct t_tcpsrv_conn_flags  {
 	uint16 client:				1; //0001 данное соединение не сервер, а клиент!
-	uint16 pcb_time_wait_free:	1; //0002 уничтожение pcb при вызове disconnect() (иначе pcb TIME_WAIT 60 сек http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html)
-	uint16 nagle_disabled: 		1; //0004 выключение nagle
-	uint16 rx_buf: 				1; //0008 прием в буфер, используется ручное управление размером окна TCP
-	uint16 rx_null:				1; //0010 отключение вызова func_received_data() и прием в null (устанавливается автоматически при вызове tcpsrv_disconnect())
-	uint16 tx_null:				1; //0020 отключение вызова func_sent_callback() и передача в null (устанавливается автоматически при вызове tcpsrv_disconnect())
-	uint16 wait_sent:			1; //0040 ожидет завершения/подтверждения передачи от lwip
-	uint16 busy_bufo:			1; //0080 идет обработка bufo
-	uint16 busy_bufi:			1; //0100 идет обработка bufi
+	uint16 client_reconnect:	1; //0002 вечный реконнект
+	uint16 pcb_time_wait_free:	1; //0004 уничтожение pcb при вызове disconnect() (иначе pcb TIME_WAIT 60 сек http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html)
+	uint16 nagle_disabled: 		1; //0008 выключение nagle
+	uint16 rx_buf: 				1; //0010 прием в буфер, используется ручное управление размером окна TCP
+	uint16 rx_null:				1; //0020 отключение вызова func_received_data() и прием в null (устанавливается автоматически при вызове tcpsrv_disconnect())
+	uint16 tx_null:				1; //0040 отключение вызова func_sent_callback() и передача в null (устанавливается автоматически при вызове tcpsrv_disconnect())
+	uint16 wait_sent:			1; //0080 ожидет завершения/подтверждения передачи от lwip
+	uint16 busy_bufo:			1; //0100 идет обработка bufo
+	uint16 busy_bufi:			1; //0200 идет обработка bufi
 	// далее идут биты не относящиеся к работе tcp_srv_conn
-	uint16 user_flg1:			1; //0200 для нужд процедур уровнем выше (использован в tcp_terminal.c)
-	uint16 user_flg2:			1; //0400 для нужд процедур уровнем выше (пока свободен)
-	uint16 user_option1:		1; //0800 для нужд процедур обработки переменных (использован для hexdump в web_int_callbacks.c)
-	uint16 user_option2:		1; //1000 для нужд процедур обработки переменных (пока свободен)
+	uint16 user_flg1:			1; //0400 для нужд процедур уровнем выше (использован в tcp2uart.c)
+	uint16 user_flg2:			1; //0800 для нужд процедур уровнем выше (пока свободен)
+	uint16 user_option1:		1; //1000 для нужд процедур обработки переменных (использован для hexdump в web_int_callbacks.c)
+	uint16 user_option2:		1; //2000 для нужд процедур обработки переменных (пока свободен)
 } __attribute__((packed)) tcpsrv_conn_flags;
 
 typedef struct t_TCP_SERV_CONN {
@@ -149,7 +154,8 @@ extern TCP_SERV_CFG *phcfg; // указатель на цепочку TCP_SERV_C
 err_t tcpsrv_int_sent_data(TCP_SERV_CONN * ts_conn, uint8 *psent, uint16 length) ICACHE_FLASH_ATTR; // передать length байт (внутрення функция - никаких проверок)
 void tcpsrv_disconnect(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR; // закрыть соединение
 void tcpsrv_print_remote_info(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR; // выводит remote_ip:remote_port [conn_count] os_printf("srv x.x.x.x:x [n] ")
-TCP_SERV_CFG * tcpsrv_port2pcfg(uint16 portn) ICACHE_FLASH_ATTR; // поиск структуры конфига по номеру порта
+TCP_SERV_CFG * tcpsrv_server_port2pcfg(uint16 portn) ICACHE_FLASH_ATTR; // поиск структуры конфига по номеру порта
+TCP_SERV_CFG * tcpsrv_client_ip_port2conn(uint32 ip, uint16 portn) ICACHE_FLASH_ATTR ; // поиск структуры конфига по номеру порта для клиента
 void tcpsrv_unrecved_win(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR; // Восстановить размер TCP WIN, если используется ручное управление размером окна TCP
 
 void tcpsrv_disconnect_calback_default(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
@@ -158,7 +164,6 @@ err_t tcpsrv_sent_callback_default(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
 err_t tcpsrv_received_data_default(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
 
 TCP_SERV_CFG *tcpsrv_init(uint16 portn) ICACHE_FLASH_ATTR;
-#define tcpsrv_init_client() tcpsrv_init(ID_CLIENTS_PORT)
 err_t tcpsrv_start(TCP_SERV_CFG *p) ICACHE_FLASH_ATTR;
 err_t tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, uint16 remote_port) ICACHE_FLASH_ATTR;
 err_t tcpsrv_close(TCP_SERV_CFG *p) ICACHE_FLASH_ATTR;

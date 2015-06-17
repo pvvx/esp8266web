@@ -135,7 +135,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
 #ifdef USE_NETBIOS
 	if(syscfg.cfg.b.netbios_ena) netbios_init();
 #endif
-/* #ifdef USE_SNTP перенесено в wifi_events
+/* #ifdef USE_SNTP
 	if(syscfg.cfg.b.sntp_ena) sntp_init();
 #endif */
 #ifdef UDP_TEST_PORT
@@ -145,7 +145,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
 #ifdef USE_SRV_WEB_PORT
     if(syscfg.web_port) webserver_init(syscfg.web_port);
 #endif
-    if(syscfg.tcp2uart_port) tcp2uart_init(syscfg.tcp2uart_port);
+///    if(syscfg.tcp2uart_port) tcp2uart_init(syscfg.tcp2uart_port);
 	system_deep_sleep_set_option(0);
 	system_init_done_cb(init_done_cb);
 }

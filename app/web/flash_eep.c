@@ -7,12 +7,13 @@
 
 #include "user_config.h"
 #include "bios/ets.h"
-//#include "add_sdk_func.h"
+#include "mem_manager.h"
 #include "ets_sys.h"
 #include "os_type.h"
 #include "osapi.h"
 #include "flash.h"
 #include "flash_eep.h"
+#include "web_srv.h"
 
 //-----------------------------------------------------------------------------
 
@@ -254,10 +255,12 @@ sint16 ICACHE_FLASH_ATTR flash_read_cfg(void *ptr, uint16 id, uint16 maxsize)
 //-- Сохранение системных настроек -------------------------------------------
 //=============================================================================
 struct SystemCfg syscfg;
+uint8 * tcp2uart_url;
 //-----------------------------------------------------------------------------
 // Чтение системных настроек
 //-----------------------------------------------------------------------------
 bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
+	read_tcp2uart_url();
 	if(flash_read_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg)) != sizeof(syscfg)) {
 		syscfg.cfg.w = 0
 				| SYS_CFG_PIN_CLR_ENA
@@ -304,6 +307,50 @@ bool ICACHE_FLASH_ATTR sys_write_cfg(void) {
 	return flash_save_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg));
 }
 
+//-------------------------------------------------------------------------------
+// new_tcp2uart_url()
+//-------------------------------------------------------------------------------
+
+bool ICACHE_FLASH_ATTR new_tcp2uart_url(uint8 *url)
+{
+	if(tcp2uart_url != NULL) {
+		if (os_strcmp(tcp2uart_url, url) == 0) {
+			return false;
+		}
+		os_free(tcp2uart_url);
+	}
+	uint32 len = os_strlen(url);
+	if(len < VarNameSize || len != 0) {
+		tcp2uart_url = os_zalloc(len+1);
+		if(tcp2uart_url == NULL) return false;
+		os_memcpy(tcp2uart_url, url, len);
+		if(flash_save_cfg(tcp2uart_url, ID_CFG_UURL, len)) return true;
+		os_free(tcp2uart_url);
+	}
+	tcp2uart_url = NULL;
+	return false;
+}
+//-------------------------------------------------------------------------------
+// read_tcp2uart_url()
+//-------------------------------------------------------------------------------
+bool ICACHE_FLASH_ATTR read_tcp2uart_url(void)
+{
+	uint8 url[VarNameSize] = {0};
+	uint32 len = flash_read_cfg(&url, ID_CFG_UURL, VarNameSize);
+	if(len != 0) {
+		if(tcp2uart_url != NULL) os_free(tcp2uart_url);
+		uint32 len = os_strlen(url);
+		if(len < VarNameSize || len != 0) {
+			tcp2uart_url = os_zalloc(len+1);
+			if(tcp2uart_url == NULL) return false;
+			os_memcpy(tcp2uart_url, url, len);
+			if(flash_save_cfg(tcp2uart_url, ID_CFG_UURL, len)) return true;
+			os_free(tcp2uart_url);
+		}
+	}
+	tcp2uart_url = NULL;
+	return false;
+}
 
 
 

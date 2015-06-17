@@ -398,6 +398,10 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 		    	if(!os_memcmp((void*)cstr,"port", 4)) tcp_puts("%u", syscfg.tcp2uart_port);
 	        	else if(!os_memcmp((void*)cstr,"twrec", 5)) tcp_puts("%u", syscfg.tcp2uart_twrec);
 	        	else if(!os_memcmp((void*)cstr,"twcls", 5)) tcp_puts("%u", syscfg.tcp2uart_twcls);
+	        	else if(!os_memcmp((void*)cstr,"url", 3)) {
+	        		if(tcp2uart_url == NULL) tcp_puts("none");
+	        		else tcp_puts("%s", tcp2uart_url);
+	        	}
 		    	else tcp_put('?');
 		    }
 		    else if(!os_memcmp((void*)cstr, "udp_", 4)) {

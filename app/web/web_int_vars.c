@@ -145,31 +145,23 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 		}
 	    else if(!os_memcmp((void*)cstr, "tcp_", 4)) {
 	    	cstr+=4;
-	    	if(!os_memcmp((void*)cstr,"port", 4)) {
-	    		if(val) {
-	    			if(syscfg.tcp2uart_port != val) {
-	    				if(syscfg.tcp2uart_port) tcp2uart_close(syscfg.tcp2uart_port);
-	    				tcp2uart_init(val);
-	    			}
-	    		}
-	    		else {
-	    			if(syscfg.tcp2uart_port) tcp2uart_close(syscfg.tcp2uart_port);
-	    		}
-	    	}
+	    	if(!os_memcmp((void*)cstr,"port", 4)) tcp2uart_start(val);
 	   		else if(!os_memcmp((void*)cstr,"twrec", 5)) {
 	   			syscfg.tcp2uart_twrec = val;
-	   			if(syscfg.tcp2uart_port) {
-	   				TCP_SERV_CFG *p = tcpsrv_port2pcfg(syscfg.tcp2uart_port);
-	   				if(p != NULL) p->time_wait_rec = val;
+	   			if(tcp2uart_servcfg != NULL) {
+	   				tcp2uart_servcfg->time_wait_rec = val;
 	   			}
 	   		}
 	   		else if(!os_memcmp((void*)cstr,"twcls", 5)) {
 	   			syscfg.tcp2uart_twcls = val;
-	   			if(syscfg.tcp2uart_port) {
-	   				TCP_SERV_CFG *p = tcpsrv_port2pcfg(syscfg.tcp2uart_port);
-	   				if(p != NULL) p->time_wait_cls = val;
+	   			if(tcp2uart_servcfg != NULL) {
+	   				tcp2uart_servcfg->time_wait_cls = val;
 	   			}
 	   		}
+			else if(!os_memcmp((void*)cstr, "url", 3)) {
+				if(new_tcp2uart_url(pvar))
+					tcp2uart_start(syscfg.tcp2uart_port);
+			}
 	    }
 	    else if(!os_memcmp((void*)cstr, "udp_", 4)) {
 	    	cstr+=4;
@@ -444,23 +436,17 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     		if(tcp2uart_conn == NULL) tcp_abort(tcp2uart_conn->pcb);
     	}
    		else if(!os_memcmp((void*)cstr,"twrec", 5)) {
-   			if(syscfg.tcp2uart_port) {
-   				TCP_SERV_CFG *p = tcpsrv_port2pcfg(syscfg.tcp2uart_port);
-   				if(p != NULL) p->time_wait_rec = val;
+   			if(tcp2uart_servcfg != NULL) {
+   				tcp2uart_servcfg->time_wait_rec = val;
    			}
    		}
    		else if(!os_memcmp((void*)cstr,"twcls", 5)) {
-   			if(syscfg.tcp2uart_port) {
-   				TCP_SERV_CFG *p = tcpsrv_port2pcfg(syscfg.tcp2uart_port);
-   				if(p != NULL) p->time_wait_cls = val;
+   			if(tcp2uart_servcfg != NULL) {
+   			   	tcp2uart_servcfg->time_wait_cls = val;
    			}
    		}
     }
 	else if(!os_memcmp((void*)cstr,"test", 5)) {
-		TCP_SERV_CFG * p = tcpsrv_init_client();
-		p->time_wait_rec = 60;
-		p->time_wait_cls = 60;
-		tcpsrv_client_start(p, val, 80);
 	}
 #if DEBUGSOO > 5
     else os_printf(" - none! ");

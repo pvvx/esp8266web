@@ -1746,7 +1746,7 @@ err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 *******************************************************************************/
 err_t ICACHE_FLASH_ATTR webserver_close(uint16 portn)
 {
-	return tcpsrv_close(tcpsrv_port2pcfg(portn));
+	return tcpsrv_close(tcpsrv_server_port2pcfg(portn));
 }
 /******************************************************************************
  * FunctionName : webserver_reinit
@@ -1758,7 +1758,7 @@ err_t ICACHE_FLASH_ATTR webserver_reinit(uint16 portn)
 {
 	err_t err = ERR_OK;
 //	if(portn == syscfg.web_port) return err;
-	if(portn) err = tcpsrv_close(tcpsrv_port2pcfg(portn)); // зарыть старый порт
+	if(portn) err = tcpsrv_close(tcpsrv_server_port2pcfg(portn)); // зарыть старый порт
 	if(syscfg.web_port) err = webserver_init(syscfg.web_port); // открыть новый
 	return err;
 }

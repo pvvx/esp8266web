@@ -21,6 +21,7 @@
 #define ID_CFG_UART0 0x3075
 #define ID_CFG_TREM  0x6574
 #define ID_CFG_SYS   0x7373
+#define ID_CFG_UURL  0x5552
 
 //-----------------------------------------------------------------------------
 
@@ -98,9 +99,13 @@ struct SystemCfg { // структура сохранения системных
 
 sint16 flash_read_cfg(void *ptr, uint16 id, uint16 maxsize) ICACHE_FLASH_ATTR; // возврат: размер объекта последнего сохранения, -1 - не найден, -2 - error
 bool flash_save_cfg(void *ptr, uint16 id, uint16 size) ICACHE_FLASH_ATTR;
+
 extern struct SystemCfg syscfg;
+extern uint8 * tcp2uart_url;
+
 bool sys_write_cfg(void) ICACHE_FLASH_ATTR; // пишет из struct SystemCfg *scfg
 bool sys_read_cfg(void) ICACHE_FLASH_ATTR; // читет в struct SystemCfg *scfg
-
+bool new_tcp2uart_url(uint8 *url) ICACHE_FLASH_ATTR;
+bool read_tcp2uart_url(void) ICACHE_FLASH_ATTR;
 
 #endif /* __FLASH_EEP_H_ */

@@ -5,6 +5,7 @@
  * PV` 
  ***********************************/
 
+#include "user_interface.h"
 // default:
 #ifndef WIFI_AP_NAME
 	#define WIFI_AP_NAME	"ESP8266"
