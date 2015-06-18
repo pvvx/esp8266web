@@ -250,13 +250,13 @@ void ICACHE_FLASH_ATTR term_disconnect(TCP_SERV_CONN *conn) {
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR tcp2uart_close(void)
 {
+	syscfg.tcp2uart_port = 0;
 	if(tcp2uart_servcfg != NULL) {
 		tcp2uart_int_rxtx_disable();
 		tcpsrv_close(tcp2uart_servcfg);
 		tcp2uart_servcfg = NULL;
 		update_mux_uart0();
 	}
-	syscfg.tcp2uart_port = 0;
 }
 //-------------------------------------------------------------------------------
 // tcp2uart_init
