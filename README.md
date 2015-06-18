@@ -1,5 +1,5 @@
 # esp8266web
-Small web server on ESP8266 + TCP2UART 
+Small web server on ESP8266 + TCP2UART (server/client) 
 ---
 
 HTTP-Web supports more than hundred variables -
