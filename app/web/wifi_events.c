@@ -74,7 +74,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 			break;
 		case EVENT_SOFTAPMODE_STACONNECTED:
 #if DEBUGSOO > 1
-			os_printf("Station[%u]: " MACSTR "join, AID = %d\n",
+			os_printf("Station[%u]: " MACSTR " join, AID = %d\n",
 					wifi_softap_get_station_num(),
 					MAC2STR(evt->event_info.sta_connected.mac),
 					evt->event_info.sta_connected.aid);
@@ -90,7 +90,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 			break;
 #if DEBUGSOO > 1
 		case EVENT_SOFTAPMODE_STADISCONNECTED:
-				os_printf("Station[%u]: " MACSTR "leave, AID = %d\n",
+				os_printf("Station[%u]: " MACSTR " leave, AID = %d\n",
 						wifi_softap_get_station_num(),
 						MAC2STR(evt->event_info.sta_disconnected.mac),
 						evt->event_info.sta_disconnected.aid);
