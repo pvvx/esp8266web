@@ -25,11 +25,7 @@
 #include "netif/wlan_lwip_if.h"
 
 #define QUEUE_LEN 10
-//#define TASK_IF0_PRIO 28
-//#define TASK_IF1_PRIO 29
 #define DEFAULT_MTU 1500
-
-// err_t ICACHE_FLASH_ATTR ieee80211_output_pbuf(struct netif *netif, struct pbuf *p);
 
 extern uint8 dhcps_flag;
 extern void ppRecycleRxPkt(void *esf_buf); // struct pbuf -> eb

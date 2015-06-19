@@ -66,7 +66,8 @@ void ICACHE_FLASH_ATTR uart0_set_flow(bool flow_en)
     ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
 }
 //=============================================================================
-// update_rts0()
+// update_rts0() включение/отключение RTS UART0
+// в зависимости от установок флага uart0_flow_ctrl_flg
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR update_rts0(void)
 {
@@ -205,7 +206,7 @@ void ICACHE_FLASH_ATTR uart_init(void)
 			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
 			| ((0x01 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
 		;
-		update_mux_uart0();
+		update_mux_uart0(); // включение/отключение RTS UART0 в зависимости от установок флага uart0_flow_ctrl_flg
 		uart_div_modify(UART0, UART_CLK_FREQ / ux.baud); // WRITE_PERI_REG(UART_CLKDIV(num), ux.baud) + clear rx and tx fifo, not ready =
 	    // clear all interrupt UART0
 		UART0_INT_CLR &= ~0xffff;
@@ -291,7 +292,7 @@ void uart_intr_handler(void *para)
 {
     // uart0 and uart1 intr combine togther, when interrupt occur, see reg 0x3ff20020, bit2, bit0 represents
     // uart1 and uart0 respectively
-	MEMW();
+	MEMW(); // синхронизация и ожидание отработки fifo-write на шинах CPU,  на всякий случай
     uint32 ints = UART0_INT_ST;
     if(ints) {
     	if (ints & UART_TXFIFO_EMPTY_INT_ST) { // fifo tx пусто?

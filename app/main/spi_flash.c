@@ -14,9 +14,14 @@ int	dual_flash_flag;
 #else
 	void *flash_read;
 #endif
-
+//=============================================================================
+// define
+//-----------------------------------------------------------------------------
+#ifdef USE_MAX_IRAM
+#define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 0)
+#else
 #define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 1)
-
+#endif
 /******************************************************************************
  * FunctionName : Cache_Read_Enable_New
  * Returns      : none
@@ -24,7 +29,12 @@ int	dual_flash_flag;
 void Cache_Read_Enable_New(void)
 {
 #ifdef USE_OVERLAP_MODE
-	if(dual_flash_flag) Cache_Read_Enable(1,0,1);
+	if(dual_flash_flag)
+#ifdef USE_MAX_IRAM
+		Cache_Read_Enable(1,0,0);
+#else
+		Cache_Read_Enable(1,0,1);
+#endif
 	else
 #endif
 	Cache_Read_Enable_def();

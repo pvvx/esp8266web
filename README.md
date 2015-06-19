@@ -3,7 +3,7 @@ Small web server on ESP8266 + TCP2UART (server/client)
 ---
 
 HTTP-Web supports more than hundred variables -
-All I/О, Wifi, system, ... variables.
+All I/O, Wifi, system, ... variables.
 
 GET/POST, cookie, load/upload data/Flash, multipart/form-data,...
 
@@ -14,6 +14,8 @@ HTTP-Web services to more than 10 simultaneous open connections.
 TCP transfer speed > 1 Mbytes/sec (debug off).
 
 Supported 512k..16 MBytes Flash (Web Disk).
+
+Supported options 48 kbytes IRAM.
 
 From SDK 1.1.2 used only: 
 libpp.a, libwpa.a, libnet80211.a, parts libphy.a, eagle_lib.o, mem_manager.o, user_interface.o

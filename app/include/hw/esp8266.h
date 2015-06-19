@@ -38,7 +38,7 @@ extern volatile uint32 rtc_ram_[64];	// 0x60001000
 extern volatile uint32 rtc_mem_[192];	// 0x60001100
 extern volatile uint32 io4_regs_[384];	// 0x60009800
 
-#define MEMW() __asm__ __volatile__("memw" : : : "memory")
+#define MEMW() __asm__ __volatile__("memw" : : : "memory") // синхронизация и ожидание отработки fifo-write на шинах CPU
 
 /* dport (io1) section */
 #define DPORT_BASE		dport_		// 0x3ff00000

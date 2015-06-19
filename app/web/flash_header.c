@@ -13,6 +13,7 @@
 #include "user_interface.h"
 #include "flash.h"
 #include "bios/spiflash.h"
+#include "hw/esp8266.h"
 #include "iram_info.h"
 
 #if DEBUGSOO > 0

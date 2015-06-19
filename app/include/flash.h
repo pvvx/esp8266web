@@ -37,7 +37,6 @@ void spi_flash_set_read_func(user_spi_flash_read read);
 
 #endif
 
-
 #define USE_MSPI_FLASH_O 1 // включена "песочница" для SDK в 512 килобайт flash. Включить доступ к flash до 16Мбайт включительно
 
 #define MASK_ADDR_FLASH_ICACHE_DATA	0xfffff

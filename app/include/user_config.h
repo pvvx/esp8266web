@@ -20,8 +20,11 @@
  #define USE_OPEN_LWIP 140
 #endif
 
+#ifndef USE_MAX_IRAM
+	#define USE_MAX_IRAM // использовать часть cache под IRAM, IRAM size = 49152 байт
+#endif
 
-#define USE_OVERLAP_MODE // используются две и более flash
+//#define USE_OVERLAP_MODE // используются две и более flash
 
 #ifndef USE_OPTIMIZE_PRINTF
 	#define USE_OPTIMIZE_PRINTF
