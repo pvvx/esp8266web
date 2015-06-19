@@ -287,16 +287,16 @@ void Cache_Read_Enable(uint32 a2, uint32 a3, uint32 a4)
 	}
 	else if(a2 == 1) {
 		DPORT_BASE[3] &= 0xFEFFFFFF;
-		DPORT_BASE[3] |= 0x2000000;
+		DPORT_BASE[3] |= 0x02000000;
 	}
 	else {
 		DPORT_BASE[3] &= 0xFDFFFFFF;
-		DPORT_BASE[3] |= 0x1000000;
+		DPORT_BASE[3] |= 0x01000000;
 	}
 	DPORT_BASE[3] &= 0xFBF8FFFF;
 	DPORT_BASE[3] |= (a4 << 26) | (a3 << 16);
-	if(a4 == 0) DPORT_BASE[9] |= 8; // 0x3FF00024
-	else DPORT_BASE[9] |= 0x18;
+	if(a4 == 0) DPORT_BASE[9] |= 8; // 0x3FF00024 включить блок 16k IRAM в кэш SPI Flash
+	else DPORT_BASE[9] |= 0x18; // 0x3FF00024 включить блок в 32k IRAM в кэш SPI Flash
 	if((a6 & 0x100) == 0) do {
 		DPORT_BASE[3] |= 0x100;
 	} while((DPORT_BASE[3] &0x100) == 0);
