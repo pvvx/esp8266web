@@ -62,7 +62,7 @@ int ets_sprintf(char *str, const char *format, ...) ICACHE_FLASH_ATTR;
 void wifi_softap_set_default_ssid(void) ICACHE_FLASH_ATTR;
 void wDev_Set_Beacon_Int(uint32_t) ICACHE_FLASH_ATTR;
 extern void wDev_ProcessFiq(void) ICACHE_FLASH_ATTR;
-void ets_timer_arm_new(ETSTimer *ptimer, uint32_t milliseconds, int repeat_flag, int isMstimer) ICACHE_FLASH_ATTR;
+void ets_timer_arm_new(ETSTimer *ptimer, uint32_t milliseconds, int repeat_flag, int isMstimer);
 void sleep_reset_analog_rtcreg_8266(void) ICACHE_FLASH_ATTR;
 void wifi_softap_cacl_mac(uint8 *mac_out, uint8 *mac_in) ICACHE_FLASH_ATTR;
 void user_init(void);

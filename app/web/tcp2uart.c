@@ -27,7 +27,7 @@ void loading_rx_buf(void);	// UART->TCP
 
 os_timer_t uart0_rx_buf_timer;
 os_timer_t uart0_tx_buf_timer;
-uint32 wait_send_tx;
+uint32 old_time_send_tx;
 
 TCP_SERV_CONN * tcp2uart_conn;
 TCP_SERV_CFG * tcp2uart_servcfg;
@@ -71,7 +71,7 @@ void ICACHE_FLASH_ATTR loading_rx_buf(void)
 	os_timer_disarm(&uart0_rx_buf_timer);
 	if(conn->flag.busy_bufo) { // в данный момент bufo обрабатывается (передается LwIP-у)?
 		// попробовать повторить через время
-		ets_timer_arm_new(&uart0_rx_buf_timer, 10, 0, 0); // 10us
+		ets_timer_arm_new(&uart0_rx_buf_timer, 100, 0, 0); // 10us
 		conn->flag.user_flg1 = 0;
 		return;
 	}
@@ -86,9 +86,9 @@ void ICACHE_FLASH_ATTR loading_rx_buf(void)
 	// если передача ещё не идет и есть данные для передачи размером с буфер у Lwip, то передать
 	if((!conn->flag.wait_sent) && (conn->cntro)) {
 		uint32 len = conn->pcb->snd_buf;
-		uint32 time_ms = IOREG(0x3FF20C00); // phy_get_mactime();
-		if(((time_ms - wait_send_tx) > (MAX_WAIT_TX_BUF/1000)) || len  <= conn->cntro) {
-   			wait_send_tx = time_ms;
+		uint32 time_us = IOREG(0x3FF20C00); // phy_get_mactime();
+		if(((time_us - old_time_send_tx) > (MAX_WAIT_TX_BUF)) || len  <= conn->cntro) {
+   			old_time_send_tx = time_us;
 			conn->flag.busy_bufo = 1; // в данный момент bufo обрабатывается (передается LwIP-у)
 	#if DEBUGSOO > 3
 			os_printf("usnt: %u ", conn->cntro);

@@ -11,6 +11,8 @@
 
 extern bool timer2_ms_flag;
 
+#define MIN_US_TIMER 0
+
 // us timer
 // 0xFFFFFFFF/(80000000 >> 4) = 858.993459
 // (80000000 >> 4)/(1000000>>2) = 20
@@ -24,10 +26,11 @@ extern bool timer2_ms_flag;
       (((t) >> 2) * ((APB_CLK_FREQ >> prescaler)/(period>>2)) + ((t) & 0x3) * ((APB_CLK_FREQ >> prescaler)/period))  :	\
       (((t) * (APB_CLK_FREQ >> prescaler)) / period))
 
-void ICACHE_FLASH_ATTR ets_timer_arm_new(ETSTimer *ptimer, uint32_t us_ms, int repeat_flag, int isMstimer)
+void ets_timer_arm_new(ETSTimer *ptimer, uint32_t us_ms, int repeat_flag, int isMstimer)
 {
+	ets_intr_lock();
 	if(ptimer->timer_next != (ETSTimer *)0xffffffff) ets_timer_disarm(ptimer);
-	if(us_ms != 0) {
+	if(us_ms) {
 		if(timer2_ms_flag == 0) { // us_timer
 			if(isMstimer) us_ms *= 1000;
 #if ((APB_CLK_FREQ>>4)%1000000)
@@ -44,8 +47,11 @@ void ICACHE_FLASH_ATTR ets_timer_arm_new(ETSTimer *ptimer, uint32_t us_ms, int r
 #endif
 		}
 	}
+#if MIN_US_TIMER != 0
+	if(us_ms < MIN_US_TIMER) us_ms = MIN_US_TIMER;
+#endif
 	if(repeat_flag) ptimer->timer_period = us_ms;
-//	MEMW();
+	MEMW();
 	timer_insert(TIMER1_COUNT + us_ms, ptimer);
 }
 
