@@ -71,7 +71,7 @@ void ICACHE_FLASH_ATTR loading_rx_buf(void)
 	os_timer_disarm(&uart0_rx_buf_timer);
 	if(conn->flag.busy_bufo) { // в данный момент bufo обрабатывается (передается LwIP-у)?
 		// попробовать повторить через время
-		ets_timer_arm_new(&uart0_rx_buf_timer, 100, 0, 0); // 10us
+		ets_timer_arm_new(&uart0_rx_buf_timer, 10, 0, 0); // 10us
 		conn->flag.user_flg1 = 0;
 		return;
 	}
