@@ -16,8 +16,6 @@ TARGET = eagle
 USE_OPEN_LWIP = 140
 
 
-#EXTRA_CCFLAGS += -u
-
 ifndef PDIR # {
 GEN_IMAGES= eagle.app.v6.out
 GEN_BINS = eagle.app.v6.bin

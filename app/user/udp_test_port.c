@@ -278,8 +278,7 @@ udp_test_port_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *a
  * FunctionName : udp_test_port_init
  * Returns      : none
 *******************************************************************************/
-void ICACHE_FLASH_ATTR
-udp_test_port_init(uint16 portn)
+void ICACHE_FLASH_ATTR udp_test_port_init(uint16 portn)
 {
 	  struct udp_pcb *pcb;
 #if DEBUGSOO > 0

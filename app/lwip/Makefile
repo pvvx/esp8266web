@@ -21,6 +21,7 @@ COMPONENTS_liblwip = api/liblwipapi.a	\
 						netif/liblwipnetif.a
 endif
 
+CCFLAGS += -Os
 
 #############################################################
 # Configuration i.e. compile options etc.

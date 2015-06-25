@@ -15,7 +15,6 @@ ifndef PDIR
 GEN_LIBS = libuser.a
 endif
 
-
 #############################################################
 # Configuration i.e. compile options etc.
 # Target specific stuff (defines etc.) goes in here!

@@ -21,7 +21,7 @@
 #endif
 
 #ifndef USE_MAX_IRAM
-	#define USE_MAX_IRAM // использовать часть cache под IRAM, IRAM size = 49152 байт
+	#define USE_MAX_IRAM  48k // использовать часть cache под IRAM, IRAM size = 49152 байт
 #endif
 
 //#define USE_OVERLAP_MODE // используются две и более flash

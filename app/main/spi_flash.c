@@ -49,7 +49,7 @@ void Cache_Read_Enable_New(void)
  * Опции gcc: -mno-serialize-volatile !
  *******************************************************************************/
 #define SPI_FBLK 32
-SpiFlashOpResult __attribute__((optimize("O3"))) spi_flash_read(uint32 faddr, void *des, uint32 size)
+SpiFlashOpResult spi_flash_read(uint32 faddr, void *des, uint32 size)
 {
 #if DEBUGSOO > 5
 	ets_printf("fread:%p<-%p[%u]\n", des, faddr, size);
@@ -213,5 +213,68 @@ uint32 ICACHE_FLASH_ATTR spi_flash_real_size(void) {
 	};
 	return size;
 }
+
+#if 0 // not tested
+/******************************************************************************
+ * FunctionName : spi_flash_write_bytes_array
+ * Returns      : SpiFlashOpResult
+ *******************************************************************************/
+SpiFlashOpResult spi_flash_write_bytes_array(uint32 des_addr, uint8 *src_addr, uint32 size)
+{
+	SpiFlashOpResult ret = SPI_FLASH_RESULT_ERR;
+	if(src_addr == NULL || size == 0) return ret;
+	Cache_Read_Disable();
+	open_16m();
+	union {
+		uint8 uc[32];
+		uint32 ui[8];
+	}tmp;
+	uint8 *p = (uint8 *)src_addr;
+	uint32 xlen = des_addr & 3;
+	uint32 addr = des_addr & (~3);
+	if(xlen) {
+		if(SPIRead(addr, (uint32_t *)&tmp.ui[0], 4) != 0) {
+			close_16m();
+			Cache_Read_Enable_def();
+			return ret;
+		}
+		while (size)  {
+			size--;
+			tmp.uc[xlen++] = *p++;
+			if(xlen & 4) break;
+		}
+		if(SPIWrite(addr, (const uint32_t *)&tmp.ui[0], 4) != 0) {
+			close_16m();
+			Cache_Read_Enable_def();
+			return ret;
+		}
+		addr += 4;
+	}
+	while(size) {
+		if(size < 32) {
+			xlen = size;
+			if(xlen & 3) if(SPIRead(addr, (uint32_t *)&tmp.ui[xlen >> 2], 4) != 0) {
+				close_16m();
+				Cache_Read_Enable_def();
+				return ret;
+			}
+		}
+		else xlen = 32;
+		ets_memcpy(tmp.uc, p, xlen);
+		p += xlen;
+		if(SPIWrite(addr, (const uint32_t *)&tmp.ui[0], (xlen + 3) & (~3)) != 0) {
+			close_16m();
+			Cache_Read_Enable_def();
+			return ret;
+		}
+		size -= xlen;
+		addr += 32;
+	}
+	ret = SPI_FLASH_RESULT_OK;
+	close_16m();
+	Cache_Read_Enable_def();
+	return ret;
+}
+#endif
 
 

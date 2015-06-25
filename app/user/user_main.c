@@ -86,7 +86,7 @@ bool ICACHE_FLASH_ATTR test_rtc_mem(void) {
 	return true;
 }
 #endif
-void init_done_cb(void)
+void ICACHE_FLASH_ATTR init_done_cb(void)
 {
     os_printf("\nSDK Init - Ok\nCurrent 'heap' size: %d bytes\n", system_get_free_heap_size());
 #ifdef TEST_RTC_RTNTN

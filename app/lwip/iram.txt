@@ -1,2 +1,0 @@
-ICACHE_FLASH_ATTR tcp_output_segment() tcp_out.c
-ICACHE_FLASH_ATTR tcp_close_shutdown() tcp.c

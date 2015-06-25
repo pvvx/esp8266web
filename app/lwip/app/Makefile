@@ -17,7 +17,6 @@ GEN_LIBS = liblwipapp.a
 
 endif
 
-
 #############################################################
 # Configuration i.e. compile options etc.
 # Target specific stuff (defines etc.) goes in here!

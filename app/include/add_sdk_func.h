@@ -4,8 +4,7 @@
 
 #include "user_config.h"
 #include "ets_sys.h"
-//(*(uint32*)0x3fffc704) cpu_frequency
-//(*(uint32*)0x3fffc708) wdt_mode
+#include "mem_manager.h"
 
 #if SDK_VERSION > 999 // SDK > 0.9.6 b1
 //uint32 system_adc_read(void); // user_interface.h
@@ -79,12 +78,14 @@ void pm_attach(void) ICACHE_FLASH_ATTR;
 void cnx_attach(void *_g_ic) ICACHE_FLASH_ATTR; // g_ic in main\Include\libmain.h
 void wDevEnableRx(void) ICACHE_FLASH_ATTR; // io(0x3FF20004) |= 0x80000000;
 
+/* in mem_manager.h
 void *pvPortMalloc(size_t xWantedSize) ICACHE_FLASH_ATTR;
 void *pvPortRealloc(void * rmem, size_t newsize);
 void vPortFree(void *pv) ICACHE_FLASH_ATTR;
 size_t xPortGetFreeHeapSize(void) ICACHE_FLASH_ATTR;
 void vPortInitialiseBlocks(void) ICACHE_FLASH_ATTR;
 void *pvPortZalloc(size_t size) ICACHE_FLASH_ATTR;
+*/
 uint32 readvdd33(void) ICACHE_FLASH_ATTR;
 int get_noisefloor_sat(void) ICACHE_FLASH_ATTR;
 int read_hw_noisefloor(void) ICACHE_FLASH_ATTR;

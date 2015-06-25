@@ -27,9 +27,10 @@ LD := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 NM := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-nm
 CPP = $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-cpp
 OBJCOPY = $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objcopy
-CCFLAGS += -O2 -Wall -Wno-pointer-sign -mno-target-align -fno-tree-ccp -mno-serialize-volatile -foptimize-register-move
-#
-# -Os -O2 -Wall -Wno-pointer-sign -mno-target-align -mno-serialize-volatile -foptimize-register-move
+
+CCFLAGS += -Wall -Wno-pointer-sign -mno-target-align -fno-tree-ccp -mno-serialize-volatile -foptimize-register-move
+# -fomit-frame-pointer
+# -Wall -Wno-pointer-sign -mno-target-align -mno-serialize-volatile -foptimize-register-move
 # -fomit-frame-pointer -fmerge-all-constants
 #
 # https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
@@ -77,6 +78,12 @@ OUTBIN1 := ./$(FIRMWAREDIR)/$(ADDR_FW1).bin
 OUTBIN2 := ./$(FIRMWAREDIR)/$(ADDR_FW2).bin
 
 CCFLAGS += \
+	-Wall	\
+	-Wno-pointer-sign	\
+	-mtarget-align	\
+	-fno-tree-ccp	\
+	-mno-serialize-volatile	\
+	-foptimize-register-move \
 	-Wundef			\
 	-Wpointer-arith	\
 	-Werror	\
@@ -89,8 +96,8 @@ CCFLAGS += \
 #
 
 
-CFLAGS = $(CCFLAGS) $(DEFINES) $(EXTRA_CCFLAGS) $(INCLUDES)
-DFLAGS = $(CCFLAGS) $(DDEFINES) $(EXTRA_CCFLAGS) $(INCLUDES)
+CFLAGS = -O2 $(CCFLAGS) $(DEFINES)  $(INCLUDES)
+DFLAGS = -O2 $(CCFLAGS) $(DDEFINES)  $(INCLUDES)
 
 define ShortcutRule
 $(1): .subdirs $(2)/$(1)

@@ -260,6 +260,8 @@ void ICACHE_FLASH_ATTR startup(void)
 		RTC_RAM_BASE[0x78>>2] = 0; // обнулить Espressif OR контрольку области 0..0x78 RTC_RAM
 	}
 	//
+	prvHeapInit();
+	//
 	read_wifi_config();
 #ifdef USE_OPEN_LWIP	
 	default_hostname = true;
