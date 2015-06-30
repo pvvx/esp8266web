@@ -123,7 +123,7 @@ uint32 ICACHE_FLASH_ATTR Read_WiFi_config(struct wifi_config *wcfg,
 	if (wset.b.phy) wcfg->b.phy = wifi_get_phy_mode();
 	if (wset.b.chl)	wcfg->b.chl = wifi_get_channel();
 	if (wset.b.sleep) wcfg->b.sleep = wifi_get_sleep_type();
-	if (opmode & STATION_MODE) {
+	if (opmode & SOFTAP_MODE) {
 		if (wset.b.ap_dhcp)
 			wcfg->b.ap_dhcp_enable = (dhcps_flag == 0) ? 0 : 1; // DHCP_ENABLE =0
 		if ((wset.b.ap_config) && (!wifi_softap_get_config(&wcfg->ap.config)))
@@ -136,7 +136,7 @@ uint32 ICACHE_FLASH_ATTR Read_WiFi_config(struct wifi_config *wcfg,
 			wcfg->ap.ipdhcp = dhcps_lease;
 		}
 	}
-	if (opmode & SOFTAP_MODE) {
+	if (opmode & STATION_MODE) {
 		if (wset.b.st_dhcp)
 			wcfg->b.st_dhcp_enable = (dhcpc_flag == 0) ? 0 : 1; // DHCP_ENABLE =0
 		if ((wset.b.st_config) && (!wifi_station_get_config(&wcfg->st.config)))
