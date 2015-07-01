@@ -13,7 +13,7 @@
 #ifndef ICACHE_FLASH
 	#define ICACHE_FLASH
 //	#define ICACHE_FLASH_ATTR __attribute__((section(".irom0.text")))
-//	#define ICACHE_RODATA_ATTR __attribute__((section(".irom.text")))
+//	#define ICACHE_RODATA_ATTR __attribute__((aligned(4))) __attribute__((section(".irom.text")))
 #endif
 
 #ifndef USE_OPEN_LWIP

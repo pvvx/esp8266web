@@ -4,7 +4,7 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM6 -b 230400
+ESPOPTION ?= -p COM2 -b 230400
 
 USERFADDR = 0x0A000
 USERFBIN = ./webbin/WEBFiles.bin
@@ -96,8 +96,8 @@ CCFLAGS += \
 #
 
 
-CFLAGS = -O2 $(CCFLAGS) $(DEFINES)  $(INCLUDES)
-DFLAGS = -O2 $(CCFLAGS) $(DDEFINES)  $(INCLUDES)
+CFLAGS = -Os $(CCFLAGS) $(DEFINES)  $(INCLUDES)
+DFLAGS = -Os $(CCFLAGS) $(DDEFINES)  $(INCLUDES)
 
 define ShortcutRule
 $(1): .subdirs $(2)/$(1)
