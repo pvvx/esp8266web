@@ -44,6 +44,11 @@ bool ICACHE_FLASH_ATTR get_eram_size(ERAMInfo *einfo) {
 	uint32 iramsize = 32768 + ((((DPORT_BASE[9]>>3)&3)==3)? 0 : 16384);
 	if (flash_read(faddr, (uint32 *)&x, 8) != 0)
 		return false;
+	if(x.head.number_segs <= 1) {
+		faddr = 0xC0;
+		if (flash_read(faddr, (uint32 *)&x, 8) != 0)
+			return false;
+	}
 	faddr += 8;
 #if DEBUGSOO > 1
 	os_printf("Flash Header:\n");

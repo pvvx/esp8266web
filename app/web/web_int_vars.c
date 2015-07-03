@@ -432,10 +432,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     }
     else if(!os_memcmp((void*)cstr, "tcp_", 4)) {
     	cstr+=4;
-    	if(!os_memcmp((void*)cstr,"disconnect", 10)) {
-    		if(tcp2uart_conn == NULL) tcp_abort(tcp2uart_conn->pcb);
-    	}
-   		else if(!os_memcmp((void*)cstr,"twrec", 5)) {
+   		if(!os_memcmp((void*)cstr,"twrec", 5)) {
    			if(tcp2uart_servcfg != NULL) {
    				tcp2uart_servcfg->time_wait_rec = val;
    			}
