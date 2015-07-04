@@ -42,14 +42,8 @@ bool ICACHE_FLASH_ATTR get_eram_size(ERAMInfo *einfo) {
 	einfo->base = NULL;
 	einfo->size = 0;
 	uint32 iramsize = 32768 + ((((DPORT_BASE[9]>>3)&3)==3)? 0 : 16384);
-	if (flash_read(faddr, (uint32 *)&x, 8) != 0)
+	if (flash_read(faddr, (uint32 *)&x, sizeof(x)) != 0)
 		return false;
-	if(x.head.number_segs <= 1) {
-		faddr = 0xC0;
-		if (flash_read(faddr, (uint32 *)&x, 8) != 0)
-			return false;
-	}
-	faddr += 8;
 #if DEBUGSOO > 1
 	os_printf("Flash Header:\n");
 #endif
@@ -58,19 +52,31 @@ bool ICACHE_FLASH_ATTR get_eram_size(ERAMInfo *einfo) {
 		os_printf(" Bad Header!\n");
 #endif
 		return false;
-	} else {
+	}
 #if DEBUGSOO > 1
-/*		uint32 speed = x.head.hsz.spi_freg;
-		if(speed > 2) {
-			if(speed == 15) speed = 3;
-			else speed = 0;
-		} */
 		os_printf(
-				" Number of segments: %u\n SPI Flash Interface: %s\n SPI CLK: %s\n Flash size: %s\n Entry point: %p\n",
-				x.head.number_segs, txtSPIFlashInterface[x.head.spi_interface & 3], txtSFreq[x.head.hsz.spi_freg & 3],
-				txtFSize[x.head.hsz.flash_size&3], x.entry_point);
+				" SPI Flash Interface: %s\n SPI CLK: %s\n Flash size: %s\n",
+				txtSPIFlashInterface[x.head.spi_interface & 3], txtSFreq[x.head.hsz.spi_freg & 3],
+				txtFSize[x.head.hsz.flash_size&3]);
 #endif
-		while (x.head.number_segs) {
+	if(x.head.number_segs <= 1 && x.seg.segment_size < 0x200) {
+#if DEBUGSOO > 1
+		os_printf(" Detect 'rapid loader'\n");
+#endif
+		faddr = (x.seg.segment_size + 16 + 16)&(~15);
+		if (flash_read(faddr, (uint32 *)&x, 8) != 0) return false;
+		if (x.head.id != 0xE9) {
+	#if DEBUGSOO > 1
+			os_printf(" Bad Header2!\n");
+	#endif
+			return false;
+		}
+	}
+	faddr += 8;
+#if DEBUGSOO > 1
+    os_printf(" Number of segments: %u\n Entry point: %p\n", x.head.number_segs, x.entry_point);
+#endif
+	while (x.head.number_segs) {
 			if (flash_read(faddr, (uint32 *)&x.seg, 8) != 0) {
 #if DEBUGSOO > 0
 				os_printf("flash read error!");
@@ -94,7 +100,6 @@ bool ICACHE_FLASH_ATTR get_eram_size(ERAMInfo *einfo) {
 			i++;
 			faddr += x.seg.segment_size + 8;
 		};
-	};
 	if((eraminfo.base)&&(eraminfo.size > MIN_GET_IRAM)) return true;
 	return false;
 }

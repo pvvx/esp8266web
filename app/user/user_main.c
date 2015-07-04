@@ -40,7 +40,7 @@
 //#define TEST_RTC_RTNTN 1
 #endif
 
-#if SDK_VERSION > 959
+#if DEF_SDK_VERSION > 959
 //uint32 ICACHE_FLASH_ATTR espconn_init(uint32 x) {
 //	return 1;
 //}

@@ -6,7 +6,7 @@
 #include "ets_sys.h"
 #include "mem_manager.h"
 
-#if SDK_VERSION > 999 // SDK > 0.9.6 b1
+#if DEF_SDK_VERSION > 999 // SDK > 0.9.6 b1
 //uint32 system_adc_read(void); // user_interface.h
 //void system_deep_sleep(uint32 time_in_us); // user_interface.h
 //bool system_deep_sleep_set_option(uint8 option); // user_interface.h
@@ -67,7 +67,12 @@ void wifi_softap_cacl_mac(uint8 *mac_out, uint8 *mac_in) ICACHE_FLASH_ATTR;
 void user_init(void);
 int wifi_mode_set(int mode) ICACHE_FLASH_ATTR;
 int wifi_station_start(void) ICACHE_FLASH_ATTR;
+
+#if DEF_SDK_VERSION >= 1200
+int wifi_softap_start(int) ICACHE_FLASH_ATTR;
+#else
 int wifi_softap_start(void) ICACHE_FLASH_ATTR;
+#endif
 int register_chipv6_phy(uint8 * esp_init_data) ICACHE_FLASH_ATTR; // esp_init_data_default[128]
 void ieee80211_phy_init(int phy_mode) ICACHE_FLASH_ATTR; // ieee80211_setup_ratetable()
 void lmacInit(void) ICACHE_FLASH_ATTR;
@@ -75,6 +80,7 @@ void wDev_Initialize(uint8 * mac) ICACHE_FLASH_ATTR;
 void pp_attach(void) ICACHE_FLASH_ATTR;
 void ieee80211_ifattach(void *_g_ic) ICACHE_FLASH_ATTR; // g_ic in main\Include\libmain.h
 void pm_attach(void) ICACHE_FLASH_ATTR;
+int fpm_attach(void) ICACHE_FLASH_ATTR; // all return  1
 void cnx_attach(void *_g_ic) ICACHE_FLASH_ATTR; // g_ic in main\Include\libmain.h
 void wDevEnableRx(void) ICACHE_FLASH_ATTR; // io(0x3FF20004) |= 0x80000000;
 

@@ -15,10 +15,10 @@
 #include "flash_eep.h"
 #include "iram_info.h"
 #include "wifi_events.h"
-#if SDK_VERSION == 1019
+#if DEF_SDK_VERSION == 1019
 #include "../main/include/libmain.h"
 #include "../main/include/app_main.h"
-#elif SDK_VERSION > 1019
+#elif DEF_SDK_VERSION > 1019
 // #warning "LIGHT mode?"
 #endif
 
@@ -166,7 +166,7 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 	if ((wset.b.ap_config) || (wset.b.ap_ipinfo) || (wset.b.ap_ipdhcp)) {
 		wifi_softap_dhcps_stop();
 		if (wset.b.ap_config) {
-#if (SDK_VERSION < 1000)  // исправление для SDK 0.9.5...
+#if (DEF_SDK_VERSION < 1000)  // исправление для SDK 0.9.5...
 			struct softap_config ap_config;
 			os_memset(&ap_config, 0, sizeof(ap_config));
 			if (wifi_softap_get_config(&ap_config)
@@ -222,13 +222,13 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 	};
 	if (wset.b.sleep) {
 		if(!(wifi_set_sleep_type(wcfg->b.sleep))) werr.b.sleep = 1;
-#if SDK_VERSION <= 1019
+#if DEF_SDK_VERSION <= 1019
 		else if(wcfg->b.sleep == 1) {
 			ets_timer_disarm(&check_timeouts_timer);
 			// wifi_set_sleep_type: NONE = 25, LIGHT = 3000 + reset_noise_timer(3000), MODEM = 25 + reset_noise_timer(100);
 			ets_timer_arm_new(&check_timeouts_timer, 100, 1, 1);
 		}
-#elif SDK_VERSION > 1019
+#elif DEF_SDK_VERSION > 1019
 // #warning "Test LIGHT mode?"
 #endif
 	}

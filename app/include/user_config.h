@@ -34,8 +34,8 @@
 	#define USE_US_TIMER
 #endif
 
-#define SDK_VERSION 1129   // 1129 = 1.1.1 release + path N1  // 1.1.2 b1 = 1121
-#define SYS_VERSION "0.3.5"
+#define DEF_SDK_VERSION 1200   // 1201 = 1.2.0 no path
+#define SYS_VERSION "0.3.6"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

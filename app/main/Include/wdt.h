@@ -13,7 +13,7 @@
 #include "fatal_errs.h"
 
 
-#if SDK_VERSION >= 1119 // (SDK 1.1.1..1.1.2)
+#if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1..1.1.2)
 void wdt_init(int flg) ICACHE_FLASH_ATTR;
 #else
 void wdt_init(void) ICACHE_FLASH_ATTR;

@@ -14,7 +14,7 @@
 #include "user_interface.h"
 #include "add_sdk_func.h"
 
-#if SDK_VERSION >= 1119 // (SDK 1.1.1..1.1.2)
+#if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1..1.1.2)
 
 //extern struct rst_info rst_inf; // SDK 1.1.0 + libmain_patch_01.a
 //extern int soft_wdt_interval; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
@@ -35,7 +35,7 @@ void ICACHE_FLASH_ATTR wdt_init(int flg)
 	pp_soft_wdt_init();
 }
 
-#elif SDK_VERSION != 0
+#elif DEF_SDK_VERSION != 0
 #error Check WDT!
 #else
 

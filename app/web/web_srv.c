@@ -31,7 +31,7 @@
 #define MIN_REQ_LEN  7  // Minimum length for a valid HTTP/0.9 request: "GET /\r\n" -> 7 bytes
 #define CRLF "\r\n"
 
-//#if (SDK_VERSION >= 1000) && (SDK_VERSION <= 1012)
+//#if (DEF_SDK_VERSION >= 1000) && (DEF_SDK_VERSION <= 1012)
 //#define max_len_buf_write_flash 1024 // размер буфера при записи flash. Увеличение/уменньшение размера (до сектора 4096) ускорения не дает (1..2%)
 //#else
 //#error "lmac.c 599 remove?"
@@ -1346,7 +1346,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #endif
 				if(pupload->fsize < len) block_size = pupload->fsize;
 				else block_size = len;
-#if (SDK_VERSION >= 1000) && (SDK_VERSION <= 1012)
+#if (DEF_SDK_VERSION >= 1000) && (DEF_SDK_VERSION <= 1012)
 #define SET_CPU_CLK_SPEED 1
 				if(syscfg.cfg.b.hi_speed_enable) {
 					ets_intr_lock();

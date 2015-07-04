@@ -38,6 +38,11 @@ struct s_info info; // ip,mask,gw,mac AP, ST
 ETSTimer check_timeouts_timer; // timer_lwip
 uint8 user_init_flag;
 
+#if DEF_SDK_VERSION >= 1200
+uint8 SDK_VERSION[] = {"1.2.0"};
+uint16 lwip_timer_interval;
+#endif
+
 #ifdef USE_OPEN_LWIP
 extern bool default_hostname; // in eagle_lwip_if.c
 #endif
@@ -70,6 +75,7 @@ void call_user_start(void)
 {
 	    // Загрузка заголовка flash
 	    struct SPIFlashHead fhead;
+	    Cache_Read_Disable();
 		SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS
 		SPIRead(0, (uint32_t *)&fhead, sizeof(fhead));
 		// Установка размера Flash от 256Kbytes до 32Mbytes
@@ -152,6 +158,7 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 {
     struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
 	wifi_softap_set_default_ssid();
+	wifi_station_set_default_hostname(info.st_mac);
 	if(wifi_config->wfmode[0] == 0xff) wifi_config->wfmode[0] = 2;
 	else wifi_config->wfmode[0] &= 3;
 	wifi_config->wfmode[1] = 0;
@@ -277,11 +284,16 @@ void ICACHE_FLASH_ATTR startup(void)
 	ets_timer_init();
 	lwip_init();
 //	espconn_init();
+#if DEF_SDK_VERSION >= 1200
+	lwip_timer_interval = 25;
+	ets_timer_setfn(&check_timeouts_timer, (ETSTimerFunc *) sys_check_timeouts, NULL);
+#else
 	// set up a timer for lwip
 	ets_timer_disarm(&check_timeouts_timer);
 	ets_timer_setfn(&check_timeouts_timer, (ETSTimerFunc *) sys_check_timeouts, NULL);
-	// wifi_set_sleep_type: NONE = 25, LIGHT = 3000 + reset_noise_timer(3000), MODEM = 25 + reset_noise_timer(100);
 	ets_timer_arm_new(&check_timeouts_timer, 25, 1, 1);
+	// wifi_set_sleep_type: NONE = 25, LIGHT = 3000 + reset_noise_timer(3000), MODEM = 25 + reset_noise_timer(100);
+#endif
 	//
 	tst_cfg_wifi();
 #ifdef USE_DUAL_FLASH
@@ -307,25 +319,49 @@ void ICACHE_FLASH_ATTR startup(void)
 	//
 #endif
 //	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F; // ??
-#if SDK_VERSION >= 1119 // (SDK 1.1.1)
+#if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1)
 	wdt_init(1);
 #else
 	wdt_init();
 #endif
 	user_init();
 	user_init_flag = true;
+#if DEF_SDK_VERSION >= 1200
+	ets_timer_disarm(&check_timeouts_timer);
+	ets_timer_arm_new(&check_timeouts_timer, lwip_timer_interval, 1, 1);
+#endif
 	WDT_FEED = WDT_FEED_MAGIC; // WDT
 	//
+#if DEF_SDK_VERSION >= 1200
+	int wfmode = g_ic.g.wifi_store.wfmode[0]; // g_ic.c[0x214] (+532) SDK 1.2.0
+#else
 	int wfmode = g_ic.g.wifi_store.wfmode[0];
+#endif
 	wifi_mode_set(wfmode);
 	if(wfmode & 1)  wifi_station_start();
+#if DEF_SDK_VERSION >= 1200
+	if(wfmode == 2) {
+		uint8 x_wfmode = g_ic.c[504];
+	if(x_wfmode != 2) wifi_softap_start(1);
+		else wifi_softap_start(0);
+	}
+	else if(wfmode == 3) {
+		wifi_softap_start(0);
+	}
+#else
 	if(wfmode & 2)  wifi_softap_start();
+#endif
+
+#if DEF_SDK_VERSION >= 1110
+	if(wfmode == 1) netif_set_default(*g_ic.g.netif1);	// struct netif *
+#else
 	if(wfmode) {
 		struct netif * * p;
 		if(wfmode == 1) p = g_ic.g.netif1; // g_ic+0x10;
 		else p = g_ic.g.netif2; // g_ic+0x14;
 		netif_set_default(*p);	// struct netif *
 	}
+#endif
 	if(wifi_station_get_auto_connect()) wifi_station_connect();
 	if(done_cb != NULL) done_cb();
 }
@@ -379,6 +415,7 @@ void ICACHE_FLASH_ATTR init_wifi(uint8 * init_data, uint8 * mac)
 	ets_isr_attach(0, wDev_ProcessFiq, NULL);
 	ets_isr_unmask(1);
 	pm_attach();
+	fpm_attach();
 	phy_enable_agc();
 	cnx_attach(&g_ic);
 	wDevEnableRx();

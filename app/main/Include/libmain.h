@@ -8,6 +8,7 @@
 #ifndef _INCLUDE_LIBMAIN_H_
 #define _INCLUDE_LIBMAIN_H_
 
+#include "user_config.h"
 #include "c_types.h"
 
 #define DEBUG_UART 0 // включить вывод в загрузчике сообщений
@@ -43,8 +44,35 @@ struct ets_store_wifi_hdr { // Sector flash addr flashchip->chip_size-0x1000  (0
 // Extern data
 //-----------------------------------------------------------------------------
 struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 or -0x2000
+#if DEF_SDK_VERSION >= 1200 // SDK >= 1.2.0
+	uint8	field_000[8];	//+000  g_ic+? 488 boot_version // 0x3FFF2530
+	uint8 	wfmode[4];		//+008  g_ic.c[0x214] (+532) SDK 1.2.0 // 3FFF2538
+	uint32	st_ssid_len;	//+012  g_ic+? 500
+	uint8	st_ssid[32];	//+016
+	uint8	field_048[7];	//+048
+	uint8	st_passw[64];	//+055
+	uint8	field_119;		//+119
+	uint8	data_120[32];	//+120
+	uint8	field_152[24];	//+152
+	uint32	ap_ssid_len;	//+176
+	uint8	ap_ssid[32];	//+180
+	uint8	ap_passw[64];	//+212
+	uint8	field_276[32];	//+276
+	uint8	field_308[8];	//+308
+	uint16	field_316;		//+316
+	uint8	field_318[2];	//+318
+	uint32	st1ssid_len;	//+320
+	uint8	st1ssid[32];	//+324
+	uint8	st1passw[64];	//+356
+	uint8	field_420[400];	//+420
+	uint8	field_820[16];	//+820
+	uint32  phy_mode;		//+836 // g_ic+1360 (+550h) 0x3FFF2874?
+	uint8	field_840[36];	//+840
+	uint16	beacon;			//+876 // 0x3FFF289C g_ic+1400
+	uint8	field_878[10];	//+878
+#else
 	uint8	field_000[8];	//+000  g_ic+488 boot_version g_ic+0x1D9
-	uint8 	wfmode[4];		//+008  g_ic+496 +0x1F0 // SDK1.1.0
+	uint8 	wfmode[4];		//+008  g_ic+496 +0x1F0 SDK1.1.0
 	uint32	st_ssid_len;	//+012  g_ic+500
 	uint8	st_ssid[32];	//+016
 	uint8	field_048[7];	//+048
@@ -68,12 +96,17 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
 	uint8	field_840[36];	//+840
 	uint16	beacon;			//+876
 	uint8	field_878[2];	//+878
+#endif
 }; // (sizeof+880)
 
+#if DEF_SDK_VERSION >= 1200 // SDK >= 1.2.0
+#define wifi_config_size 0x378 // 888 bytes
+#elif DEF_SDK_VERSION >= 1100 // SDK >= 1.1.0
 #define wifi_config_size 0x370 // 880 bytes
+#endif
 
 struct	s_g_ic{
-	void *	scan_pages;		//+0000 g_ic+0
+	void *	scan_pages;		//+0000 g_ic+0	// 0x3FFF2324
 	void *	gScanStruct;	//+0004 g_ic+4
 	uint32	anonymous_0;	//+0008 g_ic+8
 	uint32	anonymous_1;	//+000C g_ic+12
@@ -108,13 +141,15 @@ struct	s_g_ic{
 	uint32	field_1BC;		//+01BC g_ic+444
 	uint32	field_1C0;		//+01C0 g_ic+448
 	uint32	field_1C4;		//+01C4 g_ic+452
-#if 0 // SDK < 1.1.0
+#if DEF_SDK_VERSION >= 1200 // SDK >= 1.2.0
+	uint8	field_1C8[68];	//+01C8 g_ic+456
+#elif DEF_SDK_VERSION < 1100 // SDK < 1.1.0
 	uint8	field_1C8[16];	//+01C8 g_ic+456
 #else // SDK >= 1.1.0
 	uint8	field_1C8[32];	//+01C8 g_ic+456
 #endif
-	struct s_wifi_store wifi_store;	//g_ic+488
-}; // (sizeof 1368 (488+880)) // new 1368 SDK v1.1.0, sizeof 1352 = v1.0.1
+	struct s_wifi_store wifi_store;	//g_ic+488 // 0x3FFF2530-0x3FFF2324=0x20C (524) SDK 1.2.0
+}; // (sizeof 1368+32 (524+888)) //   1368 SDK v1.1.0, 1352 = v1.0.1
 
 typedef union _u_g_ic{
 	struct s_g_ic g;
@@ -126,14 +161,14 @@ typedef union _u_g_ic{
 extern u_g_ic g_ic;
 
 struct s_info {
-	uint32 ap_ip;
-	uint32 ap_mask;
-	uint32 ap_gw;
-	uint32 st_ip;
-	uint32 st_mask;
-	uint32 st_gw;
-	uint8 ap_mac[6];
-	uint8 st_mac[6];
+	uint32 ap_ip;	//+00
+	uint32 ap_mask;	//+04
+	uint32 ap_gw;	//+08
+	uint32 st_ip;	//+0C
+	uint32 st_mask;	//+10
+	uint32 st_gw;	//+14
+	uint8 ap_mac[6];	//+18
+	uint8 st_mac[6];	//+1E
 } __attribute__((packed));
 
 #endif /* _INCLUDE_LIBMAIN_H_ */

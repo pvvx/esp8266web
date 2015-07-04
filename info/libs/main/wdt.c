@@ -47,7 +47,7 @@ void pp_soft_wdt_feed()
 		system_restart_local();
 	}
 	else {
-#if SDK_VERSION >= 1119
+#if DEF_SDK_VERSION >= 1119
 		wDev_MacTim1Arm(soft_wdt_interval);
 #else
 		ets_timer_disarm(SoftWdtTimer);
@@ -60,7 +60,7 @@ void pp_soft_wdt_feed()
 
 void pp_soft_wdt_stop(void)
 {
-#if SDK_VERSION >= 1119
+#if DEF_SDK_VERSION >= 1119
 	WDT_FEED = WDT_FEED_MAGIC;
 	wdt_flg = false;
 	wDev_MacTim1Arm(70000000);
@@ -72,7 +72,7 @@ void pp_soft_wdt_stop(void)
 
 void pp_soft_wdt_restart(void)
 {
-#if SDK_VERSION >= 1119
+#if DEF_SDK_VERSION >= 1119
 	wDev_MacTim1SetFunc(pp_soft_wdt_feed);
 	wDev_MacTim1Arm(soft_wdt_interval);
 	WDT_FEED = WDT_FEED_MAGIC;
@@ -83,10 +83,10 @@ void pp_soft_wdt_restart(void)
 
 void pp_soft_wdt_init(void)
 {
-#if SDK_VERSION < 1109 // (SDK 1.1.0 no patch)
+#if DEF_SDK_VERSION < 1109 // (SDK 1.1.0 no patch)
 	ets_timer_setfn(SoftWdtTimer, (ETSTimerFunc *)pp_soft_wdt_feed, NULL);
 	ets_timer_arm_new(SoftWdtTimer, soft_wdt_interval, 0, 1);
-#elif SDK_VERSION >= 1119
+#elif DEF_SDK_VERSION >= 1119
 	wDev_MacTim1SetFunc(pp_soft_wdt_feed);
 	wDev_MacTim1Arm(soft_wdt_interval);
 #endif
