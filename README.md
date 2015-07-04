@@ -17,7 +17,7 @@ Supported 512k..16 MBytes Flash (Web Disk).
 
 Supported options 48 kbytes IRAM.
 
-From SDK 1.1.2 used only: 
+From SDK 1.2.0 used only: 
 libpp.a, libwpa.a, libnet80211.a, parts libphy.a, eagle_lib.o, mem_manager.o, user_interface.o
 
 Make WEBFS CmdLine:
