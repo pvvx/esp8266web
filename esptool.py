@@ -8,8 +8,8 @@
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
 # Foundation; either version 2 of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but WITHOUT
+# 
+# This program is distributed in the hope that it will be useful, but WITHOUT 
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
@@ -25,6 +25,7 @@ import time
 import argparse
 import os
 import subprocess
+import tempfile
 
 class ESPROM:
 
@@ -95,7 +96,7 @@ class ESPROM:
         for b in data:
             state ^= ord(b)
         return state
-
+        
     """ Send a request and read the response """
     def command(self, op = None, data = None, chk = 0):
         if op:
@@ -128,29 +129,34 @@ class ESPROM:
 
     """ Try connecting repeatedly until successful, or giving up """
     def connect(self):
-        # RTS = EXT_RSTB
-        # DTR = GPIO0
-	print 'Entering bootloader...'
-	self._port.setRTS(True)
-	self._port.setDTR(True)
-	time.sleep(0.25)
-	self._port.setRTS(False)
-	self._port.setDTR(True)
-	time.sleep(0.25)
-        self._port.setRTS(False)
-	self._port.setDTR(False)
-
         print 'Connecting...'
-        self._port.timeout = 0.5
-        for i in xrange(10):
-            try:
-                self._port.flushInput()
-                self._port.flushOutput()
-                self.sync()
-                self._port.timeout = 5
-                return
-            except:
-                time.sleep(0.1)
+
+        for _ in xrange(4):
+            # issue reset-to-bootloader:
+            # RTS = either CH_PD or nRESET (both active low = chip in reset)
+            # DTR = GPIO0 (active low = boot to flasher)
+            self._port.setDTR(False)
+            self._port.setRTS(True)
+            time.sleep(0.05)
+            self._port.setDTR(True)
+            self._port.setRTS(False)
+            time.sleep(0.05)
+            self._port.setDTR(False)
+
+            self._port.timeout = 0.3 # worst-case latency timer should be 255ms (probably <20ms)
+            for _ in xrange(4):
+                try:
+                    self._port.flushInput()
+                    self._port.flushOutput()
+                    self.sync()
+                    self._port.timeout = 5
+                    return
+                except:
+                    time.sleep(0.05)
+            # this is a workaround for the CH340 serial driver on current versions of Linux,
+            # which seems to sometimes set the serial port up with wrong parameters
+            self._port.close()
+            self._port.open()
         raise Exception('Failed to connect')
 
     """read mac addr"""
@@ -266,7 +272,6 @@ class ESPROM:
 	    print "head:",head_sector_num,";total:",total_sector_num
 	    print "erase size :",size
 
-
         if self.command(ESPROM.ESP_FLASH_BEGIN,
                 struct.pack('<IIII', size, 0x200, ESPROM.ESP_FLASH_BLOCK, offset))[1] != "\0\0":
             raise Exception('Failed to enter Flash download mode')
@@ -294,18 +299,6 @@ class ESPROM:
         # Fake flash begin immediately followed by flash end
         self.flash_begin(0, 0)
         self.flash_finish(reboot)
-
-    """ Read MAC from OTP ROM """
-    def read_mac(self):
-        mac0 = esp.read_reg(esp.ESP_OTP_MAC0)
-        mac1 = esp.read_reg(esp.ESP_OTP_MAC1)
-        if ((mac1 >> 16) & 0xff) == 0:
-            oui = (0x18, 0xfe, 0x34)
-        elif ((mac1 >> 16) & 0xff) == 1:
-            oui = (0xac, 0xd0, 0x74)
-        else:
-            raise Exception("Unknown OUI")
-        return oui + ((mac1 >> 8) & 0xff, mac1 & 0xff, (mac0 >> 24) & 0xff)
 
     """ Read SPI flash manufacturer and device id """
     def flash_id(self):
@@ -357,7 +350,7 @@ class ESPROM:
         # It it on the other hand unlikely to fail.
 
 class ESPFirmwareImage:
-
+    
     def __init__(self, filename = None):
         self.segments = []
         self.entrypoint = 0
@@ -367,17 +360,17 @@ class ESPFirmwareImage:
         if filename is not None:
             f = file(filename, 'rb')
             (magic, segments, self.flash_mode, self.flash_size_freq, self.entrypoint) = struct.unpack('<BBBBI', f.read(8))
-
+            
             # some sanity check
             if magic != ESPROM.ESP_IMAGE_MAGIC or segments > 16:
                 raise Exception('Invalid firmware image')
-
+        
             for i in xrange(segments):
                 (offset, size) = struct.unpack('<II', f.read(8))
                 if offset > 0x40200000 or offset < 0x3ffe0000 or size > 65536:
                     raise Exception('Suspicious segment %x,%d' % (offset, size))
                 if size > 0:
-                   self.segments.append((offset, size, f.read(size)))
+                    self.segments.append((offset, size, f.read(size)))
 
             # Skip the padding. The checksum is stored in the last byte so that the
             # file is a multiple of 16 bytes.
@@ -391,14 +384,14 @@ class ESPFirmwareImage:
         l = len(data)
         if l > 0:
             if l % 4:
-                 data += b"\x00" * (4 - l % 4)
+                data += b"\x00" * (4 - l % 4)
             self.segments.append((addr, len(data), data))
 
     def save(self, filename):
         f = file(filename, 'wb')
         f.write(struct.pack('<BBBBI', ESPROM.ESP_IMAGE_MAGIC, len(self.segments),
             self.flash_mode, self.flash_size_freq, self.entrypoint))
-
+            
         checksum = ESPROM.ESP_CHECKSUM_MAGIC
         for (offset, size, data) in self.segments:
             f.write(struct.pack('<II', offset, size))
@@ -420,17 +413,27 @@ class ELFFile:
         if self.symbols is not None:
             return
         self.symbols = {}
-        try:
-            tool_nm = "C:\\Espressif\\xtensa-lx106-elf\\bin\\xtensa-lx106-elf-nm.exe"
-            if os.getenv('XTENSA_CORE')=='lx106':
-                tool_nm = "xt-nm"
-            proc = subprocess.Popen([tool_nm, self.name], stdout=subprocess.PIPE)
-        except OSError:
-            print "Error calling "+tool_nm+", do you have Xtensa toolchain in PATH?"
-            sys.exit(1)
-        for l in proc.stdout:
-            fields = l.strip().split()
-            self.symbols[fields[2]] = int(fields[0], 16)
+        fname = os.getenv('TEMP');
+        if fname == None:
+                  fname = '.'
+        fname += '\\eagle.app.sym'
+        cmd = 'C:\\Espressif\\xtensa-lx106-elf\\bin\\xtensa-lx106-elf-nm.exe -g ' + self.name + ' >'+fname
+        print cmd
+        os.system(cmd)
+        fps = file(fname)
+        if fps is None:
+            print "open sym file error\n"
+            exit(1)
+        lines = fps.readlines()
+        fps.close()
+        for l in lines:
+           fields = l.strip().split()
+           try:
+              self.symbols[fields[2]] = int(fields[0], 16)
+           except ValueError as verr:
+              pass  
+           except Exception as ex:
+              pass 
 
     def get_symbol_addr(self, sym):
         self._fetch_symbols()
@@ -440,11 +443,13 @@ class ELFFile:
         tool_objcopy = "C:\\Espressif\\xtensa-lx106-elf\\bin\\xtensa-lx106-elf-objcopy.exe"
         if os.getenv('XTENSA_CORE')=='lx106':
             tool_objcopy = "xt-objcopy"
-        subprocess.check_call([tool_objcopy, "--only-section", section, "-Obinary", self.name, ".tmp.section"])
-        f = open(".tmp.section", "rb")
-        data = f.read()
-        f.close()
-        os.remove(".tmp.section")
+        tmpsection = tempfile.mktemp(suffix=".section")
+        try:
+            subprocess.check_call([tool_objcopy, "--only-section", section, "-Obinary", self.name, tmpsection])
+            with open(tmpsection, "rb") as f:
+                data = f.read()
+        finally:
+            os.remove(tmpsection)
         return data
 
 
@@ -502,7 +507,7 @@ if __name__ == '__main__':
     parser_write_flash.add_argument('--flash_mode', '-fm', help = 'SPI Flash mode',
             choices = ['qio', 'qout', 'dio', 'dout'], default = 'qio')
     parser_write_flash.add_argument('--flash_size', '-fs', help = 'SPI Flash size in Mbit',
-            choices = ['4m', '2m', '8m', '16m', '32m'], default = '4m')
+            choices = ['4m', '2m', '8m', '16m', '32m', '16m-c1', '32m-c1', '32m-c2'], default = '4m')
 
     parser_run = subparsers.add_parser(
             'run',
@@ -531,7 +536,9 @@ if __name__ == '__main__':
     parser_elf2image.add_argument('--flash_mode', '-fm', help = 'SPI Flash mode',
             choices = ['qio', 'qout', 'dio', 'dout'], default = 'qio')
     parser_elf2image.add_argument('--flash_size', '-fs', help = 'SPI Flash size in Mbit',
-            choices = ['4m', '2m', '8m', '16m', '32m'], default = '4m')
+            choices = ['4m', '2m', '8m', '16m', '32m', '16m-c1', '32m-c1', '32m-c2'], default = '4m')
+    parser_elf2image.add_argument('--entry-symbol', '-es', help = 'Entry point symbol name (default \'call_user_start\')',
+                                  default = 'call_user_start')
 
     parser_read_mac = subparsers.add_parser(
             'read_mac',
@@ -601,7 +608,7 @@ if __name__ == '__main__':
         assert len(args.addr_filename) % 2 == 0
 
         flash_mode = {'qio':0, 'qout':1, 'dio':2, 'dout': 3}[args.flash_mode]
-        flash_size_freq = {'4m':0x00, '2m':0x10, '8m':0x20, '16m':0x30, '32m':0x40}[args.flash_size]
+        flash_size_freq = {'4m':0x00, '2m':0x10, '8m':0x20, '16m':0x30, '32m':0x40, '16m-c1': 0x50, '32m-c1':0x60, '32m-c2':0x70}[args.flash_size]
         flash_size_freq += {'40m':0, '26m':1, '20m':2, '80m': 0xf}[args.flash_freq]
         flash_info = struct.pack('BB', flash_mode, flash_size_freq)
 
@@ -614,6 +621,8 @@ if __name__ == '__main__':
             blocks = math.ceil(len(image)/float(esp.ESP_FLASH_BLOCK))
             esp.flash_begin(blocks*esp.ESP_FLASH_BLOCK, address)
             seq = 0
+            written = 0
+            t = time.time()
             while len(image) > 0:
                 print '\rWriting at 0x%08x... (%d %%)' % (address + seq*esp.ESP_FLASH_BLOCK, 100*(seq+1)/blocks),
                 sys.stdout.flush()
@@ -626,8 +635,10 @@ if __name__ == '__main__':
                 esp.flash_block(block, seq)
                 image = image[esp.ESP_FLASH_BLOCK:]
                 seq += 1
-            print
-        print '\nLeaving...'
+                written += len(block)
+            t = time.time() - t
+            print '\nWritten %d bytes in %.2f seconds (%.2f kbit/s)...' % (written, t, written / t * 8 / 1000)
+        print "\nLeaving..."
         esp.flash_finish(False)
 
     elif args.operation == 'run':
@@ -662,13 +673,15 @@ if __name__ == '__main__':
             args.output = args.input + '-'
         e = ELFFile(args.input)
         image = ESPFirmwareImage()
-        image.entrypoint = e.get_symbol_addr("call_user_start")
+        image.entrypoint = e.get_symbol_addr(args.entry_symbol)
+        print args.entry_symbol+':\t\t\t\t\t0x%08x' % (image.entrypoint)
         for section, start in ((".text", "_text_start"), (".data", "_data_start"), (".rodata", "_rodata_start")):
             data = e.load_section(section)
             image.add_segment(e.get_symbol_addr(start), data)
+            print section+':   \t\t'+start+':\t\t0x%08x' % (e.get_symbol_addr(start))
 
         image.flash_mode = {'qio':0, 'qout':1, 'dio':2, 'dout': 3}[args.flash_mode]
-        image.flash_size_freq = {'4m':0x00, '2m':0x10, '8m':0x20, '16m':0x30, '32m':0x40}[args.flash_size]
+        image.flash_size_freq = {'4m':0x00, '2m':0x10, '8m':0x20, '16m':0x30, '32m':0x40, '16m-c1': 0x50, '32m-c1':0x60, '32m-c2':0x70}[args.flash_size]
         image.flash_size_freq += {'40m':0, '26m':1, '20m':2, '80m': 0xf}[args.flash_freq]
 
         image.save(args.output + "0x00000.bin")
