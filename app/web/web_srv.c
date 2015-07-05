@@ -27,7 +27,7 @@
 #include "websocket.h"
 #endif
 
-
+#define USE_WEB_NAGLE // https://en.wikipedia.org/wiki/Nagle%27s_algorithm
 #define MIN_REQ_LEN  7  // Minimum length for a valid HTTP/0.9 request: "GET /\r\n" -> 7 bytes
 #define CRLF "\r\n"
 
@@ -1106,7 +1106,9 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
     if(web_conn->msgbuflen) {
         if(CheckSCB(SCB_DISCONNECT)) SetSCB(SCB_CLOSED);
         tcpsrv_int_sent_data(ts_conn, web_conn->msgbuf, web_conn->msgbuflen);
+#ifdef USE_WEB_NAGLE
         ts_conn->flag.nagle_disabled = 1;
+#endif
     };
     os_free(web_conn->msgbuf);
     web_conn->msgbuf = NULL;

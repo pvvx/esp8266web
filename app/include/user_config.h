@@ -4,6 +4,7 @@
 #ifndef LWIP_OPEN_SRC
 	#define LWIP_OPEN_SRC
 #endif
+
 #ifndef PBUF_RSV_FOR_WLAN
 	#define PBUF_RSV_FOR_WLAN
 #endif
@@ -16,9 +17,8 @@
 //	#define ICACHE_RODATA_ATTR __attribute__((aligned(4))) __attribute__((section(".irom.text")))
 #endif
 
-#ifndef USE_OPEN_LWIP
- #define USE_OPEN_LWIP 140 // использовать OpenLwIP 1.4.0 (при изменении править app/MakeFile #USE_OPEN_LWIP = 140)
-#endif
+// #define USE_OPEN_LWIP 140 // использовать OpenLwIP 1.4.0 (назначается в app/MakeFile #USE_OPEN_LWIP = 140)
+// #define USE_OPEN_DHCPS 1	 // использовать исходник или либу из SDK (назначается в app/MakeFile #USE_OPEN_DHCP = 1)
 
 #ifndef USE_MAX_IRAM
 	#define USE_MAX_IRAM  48k // использовать часть cache под IRAM, IRAM size = 49152 байт

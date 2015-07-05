@@ -14,27 +14,23 @@
 TARGET = eagle
 
 USE_OPEN_LWIP = 140
+USE_OPEN_DHCPS = 1
 
 
 ifndef PDIR # {
 GEN_IMAGES= eagle.app.v6.out
 GEN_BINS = eagle.app.v6.bin
 
-ifndef USE_OPEN_LWIP
 SUBDIRS =	\
 	main	\
 	phy		\
 	user	\
 	driver	\
 	web
-else
-SUBDIRS =	\
-	main	\
-	phy		\
-	user	\
-	driver	\
-	lwip	\
-	web
+
+
+ifdef USE_OPEN_LWIP
+SUBDIRS += lwip
 endif
 	
 endif # } PDIR
@@ -52,14 +48,35 @@ ifeq ($(APP), 2)
 	LD_FILE = $(LDDIR)/eagle.app.v6.app2.ld
 endif
 
-ifndef USE_OPEN_LWIP
-
 COMPONENTS_eagle.app.v6 = \
 	main/libaddmmain.a	\
 	phy/libaddmphy.a	\
 	driver/libdriver.a \
 	web/libweb.a	\
 	user/libuser.a
+
+ifdef USE_OPEN_LWIP
+COMPONENTS_eagle.app.v6 +=	lwip/liblwip.a 	
+endif
+
+LINK_LIBS = \
+	-lmc	\
+	-lmgcc	\
+	-lmphy	\
+	-lpp	\
+	-lnet80211 \
+	-lwpa	\
+	-lmmain	
+
+ifndef USE_OPEN_LWIP 
+LINK_LIBS += \
+	-llwipif	\
+	-lmlwip	
+endif
+
+ifndef USE_OPEN_DHCPS
+LINK_LIBS += -ldhcps
+endif
 	
 LINKFLAGS_eagle.app.v6 = \
 	-L../lib	\
@@ -70,15 +87,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-Wl,-static \
 	-Wl,-Map -Wl,$(@:.out=.map) \
 	-Wl,--start-group \
-	-lmc	\
-	-lmgcc	\
-	-lmphy	\
-	-lpp	\
-	-lnet80211 \
-	-lwpa	\
-	-llwipif	\
-	-lmlwip	\
-	-lmmain	\
+	$(LINK_LIBS)	\
 	$(DEP_LIBS_eagle.app.v6) \
 	-Wl,--end-group
 
@@ -88,43 +97,14 @@ CONFIGURATION_DEFINES =	-D__ets__ \
 			-DLWIP_OPEN_SRC	\
 			-DEBUF_LWIP
 
-else	
-
-COMPONENTS_eagle.app.v6 = \
-	main/libaddmmain.a	\
-	phy/libaddmphy.a	\
-	driver/libdriver.a \
-	web/libweb.a	\
-	lwip/liblwip.a \
-	user/libuser.a
-	
-LINKFLAGS_eagle.app.v6 = \
-	-L../lib	\
-	-nostdlib \
-    -T$(LD_FILE) \
-	-Wl,--no-check-sections	\
-    -u call_user_start \
-	-Wl,-static \
-	-Wl,-Map -Wl,$(@:.out=.map) \
-	-Wl,--start-group \
-	-lmc	\
-	-lmgcc	\
-	-lmphy	\
-	-lpp	\
-	-lnet80211 \
-	-lwpa	\
-	-lmmain	\
-	$(DEP_LIBS_eagle.app.v6) \
-	-Wl,--end-group
-
-CONFIGURATION_DEFINES =	-D__ets__ \
-			-DICACHE_FLASH	\
-			-DPBUF_RSV_FOR_WLAN	\
-			-DLWIP_OPEN_SRC	\
-			-DEBUF_LWIP	\
-			-DUSE_OPEN_LWIP
-
+ifdef USE_OPEN_LWIP
+CONFIGURATION_DEFINES +=-DUSE_OPEN_LWIP
 endif 
+
+ifdef USE_OPEN_DHCPS
+CONFIGURATION_DEFINES +=-DUSE_OPEN_DHCPS
+endif 
+
 
 DEPENDS_eagle.app.v6 = \
                 $(LD_FILE) \
