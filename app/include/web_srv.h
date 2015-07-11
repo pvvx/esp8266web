@@ -156,11 +156,12 @@ typedef struct s_http_response
 //#define tcp_urlstrcpy(str, len) web_conn->msgbuflen += urlencode(&web_conn->msgbuf[web_conn->msgbuflen], str, web_conn->msgbufsize - web_conn->msgbuflen - 1, len)
 #define tcp_puts_fd(fmt, ...) do { \
 		static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
-		web_conn->msgbuflen += os_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)ets_strcpy((char *)UartDev.rcv_buff.pRcvMsgBuff, (char *)flash_str), ##__VA_ARGS__); \
+		web_conn->msgbuflen += os_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)flash_str, ##__VA_ARGS__); \
 		} while(0)
+extern unsigned int rom_xstrcpy(char * pd, void * ps);
 #define tcp_strcpy_fd(fmt) do { \
 		static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
-		web_conn->msgbuflen += ets_strlen((char *)ets_strcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)ets_strcpy((char *)UartDev.rcv_buff.pRcvMsgBuff, (char *)flash_str))); \
+		web_conn->msgbuflen += rom_xstrcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)flash_str); \
 		} while(0)
 uint32 ahextoul(uint8 *s) ICACHE_FLASH_ATTR;
 err_t webserver_init(uint16 portn) ICACHE_FLASH_ATTR;

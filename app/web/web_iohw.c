@@ -90,9 +90,6 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
         gpio_pin_intr_state_set(GPIO_TEST, GPIO_PIN_INTR_ANYEDGE);
 		GPIO_STATUS_W1TC = 1 << GPIO_TEST;
 		ets_isr_unmask(1 << ETS_GPIO_INUM);
-#if DEBUGSOO > 2
-		os_printf("Test pin ResetWiFiConfig ...\n");
-#endif
 		ets_delay_us(25000); //25 ms
 		ets_isr_mask(1 << ETS_GPIO_INUM);
 	    if(test_edge == 0) { // изменений не было
@@ -103,9 +100,6 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 	//    	flash_save_cfg(&x, ID_CFG_UART0, 0);
 	//    	flash_save_cfg(&x, ID_CFG_SYS, 0);
 	    }
-#if DEBUGSOO > 2
-	    else os_printf("No clear (%d)\n", count_gpio_test_edge);
-#endif
 	}
 	set_uartx_invx(UART0, ucfg.cfg.b.rxd_inv, UART_RXD_INV); // установить RX (GPIO3) в режим RX UART, если требуется
 }

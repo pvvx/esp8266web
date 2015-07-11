@@ -29,7 +29,7 @@
 #ifdef USE_SNTP
 #include "sntp.h"
 #endif
-#include "iram_info.h"
+#include "rom2ram.h"
 #include "sys_const.h"
 
 extern TCP_SERV_CONN * tcp2uart_conn;
@@ -370,7 +370,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 			  tcp_puts(IPSTR, IP2STR(&cur_ip));
           }
           else if(!os_memcmp((void*)cstr, "url", 3)) get_new_url(ts_conn);
-          else if(!os_memcmp((void*)cstr, "debug", 3)) tcp_puts("%u", system_get_os_print()&1); // system_set_os_print
+          else if(!os_memcmp((void*)cstr, "debug", 5)) tcp_puts("%u", system_get_os_print()&1); // system_set_os_print
           else if(!os_memcmp((void*)cstr, "const_", 6)) {
         	  cstr += 6;
         	  if(!os_memcmp((void*)cstr, "faddr", 5)) {
@@ -428,7 +428,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
         	  web_conn->web_disc_cb = (web_func_disc_cb)New_WiFi_config;
         	  web_conn->web_disc_par = WIFI_MASK_ALL;
           }
-          else if(!os_memcmp((void*)cstr, "csta", 5)) tcp_puts("%d", wifi_station_get_connect_status());
+          else if(!os_memcmp((void*)cstr, "csta", 4)) tcp_puts("%d", wifi_station_get_connect_status());
           else if(!os_memcmp((void*)cstr, "mode", 4)) tcp_puts("%d", wifi_get_opmode());
           else if(!os_memcmp((void*)cstr, "id", 2)) tcp_puts("%d", wifi_station_get_current_ap_id());
           else if(!os_memcmp((void*)cstr, "phy", 3)) tcp_puts("%d", wifi_get_phy_mode());

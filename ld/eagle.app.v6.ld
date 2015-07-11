@@ -133,10 +133,15 @@ SECTIONS
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+    . = ALIGN (4);
+    eraminfo = ABSOLUTE(.);
+    LONG(eraminfo + 8)
+    LONG(0x40108000 - 8 - eraminfo)
     _text_end = ABSOLUTE(.);
     _etext = .;
   } >iram1_0_seg :iram1_0_phdr
 
+/*
   .lit4 : ALIGN(4)
   {
     _lit4_start = ABSOLUTE(.);
@@ -145,6 +150,7 @@ SECTIONS
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
   } >iram1_0_seg :iram1_0_phdr
+*/
 
   .irom0.text : ALIGN(4)
   {

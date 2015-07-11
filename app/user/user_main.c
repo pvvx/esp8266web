@@ -12,7 +12,7 @@
 #include "wifi.h"
 #include "tcp2uart.h"
 #include "hw/spi_register.h"
-#include "iram_info.h"
+#include "rom2ram.h"
 #include "web_iohw.h"
 #include "ws2812.h"
 
@@ -119,8 +119,9 @@ void ICACHE_FLASH_ATTR user_init(void) {
 #endif
 	if(syscfg.cfg.b.pin_clear_cfg_enable) test_pin_clr_wifi_config();
 	set_cpu_clk(); // select cpu frequency 80 or 160 MHz
-	eram_init();
+	iram_buf_init();
 #if DEBUGSOO > 0
+	if(eraminfo.size > 1024) os_printf("Found free IRAM: base: %p, size: %d bytes\n", eraminfo.base,  eraminfo.size);
 	os_printf("System memory:\n");
     system_print_meminfo();
     os_printf("Current 'heap' size: %d bytes\n", system_get_free_heap_size());

@@ -8,7 +8,7 @@
 
 #include "user_config.h"
 
-#ifdef USE_OPEN_LWIP
+#if 1 //def USE_OPEN_LWIP
 
 #include "user_interface.h"
 #include "add_sdk_func.h"
@@ -25,7 +25,11 @@
 #include "netif/wlan_lwip_if.h"
 
 #define QUEUE_LEN 10
+#ifdef IP_FRAG_MAX_MTU
+#define DEFAULT_MTU IP_FRAG_MAX_MTU // (TCP_MSS+40) ?
+#else
 #define DEFAULT_MTU 1500
+#endif
 
 extern uint8 dhcps_flag;
 extern void ppRecycleRxPkt(void *esf_buf); // struct pbuf -> eb
@@ -142,7 +146,7 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn
     return myif;
 }
 
-void eagle_lwip_if_free(struct ieee80211_conn *conn)
+void ICACHE_FLASH_ATTR eagle_lwip_if_free(struct ieee80211_conn *conn)
 {
 	if(conn->dhcps_if == 0) {
 		netif_remove(conn->myif);

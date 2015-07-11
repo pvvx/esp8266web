@@ -18,7 +18,7 @@
  * copy_align4
  * копирует данные из области кеширования flash и т.д.
 *******************************************************************************/
-void copy_align4(void *ptrd, void *ptrs, uint32 len)
+void ICACHE_FLASH_ATTR copy_align4(void *ptrd, void *ptrs, uint32 len)
 {
 	union {
 		uint8 uc[4];

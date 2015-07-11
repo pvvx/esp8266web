@@ -24,6 +24,7 @@ GEN_BINS = eagle.app.v6.bin
 SUBDIRS =	\
 	main	\
 	phy		\
+	wpa		\
 	user	\
 	driver	\
 	web
@@ -51,6 +52,7 @@ endif
 COMPONENTS_eagle.app.v6 = \
 	main/libaddmmain.a	\
 	phy/libaddmphy.a	\
+	wpa/libaddwpa.a	\
 	driver/libdriver.a \
 	web/libweb.a	\
 	user/libuser.a
@@ -65,7 +67,7 @@ LINK_LIBS = \
 	-lmphy	\
 	-lpp	\
 	-lnet80211 \
-	-lwpa	\
+	-lmwpa	\
 	-lmmain	
 
 ifndef USE_OPEN_LWIP 

@@ -252,7 +252,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     		  os_memset(&wificonfig.ap.config.password, 0, sizeof(wificonfig.ap.config.password));
     		  os_memcpy(wificonfig.ap.config.password, pvar, len);
           }
-          else if(!os_memcmp((void*)cstr, "dncp", 5)) wificonfig.b.ap_dhcp_enable = val;
+          else if(!os_memcmp((void*)cstr, "dncp", 4)) wificonfig.b.ap_dhcp_enable = val;
           else if(!os_memcmp((void*)cstr, "chl", 3)) wificonfig.ap.config.channel = val;
           else if(!os_memcmp((void*)cstr, "aum", 3)) wificonfig.ap.config.authmode = val;
           else if(!os_memcmp((void*)cstr, "hssid", 5)) wificonfig.ap.config.ssid_hidden = val;
@@ -270,7 +270,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       }
       else if(!os_memcmp((void*)cstr, "st_", 3)) {
     	  cstr+=3;
-          if(!os_memcmp((void*)cstr, "dncp", 5)) wificonfig.b.st_dhcp_enable = val;
+          if(!os_memcmp((void*)cstr, "dncp", 4)) wificonfig.b.st_dhcp_enable = val;
           else if(!os_memcmp((void*)cstr, "aucn", 4)) wificonfig.st.auto_connect = val;
           if(!os_memcmp((void*)cstr, "ssid", 4)) {
         	  if(pvar[0]!='\0'){
@@ -420,7 +420,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     			web_conn->web_disc_cb = (web_func_disc_cb)webserver_init;
         		web_conn->web_disc_par = val;
     	}
-    	else if(!os_memcmp((void*)cstr,"close", 4)) {
+    	else if(!os_memcmp((void*)cstr,"close", 5)) {
 			web_conn->web_disc_cb = (web_func_disc_cb)webserver_close;
 			web_conn->web_disc_par = val;
     	}

@@ -13,7 +13,7 @@
 #include "flash.h"
 #include "wifi.h"
 #include "flash_eep.h"
-#include "iram_info.h"
+#include "rom2ram.h"
 #include "wifi_events.h"
 #if DEF_SDK_VERSION == 1019
 #include "../main/include/libmain.h"

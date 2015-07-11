@@ -35,7 +35,7 @@
 #endif
 
 #define DEF_SDK_VERSION 1200   // 1201 = 1.2.0 no path
-#define SYS_VERSION "0.3.6"
+#define SYS_VERSION "0.3.7"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
