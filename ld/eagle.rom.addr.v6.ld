@@ -361,6 +361,12 @@ PROVIDE ( printf_pbuf = 0x3FFFDD5C );
 PROVIDE ( user_start_proc = 0x3FFFDCD0 );
 PROVIDE ( dtm_params = 0x3FFFDD64 );
 
+PROVIDE ( ets_bit_task_priority = 0x3FFFC6FC );
+PROVIDE ( ets_idle_cb = 0x3FFFDAB0 );
+PROVIDE ( ets_idle_arg = 0x3FFFDAB4 ); 
+PROVIDE ( ets_bit_count_task = 0x3FFFDAB8 );
+PROVIDE ( ets_tab_task = 0x3FFFDAC0 );
+
 PROVIDE ( timer_list = 0x3FFFDDB0 );
 /*
 PROVIDE ( debug_timer = 0x3FFFDDB4 );
