@@ -9,16 +9,24 @@
 #include "hw/esp8266.h"
 #include "rom2ram.h"
 
+extern char * _text_start; // start addr IRAM 
+
+#ifndef ICACHE_RAM_ATTR
+#define ICACHE_RAM_ATTR
+#endif
+#ifndef ICACHE_FLASH_ATTR
+#define ICACHE_FLASH_ATTR
+#endif
 
 int ICACHE_FLASH_ATTR iram_buf_init(void)
 {
-	 eraminfo.size = 0x40100000 + 32768 + ((((DPORT_BASE[9]>>3)&3)==3)? 0 : 16384) - (int)eraminfo.base;
+	 eraminfo.size = (uint32)(&_text_start) + ((((DPORT_BASE[9]>>3)&3)==3)? 0x08000 : 0x0C000) - (int)eraminfo.base;
 	 ets_memset(eraminfo.base, 0, eraminfo.size);
 	 return eraminfo.size;
 }
 
 
-void copy_s4d1(unsigned char * pd, void * ps, unsigned int len)
+void ICACHE_RAM_ATTR copy_s4d1(unsigned char * pd, void * ps, unsigned int len)
 {
 	union {
 		unsigned char uc[4];
@@ -57,7 +65,7 @@ void copy_s4d1(unsigned char * pd, void * ps, unsigned int len)
 }
 
 
-void copy_s1d4(void * pd, unsigned char * ps, unsigned int len)
+void ICACHE_RAM_ATTR copy_s1d4(void * pd, unsigned char * ps, unsigned int len)
 {
 	union {
 		unsigned char uc[4];
@@ -96,7 +104,26 @@ void copy_s1d4(void * pd, unsigned char * ps, unsigned int len)
 	}
 }
 
-unsigned int rom_strlen(void * ps)
+//extern void copy_s4d1(uint8 * pd, void * ps, uint32 len);
+
+bool ICACHE_RAM_ATTR eRamRead(uint32 addr, uint8 *pd, uint32 len)
+{
+	if (addr + len > eraminfo.size) return false;
+	copy_s4d1(pd, (void *)((uint32)eraminfo.base + addr), len);
+	return true;
+}
+
+//extern void copy_s1d4(void * pd, uint8 * ps, uint32 len);
+
+bool ICACHE_RAM_ATTR eRamWrite(uint32 addr, uint8 *ps, uint32 len)
+{
+	if (addr + len > eraminfo.size) return false;
+	copy_s1d4((void *)((uint32)eraminfo.base + addr), ps, len);
+	return true;
+}
+
+
+unsigned int ICACHE_RAM_ATTR rom_strlen(void * ps)
 {
 	union {
 		unsigned char uc[4];
@@ -107,17 +134,16 @@ unsigned int rom_strlen(void * ps)
 	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
 	unsigned int xlen = (unsigned int)ps & 3;
 	while(1) {
-		tmp.ud = *p;
+		tmp.ud = *p++;
 		do {
 			if(tmp.uc[xlen++] == 0) return len;
 			len++;
-		} while((xlen & 4) == 0);
-		xlen = 0;
-		p++;
+			xlen &= 3;
+		} while(xlen);
 	}
 }
 
-char * rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
+char * ICACHE_RAM_ATTR rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
 {
 	if(pd_ == (0) || ps == (0) || maxlen == 0) return (0);
 	union {
@@ -167,7 +193,7 @@ char * rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
 	return pd_;
 }
 
-unsigned int rom_xstrcpy(char * pd, void * ps)
+unsigned int ICACHE_RAM_ATTR rom_xstrcpy(char * pd, void * ps)
 {
 	union {
 		unsigned char uc[4];
@@ -179,22 +205,38 @@ unsigned int rom_xstrcpy(char * pd, void * ps)
 	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
 	unsigned int xlen = (unsigned int)ps & 3;
 	while(1) {
-		tmp.ud = *p;
-		char ch;
+		tmp.ud = *p++;
 		do {
-			ch = *pd++ = tmp.uc[xlen++];
-			if(ch == 0) return len;
+			if((*pd++ = tmp.uc[xlen++]) == 0) return len;
 			len++;
-		} while((xlen & 4) == 0);
-		xlen = 0;
-		p++;
+			xlen &= 3;
+		} while(xlen);
+	}
+}
+
+int ICACHE_RAM_ATTR rom_cpy_label(char * pd, void * ps)
+{
+	union {
+		unsigned char uc[4];
+		unsigned int ud;
+	}tmp;
+	if(ps == 0 || pd == 0) return 0;
+	unsigned int *p = (unsigned int *)((unsigned int)ps & (~3));
+	unsigned int xlen = (unsigned int)ps & 3;
+	while(1) {
+		tmp.ud = *p++;
+		do {
+			if(tmp.uc[xlen] == 0) return 1;
+			if(tmp.uc[xlen++] != *pd || *pd++ == 0) return 0;
+			xlen &= 3;
+		} while(xlen);
 	}
 }
 
 
 #if 0
 
-char __attribute__((optimize("Os"))) get_rom_chr(const char *ps)
+char ICACHE_RAM_ATTR get_rom_chr(const char *ps)
 {
 	return (*((unsigned int *)((unsigned int)ps & (~3))))>>(((unsigned int)ps & 3) << 3);
 }
@@ -218,7 +260,7 @@ For example,
 The terminating null character is considered to be part of the string, so you can use this function get a pointer to
  the end of a string by specifying a null character as the value of the c argument. It would be better (but less
  portable) to use strchrnul in this case, though. */
-const char * rom_strchr(const char * ps, char c)
+const char * ICACHE_RAM_ATTR rom_strchr(const char * ps, char c)
 {
 	union {
 		unsigned char uc[4];
@@ -239,7 +281,7 @@ const char * rom_strchr(const char * ps, char c)
 	}
 }
 
-int rom_memcmp( void * ps, const char * pd_, unsigned int len)
+int ICACHE_RAM_ATTR rom_memcmp( void * ps, const char * pd_, unsigned int len)
 {
 	union {
 		unsigned char uc[4];
@@ -290,7 +332,7 @@ The function strrchr is like strchr, except that it searches backwards
 For example,
          strrchr ("hello, world", 'l')
               "ld"	*/
-char * ets_strrchr(const char *string, int c)
+char * ICACHE_RAM_ATTR ets_strrchr(const char *string, int c)
 {
 	union {
 		unsigned char uc[4];

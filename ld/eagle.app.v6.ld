@@ -136,7 +136,7 @@ SECTIONS
     . = ALIGN (4);
     eraminfo = ABSOLUTE(.);
     LONG(eraminfo + 8)
-    LONG(0x40108000 - 8 - eraminfo)
+    LONG(0x4010C000 - 8 - eraminfo)
     _text_end = ABSOLUTE(.);
     _etext = .;
   } >iram1_0_seg :iram1_0_phdr

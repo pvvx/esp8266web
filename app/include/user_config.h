@@ -14,7 +14,7 @@
 #ifndef ICACHE_FLASH
 	#define ICACHE_FLASH
 //	#define ICACHE_FLASH_ATTR __attribute__((section(".irom0.text")))
-//	#define ICACHE_RODATA_ATTR __attribute__((aligned(4))) __attribute__((section(".irom.text")))
+//	#define ICACHE_RODATA_ATTR __attribute__((aligned(4), section(".irom.text")))
 #endif
 
 // #define USE_OPEN_LWIP 140 // использовать OpenLwIP 1.4.0 (назначается в app/MakeFile #USE_OPEN_LWIP = 140)
