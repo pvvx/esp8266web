@@ -43,7 +43,7 @@
         {
                 WEBFS_PTR addr;          // Current address in the file system
                 uint32 bytesRem;         // How many uint8s remain in this file
-                uint16 fatID;             // ID of which file in the FAT was accessed
+                uint16 fatID;            // ID of which file in the FAT was accessed
         } WEBFS_STUB;
 
         // Indicates the method for WEBFSSeek
@@ -122,6 +122,6 @@ extern WEBFS_FAT_RECORD fatCache;
 extern WEBFS_STUB WEBFSStubs[MAX_WEBFS_OPENFILES+1];
 
 extern uint32 disk_base_addr;
-extern uint16 numFiles;
+extern uint32 numFiles;
 
 #endif

@@ -34,10 +34,10 @@
 extern uint8 dhcps_flag;
 extern void ppRecycleRxPkt(void *esf_buf); // struct pbuf -> eb
 
-uint8 * hostname;
+uint8 * hostname LWIP_DATA_IRAM_ATTR;
 bool default_hostname; //  = true;
 
-ETSEvent *lwip_if_queues[2];
+ETSEvent *lwip_if_queues[2] LWIP_DATA_IRAM_ATTR;
 
 struct netif *eagle_lwip_getif(int n);
 

@@ -21,6 +21,7 @@
 #include "wdt.h"
 #include "phy/phy.h"
 #include "sys_const.h"
+#include "rom2ram.h"
 //=============================================================================
 // Define
 //-----------------------------------------------------------------------------
@@ -35,7 +36,7 @@
 // Data
 //-----------------------------------------------------------------------------
 struct s_info info; // ip,mask,gw,mac AP, ST
-ETSTimer check_timeouts_timer; // timer_lwip
+ETSTimer check_timeouts_timer DATA_IRAM_ATTR; // timer_lwip
 uint8 user_init_flag;
 
 #if DEF_SDK_VERSION >= 1200
@@ -266,6 +267,8 @@ void ICACHE_FLASH_ATTR startup(void)
 		RTC_RAM_BASE[0x60>>2] &= 0xFFFF;
 		RTC_RAM_BASE[0x78>>2] = 0; // обнулить Espressif OR контрольку области 0..0x78 RTC_RAM
 	}
+	//
+	iram_buf_init();
 	//
 	prvHeapInit();
 	//

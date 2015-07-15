@@ -356,6 +356,7 @@ PROVIDE ( esp_exception9 = 0x400017E0 );
 PROVIDE ( SPIFlashCnfig = 0x40004568 );
 PROVIDE ( _putc1 = 0x40001dcc );
 PROVIDE ( _putc2_def = 0x400024A8 );
+PROVIDE ( base64_table = 0x3FFFD600 );
 PROVIDE ( printf_buf_len = 0x3FFFDD58 );
 PROVIDE ( printf_pbuf = 0x3FFFDD5C );
 PROVIDE ( user_start_proc = 0x3FFFDCD0 );

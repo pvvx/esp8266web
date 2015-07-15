@@ -80,6 +80,10 @@ typedef enum {
 #define ICACHE_RODATA_ATTR
 #endif
 
+#ifndef DATA_IRAM_ATTR
+#define DATA_IRAM_ATTR __attribute__((aligned(4), section(".iram.data")))
+#endif
+
 #define __forceinline __attribute__((always_inline)) inline
 
 #ifndef __cplusplus

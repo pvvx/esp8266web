@@ -19,7 +19,7 @@
 
 // Lwip funcs - http://www.ecoscentric.com/ecospro/doc/html/ref/lwip.html
 
-TCP_SERV_CFG *phcfg = NULL; // начальный указатель в памяти на структуры открытых сервачков
+TCP_SERV_CFG *phcfg DATA_IRAM_ATTR; // = NULL; // начальный указатель в памяти на структуры открытых сервачков
 
 #define mMIN(a, b)  ((a<b)?a:b)
 // пред.описание...

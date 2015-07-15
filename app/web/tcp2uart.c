@@ -25,12 +25,12 @@ void loading_rx_buf(void);	// UART->TCP
 
 #define mMIN(a, b)  ((a<b)?a:b)
 
-os_timer_t uart0_rx_buf_timer;
-os_timer_t uart0_tx_buf_timer;
-uint32 old_time_send_tx;
+os_timer_t uart0_rx_buf_timer DATA_IRAM_ATTR;
+os_timer_t uart0_tx_buf_timer DATA_IRAM_ATTR;
+uint32 old_time_send_tx DATA_IRAM_ATTR;
 
-TCP_SERV_CONN * tcp2uart_conn;
-TCP_SERV_CFG * tcp2uart_servcfg;
+TCP_SERV_CONN * tcp2uart_conn DATA_IRAM_ATTR;
+TCP_SERV_CFG * tcp2uart_servcfg DATA_IRAM_ATTR;
 //-------------------------------------------------------------------------------
 // tcp2uart_int_rxtx_disable
 //-------------------------------------------------------------------------------

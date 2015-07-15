@@ -19,6 +19,8 @@ int iram_buf_init(void);
 bool eRamRead(uint32 addr, uint8 *pd, uint32 len);
 bool eRamWrite(uint32 addr, uint8 *ps, uint32 len);
 
+char * rom_strchr(const char * ps, char c);
+
 typedef struct t_eraminfo // описание свободной области в iram
 {
 	uint32 *base;

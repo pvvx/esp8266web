@@ -12,7 +12,7 @@
 #ifdef USE_OVERLAP_MODE
 int	dual_flash_flag;
 #else
-	void *flash_read;
+	void *flash_read DATA_IRAM_ATTR;
 #endif
 //=============================================================================
 // define

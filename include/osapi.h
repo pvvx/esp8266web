@@ -23,7 +23,8 @@
 #define os_putc ets_putc
 #define os_str2macaddr ets_str2macaddr
 #define os_strcat strcat
-#define os_strchr strchr
+#define os_strchr rom_strchr
+#define os_strrchr ets_strrchr
 #define os_strcmp ets_strcmp
 #define os_strcpy ets_strcpy
 #define os_strlen ets_strlen

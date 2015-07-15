@@ -2,6 +2,7 @@
  * WEBFS.c
  * WEB File System v1.0
  ********************************************************************/
+#include "user_config.h"
 #include "c_types.h"
 #include "add_sdk_func.h"
 #include "bios/ets.h"
@@ -12,7 +13,7 @@
 
 // Supports long file names to 64 characters
 #define MAX_FILE_NAME_LEN   64 // VarNameSize
-uint32 disk_base_addr;
+uint32 disk_base_addr DATA_IRAM_ATTR;
 #define WEBFS_HEAD_ADDR disk_base_addr
 /*
  * PVFS Structure:
@@ -67,7 +68,7 @@ WEBFS_FAT_RECORD fatCache;
 static uint16 fatCacheID;
 
 // Number of files in this WEBFS image
-uint16 numFiles;
+uint32 numFiles DATA_IRAM_ATTR;
 
 
 LOCAL void _LoadFATRecord(uint16 fatID);

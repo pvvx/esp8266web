@@ -1,23 +1,10 @@
-SDK 1.1.2
    Section|                   Description| Start (hex)|   End (hex)|Used space
 ------------------------------------------------------------------------------
-      data|        Initialized Data (RAM)|    3FFE8000|    3FFE89F8|    2552
-    rodata|           ReadOnly Data (RAM)|    3FFE8A00|    3FFE9830|    3632
-       bss|      Uninitialized Data (RAM)|    3FFE9830|    3FFF2488|   35928
-      text|            Cached Code (IRAM)|    40100000|    4010520B|   21003
-irom0_text|           Uncached Code (SPI)|    40240000|    402707F4|  198644
-Total Used RAM : 42112
-Free RAM : 39808
-Free IRam : 11783 (+16384 if user_config.h: #define USE_MAX_IRAM )
-
-SDK 1.2.0
-   Section|                   Description| Start (hex)|   End (hex)|Used space
-------------------------------------------------------------------------------
-      data|        Initialized Data (RAM)|    3FFE8000|    3FFE89BC|    2492
-    rodata|           ReadOnly Data (RAM)|    3FFE89C0|    3FFE9794|    3540
-       bss|      Uninitialized Data (RAM)|    3FFE9798|    3FFF2460|   36040
-      text|            Cached Code (IRAM)|    40100000|    40104E00|   19968
-irom0_text|           Uncached Code (SPI)|    40240000|    40271714|  202516
-Total Used RAM : 42072
-Free RAM : 39848
-Free IRam : 12818 (+16384 if user_config.h: #define USE_MAX_IRAM )
+      data|        Initialized Data (RAM)|    3FFE8000|    3FFE858C|    1420
+    rodata|           ReadOnly Data (RAM)|    3FFE8590|    3FFE9264|    3284
+       bss|      Uninitialized Data (RAM)|    3FFE9268|    3FFF1E68|   35840
+      text|            Cached Code (IRAM)|    40100000|    40104C90|   19600
+irom0_text|           Uncached Code (SPI)|    40240000|    40271774|  202612
+Total Used RAM : 40544
+Free RAM : 41376
+Free IRam : 13186 (+16384 if user_config.h: #define USE_MAX_IRAM )

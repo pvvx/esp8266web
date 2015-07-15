@@ -295,7 +295,7 @@ struct ssntp {
 #endif /* SNTP_SUPPORT_MULTIPLE_SERVERS */
 };
 
-struct ssntp *sntp;
+struct ssntp *sntp DATA_IRAM_ATTR;
 
 
 /* function prototypes */

@@ -39,6 +39,12 @@
 #define __LWIPOPTS_H__
 
 #include "user_config.h"
+
+#ifdef USE_MAX_IRAM
+#define LWIP_DATA_IRAM_ATTR __attribute__((aligned(4), section(".iram.data")))
+#else
+#define LWIP_DATA_IRAM_ATTR
+#endif
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------

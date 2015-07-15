@@ -411,7 +411,8 @@ const u8_t base64_table[] = {
   '+', '/'
 };
 */
-#define base64_table ((const uint8 * )(0x3FFFD600))
+// ld: PROVIDE ( base64_table = 0x3FFFD600 );
+extern const u8_t base64_table[];
 //=============================================================================
 /** Base64 encoding */
 size_t ICACHE_FLASH_ATTR base64encode(char* target, size_t target_len, const char* source, size_t source_len)

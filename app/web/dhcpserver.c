@@ -34,7 +34,7 @@ static const uint8_t xid[4] = {0xad, 0xde, 0x12, 0x23};
 static u8_t old_xid[4] = {0};
 #define magic_cookie 0x63538263
 //static const uint8_t magic_cookie[4] = {99, 130, 83, 99};
-static struct udp_pcb *pcb_dhcps = NULL;
+static struct udp_pcb *pcb_dhcps LWIP_DATA_IRAM_ATTR; // = NULL;
 static struct ip_addr broadcast_dhcps;
 static struct ip_addr server_address;
 static struct ip_addr client_address;
@@ -44,7 +44,7 @@ struct dhcps_state s;
 
 struct dhcps_lease dhcps_lease;
 bool dhcps_lease_flag = true;
-static list_node *plist = NULL;
+static list_node *plist LWIP_DATA_IRAM_ATTR; // = NULL;
 /******************************************************************************
  * FunctionName : node_insert_to_list
  * Description  : insert the node to the list

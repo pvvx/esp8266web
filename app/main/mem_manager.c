@@ -146,18 +146,18 @@ block must by correctly byte aligned. */
 //static size_t xTotalHeapSize;
 
 /* Create a couple of list links to mark the start and end of the list. */
-static xBlockLink xStart, *pxEnd = NULL;
+static xBlockLink xStart, *pxEnd DATA_IRAM_ATTR; // = NULL;
 
 /* Keeps track of the number of free bytes remaining, but says nothing about
 fragmentation. */
 //static size_t xFreeBytesRemaining = ( ( size_t ) heapADJUSTED_HEAP_SIZE ) & ( ( size_t ) ~portBYTE_ALIGNMENT_MASK );
-static size_t xFreeBytesRemaining;
+static size_t xFreeBytesRemaining DATA_IRAM_ATTR;
 
 /* Gets set to the top bit of an size_t type.  When this bit in the xBlockSize 
 member of an xBlockLink structure is set then the block belongs to the 
 application.  When the bit is free the block is still part of the free heap
 space. */
-static size_t xBlockAllocatedBit = 0;
+static size_t xBlockAllocatedBit DATA_IRAM_ATTR;// = 0;
 
 /*-----------------------------------------------------------*/
 

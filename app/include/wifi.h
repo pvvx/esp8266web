@@ -120,8 +120,11 @@ struct bss_scan_info { // структуры, сохранямые для выв
     uint8 is_hidden;
 };
 
-#define total_scan_infos (*eraminfo.base) // #include "flash_header.h"
-#define ptr_scan_infos ((uint8 *)eraminfo.base + 4) // #include "flash_header.h"
+//#define total_scan_infos (*eraminfo.base) // #include "flash_header.h"
+//#define ptr_scan_infos ((uint8 *)eraminfo.base + 4) // #include "flash_header.h"
+#define max_scan_bss 32
+extern uint32 total_scan_infos;
+extern struct bss_scan_info buf_scan_infos[max_scan_bss];
 
 extern struct wifi_config wificonfig;
 

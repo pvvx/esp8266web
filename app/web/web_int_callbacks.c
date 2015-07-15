@@ -112,7 +112,7 @@ void ICACHE_FLASH_ATTR web_wscan_xml(TCP_SERV_CONN *ts_conn)
     }
 	while(web_conn->msgbuflen + 96 + 32 <= web_conn->msgbufsize) {
 	    if(web_conn->udata_start < total_scan_infos) {
-	    	struct bss_scan_info *p = (struct bss_scan_info *)ptr_scan_infos;
+	    	struct bss_scan_info *p = (struct bss_scan_info *)buf_scan_infos;
 	    	p += web_conn->udata_start;
 	    	ets_memcpy(&si, p, sizeof(si));
 /*

@@ -23,6 +23,7 @@
 #include "hw/esp8266.h"
 #include "sys_const.h"
 #include "wifi.h"
+#include "rom2ram.h"
 #ifdef WEBSOCKET_ENA
 #include "websocket.h"
 #endif

@@ -59,14 +59,14 @@
 
 
 /** The one and only timeout list */
-static struct sys_timeo *next_timeout = NULL;
+static struct sys_timeo *next_timeout LWIP_DATA_IRAM_ATTR; // = NULL;
 #if NO_SYS
-static u32_t timeouts_last_time;
+static u32_t timeouts_last_time LWIP_DATA_IRAM_ATTR;
 #endif /* NO_SYS */
 
 #if LWIP_TCP
 /** global variable that shows if the tcp timer is currently scheduled or not */
-static int tcpip_tcp_timer_active;
+static int tcpip_tcp_timer_active LWIP_DATA_IRAM_ATTR;
 
 /**
  * Timer callback function that calls tcp_tmr() and reschedules itself.

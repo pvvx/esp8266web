@@ -66,7 +66,7 @@
 
 /* The list of UDP PCBs */
 /* exported in udp.h (was static) */
-struct udp_pcb *udp_pcbs;
+struct udp_pcb *udp_pcbs LWIP_DATA_IRAM_ATTR;
 
 /**
  * Process an incoming UDP datagram.

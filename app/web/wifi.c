@@ -415,6 +415,9 @@ bool ICACHE_FLASH_ATTR wifi_read_fcfg(void)
  *                status -- scan status
  * Returns      : none
 *******************************************************************************/
+uint32 total_scan_infos DATA_IRAM_ATTR;
+struct bss_scan_info buf_scan_infos[max_scan_bss] DATA_IRAM_ATTR;
+
 LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 {
 #if DEBUGSOO > 1
@@ -426,9 +429,9 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 		struct bss_info * bss_link = (struct bss_info *) arg;
 		bss_link = bss_link->next.stqe_next;
 		int total_scan = 0;
-		int max_scan = eraminfo.size / (sizeof(struct bss_scan_info));
-		uint8 *ptr = ptr_scan_infos;
-		while (bss_link != NULL && total_scan < max_scan) {
+//		int max_scan =  eraminfo.size / (sizeof(struct bss_scan_info));
+		uint8 *ptr = (uint8 *)&buf_scan_infos; // ptr_scan_infos;
+		while (bss_link != NULL && total_scan < max_scan_bss) {
 			ets_memcpy(ptr, &bss_link->bssid, sizeof(struct bss_scan_info));
 			ptr += sizeof(struct bss_scan_info);
 			total_scan++;
@@ -442,7 +445,7 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 		}
 		total_scan_infos = total_scan;
 #if DEBUGSOO > 1
-		os_printf("Found %d APs, saved in iram:%p\n", total_scan_infos, ptr_scan_infos );
+		os_printf("Found %d APs, saved in iram:%p\n", total_scan_infos, buf_scan_infos );
 #endif
 	}
 	if(wifi_get_opmode() != wificonfig.b.mode) {

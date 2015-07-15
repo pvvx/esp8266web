@@ -14,7 +14,7 @@
 #include "hw/spi_register.h"
 #include "flash.h"
 
-user_spi_flash_read flash_read;
+user_spi_flash_read flash_read DATA_IRAM_ATTR;
 //=============================================================================
 // overlap_hspi_read_data()
 //-----------------------------------------------------------------------------

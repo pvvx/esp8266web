@@ -62,7 +62,7 @@ COMPONENTS_eagle.app.v6 +=	lwip/liblwip.a
 endif
 
 LINK_LIBS = \
-	-lmc	\
+    -lmicroc \
 	-lmgcc	\
 	-lmphy	\
 	-lpp	\

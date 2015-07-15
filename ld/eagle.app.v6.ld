@@ -141,16 +141,16 @@ SECTIONS
     _etext = .;
   } >iram1_0_seg :iram1_0_phdr
 
-/*
   .lit4 : ALIGN(4)
   {
     _lit4_start = ABSOLUTE(.);
+    *(.iram.data)
     *(*.lit4)
     *(.lit4.*)
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
   } >iram1_0_seg :iram1_0_phdr
-*/
+
 
   .irom0.text : ALIGN(4)
   {

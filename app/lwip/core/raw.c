@@ -53,7 +53,7 @@
 #include <string.h>
 
 /** The list of RAW PCBs */
-static struct raw_pcb *raw_pcbs;
+static struct raw_pcb *raw_pcbs LWIP_DATA_IRAM_ATTR;
 
 /**
  * Determine if in incoming IP packet is covered by a RAW PCB

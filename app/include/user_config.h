@@ -21,7 +21,7 @@
 // #define USE_OPEN_DHCPS 1	 // использовать исходник или либу из SDK (назначается в app/MakeFile #USE_OPEN_DHCP = 1)
 
 #ifndef USE_MAX_IRAM
-	#define USE_MAX_IRAM  48k // использовать часть cache под IRAM, IRAM size = 49152 байт
+	#define USE_MAX_IRAM  48 // использовать часть cache под IRAM, IRAM size = 49152 байт
 #endif
 
 //#define USE_OVERLAP_MODE // используются две и более flash

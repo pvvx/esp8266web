@@ -99,12 +99,12 @@
  * The interface that provided the packet for the current callback
  * invocation.
  */
-struct netif *current_netif;
+struct netif *current_netif LWIP_DATA_IRAM_ATTR;
 
 /**
  * Header of the input packet currently being processed.
  */
-const struct ip_hdr *current_header;
+const struct ip_hdr *current_header LWIP_DATA_IRAM_ATTR;
 /** Source IP address of current_header */
 ip_addr_t current_iphdr_src;
 /** Destination IP address of current_header */

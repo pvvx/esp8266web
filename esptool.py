@@ -417,7 +417,7 @@ class ELFFile:
         if fname == None:
                   fname = '.'
         fname += '\\eagle.app.sym'
-        cmd = 'C:\\Espressif\\xtensa-lx106-elf\\bin\\xtensa-lx106-elf-nm.exe -g ' + self.name + ' >'+fname
+        cmd = 'C:\\Espressif\\xtensa-lx106-elf\\bin\\xtensa-lx106-elf-nm.exe ' + self.name + ' >'+fname
         print cmd
         os.system(cmd)
         fps = file(fname)
