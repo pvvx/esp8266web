@@ -2,9 +2,9 @@
 ------------------------------------------------------------------------------
       data|        Initialized Data (RAM)|    3FFE8000|    3FFE858C|    1420
     rodata|           ReadOnly Data (RAM)|    3FFE8590|    3FFE9264|    3284
-       bss|      Uninitialized Data (RAM)|    3FFE9268|    3FFF1E68|   35840
+       bss|      Uninitialized Data (RAM)|    3FFE9268|    3FFEFF48|   27872
       text|            Cached Code (IRAM)|    40100000|    40104C90|   19600
 irom0_text|           Uncached Code (SPI)|    40240000|    40271774|  202612
-Total Used RAM : 40544
-Free RAM : 41376
+Total Used RAM : 32576
+Free RAM : 49344
 Free IRam : 13186 (+16384 if user_config.h: #define USE_MAX_IRAM )
