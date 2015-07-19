@@ -126,18 +126,12 @@ endef
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@echo "------------------------------------------------------------------------------"
 	@mkdir -p ../$(FIRMWAREDIR)
-	@echo "FW ../$(FIRMWAREDIR)/$(ADDR_FW1).bin + ../$(FIRMWAREDIR)/$(ADDR_FW2).bin"
 	@$(ESPTOOL) elf2image -o ../$(FIRMWAREDIR)/ $(GENIMAGEOPTION) $<
 	@echo "------------------------------------------------------------------------------"
 	@echo "Add rapid_loader:"
 	@mv -f ../bin/$(ADDR_FW1).bin ../bin/0.bin 
 	@dd if=../bin/rapid_loader.bin >../bin/$(ADDR_FW1).bin
 	@dd if=../bin/0.bin >>../bin/$(ADDR_FW1).bin
-	@echo "------------------------------------------------------------------------------"
-	@$(SDK_TOOLS)/memanalyzer.exe $(OBJDUMP).exe $<
-	@echo "------------------------------------------------------------------------------"
-
-	
 	
 #	$(ESPTOOL-CK) -eo $< -bo $(FIRMWAREDIR)/$(ADDR_FW1).bin -bs .text -bs .data -bs .rodata -bc -ec
 #	$(ESPTOOL-CK) -eo $< -es .irom0.text $(FIRMWAREDIR)/$(ADDR_FW2).bin -ec

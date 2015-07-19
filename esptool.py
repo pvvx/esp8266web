@@ -413,20 +413,15 @@ class ELFFile:
         if self.symbols is not None:
             return
         self.symbols = {}
-        fname = os.getenv('TEMP');
-        if fname == None:
-                  fname = '.'
-        fname += '\\eagle.app.sym'
-        cmd = 'C:\\Espressif\\xtensa-lx106-elf\\bin\\xtensa-lx106-elf-nm.exe ' + self.name + ' >'+fname
-        print cmd
-        os.system(cmd)
-        fps = file(fname)
-        if fps is None:
-            print "open sym file error\n"
-            exit(1)
-        lines = fps.readlines()
-        fps.close()
-        for l in lines:
+        try:
+            tool_nm = "C:\\Espressif\\xtensa-lx106-elf\\bin\\xtensa-lx106-elf-nm.exe"
+            if os.getenv('XTENSA_CORE')=='lx106':
+              tool_nm = "xt-nm"
+            proc = subprocess.Popen([tool_nm, self.name], stdout=subprocess.PIPE)
+        except OSError:
+            print "Error calling "+tool_nm+", do you have Xtensa toolchain in PATH?"
+            sys.exit(1)
+        for l in proc.stdout:
            fields = l.strip().split()
            try:
               self.symbols[fields[2]] = int(fields[0], 16)
@@ -434,6 +429,10 @@ class ELFFile:
               pass  
            except Exception as ex:
               pass 
+
+    def get_symbol_addr(self, sym):
+        self._fetch_symbols()
+        return self.symbols[sym]
 
     def get_symbol_addr(self, sym):
         self._fetch_symbols()
@@ -674,11 +673,10 @@ if __name__ == '__main__':
         e = ELFFile(args.input)
         image = ESPFirmwareImage()
         image.entrypoint = e.get_symbol_addr(args.entry_symbol)
-        print args.entry_symbol+':\t\t\t\t\t0x%08x' % (image.entrypoint)
+       
         for section, start in ((".text", "_text_start"), (".data", "_data_start"), (".rodata", "_rodata_start")):
             data = e.load_section(section)
             image.add_segment(e.get_symbol_addr(start), data)
-            print section+':   \t\t'+start+':\t\t0x%08x' % (e.get_symbol_addr(start))
 
         image.flash_mode = {'qio':0, 'qout':1, 'dio':2, 'dout': 3}[args.flash_mode]
         image.flash_size_freq = {'4m':0x00, '2m':0x10, '8m':0x20, '16m':0x30, '32m':0x40, '16m-c1': 0x50, '32m-c1':0x60, '32m-c2':0x70}[args.flash_size]
@@ -691,6 +689,22 @@ if __name__ == '__main__':
         f = open(args.output + "0x%05x.bin" % off, "wb")
         f.write(data)
         f.close()
+        print "{0:>10}|{1:>30}|{2:>12}|{3:>12}|{4:>8}".format("Section", "Description", "Start (hex)", "End (hex)", "Used space")         
+        print "------------------------------------------------------------------------------"
+        sec_name = ["data", "rodata", "bss", "text", "irom0_text"]
+        sec_des = ["Initialized Data (RAM)", "ReadOnly Data (RAM)", "Uninitialized Data (RAM)", "Uncached Code (IRAM)", "Cached Code (SPI)"]
+        sec_size = []
+        for i in range(len(sec_name)):
+         ss = e.get_symbol_addr('_' + sec_name[i] + '_start')
+         se = e.get_symbol_addr('_' + sec_name[i] + '_end')
+         sec_size.append(int(se-ss))
+         print "{0:>10}|{1:>30}|{2:>12X}|{3:>12X}|{4:>8d}".format(sec_name[i], sec_des[i], ss, se, sec_size[i])
+        print "------------------------------------------------------------------------------"
+        print "{0} : {1:X} {2}()".format("Entry Point", image.entrypoint, args.entry_symbol)
+        ram_used = sec_size[0] + sec_size[1] + sec_size[2]
+        print "{0} : {1:d}".format("Total Used RAM", ram_used)
+        print "{0} : {1:d}".format("Free RAM", 0x014000 - ram_used)
+        print "{0} : {1:d}".format("Free IRam", 0x08000 - sec_size[3])
 
     elif args.operation == 'read_mac':
         esp.get_mac()
