@@ -704,7 +704,7 @@ if __name__ == '__main__':
         ram_used = sec_size[0] + sec_size[1] + sec_size[2]
         print "{0} : {1:d}".format("Total Used RAM", ram_used)
         print "{0} : {1:d}".format("Free RAM", 0x014000 - ram_used)
-        print "{0} : {1:d}".format("Free IRam", 0x08000 - sec_size[3])
+        print "{0} : {1:d} or {2:d} if 48k IRam".format("Free IRam", 0x08000 - sec_size[3], 0x0C000 - sec_size[3] )
 
     elif args.operation == 'read_mac':
         esp.get_mac()
