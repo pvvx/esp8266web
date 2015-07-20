@@ -52,7 +52,7 @@ var AUTH = {
 var cfg = { wifi_st_aucn: "~wifi_aucn~" };
 setFormValues(document.forms[0], cfg);
 var startTime = new Date();
-newAJAXCommand('web.cgi?wifi_scan=1');
+newAJAXCommand('/web.cgi?wifi_scan=1');
 setTimeout("newAJAXCommand('scan.xml', updateScan)", 2500);
 function updateScan(xmlData) {
 	if(!xmlData) return;
@@ -61,7 +61,7 @@ function updateScan(xmlData) {
 		if((new Date()-startTime)>10000) {
 			startTime = new Date();
 			$('scanResult').innerHTML="Scan failed. Try again.";
-			newAJAXCommand('web.cgi?wifi_scan=1');
+			newAJAXCommand('/web.cgi?wifi_scan=1');
 		}
 		else newAJAXCommand('scan.xml', updateScan);
 		return;
