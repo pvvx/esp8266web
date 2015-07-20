@@ -10,10 +10,10 @@
 
 void copy_s4d1(unsigned char * pd, void * ps, unsigned int len);
 void copy_s1d4(void * pd, unsigned char * ps, unsigned int len);
-unsigned int rom_strlen(void * ps);
+unsigned int rom_strlen(const char * ps);
 char * rom_strcpy(char * pd_, void * ps, unsigned int maxlen);
-unsigned int rom_xstrcpy(char * pd, void * ps);
-int rom_cpy_label(char * pd, void * ps);
+unsigned int rom_xstrcpy(char * pd, const char * ps);
+int rom_xstrcmp(char * pd, const char * ps);
 
 int iram_buf_init(void);
 bool eRamRead(uint32 addr, uint8 *pd, uint32 len);
@@ -26,6 +26,10 @@ typedef struct t_eraminfo // описание свободной области 
 	uint32 *base;
 	int32 size;
 }ERAMInfo;
+
+//#define get_rom_chr(a) (*((*((unsigned int *)((unsigned int)a & (~3))))>>(((unsigned int)a & 3) << 3)))
+char get_iram_chr(const char *ps);
+void write_iram_chr(unsigned char *pd, unsigned char c);
 
 extern ERAMInfo eraminfo;
 

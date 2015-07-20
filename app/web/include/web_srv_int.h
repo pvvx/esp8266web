@@ -17,8 +17,6 @@
 
 // lifetime (sec) of static responses as string 60*60*24*14=1209600"
 #define FILE_CACHE_MAX_AGE_SEC  3600 // время для кеша файлов, ставить 0 пока тест!
-#define HTTP_DEFAULT_FILE		"index.htm"
-#define sizeHTTP_DEFAULT_FILE	9
 
 #define MAX_HTTP_HEAD_BUF 3070 // максимальный размер HTTP запроса (GET)
 
@@ -31,8 +29,6 @@
 
 #define HTTP_SEND_SIZE 384 // минимальный размер буфера для передачи заголовка HTTP
 #define SCB_SEND_SIZE  128 // минимальный резерв в буфере для callback
-
-#define ProtectedFilesName		"protect"
 
 #define  webfile bffiles[0]        // File pointer for main file
 

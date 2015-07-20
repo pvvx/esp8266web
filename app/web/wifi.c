@@ -25,10 +25,17 @@
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 struct wifi_config wificonfig;
+
+static const char wifi_ap_name[] ICACHE_RODATA_ATTR = WIFI_AP_NAME;
+static const char wifi_ap_password[] ICACHE_RODATA_ATTR = WIFI_AP_PASSWORD;
+static const char wifi_st_name[] ICACHE_RODATA_ATTR = WIFI_ST_NAME;
+static const char wifi_st_password[] ICACHE_RODATA_ATTR = WIFI_ST_PASSWORD;
+
 /******************************************************************************
  * FunctionName : read_macaddr_from_otp
  ******************************************************************************/
-void ICACHE_FLASH_ATTR get_macaddr_from_otp(uint8 *mac)
+#if 0 // in system/app_main.c 
+void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 {
 	mac[0] = 0x18;
 	mac[1] = 0xfe;
@@ -45,6 +52,7 @@ void ICACHE_FLASH_ATTR get_macaddr_from_otp(uint8 *mac)
 		mac[5] = (OTP_MAC0 >> 24) & 0xff;
 	}
 }
+#endif
 /******************************************************************************
  * FunctionName : Cmp_wifi_chg
  ******************************************************************************/
@@ -270,9 +278,8 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	if (wset.b.sleep)
 		wcfg->b.sleep = NONE_SLEEP_T; // LIGHT_SLEEP_T; // NONE_SLEEP_T MODEM_SLEEP_T
 	if (wset.b.ap_config) {
-		wcfg->ap.config.ssid_len = os_sprintf(wcfg->ap.config.ssid,
-		WIFI_AP_NAME);
-		os_sprintf(wcfg->ap.config.password, WIFI_AP_PASSWORD);
+		wcfg->ap.config.ssid_len = rom_xstrcpy(wcfg->ap.config.ssid, wifi_ap_name);
+		rom_xstrcpy(wcfg->ap.config.password, wifi_ap_password);
 		wcfg->ap.config.authmode = AUTH_OPEN;
 		wcfg->ap.config.ssid_hidden = 0; // no
 		wcfg->ap.config.channel = wcfg->b.chl;
@@ -293,8 +300,8 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 		wcfg->b.ap_dhcp_enable = 1; // enable
 	//}
 	if (wset.b.st_config) {
-		os_sprintf(wcfg->st.config.ssid, WIFI_ST_NAME);
-		os_sprintf(wcfg->st.config.password, WIFI_ST_PASSWORD);
+		rom_xstrcpy(wcfg->st.config.ssid,wifi_st_name);
+		rom_xstrcpy(wcfg->st.config.password, wifi_st_password);
 		wcfg->st.config.bssid_set = 0;
 		os_memset(wcfg->st.config.bssid, 0xff, sizeof(wificonfig.st.config.bssid));
 	}
@@ -304,10 +311,10 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	if (wset.b.st_autocon)
 		wcfg->st.auto_connect = WIFI_ST_AUTOCONNECT;
 	if (wset.b.ap_macaddr)
-		get_macaddr_from_otp(wcfg->ap.macaddr);
+		read_macaddr_from_otp(wcfg->ap.macaddr);
 	    wcfg->ap.macaddr[0]+=2;
 	if (wset.b.st_macaddr) {
-		get_macaddr_from_otp(wcfg->st.macaddr);
+		read_macaddr_from_otp(wcfg->st.macaddr);
 	}
 	//}
 }

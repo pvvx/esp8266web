@@ -36,7 +36,7 @@ endif
 # Required for each makefile to inherit from the parent
 #
 
-INCLUDES := $(INCLUDES) -I $(PDIR)include
+#INCLUDES := $(INCLUDES) -I $(PDIR)include
 INCLUDES += -I ./include
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile

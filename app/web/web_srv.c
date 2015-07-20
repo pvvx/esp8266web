@@ -13,7 +13,7 @@
 #include "osapi.h"
 #include "lwip/tcp.h"
 #include "user_interface.h"
-#include "WEBFS1.h"
+#include "webfs.h"
 #include "tcp_srv_conn.h"
 #include "web_srv_int.h"
 #include "web_utils.h"
@@ -51,6 +51,12 @@ LOCAL void web_int_disconnect(TCP_SERV_CONN *ts_conn)  ICACHE_FLASH_ATTR;
 LOCAL bool webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
 LOCAL bool web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint16 data_len) ICACHE_FLASH_ATTR;
 LOCAL void webserver_file_ext(HTTP_CONN *CurHTTP, uint8 *pfname) ICACHE_FLASH_ATTR;
+
+const char http_default_file[] ICACHE_RODATA_ATTR = "index.htm";
+const char web_cgi_fname[] ICACHE_RODATA_ATTR = "web.cgi";
+const char fsupload_fname[] ICACHE_RODATA_ATTR = "fsupload";
+#define ProtectedFilesName		"protect"
+
 /****************************************************************************
   Section:
         File and Content Type Settings
@@ -76,7 +82,7 @@ static const char *httpFileExtensions[] = {
 };
 
 // Content-type strings corresponding to HTTP_FILE_TYPE
-const char *httpContentTypes[] = {
+static const char *httpContentTypes[] = {
 	"text/plain",               // HTTP_TXT       "txt",
 	"text/html",                // HTTP_HTM       "htm",
     "magnus-internal/cgi",      // HTTP_CGI       "cgi",
@@ -98,14 +104,37 @@ const char *httpContentTypes[] = {
   Section:
         Commands and Server Responses
   ***************************************************************************/
+const char HTTPresponse_200_head[] ICACHE_RODATA_ATTR = "OK";
+const char HTTPresponse_302_head[] ICACHE_RODATA_ATTR = "Found";
+const char HTTPresponse_304_head[] ICACHE_RODATA_ATTR = "Not Modified";
+const char HTTPresponse_400_head[] ICACHE_RODATA_ATTR = "Bad Request";
+const char HTTPresponse_401_head[] ICACHE_RODATA_ATTR = "Unauthorized\r\nWWW-Authenticate: Basic realm=\"Protected\"";
+const char HTTPresponse_404_head[] ICACHE_RODATA_ATTR = "Not found";
+const char HTTPresponse_411_head[] ICACHE_RODATA_ATTR = "Length Required";
+const char HTTPresponse_413_head[] ICACHE_RODATA_ATTR = "Request Entity Too Large";
+const char HTTPresponse_414_head[] ICACHE_RODATA_ATTR = "Request-URI Too Long";
+const char HTTPresponse_418_head[] ICACHE_RODATA_ATTR = "I'm a teapot";
+const char HTTPresponse_429_head[] ICACHE_RODATA_ATTR = "Too Many Requests\r\nRetry-After: 30";
+const char HTTPresponse_500_head[] ICACHE_RODATA_ATTR = "Internal Server Error";
+const char HTTPresponse_501_head[] ICACHE_RODATA_ATTR = "Not Implemented\r\nAllow: GET, POST";
+
+const char HTTPresponse_401_content[] ICACHE_RODATA_ATTR = "401 Unauthorized: Password required\r\n";
+const char HTTPresponse_404_content[] ICACHE_RODATA_ATTR = "404: File not found\r\n";
+const char HTTPresponse_411_content[] ICACHE_RODATA_ATTR = "411 The request must have a content length\r\n";
+const char HTTPresponse_413_content[] ICACHE_RODATA_ATTR = "413 Request Entity Too Large: There's too many letters :)\r\n";
+const char HTTPresponse_414_content[] ICACHE_RODATA_ATTR = "414 Request-URI Too Long: Buffer overflow detected\r\n";
+const char HTTPresponse_418_content[] ICACHE_RODATA_ATTR = "418: Out of Coffee\r\n";
+const char HTTPresponse_500_content[] ICACHE_RODATA_ATTR = "500 Internal Server Error\r\n";
+const char HTTPresponse_501_content[] ICACHE_RODATA_ATTR = "501 Not Implemented: Only GET and POST supported\r\n";
+
 // Initial response strings (Corresponding to HTTP_STATUS)
-const HTTP_RESPONSE HTTPResponse[] = {
+static const HTTP_RESPONSE ICACHE_RODATA_ATTR HTTPResponse[] ICACHE_RODATA_ATTR = {
         { 200, HTTP_RESP_FLG_NONE,
-                "OK",
+        		HTTPresponse_200_head,
                 NULL },
          // успешный запрос. Если клиентом были запрошены какие-либо данные, то они находятся в заголовке и/или теле сообщения.
         { 302, HTTP_RESP_FLG_NONE | HTTP_RESP_FLG_REDIRECT,
-                "Found",
+        		HTTPresponse_302_head,
                 NULL },
 // "HTTP/1.1 302 Found\r\nConnection: close\r\nLocation: ",
          // 302 Found, 302 Moved Temporarily - запрошенный документ временно
@@ -114,31 +143,31 @@ const HTTP_RESPONSE HTTPResponse[] = {
          // согласовании содержимого. Некоторые клиенты некорректно ведут себя
          // при обработке данного кода.
         { 304, HTTP_RESP_FLG_NONE,
-                "Not Modified",
+        		HTTPresponse_304_head,
                 NULL },
 ///"304 Redirect: ",   // If-Modified-Since If-None-Match
          // сервер возвращает такой код, если клиент запросил документ методом GET,
          // использовал заголовок If-Modified-Since или If-None-Match и документ
          // не изменился с указанного момента. При этом сообщение сервера не должно содержать тела.
         { 400, HTTP_RESP_FLG_FINDFILE,
-                "Bad Request",
+        		HTTPresponse_400_head,
                 NULL} ,
          // сервер обнаружил в запросе клиента синтаксическую ошибку.
         { 401, HTTP_RESP_FLG_FINDFILE,
-                "Unauthorized\r\nWWW-Authenticate: Basic realm=\"Protected\"",
-                "401 Unauthorized: Password required\r\n" },
+        		HTTPresponse_401_head,
+				HTTPresponse_401_content },
          // для доступа к запрашиваемому ресурсу требуется аутентификация.
          // В заголовке ответ должен содержать поле WWW-Authenticate с перечнем
          // условий аутентификации. Клиент может повторить запрос,
          // включив в заголовок сообщения поле Authorization с требуемыми для аутентификации данными.
 //"HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n403 Forbidden: SSL Required - use HTTPS\r\n"
         { 404, HTTP_RESP_FLG_FINDFILE,
-                "Not found",
-                "404: File not found\r\n" },
+        		HTTPresponse_404_head,
+				HTTPresponse_404_content },
          // Сервер понял запрос, но не нашёл соответствующего ресурса по указанному URI.
         { 411, HTTP_RESP_FLG_FINDFILE,
-                "Length Required",
-                "411 The request must have a content length\r\n" },
+        		HTTPresponse_411_head,
+				HTTPresponse_411_content },
          // для указанного ресурса клиент должен указать Content-Length в заголовке запроса.
          // Без указания этого поля не стоит делать повторную попытку запроса к серверу по данному URI.
          // Такой ответ естественен для запросов типа POST и PUT.
@@ -147,35 +176,35 @@ const HTTP_RESPONSE HTTPResponse[] = {
          // Content-Length и сразу отказать в загрузке, чем провоцировать бессмысленную нагрузку,
          // разрывая соединение, когда клиент действительно пришлёт слишком объёмное сообщение.
         { 413, HTTP_RESP_FLG_FINDFILE,
-                "Request Entity Too Large",
-                "413 Request Entity Too Large: There's too many letters :)" },
+        		HTTPresponse_413_head,
+				HTTPresponse_413_content },
          // возвращается в случае, если сервер отказывается обработать запрос
          // по причине слишком большого размера тела запроса. Сервер может закрыть соединение,
          // чтобы прекратить дальнейшую передачу запроса.
         { 414, HTTP_RESP_FLG_FINDFILE,
-                "Request-URI Too Long",
-                "414 Request-URI Too Long: Buffer overflow detected\r\n" },
+        		HTTPresponse_414_head,
+				HTTPresponse_414_content },
          // сервер не может обработать запрос из-за слишком длинного указанного URL.
          // Такую ошибку можно спровоцировать, например, когда клиент пытается передать длинные
          // параметры через метод GET, а не POST.
         { 429, HTTP_RESP_FLG_NONE,
-                "Too Many Requests\r\nRetry-After: 30",
+        		HTTPresponse_429_head,
                 NULL },
          // клиент попытался отправить слишком много запросов за короткое время, что может указывать,
          // например, на попытку DoS-атаки. Может сопровождаться заголовком Retry-After, указывающим,
          // через какое время можно повторить запрос.
         { 501, HTTP_RESP_FLG_FINDFILE,
-                "Not Implemented\r\nAllow: GET, POST",
-                "501 Not Implemented: Only GET and POST supported\r\n" },
+        		HTTPresponse_501_head,
+				HTTPresponse_501_content },
          // сервер не поддерживает возможностей, необходимых для обработки запроса.
          // Типичный ответ для случаев, когда сервер не понимает указанный в запросе метод. + см 405
         { 418, HTTP_RESP_FLG_FINDFILE,
-                "I'm a teapot",
-                "418: Out of Coffee\r\n" },
+        		HTTPresponse_418_head,
+				HTTPresponse_418_content },
          // http://en.wikipedia.org/wiki/Hyper_Text_Coffee_Pot_Control_Protocol
 		{ 500, HTTP_RESP_FLG_END,
-				"Internal Server Error",
-		        "500 Internal Server Error\r\n" }
+				HTTPresponse_500_head,
+				HTTPresponse_500_content }
 		// любая внутренняя ошибка сервера, которая не входит в рамки остальных ошибок класса.
 };
 /*
@@ -187,38 +216,39 @@ const HTTP_RESPONSE HTTPResponse[] = {
 #endif
 */
 
-		const char HTTPsfupload[] ICACHE_RODATA_ATTR = "<html><body style='margin:100px'><form method='post' action='/fsupload' enctype='multipart/form-data'><b>File Upload</b><p><input type='file' name='file' size=40> <input type='submit' value='Upload'></form></body></html>";
-		const char HTTPdefault[] ICACHE_RODATA_ATTR = "<html><h3>ESP8266 Built-in Web server <sup><i>&copy</i></sup></h3></html>";
+const char HTTPsfupload[] ICACHE_RODATA_ATTR = "<html><body style='margin:100px'><form method='post' action='/fsupload' enctype='multipart/form-data'><b>File Upload</b><p><input type='file' name='file' size=40> <input type='submit' value='Upload'></form></body></html>";
+const char HTTPdefault[] ICACHE_RODATA_ATTR = "<html><h3>ESP8266 Built-in Web server <sup><i>&copy</i></sup></h3></html>";
 
-		#define sizeHTTPsfupload 220
-	    #define sizeHTTPdefault 73
+#define sizeHTTPsfupload 220
+#define sizeHTTPdefault 73
 
 //        const uint8 *HTTPCacheControl = "Cache-Control:";
-        const char *HTTPContentLength = "Content-Length:";
-        #define sizeHTTPContentLength 15
+const char *HTTPContentLength = "Content-Length:";
+#define sizeHTTPContentLength 15
 //        const uint8 *HTTPConnection = "Connection: ";
 //        #define sizeHTTPConnection 12
 //        const uint8 *HTTPkeepalive = "keep-alive";
 //        #define sizeHTTPkeepalive 10
 //        const uint8 *HTTPIfNoneMatch = "If-None-Match:"
 //        #define sizeHTTPIfNoneMatch 14
-        const char *HTTPContentType = "Content-Type:";
-		#define sizeHTTPContentType 13
-        const char *HTTPmultipartformdata = "multipart/form-data";
-		#define sizeHTTPmultipartformdata 19
-        const char *HTTPboundary = "boundary=";
-		#define sizeHTTPboundary 9
-        const char *HTTPAuthorization = "Authorization:";
-        #define sizeHTTPAuthorization 14
-        const char *HTTPCookie = "Cookie:";
-		#define sizeHTTPCookie 7
+const char *HTTPContentType = "Content-Type:";
+#define sizeHTTPContentType 13
+const char *HTTPmultipartformdata = "multipart/form-data";
+#define sizeHTTPmultipartformdata 19
+const char *HTTPboundary = "boundary=";
+#define sizeHTTPboundary 9
+const char *HTTPAuthorization = "Authorization:";
+#define sizeHTTPAuthorization 14
+const char *HTTPCookie = "Cookie:";
+#define sizeHTTPCookie 7
+
 #ifdef WEBSOCKET_ENA
-        const uint8 *HTTPUpgrade = "Upgrade:";
-		#define sizeHTTPUpgrade 8
-        const uint8 *HTTPwebsocket = "websocket";
-		#define sizeHTTPwebsocket 9
-		const uint8 *HTTPSecWebSocketKey = "Sec-WebSocket-Key:";
-		#define sizeHTTPSecWebSocketKey 18
+const uint8 *HTTPUpgrade = "Upgrade:";
+#define sizeHTTPUpgrade 8
+const uint8 *HTTPwebsocket = "websocket";
+#define sizeHTTPwebsocket 9
+const uint8 *HTTPSecWebSocketKey = "Sec-WebSocket-Key:";
+#define sizeHTTPSecWebSocketKey 18
 //		const uint8 *HTTPSecWebSocketProtocol = "Sec-WebSocket-Protocol:";
 //		#define sizeHTTPSecWebSocketProtocol 23
 #endif
@@ -758,7 +788,7 @@ LOCAL void ICACHE_FLASH_ATTR webserver_file_ext(HTTP_CONN *CurHTTP, uint8 *pfnam
 	while(*pfname >= ' ') if(*pfname++ == '.') pfext = pfname;
 	if(pfext != NULL) {
 		for(CurHTTP->fileType = HTTP_TXT; CurHTTP->fileType < HTTP_UNKNOWN; CurHTTP->fileType++)
-			if(os_memcmp(pfext, httpFileExtensions[CurHTTP->fileType],3) == 0)	break;
+			if(rom_xstrcmp(pfext, httpFileExtensions[CurHTTP->fileType]))	break;
 	};
 }
 /******************************************************************************
@@ -783,11 +813,11 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 #endif
 				return true;
 			}
-			else os_sprintf(pstr, HTTP_DEFAULT_FILE);
+			else rom_xstrcpy(pstr, http_default_file);
 		}
 		else {
 			os_memcpy(pstr, &CurHTTP->pFilename[1], MAX_FILE_NAME_SIZE-1);
-			if(os_strncmp("web.cgi", pstr, 7) == 0) {
+			if(rom_xstrcmp(pstr, web_cgi_fname)) {
 				web_inc_fp(web_conn, WEBFS_WEBCGI_HANDLE);
 				web_conn->content_len = sizeHTTPdefault;
 				CurHTTP->fileType = HTTP_HTML;
@@ -796,7 +826,7 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 #endif
 				return true;
 			}
-			else if(os_strncmp("fsupload", pstr, 8) == 0) {
+			else if(rom_xstrcmp(pstr, fsupload_fname)) {
 				SetSCB(SCB_AUTH);
 				web_inc_fp(web_conn, WEBFS_UPLOAD_HANDLE);
 				web_conn->content_len = sizeHTTPsfupload;
@@ -811,10 +841,10 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 		// поиск файла на диске
 		if(!web_inc_fopen(ts_conn, pstr)) {
 			uint16 i = os_strlen(pbuf);
-			if(i + sizeHTTP_DEFAULT_FILE < MAX_FILE_NAME_SIZE - 1) {
+			if(i + sizeof(http_default_file) < MAX_FILE_NAME_SIZE - 1) {
 				// добавить к имени папки "/index.htm"
 				pbuf[i] = '/';
-				os_sprintf(&pbuf[i+1], HTTP_DEFAULT_FILE);
+				rom_xstrcpy(&pbuf[i+1], http_default_file);
 				if(!web_inc_fopen(ts_conn, pstr)) return false;
 			};
 		};
@@ -824,7 +854,7 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 		while(*pstr >= ' ') if(*pstr++ == '.') pfext = pstr;
 		if(pfext != NULL) {
 			for(CurHTTP->fileType = HTTP_TXT; CurHTTP->fileType < HTTP_UNKNOWN; CurHTTP->fileType++)
-				if(os_memcmp(pfext, httpFileExtensions[CurHTTP->fileType],3) == 0)	break;
+				if(rom_cpy_label(pfext, httpFileExtensions[CurHTTP->fileType]) == 0)	break;
 		}; */
 		return true;
 	};
@@ -990,7 +1020,8 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 		web_conn->content_len -= web_conn->msgbuflen; // пока только для инфы
 		if(CheckSCB(SCB_CHUNKED)) { // greate chunked
 			uint8 cbuf[16];
-			unsigned int len = os_sprintf(cbuf,"\r\n%X\r\n", web_conn->msgbuflen);
+			static const char chunks[] ICACHE_RODATA_ATTR = "\r\n%X\r\n";
+			unsigned int len = ets_sprintf(cbuf, chunks, web_conn->msgbuflen);
 			web_conn->msgbuf -= len;
 			os_memcpy(web_conn->msgbuf, cbuf, len);
 			web_conn->msgbuflen += len;
@@ -1039,7 +1070,9 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
       if(CurResp->status == CurHTTP->httpStatus) break;
       CurResp++;
     };
-    tcp_puts_fd("HTTP/1.1 %u %s\r\nServer: " WEB_NAME_VERSION "\r\nConnection: close\r\n", CurResp->status, CurResp->headers);
+    tcp_puts_fd("HTTP/1.1 %u ", CurResp->status);
+    tcp_strcpy(CurResp->headers);
+    tcp_strcpy_fd("\r\nServer: " WEB_NAME_VERSION "\r\nConnection: close\r\n");
     if(CheckSCB(SCB_REDIR)) {
     	tcp_puts_fd("Location: %s\r\n\r\n", CurHTTP->pFilename);
     	SetSCB(SCB_DISCONNECT);
@@ -1049,14 +1082,15 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
         	web_inc_fclose(web_conn);
         	ClrSCB(SCB_FCALBACK | SCB_FGZIP | SCB_CHUNKED | SCB_RXDATA | SCB_FCLOSE);
             if(CurResp->flag & HTTP_RESP_FLG_FINDFILE) {
-              os_sprintf(CurHTTP->pFilename, "/%u.htm", CurResp->status);
+              os_sprintf_fd(CurHTTP->pFilename, "/%u.htm", CurResp->status);
               webserver_open_file(CurHTTP, ts_conn);
         //      CurHTTP->httpStatus = CurResp->status; // вернуть статус!
             };
         }
         if((!CheckSCB(SCB_FOPEN)) && (CurResp->default_content != NULL) ) {
-            tcp_puts_fd("%s %u\r\n%s %s\r\n\r\n%s", HTTPContentLength, os_strlen(CurResp->default_content),
-              HTTPContentType, httpContentTypes[HTTP_TXT], CurResp->default_content);
+            tcp_puts_fd("%s %u\r\n%s %s\r\n\r\n", HTTPContentLength, rom_strlen(CurResp->default_content),
+              HTTPContentType, httpContentTypes[HTTP_TXT]);
+            tcp_strcpy(CurResp->default_content);
             SetSCB(SCB_DISCONNECT);
         }
         else if(CheckSCB(SCB_FOPEN)) {
@@ -1074,7 +1108,7 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
                 	if(CurHTTP->httpver >= 0x11) SetSCB(SCB_CHUNKED);
                 }
                 else { // длина изветсна
-                	tcp_puts("%s %d\r\n", HTTPContentLength, web_conn->content_len);
+                	tcp_puts_fd("%s %d\r\n", HTTPContentLength, web_conn->content_len);
                 	if(CurResp->status == 200 && (!isWEBFSLocked) && web_conn->bffiles[0] != WEBFS_WEBCGI_HANDLE) {
                 		// lifetime (sec) of static responses as string 60*60*24*14=1209600"
                     	tcp_puts_fd("Cache-Control: smax-age=%d\r\n", FILE_CACHE_MAX_AGE_SEC);
@@ -1090,7 +1124,7 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
                 else if(CheckSCB(SCB_CHUNKED)) {
                 	tcp_strcpy_fd("Transfer-Encoding: chunked\r\n");
                 }
-                if(!CheckSCB(SCB_CHUNKED)) tcp_puts(CRLF);
+                if(!CheckSCB(SCB_CHUNKED)) tcp_strcpy_fd(CRLF);
             }
             else {
             	tcp_puts_fd("%s 0\r\n\r\n", HTTPContentLength);

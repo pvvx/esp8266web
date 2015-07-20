@@ -59,7 +59,7 @@ void ICACHE_FLASH_ATTR reg_sct_bits(volatile uint32 * addr, uint32 bits, uint32 
  * Returns      : none
 *******************************************************************************/
 // #define ifcmp(a)  if(!os_memcmp((void*)cstr, a, sizeof(a)))
-#define ifcmp(a)  if(rom_cpy_label(cstr, a))
+#define ifcmp(a)  if(rom_xstrcmp(cstr, a))
 
 void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *pvar)
 {

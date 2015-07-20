@@ -20,8 +20,7 @@
 #include "wifi.h"
 #include "web_utils.h"
 #include "driver/adc.h"
-#include "WEBFS1.h"
-#include "WEBFS1.h"
+#include "webfs.h"
 #include "tcp2uart.h"
 #ifdef USE_NETBIOS
 #include "netbios.h"
@@ -309,7 +308,7 @@ void ICACHE_FLASH_ATTR get_new_url(TCP_SERV_CONN *ts_conn)
  * Returns      : none
  ******************************************************************************/
 //#define ifcmp(a)   if(!os_memcmp((void*)cstr, a , sizeof(a)))
-#define ifcmp(a)  if(rom_cpy_label(cstr, a))
+#define ifcmp(a)  if(rom_xstrcmp(cstr, a))
 
 void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 {

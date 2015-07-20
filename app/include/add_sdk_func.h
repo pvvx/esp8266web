@@ -99,6 +99,7 @@ int ram_get_fm_sar_dout(int) ICACHE_FLASH_ATTR;
 // noise_init(), rom_get_noisefloor(), ram_set_noise_floor(), noise_check_loop(), ram_start_noisefloor()
 // void sys_check_timeouts(void *timer_arg) ICACHE_FLASH_ATTR; // lwip
 uint32 system_get_checksum(uint8 *ptr, uint32 len) ICACHE_FLASH_ATTR;
+void read_macaddr_from_otp(uint8 *mac);
 
 void wifi_station_set_default_hostname(uint8 * mac);
 

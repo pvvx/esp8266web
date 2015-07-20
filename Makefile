@@ -48,7 +48,7 @@ CLREEPADDR := 0x79000
 
 SDK_TOOLS	?= c:/Espressif/utils
 #ESPTOOL		?= $(SDK_TOOLS)/esptool
-ESPTOOL		?= C:/Python27/python.exe $(SDK_TOOLS)/esptool.py
+ESPTOOL		?= C:/Python27/python.exe $(CWD)esptool.py
 
 CSRCS ?= $(wildcard *.c)
 ASRCs ?= $(wildcard *.s)

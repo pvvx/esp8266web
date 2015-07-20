@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include "user_config.h"
+#include "os_printf.h"
 
 #define os_bzero ets_bzero
 #define os_delay_us ets_delay_us
@@ -41,16 +42,22 @@
 #define os_timer_init ets_timer_init
 #define os_timer_setfn ets_timer_setfn
 
-#define os_sprintf  ets_sprintf
 #define os_update_cpu_frequency ets_update_cpu_frequency
+
+//#define os_sprintf ets_sprintf
 
 #ifdef USE_OPTIMIZE_PRINTF
 #define os_printf(fmt, ...) do {	\
 	static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
-	os_printf_plus(flash_str, ##__VA_ARGS__);	\
+	rom_printf(flash_str, ##__VA_ARGS__);	\
 	} while(0)
+#define os_sprintf_fd(des, fmt, ...) do {	\
+	static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
+	ets_sprintf(des, flash_str, ##__VA_ARGS__);	\
+	} while(0)
+#define os_printf_plus rom_printf
 #else
-#define os_printf	os_printf_plus
+#define os_printf	rom_printf
 #endif
 
 #endif

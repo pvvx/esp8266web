@@ -22,30 +22,28 @@ uint8_t os_flg[4];
 #define dhcps_flag 		os_flg[2]
 #define dhcpc_flag 		os_flg[3]
 
-struct shostname {
-	uint8 * phostname;
-} hostname;
 
+extern uint8 * hostname; // in eagle_lwip_if.c
 bool default_hostname = true;
 
 uint8 * wifi_station_get_hostname(void)
 {
 	uint32 opmode = wifi_get_opmode();
 	if(opmode == 1 || opmode == 3) {
-		return hostname.phostname;
+		return hostname;
 	}
 	return NULL;
 }
 
 void wifi_station_set_default_hostname(uint8 * mac)
 {
-	if(hostname.phostname != NULL)	{
+	if(hostname != NULL)	{
 		vPortFree(hostname);
-		hostname.phostname = NULL;
+		hostname = NULL;
 	}
-	hostname.phostname = pvPortMalloc(32);
-	if(hostname.phostname == NULL) {
-		ets_sprintf(hostname.phostname,"ESP_%02X%02X%02X", mac[3], mac[4], mac[5]);
+	hostname = pvPortMalloc(32);
+	if(hostname == NULL) {
+		ets_sprintf(hostname,"ESP_%02X%02X%02X", mac[3], mac[4], mac[5]);
 	}
 }
 
@@ -76,7 +74,12 @@ bool wifi_station_set_hostname(uint8 * name)
 
 uint32 system_phy_temperature_alert(void)
 {
-	return phy_get_check_flag(); // in libphy.a
+	return phy_get_check_flag(0); // in libphy.a
+}
+
+uint32 system_phy_set_max_tpw(uint32 tpw)
+{
+	return phy_set_most_tpw(tpw);
 }
 
 uint32 system_get_time(void)
@@ -423,6 +426,7 @@ void _sys_deep_sleep_timer(void *timer_arg)
 	IO_RTC_2 = 1<<20; // rtc_enter_sleep()	HWREG(PERIPHS_RTC_BASEADDR, 0x08) = 0x100000;
 }
 
+uint8 deep_sleep_flag;
 
 void system_deep_sleep(uint32 time_in_us)
 {
@@ -433,6 +437,8 @@ void system_deep_sleep(uint32 time_in_us)
 	ets_timer_setfn(sta_con_timer, _sys_deep_sleep_timer, 0);
 	ets_timer_arm_new(sta_con_timer,100, 0, 1);
 }
+
+uint8 deep_sleep_option;
 
 bool system_deep_sleep_set_option(uint8 option)
 {

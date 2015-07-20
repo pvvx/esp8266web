@@ -369,9 +369,6 @@ PROVIDE ( ets_bit_count_task = 0x3FFFDAB8 );
 PROVIDE ( ets_tab_task = 0x3FFFDAC0 );
 
 PROVIDE ( timer_list = 0x3FFFDDB0 );
-/*
-PROVIDE ( debug_timer = 0x3FFFDDB4 );
-PROVIDE ( debug_timerfn = 0x3FFFDDB8 ); */
 
 /* 0x3FFFE360..0x3FFFEA80 ram buf max 1824 bytes */
 PROVIDE ( _sprintf_buf = 0x3FFFE360 ); /* char * _sprintf_buf; - use ets_sprintf */

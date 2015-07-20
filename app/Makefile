@@ -22,7 +22,7 @@ GEN_IMAGES= eagle.app.v6.out
 GEN_BINS = eagle.app.v6.bin
 
 SUBDIRS =	\
-	main	\
+	system	\
 	phy		\
 	wpa		\
 	user	\
@@ -50,7 +50,7 @@ ifeq ($(APP), 2)
 endif
 
 COMPONENTS_eagle.app.v6 = \
-	main/libaddmmain.a	\
+	system/libaddmmain.a	\
 	phy/libaddmphy.a	\
 	wpa/libaddwpa.a	\
 	driver/libdriver.a \

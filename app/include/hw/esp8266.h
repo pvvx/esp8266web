@@ -77,6 +77,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define FLASH_MAX_SIZE	0x01000000
 
 /* interrupt related */
+#define ETS_SLC_INUM		1
 #define ETS_SPI_INUM        2
 #define ETS_GPIO_INUM       4
 #define ETS_UART_INUM       5
@@ -363,94 +364,6 @@ typedef enum {
 /*	Returns	the	current	time	according	to	the	timer	timer. */
 #define	NOW()			TIMER1_COUNT // FRC2_COUNT
 
-/* SCL:0x60000B00 registers */
-/* SLC_CONF0:0x60000B00 */
-#define SLC_CONF0		scl_[0]
-/* SLC_INT_RAW:0x60000B04 */
-#define SLC_INT_RAW		scl_[1]
-/* SLC_INT_STATUS:0x60000B08 */
-#define SLC_INT_STATUS	scl_[2]
-/* SLC_INT_ENA:0x60000B0C */
-#define SLC_INT_ENA		scl_[3]
-/* SLC_INT_CLR:0x60000B10 */
-#define SLC_INT_CLR		scl_[4]
-/* SLC_RX_STATUS:0x60000B14 */
-#define SLC_RX_STATUS	scl_[5]
-/* SLC_RX_FIFO_PUSH:0x60000B18 */
-#define SLC_RX_FIFO_PUSH	scl_[6]
-/* SLC_TX_STATUS:0x60000B1C */
-#define SLC_TX_STATUS	scl_[7]
-/* SLC_TX_FIFO_POP:0x60000B20 */
-#define SLC_TX_FIFO_POP		scl_[8]
-/* SLC_RX_LINK:0x60000B24 */
-#define SLC_RX_LINK		scl_[9]
-/* SLC_TX_LINK:0x60000B28 */
-#define SLC_TX_LINK		scl_[10]
-/* SLC_INTVEC_TOHOST:0x60000B2C */
-#define SLC_INTVEC_TOHOST	scl_[11]
-/* SLC_TOKEN0:0x60000B30 */
-#define SLC_TOKEN0		scl_[12]
-/* SLC_TOKEN1:0x60000B34 */
-#define SLC_TOKEN1		scl_[13]
-/* SLC_CONF1:0x60000B38 */
-#define SLC_CONF1		scl_[14]
-/* SLC_STATE0:0x60000B3C */
-#define SLC_STATE0		scl_[15]
-/* SLC_STATE1:0x60000B40 */
-#define SLC_STATE1		scl_[16]
-/* SLC_BRIDGE_CONF:0x60000B44 */
-#define SLC_BRIDGE_CONF	scl_[17]
-/* SLC_RX_EOF_DES_ADDR:0x60000B48 */
-#define SLC_RX_EOF_DES_ADDR	scl_[18]
-/* SLC_TX_EOF_DES_ADDR:0x60000B4C */
-#define SLC_TX_EOF_DES_ADDR	scl_[19]
-/* SLC_RX_EOF_BFR_DES_ADDR:0x60000B50 */
-#define SLC_RX_EOF_BFR_DES_ADDR		scl_[20]
-/* SLC_AHB_TEST:0x60000B54 */
-#define SLC_AHB_TEST scl_[21]
-/* SLC_SDIO_ST:0x60000B58 */
-#define SLC_SDIO_ST		scl_[22]
-/* SLC_RX_DSCR_CONF:0x60000B5C */
-#define SLC_RX_DSCR_CONF	scl_[23]
-/* SLC_TXLINK_DSCR:0x60000B60 */
-#define SLC_TXLINK_DSCR	scl_[24]
-/* SLC_TXLINK_DSCR_BF0:0x60000B64 */
-#define SLC_TXLINK_DSCR_BF0	scl_[25]
-/* SLC_TXLINK_DSCR_BF1:0x60000B68 */
-#define SLC_TXLINK_DSCR_BF1		scl_[26]
-/* SLC_RXLINK_DSCR:0x60000B6C */
-#define SLC_RXLINK_DSCR		scl_[27]
-/* SLC_RXLINK_DSCR_BF0:0x60000B70 */
-#define SLC_RXLINK_DSCR_BF0	scl_[28]
-/* SLC_RXLINK_DSCR_BF1:0x60000B74 */
-#define SLC_RXLINK_DSCR_BF1	scl_[29]
-/* SLC_DATE:0x60000B78 */
-#define SLC_DATE		scl_[30]
-/* SLC_ID:0x60000B7C */
-#define SLC_ID		scl_[31]
-
-/* SLC_HOST_INTR_RAW:0x60000B88 */
-#define SLC_HOST_INTR_RAW	scl_[34]
-
-/* SLC_HOST_CONF_W0:0x60000B94 */
-#define SLC_HOST_CONF_W0	scl_[37]
-/* SLC_HOST_CONF_W1:0x60000B98 */
-#define SLC_HOST_CONF_W1	scl_[38]
-/* SLC_HOST_INTR_ST:0x60000B9C */
-#define SLC_HOST_INTR_ST	scl_[39]
-/* SLC_HOST_CONF_W2:0x60000BA0 */
-#define SLC_HOST_CONF_W2	scl_[40]
-/* SLC_HOST_CONF_W3:0x60000BA4 */
-#define SLC_HOST_CONF_W3	scl_[41]
-/* SLC_HOST_CONF_W4:0x60000BA8 */
-#define SLC_HOST_CONF_W4	scl_[42]
-
-/* SLC_HOST_INTR_CLR:0x60000BB0 */
-#define SLC_HOST_INTR_CLR	scl_[44]
-/* SLC_HOST_INTR_ENA:0x60000BB4 */
-#define SLC_HOST_INTR_ENA	scl_[45]
-/* SLC_HOST_CONF_W5:0x60000BB8 */
-#define SLC_HOST_CONF_W5	scl_[46]
 
 /* WDT:0x60000900 registers */
 /* WDT_CTRL:0x60000900 register */
@@ -704,6 +617,95 @@ typedef enum {
 #define SET_PIN_FUNC_IOPORT(PIN_NUM) SET_PIN_FUNC(PIN_NUM, MUX_FUN_IO_PORT(PIN_NUM))
 // установить функцию GPIOn по умолчанию для SDK
 #define SET_PIN_FUNC_DEF_SDK(PIN_NUM) SET_PIN_FUNC(PIN_NUM, MUX_FUN_DEF_SDK(PIN_NUM))
+
+/* SCL:0x60000B00 registers */
+/* SLC_CONF0:0x60000B00 */
+#define SLC_CONF0		scl_[0]
+/* SLC_INT_RAW:0x60000B04 */
+#define SLC_INT_RAW		scl_[1]
+/* SLC_INT_STATUS:0x60000B08 */
+#define SLC_INT_STATUS	scl_[2]
+/* SLC_INT_ENA:0x60000B0C */
+#define SLC_INT_ENA		scl_[3]
+/* SLC_INT_CLR:0x60000B10 */
+#define SLC_INT_CLR		scl_[4]
+/* SLC_RX_STATUS:0x60000B14 */
+#define SLC_RX_STATUS	scl_[5]
+/* SLC_RX_FIFO_PUSH:0x60000B18 */
+#define SLC_RX_FIFO_PUSH	scl_[6]
+/* SLC_TX_STATUS:0x60000B1C */
+#define SLC_TX_STATUS	scl_[7]
+/* SLC_TX_FIFO_POP:0x60000B20 */
+#define SLC_TX_FIFO_POP		scl_[8]
+/* SLC_RX_LINK:0x60000B24 */
+#define SLC_RX_LINK		scl_[9]
+/* SLC_TX_LINK:0x60000B28 */
+#define SLC_TX_LINK		scl_[10]
+/* SLC_INTVEC_TOHOST:0x60000B2C */
+#define SLC_INTVEC_TOHOST	scl_[11]
+/* SLC_TOKEN0:0x60000B30 */
+#define SLC_TOKEN0		scl_[12]
+/* SLC_TOKEN1:0x60000B34 */
+#define SLC_TOKEN1		scl_[13]
+/* SLC_CONF1:0x60000B38 */
+#define SLC_CONF1		scl_[14]
+/* SLC_STATE0:0x60000B3C */
+#define SLC_STATE0		scl_[15]
+/* SLC_STATE1:0x60000B40 */
+#define SLC_STATE1		scl_[16]
+/* SLC_BRIDGE_CONF:0x60000B44 */
+#define SLC_BRIDGE_CONF	scl_[17]
+/* SLC_RX_EOF_DES_ADDR:0x60000B48 */
+#define SLC_RX_EOF_DES_ADDR	scl_[18]
+/* SLC_TX_EOF_DES_ADDR:0x60000B4C */
+#define SLC_TX_EOF_DES_ADDR	scl_[19]
+/* SLC_RX_EOF_BFR_DES_ADDR:0x60000B50 */
+#define SLC_RX_EOF_BFR_DES_ADDR		scl_[20]
+/* SLC_AHB_TEST:0x60000B54 */
+#define SLC_AHB_TEST scl_[21]
+/* SLC_SDIO_ST:0x60000B58 */
+#define SLC_SDIO_ST		scl_[22]
+/* SLC_RX_DSCR_CONF:0x60000B5C */
+#define SLC_RX_DSCR_CONF	scl_[23]
+/* SLC_TXLINK_DSCR:0x60000B60 */
+#define SLC_TXLINK_DSCR	scl_[24]
+/* SLC_TXLINK_DSCR_BF0:0x60000B64 */
+#define SLC_TXLINK_DSCR_BF0	scl_[25]
+/* SLC_TXLINK_DSCR_BF1:0x60000B68 */
+#define SLC_TXLINK_DSCR_BF1		scl_[26]
+/* SLC_RXLINK_DSCR:0x60000B6C */
+#define SLC_RXLINK_DSCR		scl_[27]
+/* SLC_RXLINK_DSCR_BF0:0x60000B70 */
+#define SLC_RXLINK_DSCR_BF0	scl_[28]
+/* SLC_RXLINK_DSCR_BF1:0x60000B74 */
+#define SLC_RXLINK_DSCR_BF1	scl_[29]
+/* SLC_DATE:0x60000B78 */
+#define SLC_DATE		scl_[30]
+/* SLC_ID:0x60000B7C */
+#define SLC_ID		scl_[31]
+
+/* SLC_HOST_INTR_RAW:0x60000B88 */
+#define SLC_HOST_INTR_RAW	scl_[34]
+
+/* SLC_HOST_CONF_W0:0x60000B94 */
+#define SLC_HOST_CONF_W0	scl_[37]
+/* SLC_HOST_CONF_W1:0x60000B98 */
+#define SLC_HOST_CONF_W1	scl_[38]
+/* SLC_HOST_INTR_ST:0x60000B9C */
+#define SLC_HOST_INTR_ST	scl_[39]
+/* SLC_HOST_CONF_W2:0x60000BA0 */
+#define SLC_HOST_CONF_W2	scl_[40]
+/* SLC_HOST_CONF_W3:0x60000BA4 */
+#define SLC_HOST_CONF_W3	scl_[41]
+/* SLC_HOST_CONF_W4:0x60000BA8 */
+#define SLC_HOST_CONF_W4	scl_[42]
+
+/* SLC_HOST_INTR_CLR:0x60000BB0 */
+#define SLC_HOST_INTR_CLR	scl_[44]
+/* SLC_HOST_INTR_ENA:0x60000BB4 */
+#define SLC_HOST_INTR_ENA	scl_[45]
+/* SLC_HOST_CONF_W5:0x60000BB8 */
+#define SLC_HOST_CONF_W5	scl_[46]
 
 /* USER RTC RAM:	0x60001100 */
 #define RTC_MEM(IDX)	rtc_mem_[IDX]

@@ -137,10 +137,10 @@ typedef struct s_http_upload
 
 typedef struct s_http_response
 {
-  uint16 status;
-  uint16 flag;
-  char * headers;
-  char * default_content;
+  uint32 status;
+  uint32 flag;
+  const char * headers;
+  const char * default_content;
 } HTTP_RESPONSE;
 
 // HTTP_RESPONSE.flags:
@@ -150,15 +150,15 @@ typedef struct s_http_response
 #define HTTP_RESP_FLG_REDIRECT  0x0002
 
 #define tcp_put(a) web_conn->msgbuf[web_conn->msgbuflen++] = a
-#define tcp_puts(...) web_conn->msgbuflen += os_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], __VA_ARGS__)
-#define tcp_strcpy(a) web_conn->msgbuflen += ets_strlen((char *)ets_strcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)a))
 #define tcp_htmlstrcpy(str, len) web_conn->msgbuflen += htmlcode(&web_conn->msgbuf[web_conn->msgbuflen], str, web_conn->msgbufsize - web_conn->msgbuflen - 1, len)
 //#define tcp_urlstrcpy(str, len) web_conn->msgbuflen += urlencode(&web_conn->msgbuf[web_conn->msgbuflen], str, web_conn->msgbufsize - web_conn->msgbuflen - 1, len)
+#define tcp_puts(...) web_conn->msgbuflen += ets_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], __VA_ARGS__)
 #define tcp_puts_fd(fmt, ...) do { \
 		static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
-		web_conn->msgbuflen += os_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)flash_str, ##__VA_ARGS__); \
+		web_conn->msgbuflen += ets_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)flash_str, ##__VA_ARGS__); \
 		} while(0)
-extern unsigned int rom_xstrcpy(char * pd, void * ps);
+//#define tcp_strcpy(a) web_conn->msgbuflen += ets_strlen((char *)ets_strcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)a))
+#define tcp_strcpy(a) web_conn->msgbuflen += rom_xstrcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], (const char *)a)
 #define tcp_strcpy_fd(fmt) do { \
 		static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
 		web_conn->msgbuflen += rom_xstrcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], (char *)flash_str); \
