@@ -32,6 +32,7 @@
 #include "sntp.h"
 #endif
 
+#include "modbustcp.h"
 
 #if DEBUGSOO > 1
 //#define TEST_TIMER 1
@@ -123,7 +124,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
 	if(eraminfo.size > 0) os_printf("Found free IRAM: base: %p, size: %d bytes\n", eraminfo.base,  eraminfo.size);
 	os_printf("System memory:\n");
     system_print_meminfo();
-    os_printf("Current 'heap' size: %d bytes\n", system_get_free_heap_size());
+    os_printf("Start 'heap' size: %d bytes\n", system_get_free_heap_size());
 #endif
 #if DEBUGSOO > 0
 	os_printf("Set CPU CLK: %u MHz\n", ets_get_cpu_frequency());
@@ -146,6 +147,9 @@ void ICACHE_FLASH_ATTR user_init(void) {
     if(syscfg.web_port) webserver_init(syscfg.web_port);
 #endif
 ///    if(syscfg.tcp2uart_port) tcp2uart_init(syscfg.tcp2uart_port);
+#ifdef USE_MODBUS
+    mdb_tcp_init(502);
+#endif
 	system_deep_sleep_set_option(0);
 	system_init_done_cb(init_done_cb);
 }

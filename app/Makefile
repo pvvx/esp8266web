@@ -27,6 +27,7 @@ SUBDIRS =	\
 	wpa		\
 	user	\
 	driver	\
+	mdbtcp	\
 	web
 
 
@@ -55,6 +56,7 @@ COMPONENTS_eagle.app.v6 = \
 	wpa/libaddwpa.a	\
 	driver/libdriver.a \
 	web/libweb.a	\
+	mdbtcp/libmdbtcp.a \
 	user/libuser.a
 
 ifdef USE_OPEN_LWIP

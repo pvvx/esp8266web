@@ -1,10 +1,10 @@
 #ifndef __TCP_SERV_CONN_H__
-#define __TCP_SERV_CONN_H__
 /***********************************
  * FileName: tcp_srv_conn.h
  * Tcp сервачек для ESP8266
  * PV` ver1.0 20/12/2014
  ***********************************/
+#define __TCP_SERV_CONN_H__
 
 #include "user_interface.h"
 #include "os_type.h"
