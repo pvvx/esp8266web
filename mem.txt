@@ -7,4 +7,5 @@
 irom0_text|           Uncached Code (SPI)|    40240000|    402719E4|  203236
 Total Used RAM : 31360
 Free RAM : 50560
-Free IRam : 13130 (+16384 if user_config.h: #define USE_MAX_IRAM )
+Free IRAM : 13130+16384=29514 (IRAM 48 k)
+Total Free RAM : 80074 
