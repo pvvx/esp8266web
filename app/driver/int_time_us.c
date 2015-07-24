@@ -1,6 +1,7 @@
 /******************************************************************************
 * PV` * Test intr TIMER0 (0.2..1677721.4 us)
 *******************************************************************************/
+#if 0
 #include "bios/ets.h"
 #include "hw/esp8266.h"
 #include "user_interface.h"
@@ -40,8 +41,8 @@ void tst_tm0_intr_handler(void)
 *******************************************************************************/
 void ICACHE_FLASH_ATTR int_us_disable(void)
 {
-	ETS_FRC1_INTR_DISABLE();
-	TM1_EDGE_INT_DISABLE();
+	ets_isr_mask(BIT(ETS_FRC_TIMER0_INUM));
+	INTC_EDGE_EN &= ~BIT(1);
 }
 /******************************************************************************
  * int_us_init()
@@ -61,3 +62,5 @@ void ICACHE_FLASH_ATTR int_us_init(uint32 us)
     INTC_EDGE_EN |= BIT(1);
     ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM));
 }
+
+#endif

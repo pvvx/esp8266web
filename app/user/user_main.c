@@ -32,7 +32,13 @@
 #include "sntp.h"
 #endif
 
+#ifdef USE_WDRV
+#include "driver/wdrv.h"
+#endif
+
+#ifdef USE_USE_MODBUS
 #include "modbustcp.h"
+#endif
 
 #if DEBUGSOO > 1
 //#define TEST_TIMER 1
@@ -149,6 +155,9 @@ void ICACHE_FLASH_ATTR user_init(void) {
 ///    if(syscfg.tcp2uart_port) tcp2uart_init(syscfg.tcp2uart_port);
 #ifdef USE_MODBUS
     mdb_tcp_init(502);
+#endif
+#ifdef USE_WDRV
+    init_wdrv();
 #endif
 	system_deep_sleep_set_option(0);
 	system_init_done_cb(init_done_cb);

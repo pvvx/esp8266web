@@ -95,7 +95,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 /* DPORT regs */
 /* INTC_EDGE_EN: 0x3FF00004
 	bit0: WDT edge int enable
-	bit1: TIMER1 edge int enable	*/
+	bit1: TIMER0 edge int enable	*/
 #define INTC_EDGE_EN	dport_[1]
 
 /* DPORT_SPI_READY: 0x3FF0000C

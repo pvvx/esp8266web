@@ -40,6 +40,10 @@
 struct ping_option pingopt; // for test
 #endif
 
+#ifdef USE_WDRV
+#include "driver/wdrv.h"
+#endif
+
 extern TCP_SERV_CONN * tcp2uart_conn;
 
 typedef uint32 (* call_func)(uint32 a, uint32 b, uint32 c);
@@ -447,6 +451,20 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
    			}
    		}
     }
+#ifdef USE_WDRV
+	else ifcmp("wdrv_") {
+		cstr+=5;
+		ifcmp("init") {
+			system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
+		}
+		else ifcmp("start") {
+			system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, val);
+		}
+		else ifcmp("stop") {
+			system_os_post(WDRV_TASK_PRIO, WDRV_SIG_STOP, 0);
+		}
+	}
+#endif
 	else ifcmp("test") {
 	}
 #if DEBUGSOO > 5

@@ -238,8 +238,7 @@ SSL *ssl_new(SSL_CTX *ssl_ctx, int client_fd);
 SSL *ssl_new_context(SSL_CTX *ssl_ctx, struct tcp_pcb *SslClient_pcb);
 void disposable_new(SSL *ssl);
 void disposable_free(SSL *ssl);
-int send_packet(SSL *ssl, uint8_t protocol, 
-        const uint8_t *in, int length);
+int send_ssl_packet(SSL *ssl, uint8_t protocol, const uint8_t *in, int length);
 int do_svr_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len);
 int do_clnt_handshake(SSL *ssl, int handshake_type, uint8_t *buf, int hs_len);
 int process_finished(SSL *ssl, uint8_t *buf, int hs_len);

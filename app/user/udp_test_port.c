@@ -291,6 +291,7 @@ void ICACHE_FLASH_ATTR udp_test_port_init(uint16 portn)
 #if DEBUGSOO > 0
 			   os_printf("Error bind\n");
 #endif
+			   udp_remove(pcb);
 			   return;
 		   };
 		   udp_recv(pcb, udp_test_port_recv, pcb);
