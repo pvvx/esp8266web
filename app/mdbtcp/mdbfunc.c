@@ -25,7 +25,7 @@ void ICACHE_FLASH_ATTR Swapws(uint16 *bufw, uint32 lenw)
 	}
 }
 
-uint32 mdbiosize; // размер принятого и отправляемого сообщений ModBus
+uint32 mdbiosize DATA_IRAM_ATTR; // размер принятого и отправляемого сообщений ModBus
 
 uint32 ICACHE_FLASH_ATTR MdbWordRW(uint8 * mdb, uint8 * buf, uint32 rwflg) 
 {

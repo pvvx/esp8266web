@@ -31,6 +31,10 @@
 #include "rom2ram.h"
 #include "sys_const.h"
 
+#ifdef USE_WDRV
+#include "driver/wdrv.h"
+#endif
+
 extern TCP_SERV_CONN * tcp2uart_conn;
 /*extern uint32 adc_rand_noise;
 extern uint32 dpd_bypass_original;
@@ -677,6 +681,21 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 			else tcp_put('?');
 		}
 #endif
-        else tcp_put('?');
+#ifdef USE_WDRV
+		else ifcmp("wdrv_") {
+			cstr+=5;
+			ifcmp("freq") {
+				tcp_puts("%u", wdrv_sample_rate);
+			}
+			else ifcmp("port") {
+				tcp_puts("%u", wdrv_host_port);
+			}
+			else ifcmp("ip") {
+				tcp_puts(IPSTR, IP2STR(&wdrv_host_ip));
+			}
+			else tcp_put('?');
+		}
+#endif
+		else tcp_put('?');
 }
 

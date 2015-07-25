@@ -46,7 +46,8 @@ void ICACHE_FLASH_ATTR _sprintf_out(char c)
 		}tmp;
   	  	register uint32 *p = (uint32 *)((uint32)_sprintf_buf & (~3));
 		tmp.ud = *p;
-		tmp.uc[(uint32)_sprintf_buf++ & 3] = c;
+		tmp.uc[(uint32)_sprintf_buf & 3] = c;
+		_sprintf_buf++;
 		*p = tmp.ud;
 	}
 }

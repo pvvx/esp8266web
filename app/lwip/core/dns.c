@@ -216,13 +216,13 @@ static void dns_check_entries(void);
  *----------------------------------------------------------------------------*/
 
 /* DNS variables */
-static struct udp_pcb        *dns_pcb;
+static struct udp_pcb        *dns_pcb LWIP_DATA_IRAM_ATTR;
 static u8_t                   dns_seqno;
 static struct dns_table_entry dns_table[DNS_TABLE_SIZE];
 static ip_addr_t              dns_servers[DNS_MAX_SERVERS];
 /** Contiguous buffer for processing responses */
 static u8_t                   dns_payload_buffer[LWIP_MEM_ALIGN_BUFFER(DNS_MSG_SIZE)];
-static u8_t*                  dns_payload;
+static u8_t*                  dns_payload LWIP_DATA_IRAM_ATTR;
 
 /**
  * Initialize the resolver: set up the UDP pcb and configure the default server

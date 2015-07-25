@@ -454,14 +454,17 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #ifdef USE_WDRV
 	else ifcmp("wdrv_") {
 		cstr+=5;
-		ifcmp("init") {
-			system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
+		ifcmp("ip") {
+			wdrv_host_ip.addr = ipaddr_addr(pvar);
+		}
+		else ifcmp("init") {
+			wdrv_init(val);
 		}
 		else ifcmp("start") {
-			system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, val);
+			wdrv_start(val);
 		}
 		else ifcmp("stop") {
-			system_os_post(WDRV_TASK_PRIO, WDRV_SIG_STOP, 0);
+			wdrv_stop();
 		}
 	}
 #endif

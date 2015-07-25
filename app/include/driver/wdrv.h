@@ -19,8 +19,18 @@
 #define WDRV_OUT_BUF_SIZE  1024 // max MSS (1460)
 
 #define DEFAULT_SAMPLE_RATE_HZ 1000 // min 0 max 200000
+#define DEFAULT_WDRV_HOST_IP IPADDR_BROADCAST;
+#define DEFAULT_WDRV_HOST_PORT 10201;
 
 void init_wdrv(void);
+
+extern uint32 wdrv_sample_rate;
+extern uint16 wdrv_host_port;
+extern ip_addr_t wdrv_host_ip;
+
+bool wdrv_start(uint32 sample_rate);
+bool wdrv_init(uint32 portn);
+void wdrv_stop(void);
 
 // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, portn); // if portn == 0 -> wdrv_close
 // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, sample_rate); // sample_rate = min 1 max 200000 Hz, if sample_rate = 0 -> DEFAULT_SAMPLE_RATE_HZ

@@ -29,7 +29,7 @@
 
 #define udp_puts(fmt, ...) do { \
 		static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
-		udpbuflen += ets_sprintf((char *)&pudpbuf[udpbuflen], (char *)ets_strcpy((char *)UartDev.rcv_buff.pRcvMsgBuff, (char *)flash_str), ##__VA_ARGS__); \
+		udpbuflen += ets_sprintf((char *)&pudpbuf[udpbuflen], (char *)flash_str, ##__VA_ARGS__); \
 		} while(0)
 
 
@@ -64,7 +64,7 @@ print_udp_psc(uint8 *pudpbuf, int max_size)
   udp_puts("UDP pcbs:\n");
   for(pcb = udp_pcbs; pcb != NULL; pcb = pcb->next) {
 	  if(max_size - udpbuflen < 72) goto errrl;
-	  udp_puts("flg:%02x " IPSTR ":%u " IPSTR ":%u recv:%p\n", pcb->flags, IP2STR(&pcb->local_ip), pcb->local_port, IP2STR(&pcb->remote_ip), pcb->remote_port, pcb->recv );
+	  udp_puts("flg:%02x\t" IPSTR ":%u\t" IPSTR ":%u\trecv:%08x\n", pcb->flags, IP2STR(&pcb->local_ip), pcb->local_port, IP2STR(&pcb->remote_ip), pcb->remote_port, pcb->recv );
 	  prt_none = false;
   }
   if(prt_none) udp_puts("none\n");
@@ -89,7 +89,7 @@ print_tcp_psc(uint8 *pudpbuf, int max_size)
   bool prt_none = true;
   for(pcb = tcp_active_pcbs; pcb != NULL; pcb = pcb->next) {
      if(max_size - udpbuflen < 52) goto errrl;
-     udp_puts("Port %u|%u flg:%02x tmr:%04x %s\n", pcb->local_port, pcb->remote_port, pcb->flags, pcb->tmr, tcp_state_str[pcb->state]);
+     udp_puts("Port %u|%u\tflg:%02x\ttmr:%04x\t%s\n", pcb->local_port, pcb->remote_port, pcb->flags, pcb->tmr, tcp_state_str[pcb->state]);
      prt_none = false;
   }
   if(prt_none) udp_puts("none\n");
@@ -98,7 +98,7 @@ print_tcp_psc(uint8 *pudpbuf, int max_size)
   prt_none = true;
   for(pcb = (struct tcp_pcb *)tcp_listen_pcbs.pcbs; pcb != NULL; pcb = pcb->next) {
     if(max_size - udpbuflen < 52) goto errrl;
-    udp_puts("Port %u|%u flg:%02x tmr:%04x %s\n", pcb->local_port, pcb->remote_port, pcb->flags, pcb->tmr, tcp_state_str[pcb->state]);
+    udp_puts("Port %u|%u\tflg:%02x\ttmr:%04x\t%s\n", pcb->local_port, pcb->remote_port, pcb->flags, pcb->tmr, tcp_state_str[pcb->state]);
     prt_none = false;
   }
   if(prt_none) udp_puts("none\n");
@@ -107,7 +107,7 @@ print_tcp_psc(uint8 *pudpbuf, int max_size)
   prt_none = true;
   for(pcb = tcp_tw_pcbs; pcb != NULL; pcb = pcb->next) {
     if(max_size - udpbuflen < 52) goto errrl;
-    udp_puts("Port %u|%u flg:%02x tmr:%04x %s\n", pcb->local_port, pcb->remote_port, pcb->flags, pcb->tmr, tcp_state_str[pcb->state]);
+    udp_puts("Port %u|%u\tflg:%02x\ttmr:%04x\t%s\n", pcb->local_port, pcb->remote_port, pcb->flags, pcb->tmr, tcp_state_str[pcb->state]);
     prt_none = false;
   }
   if(prt_none) udp_puts("none\n");
