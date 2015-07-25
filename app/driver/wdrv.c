@@ -30,6 +30,7 @@
 extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb, int indata);
 //extern int rom_i2c_readReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb);
 //extern void read_sar_dout(uint16 * buf);
+//i2c_writeReg_Mask_def(i2c_bbpll, i2c_bbpll_en_audio_clock_out, 1); //Enable clock to i2s subsystem
 
 #define i2c_writeReg_Mask(block, host_id, reg_add, Msb, Lsb, indata) \
     rom_i2c_writeReg_Mask(block, host_id, reg_add, Msb, Lsb, indata)
@@ -55,31 +56,31 @@ ip_addr_t wdrv_host_ip;
 
 /*-----------------------------------------------------------------------------*/
 
-void timer0_isr(uint16 *pbuf)
+void timer0_isr(void)
 {
 	TIMER0_INT = 0;
 	if(out_wave_pbuf != NULL) {
-		uint16 sar_dout = 0, sardata[8];
-	//	while((SAR_BASE[20] >> 24) & 0x07); // while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
-		if((wdrv_buf_wr_idx >> 31) == 0) {
-			volatile uint32 * sar_regs = &SAR_BASE[32]; // 8 шт. с адреса 0x60000D80
-			int i;
-			for(i = 0; i < 8; i++) {
-				int x = ~(*sar_regs++);
-				int z = (x & 0xFF) - 21;
-				x &= 0x700;
-				if(z > 0) x = ((z * 279) >> 8) + x;
-				sardata[i] = x;
-			}
-		}
-		// запуск SAR
+		uint16 sardata[8];
+	//	while((SAR_BASE[20] >> 24) & 0x07); // wait r_state == 0
+		volatile uint32 * sar_regs = &SAR_BASE[32]; // считать 8 шт. значений SAR с адреса 0x60000D80
+		int i;
+		for(i = 0; i < 8; i++) sardata[i] = ~(*sar_regs++);
+		// запуск нового замера SAR
 		uint32 x = SAR_BASE[20] & (~(1 << 1));
 		SAR_BASE[20] = x;
 		SAR_BASE[20] = x | (1 << 1);
 		if((wdrv_buf_wr_idx >> 31) == 0) {
-			int i;
-			for(i = 0; i < 8; i++) sar_dout += sardata[i];
-			out_wave_pbuf[wdrv_buf_wr_idx++] = sar_dout;
+			// если второе и последующее прерывание, данные в SAR готовы
+			uint16 sar_dout = 0;
+			for(i = 0; i < 8; i++) {
+				// коррекция значений SAR под утечки и т.д.
+				int x = sardata[i];
+				int z = (x & 0xFF) - 21;
+				x &= 0x700;
+				if(z > 0) x = ((z * 279) >> 8) + x;
+				sar_dout += x;
+			}
+			out_wave_pbuf[wdrv_buf_wr_idx++] = sar_dout; // 14 бит 0..16384
 			if(wdrv_buf_wr_idx == (WDRV_OUT_BUF_SIZE >>1) || wdrv_buf_wr_idx == WDRV_OUT_BUF_SIZE) {
 				system_os_post(WDRV_TASK_PRIO, WDRV_SIG_DATA, wdrv_buf_wr_idx);
 			}
@@ -90,14 +91,14 @@ void timer0_isr(uint16 *pbuf)
 
 void ICACHE_FLASH_ATTR wdrv_stop(void)
 {
-#if DEBUGSOO > 1
-	os_printf("wdrv: stop()\n");
-#endif
 	ets_isr_mask(BIT(ETS_FRC_TIMER0_INUM));
 	INTC_EDGE_EN &= ~BIT(1);
-	if(out_wave_pbuf != NULL){
+	if(out_wave_pbuf != NULL) {
 		os_free(out_wave_pbuf);
 		out_wave_pbuf = NULL;
+#if DEBUGSOO > 1
+		os_printf("wdrv: stop()\n");
+#endif
 		// отключить SAR
     	i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 0);
     	while((SAR_BASE[20] >> 24) & 0x07);
@@ -110,33 +111,38 @@ void ICACHE_FLASH_ATTR wdrv_stop(void)
 
 bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 {
+	if(pcb_wdrv != NULL) {
+		wdrv_stop();
+		if(sample_rate <= 20000)	{
+			if(sample_rate == 0) sample_rate = wdrv_sample_rate;
+			else wdrv_sample_rate = sample_rate;
+			out_wave_pbuf = os_malloc(WDRV_OUT_BUF_SIZE<<1);
+			if(out_wave_pbuf != NULL) {
 #if DEBUGSOO > 1
-	os_printf("wdrv: start(%u)\n", sample_rate);
+				os_printf("wdrv: start(%u)\n", sample_rate);
 #endif
-	if(pcb_wdrv == NULL) return false;
-	wdrv_stop();
-	if(sample_rate > 20000)	return false;
-	else if(sample_rate == 0) sample_rate = wdrv_sample_rate;
-	else wdrv_sample_rate = sample_rate;
-	out_wave_pbuf = os_malloc(WDRV_OUT_BUF_SIZE<<1);
-	if(out_wave_pbuf == NULL) {
-		return false;
+				wdrv_buf_wr_idx = 1<<31; // флаг для пропуска считывания SAR при первом прерывания
+				// включить SAR
+				i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 1); //select test mux
+				SAR_BASE[23] |= 1 << 21;
+				while((SAR_BASE[20] >> 24) & 0x07);
+				// включить TIMER0
+				TIMER0_CTRL =   TM_DIVDED_BY_16
+				              | TM_AUTO_RELOAD_CNT
+				              | TM_ENABLE_TIMER
+				              | TM_EDGE_INT;
+				TIMER0_LOAD = ((APB_CLK_FREQ>>4)+(sample_rate>>1))/sample_rate;
+				ets_isr_attach(ETS_FRC_TIMER0_INUM, timer0_isr, out_wave_pbuf);
+				INTC_EDGE_EN |= BIT(1);
+				ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM));
+				return true;
+			}
+		}
 	}
-	wdrv_buf_wr_idx = 1<<31;
-	// включить SAR
-	i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 1); //select test mux
-	SAR_BASE[23] |= 1 << 21;
-	while((SAR_BASE[20] >> 24) & 0x07);
-	// включить TIMER0
-	TIMER0_CTRL =   TM_DIVDED_BY_16
-	              | TM_AUTO_RELOAD_CNT
-	              | TM_ENABLE_TIMER
-	              | TM_EDGE_INT;
-	TIMER0_LOAD = ((APB_CLK_FREQ>>4)+(sample_rate>>1))/sample_rate;
-	ets_isr_attach(ETS_FRC_TIMER0_INUM, timer0_isr, out_wave_pbuf);
-	INTC_EDGE_EN |= BIT(1);
-	ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM));
-	return true;
+#if DEBUGSOO > 1
+	os_printf("wdrv: error start(%u)\n", sample_rate);
+#endif
+	return false;
 }
 
 void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
@@ -176,7 +182,7 @@ void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
 }
 
 extern uint32 ahextoul(uint8 *s);
-static const char WDRV_ver_str[] ICACHE_RODATA_ATTR = "WDRV: 0.0.1";
+static const char WDRV_ver_str[] ICACHE_RODATA_ATTR = "WDRV: 0.0.2";
 static const char WDRV_error_str[] ICACHE_RODATA_ATTR = "WDRV: error";
 static const char WDRV_stop_str[] ICACHE_RODATA_ATTR = "WDRV: stop";
 static const char WDRV_start_str[] ICACHE_RODATA_ATTR = "WDRV: start, freg %u Hz";
