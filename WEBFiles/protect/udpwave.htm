@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<title>UDP Wave Port</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+~inc:menu.inc~
+<div class="content">
+<h2 class="title">UDP Wave Port</h2>
+<table class="form">
+<tr><form method="post" action="">
+<td class="label">UDP host IP:</td>
+<td><input name='wdrv_ip' maxlength='31' value='~wdrv_ip~'></td>
+</tr><tr>
+<td class="label">UDP Port:</td>
+<td><input title='1..65535, 0 - close' name='wdrv_init' maxlength='5' value='~wdrv_port~'></td>
+<td class="left"><input type="submit" value="Set" class="button"></td></form>
+</tr><tr><form method="post" action=""><td class="label">Sample Feq:</td>
+<td><input title='1..20 000 Hz' name='wdrv_start' maxlength='5' value='~wdrv_freq~'></td>
+<td class="left"><input type="submit" value="Start" class="button"></form>
+<form method="post" action="">
+<input type="hidden" name='wdrv_stop' value='0'><input type="submit" value="Stop" class="button">
+</form></td></tr></table>
+<h2 class="title">UDP send:</h2>
+<table class="scan">
+<tr><td>'?'</td><td>WDRV: ver<td></tr>
+<tr><td>'F=fx'</td><td>WDRV: start, freg fx Hz<td></tr>
+<tr><td>'A'</td><td>WDRV: set remote ip , remote port<td></tr>
+<tr><td>'S'</td><td>WDRV: stop<td></tr></p>
+</table></div>
+~inc:footer.inc~
+~inc:vdd.inc~
+</body></script></html>
