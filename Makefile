@@ -6,10 +6,17 @@
 
 ESPOPTION ?= -p COM2 -b 460800
 
+# SPI_SPEED = 40MHz or 80MHz
+SPI_SPEED?=80
+# SPI_MODE: QIO only
+SPI_MODE?=QIO
+# SPI_SIZE: 512KB for all size Flash ! (512 kbytes .. 16 Mbytes Flash autodetect)
+SPI_SIZE?=512
+
+# 
 USERFADDR = 0x0A000
 USERFBIN = ./webbin/WEBFiles.bin
-GENIMAGEOPTION = -ff 80m -fm qio -fs 4m
-
+# 
 ADDR_FW1 = 0x00000
 ADDR_FW2 = 0x40000
 
@@ -96,6 +103,71 @@ CCFLAGS += \
 #	-Wall	\
 #
 
+ifeq ($(SPI_SPEED), 26.7)
+    freqdiv = 1
+	flashimageoptions = -ff 26m
+else
+    ifeq ($(SPI_SPEED), 20)
+        freqdiv = 2
+        flashimageoptions = -ff 20m
+    else
+        ifeq ($(SPI_SPEED), 80)
+            freqdiv = 15
+			flashimageoptions = -ff 80m
+        else
+            freqdiv = 0
+			flashimageoptions = -ff 40m
+        endif
+    endif
+endif
+
+ifeq ($(SPI_MODE), QOUT)
+    mode = 1
+	flashimageoptions += -fm qout
+else
+    ifeq ($(SPI_MODE), DIO)
+        mode = 2
+		flashimageoptions += -fm dio
+    else
+        ifeq ($(SPI_MODE), DOUT)
+            mode = 3
+			flashimageoptions += -fm dout
+        else
+            mode = 0
+			flashimageoptions += -fm qio
+        endif
+    endif
+endif
+
+# flash larger than 1024KB only use 1024KB to storage user1.bin and user2.bin
+ifeq ($(SPI_SIZE), 256)
+    size = 1
+    flash = 256
+	flashimageoptions += -fs 2m
+else
+    ifeq ($(SPI_SIZE), 1024)
+        size = 2
+        flash = 1024
+		flashimageoptions += -fs 8m
+    else
+        ifeq ($(SPI_SIZE), 2048)
+            size = 3
+            flash = 1024
+			flashimageoptions += -fs 16m
+        else
+            ifeq ($(SPI_SIZE), 4096)
+                size = 4
+                flash = 1024
+				flashimageoptions += -fs 32m
+            else
+                size = 0
+                flash = 512
+				flashimageoptions += -fs 4m
+            endif
+        endif
+    endif
+endif
+
 
 CFLAGS = -Os $(CCFLAGS) $(DEFINES)  $(INCLUDES)
 DFLAGS = -Os $(CCFLAGS) $(DDEFINES)  $(INCLUDES)
@@ -126,11 +198,15 @@ endef
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@echo "------------------------------------------------------------------------------"
 	@mkdir -p ../$(FIRMWAREDIR)
-	@$(ESPTOOL) elf2image -o ../$(FIRMWAREDIR)/ $(GENIMAGEOPTION) $<
+	@$(ESPTOOL) elf2image -o ../$(FIRMWAREDIR)/ $(flashimageoptions) $<
 	@echo "------------------------------------------------------------------------------"
 	@echo "Add rapid_loader:"
 	@mv -f ../bin/$(ADDR_FW1).bin ../bin/0.bin 
+ifeq ($(freqdiv), 15)	
 	@dd if=../bin/rapid_loader.bin >../bin/$(ADDR_FW1).bin
+else
+	@dd if=../bin/rapid_loader_40m.bin >../bin/$(ADDR_FW1).bin
+endif	
 	@dd if=../bin/0.bin >>../bin/$(ADDR_FW1).bin
 	
 #	$(ESPTOOL-CK) -eo $< -bo $(FIRMWAREDIR)/$(ADDR_FW1).bin -bs .text -bs .data -bs .rodata -bc -ec
@@ -147,16 +223,16 @@ clobber: $(SPECIAL_CLOBBER)
 	$(RM) -r $(ODIR)
 
 FlashUserFiles: $(USERFBIN)
-	$(ESPTOOL) $(ESPOPTION) write_flash $(GENIMAGEOPTION) $(USERFADDR) $(USERFBIN)
+	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(USERFADDR) $(USERFBIN)
 
 FlashAll: $(OUTBIN1)  $(USERFBIN) $(OUTBIN2) $(DEFAULTBIN) $(BLANKBIN) $(CLREEPBIN)
-	$(ESPTOOL) $(ESPOPTION) write_flash $(GENIMAGEOPTION) $(ADDR_FW1) $(OUTBIN1) $(USERFADDR) $(USERFBIN) $(ADDR_FW2) $(OUTBIN2) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
+	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(ADDR_FW1) $(OUTBIN1) $(USERFADDR) $(USERFBIN) $(ADDR_FW2) $(OUTBIN2) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
 
 FlashClearSetings: $(CLREEPBIN) $(DEFAULTBIN) $(BLANKBIN)
-	$(ESPTOOL) $(ESPOPTION) write_flash $(GENIMAGEOPTION) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
+	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
 
 FlashCode: $(OUTBIN1) $(OUTBIN2)
-	$(ESPTOOL) $(ESPOPTION) write_flash $(GENIMAGEOPTION) $(ADDR_FW1) $(OUTBIN1) $(ADDR_FW2) $(OUTBIN2)
+	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(ADDR_FW1) $(OUTBIN1) $(ADDR_FW2) $(OUTBIN2)
 
 $(USERFBIN):
 	./PVFS2.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib" ./WEBFiles ./webbin WEBFiles.bin
