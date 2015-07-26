@@ -462,3 +462,19 @@ void ICACHE_FLASH_ATTR print_hex_dump(uint8 *buf, uint32 len, uint8 k)
 		ets_printf((uint8 *)&ss[0], *ptr++);
 	}
 }
+
+#if 0
+//=============================================================================
+/* char UpperCase(char ch) {
+	return (('a' <= ch) && (ch <= 'z')) ? ch - 32 : ch; }*/
+#define UpperCase(a) ((('a' <= a) && (a <= 'z')) ? a - 32 : a)
+
+char* ICACHE_FLASH_ATTR str_to_upper_case(char* text) {
+	char* p = text;
+	for (; *p; ++p) {
+		*p = UpperCase(*p);
+	}
+	return text;
+}
+#endif
+

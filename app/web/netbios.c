@@ -368,6 +368,8 @@ struct udp_pcb * ICACHE_FLASH_ATTR netbios_pcb(void)
 	return NULL;
 }
 
+#define UpperCase(a) ((('a' <= a) && (a <= 'z')) ? a - 32 : a)
+
 void ICACHE_FLASH_ATTR netbios_set_name(uint8 * name)
 {
 	uint8 * pnbn = netbios_name;
@@ -377,7 +379,8 @@ void ICACHE_FLASH_ATTR netbios_set_name(uint8 * name)
 	uint8 * pmane = name;
 	for(i = 0; i < NETBIOS_NAME_LEN; i++) {
 		if(*pmane <= ' ') break;
-		*pnbn++ = *pmane++;
+		*pnbn++ = UpperCase(*pmane);
+		pmane++;
 	};
 	*pnbn='\0';
 }

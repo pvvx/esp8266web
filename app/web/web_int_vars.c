@@ -250,6 +250,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
         		  }
         		  os_memcpy(wificonfig.ap.config.ssid, pvar, len);
         		  wificonfig.ap.config.ssid_len = len;
+        		  netbios_set_name(wificonfig.ap.config.ssid);
         	  }
           }
           else ifcmp("psw") {
