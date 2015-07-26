@@ -691,8 +691,8 @@ if __name__ == '__main__':
         f.close()
         print "{0:>10}|{1:>30}|{2:>12}|{3:>12}|{4:>8}".format("Section", "Description", "Start (hex)", "End (hex)", "Used space")         
         print "------------------------------------------------------------------------------"
-        sec_name = ["data", "rodata", "bss", "text", "irom0_text"]
-        sec_des = ["Initialized Data (RAM)", "ReadOnly Data (RAM)", "Uninitialized Data (RAM)", "Uncached Code (IRAM)", "Cached Code (SPI)"]
+        sec_name = ["data", "rodata", "bss", "lit4", "text", "irom0_text"]
+        sec_des = ["Initialized Data (RAM)", "ReadOnly Data (RAM)", "Uninitialized Data (RAM)", "Uninitialized Data (IRAM)", "Uncached Code (IRAM)", "Cached Code (SPI)"]
         sec_size = []
         for i in range(len(sec_name)):
          ss = e.get_symbol_addr('_' + sec_name[i] + '_start')
@@ -701,10 +701,10 @@ if __name__ == '__main__':
          print "{0:>10}|{1:>30}|{2:>12X}|{3:>12X}|{4:>8d}".format(sec_name[i], sec_des[i], ss, se, sec_size[i])
         print "------------------------------------------------------------------------------"
         print "{0} : {1:X} {2}()".format("Entry Point", image.entrypoint, args.entry_symbol)
-        ram_used = sec_size[0] + sec_size[1] + sec_size[2]
+        ram_used = sec_size[0] + sec_size[1]  + sec_size[2]
         print "{0} : {1:d}".format("Total Used RAM", ram_used)
         print "{0} : {1:d}".format("Free RAM", 0x014000 - ram_used)
-        print "{0} : {1:d} or {2:d} if 48k IRam".format("Free IRam", 0x08000 - sec_size[3], 0x0C000 - sec_size[3] )
+        print "{0} : {1:d} or {2:d} (option 48k IRAM)".format("Free IRam", 0x08000 - sec_size[3] - sec_size[4], 0x0C000 - sec_size[3] - sec_size[4])
 
     elif args.operation == 'read_mac':
         esp.get_mac()
