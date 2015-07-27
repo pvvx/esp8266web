@@ -73,6 +73,7 @@ struct sys_bits_config {
 	uint16 web_time_wait_delete	: 1;	//3  0x0000008 =1 Закрывать соединение и убивать pcb c TIME_WAIT
 	uint16 netbios_ena			: 1;	//4  0x0000010 =1 включить NetBios
 	uint16 sntp_ena				: 1;	//5  0x0000020 =1 включить SNTP
+	uint16 cdns_ena				: 1;	//6  0x0000040 =1 включить CAPDNS
 };
 
 #define SYS_CFG_HI_SPEED	0x0000001 // Set CPU 160 MHz ...
@@ -81,6 +82,7 @@ struct sys_bits_config {
 #define SYS_CFG_TWPCB_DEL 	0x0000008 // Закрывать соединение и убивать pcb c TIME_WAIT
 #define SYS_CFG_NETBIOS_ENA	0x0000010 // включить NetBios
 #define SYS_CFG_SNTP_ENA	0x0000020 // включить SNTP
+#define SYS_CFG_CDNS_ENA	0x0000040 // включить CAPDNS
 
 struct SystemCfg { // структура сохранения системных настроек в Flash
 	union {

@@ -14,8 +14,10 @@
 #ifdef USE_SNTP
 #include "sntp.h"
 #endif
-
-
+#ifdef USE_CAPTDNS
+#include "captdns.h"
+#endif
+#include "web_srv.h"
 
 
 /******************************************************************************
@@ -24,6 +26,7 @@
 
 void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 {
+	int i;
 #if DEBUGSOO > 1
 	os_printf("WiFi event %x\n", evt->event);
 #endif
@@ -59,7 +62,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 #ifdef USE_SNTP
 					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
 #endif
-					tcp2uart_start(syscfg.tcp2uart_port);
+					if(tcp2uart_servcfg != NULL) tcp2uart_start(syscfg.tcp2uart_port);
 /*			os_printf("ST info ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR "\n",
 					IP2STR(((struct ip_addr *)&info.st_ip)),
 					IP2STR((struct ip_addr *)&info.st_mask),
@@ -73,9 +76,10 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 			else os_printf("wifi_get_ip_info() error!"); */
 			break;
 		case EVENT_SOFTAPMODE_STACONNECTED:
+			i = wifi_softap_get_station_num(); // Number count of stations which connected to ESP8266 soft-AP
 #if DEBUGSOO > 1
 			os_printf("Station[%u]: " MACSTR " join, AID = %d\n",
-					wifi_softap_get_station_num(),
+					i,
 					MAC2STR(evt->event_info.sta_connected.mac),
 					evt->event_info.sta_connected.aid);
 /*			os_printf("AP info ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR "\n",
@@ -83,21 +87,36 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					IP2STR((struct ip_addr *)&info.ap_mask),
 					IP2STR((struct ip_addr *)&info.ap_gw)); */
 #endif
+			if(i == 1) {
 #ifdef USE_SNTP
 					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
 #endif
-					tcp2uart_start(syscfg.tcp2uart_port);
+					if(tcp2uart_servcfg != NULL) tcp2uart_start(syscfg.tcp2uart_port);
+#ifdef USE_CAPTDNS
+					if(syscfg.cfg.b.cdns_ena) {
+						captdns_init();
+						// webserver_init(443);
+					}
+#endif
+			}
 			break;
-#if DEBUGSOO > 1
+#ifdef USE_CAPTDNS
 		case EVENT_SOFTAPMODE_STADISCONNECTED:
-				os_printf("Station[%u]: " MACSTR " leave, AID = %d\n",
-						wifi_softap_get_station_num(),
-						MAC2STR(evt->event_info.sta_disconnected.mac),
-						evt->event_info.sta_disconnected.aid);
+			i = wifi_softap_get_station_num();
+#if DEBUGSOO > 1
+			os_printf("Station[%u]: " MACSTR " leave, AID = %d\n",
+					i,
+					MAC2STR(evt->event_info.sta_disconnected.mac),
+					evt->event_info.sta_disconnected.aid);
+#endif
+			if(i == 1) {
+				captdns_close();
+				// webserver_close(443);
+			}
 			break;
+#endif
 /*		default:
 			break; */
-#endif
 		}
 }
 

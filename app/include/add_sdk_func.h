@@ -6,6 +6,19 @@
 #include "ets_sys.h"
 #include "mem_manager.h"
 
+struct s_info {
+	uint32 ap_ip;	//+00
+	uint32 ap_mask;	//+04
+	uint32 ap_gw;	//+08
+	uint32 st_ip;	//+0C
+	uint32 st_mask;	//+10
+	uint32 st_gw;	//+14
+	uint8 ap_mac[6];	//+18
+	uint8 st_mac[6];	//+1E
+} __attribute__((packed));
+
+extern struct s_info info;
+
 #if DEF_SDK_VERSION > 999 // SDK > 0.9.6 b1
 //uint32 system_adc_read(void); // user_interface.h
 //void system_deep_sleep(uint32 time_in_us); // user_interface.h

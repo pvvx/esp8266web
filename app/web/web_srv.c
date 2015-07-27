@@ -24,8 +24,13 @@
 #include "sys_const.h"
 #include "wifi.h"
 #include "rom2ram.h"
+
 #ifdef WEBSOCKET_ENA
 #include "websocket.h"
+#endif
+
+#ifdef USE_CAPTDNS
+#include "captdns.h"
 #endif
 
 #define USE_WEB_NAGLE // https://en.wikipedia.org/wiki/Nagle%27s_algorithm
@@ -55,6 +60,12 @@ LOCAL void webserver_file_ext(HTTP_CONN *CurHTTP, uint8 *pfname) ICACHE_FLASH_AT
 const char http_default_file[] ICACHE_RODATA_ATTR = "index.htm";
 const char web_cgi_fname[] ICACHE_RODATA_ATTR = "web.cgi";
 const char fsupload_fname[] ICACHE_RODATA_ATTR = "fsupload";
+#ifdef USE_CAPTDNS
+const char ncsi_txt_fname[] ICACHE_RODATA_ATTR = "ncsi.txt";
+//const char generate_204_fname[] ICACHE_RODATA_ATTR = "generate_204";
+const char *HTTPHost ="Host:";
+#define sizeHTTPHost 5
+#endif
 #define ProtectedFilesName		"protect"
 
 /****************************************************************************
@@ -791,6 +802,31 @@ LOCAL void ICACHE_FLASH_ATTR webserver_file_ext(HTTP_CONN *CurHTTP, uint8 *pfnam
 			if(rom_xstrcmp(pfext, httpFileExtensions[CurHTTP->fileType]))	break;
 	};
 }
+/*----------------------------------------------------------------------*/
+#ifdef USE_CAPTDNS
+LOCAL bool ICACHE_FLASH_ATTR web_cdns_no_redir(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
+{
+	if(syscfg.cfg.b.cdns_ena
+	  && pcb_cdns != NULL
+	  &&((ts_conn->pcb->remote_ip.addr ^ info.ap_ip) & info.ap_mask) == 0
+	  && CurHTTP->phead != NULL
+	  && CurHTTP->head_len != 0) {
+		uint8 * ps = head_find_ctr(CurHTTP, HTTPHost, sizeHTTPHost, 7);
+		if(ps != NULL) {
+#if DEBUGSOO > 1
+		os_printf("Host: '%s' ", ps);
+#endif
+		if(rom_xstrcmp(ps, HostNameLocal) == 0)  {
+				ets_sprintf(CurHTTP->pFilename, httpHostNameLocal, HostNameLocal); // "http://esp8266/"
+				WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
+				SetSCB(SCB_REDIR);
+				return false;
+			}
+		}
+	}
+	return true;
+}
+#endif
 /******************************************************************************
  * FunctionName : webserver_open_file
  * Description  : Open file
@@ -813,7 +849,14 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 #endif
 				return true;
 			}
-			else rom_xstrcpy(pstr, http_default_file);
+			else {
+#ifdef USE_CAPTDNS
+				if(web_cdns_no_redir(CurHTTP, ts_conn)) rom_xstrcpy(pstr, http_default_file);
+				else return false;
+#else
+				rom_xstrcpy(pstr, http_default_file);
+#endif
+			}
 		}
 		else {
 			os_memcpy(pstr, &CurHTTP->pFilename[1], MAX_FILE_NAME_SIZE-1);
@@ -845,17 +888,16 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 				// добавить к имени папки "/index.htm"
 				pbuf[i] = '/';
 				rom_xstrcpy(&pbuf[i+1], http_default_file);
-				if(!web_inc_fopen(ts_conn, pstr)) return false;
+				if(!web_inc_fopen(ts_conn, pstr)) {
+#ifdef USE_CAPTDNS
+					web_cdns_no_redir(CurHTTP, ts_conn);
+#endif
+					return false;
+				}
 			};
 		};
 		// Compare to known extensions to determine Content-Type
 		webserver_file_ext(CurHTTP, pstr);
-/*		uint8 *pfext = NULL;
-		while(*pstr >= ' ') if(*pstr++ == '.') pfext = pstr;
-		if(pfext != NULL) {
-			for(CurHTTP->fileType = HTTP_TXT; CurHTTP->fileType < HTTP_UNKNOWN; CurHTTP->fileType++)
-				if(rom_cpy_label(pfext, httpFileExtensions[CurHTTP->fileType]) == 0)	break;
-		}; */
 		return true;
 	};
 	return false; // файл не открыт

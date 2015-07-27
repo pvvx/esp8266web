@@ -25,6 +25,10 @@ struct dhcps_lease {
 #include "flash.h"
 #include "flash_eep.h"
 
+#ifdef USE_CAPTDNS
+#define USE_DNS
+#endif
+
 // https://tools.ietf.org/html/rfc2132
 
 extern int wifi_softap_set_station_info(uint8_t * chaddr, struct ip_addr *ip);

@@ -35,6 +35,10 @@
 #include "driver/wdrv.h"
 #endif
 
+#ifdef USE_CAPTDNS
+#include "captdns.h"
+#endif
+
 extern TCP_SERV_CONN * tcp2uart_conn;
 /*extern uint32 adc_rand_noise;
 extern uint32 dpd_bypass_original;
@@ -425,6 +429,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 #endif
 #ifdef USE_SNTP
 			else ifcmp("sntp") tcp_put((syscfg.cfg.b.sntp_ena)? '1' : '0');
+#endif
+#ifdef USE_CAPTDNS
+			else ifcmp("cdns") tcp_put((syscfg.cfg.b.cdns_ena)? '1' : '0');
 #endif
 		    else tcp_put('?');
 		}

@@ -160,6 +160,7 @@ typedef union _u_g_ic{
 
 extern u_g_ic g_ic;
 
+/* перенесено в add_sdk_func.h
 struct s_info {
 	uint32 ap_ip;	//+00
 	uint32 ap_mask;	//+04
@@ -170,5 +171,6 @@ struct s_info {
 	uint8 ap_mac[6];	//+18
 	uint8 st_mac[6];	//+1E
 } __attribute__((packed));
+*/
 
 #endif /* _INCLUDE_LIBMAIN_H_ */

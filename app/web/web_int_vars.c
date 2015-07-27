@@ -44,6 +44,10 @@ struct ping_option pingopt; // for test
 #include "driver/wdrv.h"
 #endif
 
+#ifdef USE_CAPTDNS
+#include "captdns.h"
+#endif
+
 extern TCP_SERV_CONN * tcp2uart_conn;
 
 typedef uint32 (* call_func)(uint32 a, uint32 b, uint32 c);
@@ -199,6 +203,13 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			syscfg.cfg.b.sntp_ena = (val)? 1 : 0;
 			if(syscfg.cfg.b.sntp_ena) sntp_init();
 			else sntp_close();
+		}
+#endif
+#ifdef USE_CAPTDNS
+		else ifcmp("cdns") {
+			syscfg.cfg.b.cdns_ena = (val)? 1 : 0;
+			if(syscfg.cfg.b.cdns_ena && wifi_softap_get_station_num()) captdns_init();
+			else captdns_close();
 		}
 #endif
 #if DEBUGSOO > 5
