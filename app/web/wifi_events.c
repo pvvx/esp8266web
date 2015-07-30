@@ -19,6 +19,10 @@
 #endif
 #include "web_srv.h"
 
+#if 0
+#undef DEBUGSOO
+#define DEBUGSOO 2
+#endif
 
 /******************************************************************************
  * FunctionName : wifi_handle_event_cb
@@ -62,7 +66,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 #ifdef USE_SNTP
 					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
 #endif
-					if(tcp2uart_servcfg != NULL) tcp2uart_start(syscfg.tcp2uart_port);
+					if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
 /*			os_printf("ST info ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR "\n",
 					IP2STR(((struct ip_addr *)&info.st_ip)),
 					IP2STR((struct ip_addr *)&info.st_mask),
@@ -91,7 +95,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 #ifdef USE_SNTP
 					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
 #endif
-					if(tcp2uart_servcfg != NULL) tcp2uart_start(syscfg.tcp2uart_port);
+					if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
 #ifdef USE_CAPTDNS
 					if(syscfg.cfg.b.cdns_ena) {
 						captdns_init();
