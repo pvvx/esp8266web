@@ -702,9 +702,11 @@ if __name__ == '__main__':
         print "------------------------------------------------------------------------------"
         print "{0} : {1:X} {2}()".format("Entry Point", image.entrypoint, args.entry_symbol)
         ram_used = sec_size[0] + sec_size[1]  + sec_size[2]
-        print "{0} : {1:d}".format("Total Used RAM", ram_used)
-        print "{0} : {1:d}".format("Free RAM", 0x014000 - ram_used)
-        print "{0} : {1:d} or {2:d} (option 48k IRAM)".format("Free IRam", 0x08000 - sec_size[3] - sec_size[4], 0x0C000 - sec_size[3] - sec_size[4])
+        iram_used = sec_size[3] + sec_size[4]
+        print "{0} : {1:d}".format("Total Used RAM", ram_used + iram_used)
+        print "{0} : {1:d} or {2:d} (option 48k IRAM)".format("Free IRam", 0x08000 - iram_used, 0x0C000 - iram_used)
+        print "{0} : {1:d}".format("Free Heap", 0x014000 - ram_used)
+        print "{0} : {1:d}".format("Total Free RAM", 0x020000 - iram_used - ram_used)
 
     elif args.operation == 'read_mac':
         esp.get_mac()
