@@ -7,6 +7,7 @@
 #include "hw/esp8266.h"
 #include "hw/spi_register.h"
 #include "flash.h"
+#include "rom2ram.h"
 #include "user_interface.h"
 
 #ifdef USE_OVERLAP_MODE
@@ -59,62 +60,65 @@ SpiFlashOpResult spi_flash_read(uint32 faddr, void *des, uint32 size)
 	if(flash_read != NULL) return flash_read(flashchip, faddr, des, size);
 #endif
 	if(size != 0) {
-		faddr <<= 8; faddr >>= 8; //	faddr &= (1 << 24) - 1; //	if((faddr >> 24) || ((faddr + size) >> 24)) return SPI_FLASH_RESULT_ERR;
-		Cache_Read_Disable();
-		Wait_SPI_Idle(flashchip);
-		uint32 blksize = (uint32)des & 3;
-		if(blksize) {
-			blksize = 4 - blksize;
-#if DEBUGSOO > 4
-			ets_printf("fr1:%p<-%p[%u]\n", des, faddr, blksize);
-#endif
-			if(size < blksize) blksize = size;
-			SPI0_ADDR = faddr | (blksize << 24);
-			SPI0_CMD = SPI_READ;
-			size -= blksize;
-			faddr += blksize;
-			while(SPI0_CMD);
-			register uint32 data_buf = SPI0_W0;
-			do {
-				*(uint8 *)des = data_buf;
-				des = (uint8 *)des + 1;
-				data_buf >>= 8;
-			} while(--blksize);
-		}
-		while(size) {
-			if(size < SPI_FBLK) blksize = size;
-			else blksize = SPI_FBLK;
-#if DEBUGSOO > 5
-			ets_printf("fr2:%p<-%p[%u]\n", des, faddr, blksize);
-#endif
-			SPI0_ADDR = faddr | (blksize << 24);
-			SPI0_CMD = SPI_READ;
-			size -= blksize;
-			faddr += blksize;
-			while(SPI0_CMD);
-			//__asm__ __volatile__("memw" : : : "memory");
-			// volatile uint32 *srcdw = (volatile uint32 *)(SPI0_BASE+0x40);
-			uint32 *srcdw = (uint32 *)(&SPI0_W0);
-//			uint32 *srcdw = (uint32 *)(SPI0_BASE+0x40);
-			while(blksize >> 2) {
-				*((uint32 *)des) = *srcdw++;
-				des = ((uint32 *)des) + 1;
-				blksize -= 4;
-			}
+		if(faddr>>20) {
+			faddr <<= 8; faddr >>= 8; //	faddr &= (1 << 24) - 1; //	if((faddr >> 24) || ((faddr + size) >> 24)) return SPI_FLASH_RESULT_ERR;
+			Cache_Read_Disable();
+			Wait_SPI_Idle(flashchip);
+			uint32 blksize = (uint32)des & 3;
 			if(blksize) {
-#if DEBUGSOO > 4
-				ets_printf("fr3:%p<-%p[%u]\n", des, faddr, blksize);
-#endif
-				uint32 data_buf = *srcdw;
+				blksize = 4 - blksize;
+	#if DEBUGSOO > 4
+				ets_printf("fr1:%p<-%p[%u]\n", des, faddr, blksize);
+	#endif
+				if(size < blksize) blksize = size;
+				SPI0_ADDR = faddr | (blksize << 24);
+				SPI0_CMD = SPI_READ;
+				size -= blksize;
+				faddr += blksize;
+				while(SPI0_CMD);
+				register uint32 data_buf = SPI0_W0;
 				do {
 					*(uint8 *)des = data_buf;
 					des = (uint8 *)des + 1;
 					data_buf >>= 8;
 				} while(--blksize);
-				break;
 			}
+			while(size) {
+				if(size < SPI_FBLK) blksize = size;
+				else blksize = SPI_FBLK;
+	#if DEBUGSOO > 5
+				ets_printf("fr2:%p<-%p[%u]\n", des, faddr, blksize);
+	#endif
+				SPI0_ADDR = faddr | (blksize << 24);
+				SPI0_CMD = SPI_READ;
+				size -= blksize;
+				faddr += blksize;
+				while(SPI0_CMD);
+				//__asm__ __volatile__("memw" : : : "memory");
+				// volatile uint32 *srcdw = (volatile uint32 *)(SPI0_BASE+0x40);
+				uint32 *srcdw = (uint32 *)(&SPI0_W0);
+	//			uint32 *srcdw = (uint32 *)(SPI0_BASE+0x40);
+				while(blksize >> 2) {
+					*((uint32 *)des) = *srcdw++;
+					des = ((uint32 *)des) + 1;
+					blksize -= 4;
+				}
+				if(blksize) {
+	#if DEBUGSOO > 4
+					ets_printf("fr3:%p<-%p[%u]\n", des, faddr, blksize);
+	#endif
+					uint32 data_buf = *srcdw;
+					do {
+						*(uint8 *)des = data_buf;
+						des = (uint8 *)des + 1;
+						data_buf >>= 8;
+					} while(--blksize);
+					break;
+				}
+			}
+			Cache_Read_Enable_def();
 		}
-		Cache_Read_Enable_def();
+		else copy_s4d1((char *)des, (void *)(faddr + 0x40200000), size );
 	}
 	return SPI_FLASH_RESULT_OK;
 }

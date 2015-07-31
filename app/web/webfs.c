@@ -60,7 +60,7 @@ int isWEBFSLocked DATA_IRAM_ATTR;
 // WEBFSStubs[0] is reserved for internal use (FAT access)
 WEBFS_STUB WEBFSStubs[MAX_WEBFS_OPENFILES+1] DATA_IRAM_ATTR; // + HANDLE = 0
 // FAT record cache
-WEBFS_FAT_RECORD fatCache DATA_IRAM_ATTR;
+WEBFS_FAT_RECORD fatCache;
 // ID of currently loaded fatCache
 static uint32 fatCacheID DATA_IRAM_ATTR;
 // Number of files in this WEBFS image
