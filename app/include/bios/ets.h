@@ -93,6 +93,8 @@ void ets_update_cpu_frequency(uint32_t clk_mhz);
 uint32_t ets_get_cpu_frequency(void);
 /* { user_start_proc = routine; } user_start_proc 0x3FFFDCD0 */
 void ets_set_user_start(void *routine);
+extern void *ets_idle_cb;
+extern void *ets_idle_arg;
 /* idle_cb(idle_arg) вызывает ets_run()
  { idle_cb = routine; idle_arg = arg }
   idle_cb 0x3FFFDAB0, idle_arg 0x3FFFDAB4 */
