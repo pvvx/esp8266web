@@ -422,9 +422,17 @@ bool ICACHE_FLASH_ATTR wifi_read_fcfg(void)
  *                status -- scan status
  * Returns      : none
 *******************************************************************************/
-uint32 total_scan_infos DATA_IRAM_ATTR;
-struct bss_scan_info buf_scan_infos[max_scan_bss] DATA_IRAM_ATTR;
+uint32 total_scan_infos;
+struct bss_scan_info buf_scan_infos[max_scan_bss]; //  DATA_IRAM_ATTR
+struct scan_config * scan_cfg;
 
+#if	DEF_SDK_VERSION == 1200
+LOCAL void ICACHE_FLASH_ATTR quit_scan(void)
+{
+	ets_set_idle_cb(NULL, NULL);
+	New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
+}
+#endif
 LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 {
 #if DEBUGSOO > 1
@@ -456,8 +464,13 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 #endif
 	}
 	if(wifi_get_opmode() != wificonfig.b.mode) {
+#if	DEF_SDK_VERSION == 1200
+		ets_set_idle_cb(quit_scan, NULL);
+#else
 		New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
+#endif
 	}
+
 }
 /******************************************************************************
  * FunctionName : wifi_start_scan
@@ -468,14 +481,22 @@ void ICACHE_FLASH_ATTR wifi_start_scan(void)
 #if DEBUGSOO > 1
 	os_printf("\nStart Wifi Scan...");
 #endif
+	scan_cfg = (struct scan_config *) os_zalloc(sizeof(scan_cfg));
 	int x = wifi_get_opmode();
+#if 0
 	if(!(x&1)) {
 		wifi_station_set_auto_connect(0);
 		wifi_set_opmode(x|1);
 	}
+#else
+	if(!(x&1)) {
+		wifi_station_set_auto_connect(0);
+		wifi_set_opmode_current(x|1);
+	}
+#endif
     if(! wifi_station_scan(NULL, wifi_scan_cb)) {
 #if DEBUGSOO > 1
-	os_printf("Error!\n");
+    	os_printf("Error!\n");
 #endif
     }
 #if DEBUGSOO > 1
