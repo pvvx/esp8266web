@@ -344,9 +344,9 @@ void ICACHE_FLASH_ATTR startup(void)
 	if(wfmode & 1)  wifi_station_start();
 #if DEF_SDK_VERSION >= 1200
 	if(wfmode == 2) {
-		uint8 x_wfmode = g_ic.c[504];
-	if(x_wfmode != 2) wifi_softap_start(1);
-		else wifi_softap_start(0);
+//		uint8 x_wfmode = g_ic.g.wifi_store.wfmode[-28];  // g_ic.c[504]?
+		if(g_ic.c[504] != 2) wifi_softap_start(0);
+		else wifi_softap_start(1);
 	}
 	else if(wfmode == 3) {
 		wifi_softap_start(0);
