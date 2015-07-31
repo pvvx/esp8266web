@@ -11,8 +11,9 @@
 
 #define RST_EVENT_WDT 1
 #define RST_EVENT_EXP 2
-#define RST_EVENT_SOFT_RESET 3
-#define RST_EVENT_DEEP_SLEEP 4
+#define RST_EVENT_SOFT_WDT 3
+#define RST_EVENT_SOFT_RESET 4
+#define RST_EVENT_DEEP_SLEEP 5
 #define RST_EVENT_RES 8
 #define FATAL_ERR_R6PHY 9 // "register_chipv6_phy"
 #define RST_EVENT_MAX 32
