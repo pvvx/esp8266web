@@ -422,9 +422,8 @@ bool ICACHE_FLASH_ATTR wifi_read_fcfg(void)
  *                status -- scan status
  * Returns      : none
 *******************************************************************************/
-uint32 total_scan_infos;
-struct bss_scan_info buf_scan_infos[max_scan_bss]; //  DATA_IRAM_ATTR
-struct scan_config * scan_cfg;
+uint32 total_scan_infos DATA_IRAM_ATTR;
+struct bss_scan_info buf_scan_infos[max_scan_bss] DATA_IRAM_ATTR;
 
 #if	DEF_SDK_VERSION == 1200
 LOCAL void ICACHE_FLASH_ATTR quit_scan(void)
@@ -481,19 +480,11 @@ void ICACHE_FLASH_ATTR wifi_start_scan(void)
 #if DEBUGSOO > 1
 	os_printf("\nStart Wifi Scan...");
 #endif
-	scan_cfg = (struct scan_config *) os_zalloc(sizeof(scan_cfg));
 	int x = wifi_get_opmode();
-#if 0
-	if(!(x&1)) {
-		wifi_station_set_auto_connect(0);
-		wifi_set_opmode(x|1);
-	}
-#else
 	if(!(x&1)) {
 		wifi_station_set_auto_connect(0);
 		wifi_set_opmode_current(x|1);
 	}
-#endif
     if(! wifi_station_scan(NULL, wifi_scan_cb)) {
 #if DEBUGSOO > 1
     	os_printf("Error!\n");
