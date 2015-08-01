@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: eagle_lwip_if.c (libmain.a)
- * Description: eagle_lwip_if for SDK 1.1.2
+ * Description: eagle_lwip_if for SDK 1.2.0
  * Author: PV`
  * Old ver: kadamski
  * https://github.com/kadamski/esp-lwip/blob/esp8266-1.4.1/our/eagle_lwip_if.c
