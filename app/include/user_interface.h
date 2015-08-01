@@ -15,7 +15,7 @@
 
 #include "queue.h"
 #include "user_config.h"
-#include "flash.h"
+#include "sdk/flash.h"
 
 #ifndef MAC2STR
 #define MAC2STR(a) (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]

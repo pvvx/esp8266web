@@ -5,28 +5,28 @@
  * (c) PV` 2015
  * ver 0.0.1
 *******************************************************************************/
-#include "user_config.h"
+#include "sdk/sdk_config.h"
 #include "bios.h"
 #include "user_interface.h"
 #include "hw/esp8266.h"
 #include "hw/spi_register.h"
 #include "hw/uart_register.h"
-#include "fatal_errs.h"
-#include "app_main.h"
-#include "add_sdk_func.h"
-#include "flash.h"
+#include "hw/corebits.h"
+#include "hw/specreg.h"
+#include "sdk/fatal_errs.h"
+#include "sdk/app_main.h"
+#include "sdk/add_func.h"
+#include "sdk/flash.h"
+#include "sdk/wdt.h"
 #include "lwip/init.h"
 #include "lwip/netif.h"
 #include "lwip/timers.h"
-#include "wdt.h"
 #include "phy/phy.h"
-#include "sys_const.h"
-#include "rom2ram.h"
+#include "sdk/sys_const.h"
+#include "sdk/rom2ram.h"
 //=============================================================================
 // Define
 //-----------------------------------------------------------------------------
-#define NO_SET_UART_BAUD
-
 #ifdef USE_MAX_IRAM
 	#define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 0)
 #else
@@ -72,6 +72,27 @@ const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
 // call_user_start() - вызов из заголовка, загрузчиком
 // ENTRY(call_user_start) in eagle.app.v6.ld
 //-----------------------------------------------------------------------------
+#ifdef USE_FIX_QSPI_FLASH 
+void call_user_start(void)
+{
+		// коррекция QSPI на 80 MHz
+		SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS = 0x80000064
+#if USE_FIX_QSPI_FLASH == 80
+		GPIO_MUX_CFG |= (1<< MUX_SPI0_CLK_BIT); // QSPI = 80 MHz
+		SPI0_CTRL = 0x016ab000; // ((SPI0_CTRL >> 12) << 12) | BIT(12);
+#else
+		GPIO_MUX_CFG &= 0xfffffeff;
+		SPI0_CTRL = 0x016aa101;
+#endif
+		flashchip->chip_size = 512*1024; // песочница для SDK в 512 килобайт flash
+		// Всё - включаем кеширование, далее можно вызывать процедуры из flash
+		Cache_Read_Enable_def();
+		// Инициализация
+		startup();
+		// Передача управления ROM-BIOS
+		ets_run();
+}		
+#else
 void call_user_start(void)
 {
 	    // Загрузка заголовка flash
@@ -123,6 +144,136 @@ void sflash_something(uint32 flash_speed)
 	}
 	SPI0_CTRL = xreg | value;
 }
+#endif
+//=============================================================================
+// Стандартный вывод putc (UART0)
+//-----------------------------------------------------------------------------
+void uart0_write_char(char c)
+{
+	if (c != '\r') {
+		do {
+			MEMW();
+			if(((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) <= 125) break;
+		} while(1);
+		if (c != '\n') UART0_FIFO = c;
+		else {
+			UART0_FIFO = '\r';
+			UART0_FIFO = '\n';
+		}
+	}
+}
+//=============================================================================
+// Стандартный вывод putc (UART1)
+//-----------------------------------------------------------------------------
+void uart1_write_char(char c)
+{
+	if (c != '\r') {
+		do {
+			MEMW();
+			if(((UART1_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) <= 125) break;
+		} while(1);
+		if (c != '\n') UART1_FIFO = c;
+		else {
+		    UART1_FIFO = '\r';
+		    UART1_FIFO = '\n';
+		}
+	}
+}
+#ifdef USE_READ_ALIGN_ISR
+const char rd_align_txt[] ICACHE_RODATA_ATTR = "Read align4";
+#define LOAD_MASK   0x00f00fu
+#define L8UI_MATCH  0x000002u
+#define L16UI_MATCH 0x001002u
+#define L16SI_MATCH 0x009002u
+// Hardware exception handling
+struct exception_frame
+{
+  uint32_t epc;
+  uint32_t ps;
+  uint32_t sar;
+  uint32_t unused;
+  union {
+    struct {
+      uint32_t a0;
+      // note: no a1 here!
+      uint32_t a2;
+      uint32_t a3;
+      uint32_t a4;
+      uint32_t a5;
+      uint32_t a6;
+      uint32_t a7;
+      uint32_t a8;
+      uint32_t a9;
+      uint32_t a10;
+      uint32_t a11;
+      uint32_t a12;
+      uint32_t a13;
+      uint32_t a14;
+      uint32_t a15;
+    };
+    uint32_t a_reg[15];
+  };
+  uint32_t cause;
+};
+void read_align_exception_handler(struct exception_frame *ef, uint32_t cause)
+{
+  /* If this is not EXCCAUSE_LOAD_STORE_ERROR you're doing it wrong! */
+  (void)cause;
+
+  uint32_t epc1 = ef->epc;
+  uint32_t excvaddr;
+  uint32_t insn;
+  asm (
+    "rsr   %0, EXCVADDR;"    /* read out the faulting address */
+    "movi  a4, ~3;"          /* prepare a mask for the EPC */
+    "and   a4, a4, %2;"      /* apply mask for 32bit aligned base */
+    "l32i  a5, a4, 0;"       /* load part 1 */
+    "l32i  a6, a4, 4;"       /* load part 2 */
+    "ssa8l %2;"              /* set up shift register for src op */
+    "src   %1, a6, a5;"      /* right shift to get faulting instruction */
+    :"=r"(excvaddr), "=r"(insn)
+    :"r"(epc1)
+    :"a4", "a5", "a6"
+  );
+
+  uint32_t valmask = 0;
+  uint32_t what = insn & LOAD_MASK;
+
+  if (what == L8UI_MATCH)
+    valmask = 0xffu;
+  else if (what == L16UI_MATCH || what == L16SI_MATCH)
+    valmask = 0xffffu;
+  else
+  {
+die:
+    /* Turns out we couldn't fix this, trigger a system break instead
+     * and hang if the break doesn't get handled. This is effectively
+     * what would happen if the default handler was installed. */
+	fatal_error(FATAL_ERR_ALIGN, (void *)ef->epc, (void *)rd_align_txt);
+//    asm ("break 1, 1");
+//    while (1) {}
+  }
+
+  /* Load, shift and mask down to correct size */
+  uint32_t val = (*(uint32_t *)(excvaddr & ~0x3));
+  val >>= (excvaddr & 0x3) * 8;
+  val &= valmask;
+
+  /* Sign-extend for L16SI, if applicable */
+  if (what == L16SI_MATCH && (val & 0x8000))
+    val |= 0xffff0000;
+
+  int regno = (insn & 0x0000f0u) >> 4;
+  if (regno == 1)
+    goto die;              /* we can't support loading into a1, just die */
+  else if (regno != 0)
+    --regno;               /* account for skipped a1 in exception_frame */
+
+  ef->a_reg[regno] = val;  /* carry out the load */
+  ef->epc += 3;            /* resume at following instruction */
+}
+#endif
+
 //=============================================================================
 // FLASH code (ICACHE_FLASH_ATTR)
 //=============================================================================
@@ -217,48 +368,51 @@ void ICACHE_FLASH_ATTR read_wifi_config(void)
 void ICACHE_FLASH_ATTR startup(void)
 {
 	ets_set_user_start(call_user_start);
+	// cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
+	if(rom_i2c_readReg(103,4,1) != 136) { // 8: 40MHz, 136: 26MHz
+		if(get_sys_const(sys_const_crystal_26m_en) == 1) { // soc_param0: 0: 40MHz, 1: 26MHz, 2: 24MHz
+			// set 80MHz PLL CPU
+			rom_i2c_writeReg(103,4,1,136);
+			rom_i2c_writeReg(103,4,2,145);
+		}
+	}
+#ifdef DEBUG_UART
+	ets_isr_mask(1 << ETS_UART_INUM);
+	UART0_INT_ENA = 0;
+	UART1_INT_ENA = 0;
+	UART0_INT_CLR = 0xFFFFFFFF;
+	UART1_INT_CLR = 0xFFFFFFFF;
+	UART0_CONF0 = 0x000001C;
+	UART1_CONF0 = 0x000001C;
+	UART0_CONF1 = 0x01707070;
+	UART1_CONF1 = 0x01707070;
+	uart_div_modify(0, UART_CLK_FREQ / DEBUG_UART0_BAUD);
+	uart_div_modify(1, UART_CLK_FREQ / DEBUG_UART1_BAUD);
+#if DEBUG_UART==1
+	MEMW();
+	GPIO2_MUX = (1 << GPIO_MUX_FUN_BIT1);
+	ets_install_putc1(uart1_write_char);
+#else
+	ets_install_putc1(uart0_write_char);
+#endif
+	os_printf("\n\nOpenSDK 1.2.0\n");
+#endif
 	// Очистка сегмента bss //	mem_clr_bss();
 	uint8 * ptr = &_bss_start;
 	while(ptr < &_bss_end) *ptr++ = 0;
 //	user_init_flag = false; // mem_clr_bss
 	//
-	_xtos_set_exception_handler(9, default_exception_handler);
-	_xtos_set_exception_handler(0, default_exception_handler);
-	_xtos_set_exception_handler(2, default_exception_handler);
-	_xtos_set_exception_handler(3, default_exception_handler);
-	_xtos_set_exception_handler(28, default_exception_handler);
-	_xtos_set_exception_handler(29, default_exception_handler);
-	_xtos_set_exception_handler(8, default_exception_handler);
-	// cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
-	if(rom_i2c_readReg(103,4,1) == 8) { // 8: 40MHz, 136: 26MHz
-#ifdef DEBUG_UART
-		if(read_sys_const(sys_const_soc_param0) == 1) { // soc_param0: 0: 40MHz, 1: 26MHz, 2: 24MHz
-#ifdef NO_SET_UART_BAUD
-			// set 80MHz PLL CPU
-			rom_i2c_writeReg(103,4,1,136);
-			rom_i2c_writeReg(103,4,2,145);
-			UART0_CLKDIV = (UART0_CLKDIV * 394) >> 8;
-			UART1_CLKDIV = (UART1_CLKDIV * 394) >> 8;
-			ets_delay_us(150);
-//			ets_update_cpu_frequency(80); // set clk cpu (rom-bios set default 80)
+	_xtos_set_exception_handler(EXCCAUSE_UNALIGNED, default_exception_handler);
+	_xtos_set_exception_handler(EXCCAUSE_ILLEGAL, default_exception_handler);
+	_xtos_set_exception_handler(EXCCAUSE_INSTR_ERROR, default_exception_handler);
+#ifdef USE_READ_ALIGN_ISR
+	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, default_exception_handler);
 #else
-			ets_update_cpu_frequency(80); // указание правильной частоты для подсчета времени в ets_delay_us(), т.к. она считает такты CPU и множит на указанное число в MHz...
-			if(UART0_CLKDIV == CALK_UART_CLKDIV(115200)) {
-				UART0_CLKDIV = CALK_UART_CLKDIV_26QZ(DEFAULT_BIOS_UART_BAUD);
-				UART1_CLKDIV = CALK_UART_CLKDIV_26QZ(DEFAULT_BIOS_UART_BAUD);
-			}
-//			os_printf("\nSet UARTs_CLKDIV 74880 Baud (BIOS set: %u)\n", UartDev.baut_rate);
+	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, read_align_exception_handler);
 #endif
-		}
-#endif
-	}
-/*	//
-	if(rtc_get_reset_reason() < 2) { // 1 - power/ch_pd, 2 - reset, 3 - software, 4 - wdt ...)
-		if((RTC_RAM_BASE[24] & 0xffff) == 0) { // *((uint32 *)0x60001060 bit0..15: старт был по =1 reset, =0 ch_pd, bit16..31: deep_sleep_option
-		// старт со сбитыми в RTC данными, если не подключен VCC_RTC
-		}
-	} */
-//	os_printf("Reset reason: %u/%u, rf/deep_sleep option: %u.\n", rtc_get_reset_reason(), RTC_RAM_BASE[0x60>>2]&0xFFFF, RTC_RAM_BASE[0x60>>2]>>16);
+	_xtos_set_exception_handler(EXCCAUSE_LOAD_PROHIBITED, default_exception_handler);
+	_xtos_set_exception_handler(EXCCAUSE_STORE_PROHIBITED, default_exception_handler);
+	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, default_exception_handler);
 	// Тест системных данных в RTС
 	if((RTC_RAM_BASE[0x60>>2]>>16) > 4) { // проверка опции phy_rfoption = deep_sleep_option
 #ifdef DEBUG_UART
@@ -316,7 +470,6 @@ void ICACHE_FLASH_ATTR startup(void)
 	vPortFree(buf);
 	// print sdk version
 #ifdef DEBUG_UART
-	os_printf("\nOpenLoaderSDK v1.2\n");
 	//
 	os_print_reset_error(); // вывод фатальных ошибок, вызвавших рестарт. см. в модуле wdt
 	//
@@ -327,6 +480,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #else
 	wdt_init();
 #endif
+	uart_wait_tx_fifo_empty();
 	user_init();
 	user_init_flag = true;
 #if DEF_SDK_VERSION >= 1200
@@ -372,8 +526,10 @@ void ICACHE_FLASH_ATTR startup(void)
 #ifdef DEBUG_UART
 void ICACHE_FLASH_ATTR puts_buf(uint8 ch)
 {
-	if(UartDev.trx_buff.TrxBuffSize < TX_BUFF_SIZE)
+	if(UartDev.trx_buff.TrxBuffSize < (TX_BUFF_SIZE-1)) {
 		UartDev.trx_buff.pTrxBuff[UartDev.trx_buff.TrxBuffSize++] = ch;
+		UartDev.trx_buff.pTrxBuff[UartDev.trx_buff.TrxBuffSize] = 0;
+	}
 }
 #endif
 //=============================================================================
@@ -384,30 +540,21 @@ void ICACHE_FLASH_ATTR init_wifi(uint8 * init_data, uint8 * mac)
 {
 #ifdef DEBUG_UART
 	uart_wait_tx_fifo_empty();
-#ifndef NO_SET_UART_BAUD
 	UartDev.trx_buff.TrxBuffSize = 0;
 	ets_install_putc1(puts_buf);
-#endif
 #endif
 	if(register_chipv6_phy(init_data)){
 		fatal_error(FATAL_ERR_R6PHY, init_wifi, (void *)aFATAL_ERR_R6PHY);
 	}
    	ets_update_cpu_frequency(80);
 #ifdef DEBUG_UART
-#ifndef NO_SET_UART_BAUD
-   	{
-   		uint32 x;
-   	  	if(UART0_CLKDIV != CALK_UART_CLKDIV(115200)) {
-   	  		x = (UART0_CLKDIV * 394) >> 8;
-   	   	}
-   	  	else x = CALK_UART_CLKDIV(DEFAULT_BIOS_UART_BAUD);
-       	UART0_CLKDIV = x;
-       	UART1_CLKDIV = x;
-   	}
-	ets_install_uart_printf();
-	if(UartDev.trx_buff.TrxBuffSize) ets_printf(UartDev.trx_buff.pTrxBuff);
-	UartDev.trx_buff.TrxBuffSize = TX_BUFF_SIZE;
+#if DEBUG_UART==1
+	ets_install_putc1(uart1_write_char);
+#else
+	ets_install_putc1(uart0_write_char);
 #endif
+	if(UartDev.trx_buff.TrxBuffSize) os_printf_plus(UartDev.trx_buff.pTrxBuff);
+	UartDev.trx_buff.TrxBuffSize = TX_BUFF_SIZE;
 #endif
 	phy_disable_agc();
 	ieee80211_phy_init(g_ic.g.wifi_store.phy_mode); // phy_mode

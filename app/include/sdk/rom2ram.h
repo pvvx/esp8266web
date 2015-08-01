@@ -27,9 +27,10 @@ typedef struct t_eraminfo // описание свободной области 
 	int32 size;
 }ERAMInfo;
 
-//#define get_rom_chr(a) (*((*((unsigned int *)((unsigned int)a & (~3))))>>(((unsigned int)a & 3) << 3)))
-char get_iram_chr(const char *ps);
-void write_iram_chr(unsigned char *pd, unsigned char c);
+#define read_align4_chr(a) (*((*((unsigned int *)((unsigned int)a & (~3))))>>(((unsigned int)a & 3) << 3)))
+
+char get_align4_chr(const char *ps);
+void write_align4_chr(unsigned char *pd, unsigned char c);
 
 extern ERAMInfo eraminfo;
 

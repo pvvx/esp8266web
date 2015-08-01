@@ -46,11 +46,11 @@
 #ifdef USE_SNTP
 
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "ets_sys.h"
 #include "os_type.h"
 #include "osapi.h"
-#include "mem_manager.h"
+#include "sdk/mem_manager.h"
 #include "user_interface.h"
 
 #include "lwip/opt.h"

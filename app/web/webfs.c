@@ -4,11 +4,11 @@
  ********************************************************************/
 #include "user_config.h"
 #include "c_types.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "bios/ets.h"
 #include "hw/esp8266.h"
 #include "osapi.h"
-#include "flash.h"
+#include "sdk/flash.h"
 #include "webfs.h"
 
 // Supports long file names to 64 characters

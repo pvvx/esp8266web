@@ -75,7 +75,7 @@
 #include <string.h>
 
 #include "bios.h"
-#include "mem_manager.h"
+#include "sdk/mem_manager.h"
 
 /* Architecture specifics. */
 #define portBYTE_ALIGNMENT			8

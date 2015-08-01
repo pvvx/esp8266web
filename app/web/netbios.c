@@ -37,7 +37,7 @@
 
 /* https://tools.ietf.org/html/rfc1002 */
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 
 #include "lwip/opt.h"
 #include "netbios.h"

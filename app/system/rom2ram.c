@@ -7,9 +7,9 @@
 #include "user_config.h"
 #include "bios.h"
 #include "hw/esp8266.h"
-#include "rom2ram.h"
+#include "sdk/rom2ram.h"
 #include "osapi.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 
 #ifndef ICACHE_RAM_ATTR
 #define ICACHE_RAM_ATTR
@@ -29,7 +29,9 @@ int ICACHE_FLASH_ATTR iram_buf_init(void)
 		 uint32 * ptr = _lit4_start;
 		 while(ptr < end) *ptr++ = 0;
 	 }
+#if DEBUGSOO > 0
 	 else os_printf("No free IRAM!");
+#endif	 
 	 return eraminfo.size;
 }
 
@@ -280,7 +282,7 @@ char * ICACHE_RAM_ATTR rom_strchr(const char * ps, char c)
 	}
 }
 
-char ICACHE_RAM_ATTR get_iram_chr(const char *ps)
+char ICACHE_RAM_ATTR get_align4_chr(const char *ps)
 {
 	return (*((unsigned int *)((unsigned int)ps & (~3))))>>(((unsigned int)ps & 3) << 3);
 /*	asm(
@@ -296,7 +298,7 @@ char ICACHE_RAM_ATTR get_iram_chr(const char *ps)
 	); */
 }
 
-void ICACHE_RAM_ATTR write_iram_chr(unsigned char *pd, unsigned char c)
+void ICACHE_RAM_ATTR write_align4_chr(unsigned char *pd, unsigned char c)
 {
 	union {
 		unsigned char uc[4];

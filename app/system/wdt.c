@@ -9,10 +9,10 @@
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "hw/specreg.h"
-#include "wdt.h"
-#include "fatal_errs.h"
+#include "sdk/wdt.h"
+#include "sdk/fatal_errs.h"
 #include "user_interface.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 
 #if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1..1.1.2)
 
@@ -115,13 +115,16 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 {
 	struct rst_info * rst_inf = (struct rst_info *)&RTC_MEM(0);
 //	system_rtc_mem_read(0, &rst_inf, sizeof(struct rst_info));
-	if(rst_inf->reason >= RST_EVENT_WDT && rst_inf->reason <= RST_EVENT_MAX) {
+//	if(rst_inf->reason >= RST_EVENT_WDT
+//	 && rst_inf->reason <= RST_EVENT_MAX
+//	 && (!(rst_inf->reason == RST_EVENT_WDT && rst_inf->epc1 == 0x40000f68))) {
+	if(rst_inf->reason > RST_EVENT_WDT && rst_inf->reason <= RST_EVENT_MAX) {
 		os_printf("Old reset: ");
 		switch(rst_inf->reason) {
-		case RST_EVENT_WDT:
+/*		case RST_EVENT_WDT:
 			os_printf("WDT (%d):\n", rst_inf->exccause);
 			os_printf_plus((const char *)aEpc10x08xEpc20, rst_inf->epc1, rst_inf->epc2, rst_inf->epc3, rst_inf->excvaddr, rst_inf->depc);
-			break;
+			break; */
 		case RST_EVENT_EXP:
 			os_printf_plus((const char *)aFatalException, rst_inf->exccause);
 			os_printf_plus((const char *)aEpc10x08xEpc20, rst_inf->epc1, rst_inf->epc2, rst_inf->epc3, rst_inf->excvaddr, rst_inf->depc);

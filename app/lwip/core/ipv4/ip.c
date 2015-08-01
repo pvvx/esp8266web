@@ -56,7 +56,7 @@
 #include "lwip/stats.h"
 #include "arch/perf.h"
 #include "bios/ets.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 
 #include <string.h>
 

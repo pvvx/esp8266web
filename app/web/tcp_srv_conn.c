@@ -5,7 +5,7 @@
  ******************************************************************************/
 #include "user_config.h"
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "osapi.h"
 #include "user_interface.h"
 #include "lwip/tcp.h"

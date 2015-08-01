@@ -4,7 +4,7 @@
 
 #include "user_config.h"
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "hw/esp8266.h"
 #include "user_interface.h"
 #include "tcp_srv_conn.h"
@@ -12,7 +12,7 @@
 #include "wifi.h"
 #include "tcp2uart.h"
 #include "hw/spi_register.h"
-#include "rom2ram.h"
+#include "sdk/rom2ram.h"
 #include "web_iohw.h"
 #include "ws2812.h"
 

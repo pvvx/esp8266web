@@ -1,6 +1,6 @@
 #include "user_config.h"
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 
 #include "lwip/inet.h"
 #include "lwip/err.h"
@@ -22,7 +22,7 @@ struct dhcps_lease {
 #include "net80211/ieee80211_var.h"
 #endif
 #include "user_interface.h"
-#include "flash.h"
+#include "sdk/flash.h"
 #include "flash_eep.h"
 
 #ifdef USE_CAPTDNS

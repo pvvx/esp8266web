@@ -6,7 +6,7 @@
 
 #include <string.h>
 #include "user_config.h"
-#include "os_printf.h"
+#include "sdk/os_printf.h"
 
 #define os_bzero ets_bzero
 #define os_delay_us ets_delay_us

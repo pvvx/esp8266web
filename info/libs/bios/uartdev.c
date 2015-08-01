@@ -115,10 +115,9 @@ void uart_buff_switch(uint8 uartnum)
 void uart_div_modify(uint32 uart_num, uint32 div_baud)
 {
 	volatile uint32_t *uartregs = REG_UART_BASE(uart_num);
-	register uint32 x = uartregs[IDX_UART_CONF0];
-	uartregs[IDX_UART_CONF0] = x | UART_TXFIFO_RST | UART_RXFIFO_RST;
-	uartregs[IDX_UART_AUTOBAUD] = div_baud; // UART_CLKDIV(uart_num) = div_baud
-	uartregs[IDX_UART_CONF0] = x  & (~(UART_TXFIFO_RST | UART_RXFIFO_RST));
+	uartregs[IDX_UART_CLKDIV] = div_baud;
+	uartregs[IDX_UART_CONF0] |= UART_TXFIFO_RST | UART_RXFIFO_RST;
+	uartregs[IDX_UART_CONF0] &= (~(UART_TXFIFO_RST | UART_RXFIFO_RST));
 }
 
 // ROM:40003924

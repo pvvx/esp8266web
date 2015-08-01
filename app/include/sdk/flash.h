@@ -9,6 +9,7 @@
 #ifndef SPI_FLASH_H
 #define SPI_FLASH_H
 
+#include "sdk_config.h"
 #include "bios/spiflash.h"
 
 #define SPI_FLASH_SEC_SIZE      4096
@@ -37,13 +38,13 @@ void spi_flash_set_read_func(user_spi_flash_read read);
 
 #endif
 
-#define USE_MSPI_FLASH_O 1 // включена "песочница" для SDK в 512 килобайт flash. Включить доступ к flash до 16Мбайт включительно
+#define USE_FIX_SDK_FLASH_SIZE  // включена "песочница" для SDK в 512 килобайт flash. Включить доступ к flash до 16Мбайт включительно
 
 #define MASK_ADDR_FLASH_ICACHE_DATA	0xfffff
 
 #define spi_flash_read_byte(faddr, dest) spi_flash_read(faddr, dest, 1);
 
-#ifdef USE_MSPI_FLASH_O
+#ifdef USE_FIX_SDK_FLASH_SIZE
 
 #define open_16m() 			flashchip->chip_size = FLASH_MAX_SIZE
 #define close_16m() 		flashchip->chip_size = FLASH_MIN_SIZE

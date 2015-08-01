@@ -8,10 +8,8 @@
 #ifndef _INCLUDE_LIBMAIN_H_
 #define _INCLUDE_LIBMAIN_H_
 
-#include "user_config.h"
+#include "sdk/sdk_config.h"
 #include "c_types.h"
-
-#define DEBUG_UART 0 // включить вывод в загрузчике сообщений
 
 //=============================================================================
 // extern data

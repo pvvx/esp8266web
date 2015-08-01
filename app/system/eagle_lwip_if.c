@@ -8,10 +8,10 @@
 
 #include "user_config.h"
 
-#if 1 //def USE_OPEN_LWIP
+#ifdef USE_OPEN_LWIP
 
 #include "user_interface.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "ets_sys.h"
@@ -19,7 +19,7 @@
 #include "lwip/netif.h"
 #include "netif/etharp.h"
 #include "lwip/app/dhcpserver.h"
-#include "libmain.h"
+#include "sdk/libmain.h"
 #include "lwip/pbuf.h"
 #include "lwip/ip_addr.h"
 #include "netif/wlan_lwip_if.h"

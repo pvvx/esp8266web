@@ -7,11 +7,11 @@
 
 #include "user_config.h"
 #include "bios/ets.h"
-#include "mem_manager.h"
+#include "sdk/mem_manager.h"
 #include "ets_sys.h"
 #include "os_type.h"
 #include "osapi.h"
-#include "flash.h"
+#include "sdk/flash.h"
 #include "flash_eep.h"
 #include "web_srv.h"
 

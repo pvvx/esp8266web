@@ -8,11 +8,13 @@
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "hw/uart_register.h"
-#include "add_sdk_func.h"
-#include "flash.h"
+#include "sdk/add_func.h"
+#include "sdk/flash.h"
 #include "flash_eep.h"
 #include "tcp2uart.h"
 //=============================================================================
+extern void uart1_write_char(char c);
+extern void uart0_write_char(char c);
 //=============================================================================
 // Функции для установки pins в режим UART
 #define VAL_FUNC_U1TX   (1<<GPIO_MUX_FUN_BIT1)
@@ -144,40 +146,6 @@ void ICACHE_FLASH_ATTR set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask)
 		update_mux_uart0();
 	}
     ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
-}
-//=============================================================================
-// Стандартный вывод putc (UART0)
-//-----------------------------------------------------------------------------
-void uart0_write_char(char c)
-{
-	if (c != '\r') {
-		do {
-			MEMW();
-			if(((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) <= 125) break;
-		} while(1);
-		if (c != '\n') UART0_FIFO = c;
-		else {
-			UART0_FIFO = '\r';
-			UART0_FIFO = '\n';
-		}
-	}
-}
-//=============================================================================
-// Стандартный вывод putc (UART1)
-//-----------------------------------------------------------------------------
-void uart1_write_char(char c)
-{
-	if (c != '\r') {
-		do {
-			MEMW();
-			if(((UART1_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) <= 125) break;
-		} while(1);
-		if (c != '\n') UART1_FIFO = c;
-		else {
-		    UART1_FIFO = '\r';
-		    UART1_FIFO = '\n';
-		}
-	}
 }
 /******************************************************************************
  * FunctionName : uart_init

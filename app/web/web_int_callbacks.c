@@ -5,7 +5,7 @@
 
 #include "user_config.h"
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "hw/esp8266.h"
 #include "hw/uart_register.h"
 #include "ets_sys.h"
@@ -13,7 +13,7 @@
 #include "osapi.h"
 #include "user_interface.h"
 #include "lwip/tcp.h"
-#include "flash.h"
+#include "sdk/flash.h"
 #include "flash_eep.h"
 #include "tcp_srv_conn.h"
 #include "web_srv_int.h"
@@ -28,8 +28,8 @@
 #ifdef USE_SNTP
 #include "sntp.h"
 #endif
-#include "rom2ram.h"
-#include "sys_const.h"
+#include "sdk/rom2ram.h"
+#include "sys_const_utils.h"
 
 #ifdef USE_WDRV
 #include "driver/wdrv.h"

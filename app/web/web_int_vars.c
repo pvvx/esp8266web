@@ -5,7 +5,7 @@
 
 #include "user_config.h"
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "hw/esp8266.h"
 #include "hw/eagle_soc.h"
 #include "hw/uart_register.h"
@@ -24,8 +24,8 @@
 #include "wifi.h"
 #include "flash_eep.h"
 #include "driver/sigma_delta.h"
-#include "sys_const.h"
-#include "rom2ram.h"
+#include "sys_const_utils.h"
+#include "sdk/rom2ram.h"
 
 #ifdef USE_NETBIOS
 #include "netbios.h"

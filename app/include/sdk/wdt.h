@@ -10,8 +10,7 @@
 #define _INCLUDE_WDT_H_
 
 #include "ets_sys.h"
-#include "fatal_errs.h"
-
+#include "sdk/fatal_errs.h"
 
 #if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1..1.1.2)
 void wdt_init(int flg) ICACHE_FLASH_ATTR;

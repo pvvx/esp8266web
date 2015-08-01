@@ -15,9 +15,6 @@
 
 #define TCP2UART_PORT_DEF 12345
 
-void uart1_write_char(char c);
-void uart0_write_char(char c);
-
 void uart_init(void) ICACHE_FLASH_ATTR;
 
 void uart_save_fcfg(uint8 set) ICACHE_FLASH_ATTR;

@@ -17,8 +17,8 @@
 #include "lwip/tcp_impl.h"
 #include "lwip/udp.h"
 
-#include "flash.h"
-#include "add_sdk_func.h"
+#include "sdk/flash.h"
+#include "sdk/add_func.h"
 
 #include "udp_test_port.h"
 #include "tcp_srv_conn.h"

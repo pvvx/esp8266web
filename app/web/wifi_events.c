@@ -4,7 +4,7 @@
  */
 #include "user_config.h"
 #include "bios/ets.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "ets_sys.h"
 #include "os_type.h"
 #include "osapi.h"

@@ -4,16 +4,16 @@
  ***********************************/
 #include "user_config.h"
 #include "bios/ets.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "ets_sys.h"
 #include "os_type.h"
 #include "osapi.h"
 #include "user_interface.h"
 #include "hw/esp8266.h"
-#include "flash.h"
+#include "sdk/flash.h"
 #include "wifi.h"
 #include "flash_eep.h"
-#include "rom2ram.h"
+#include "sdk/rom2ram.h"
 #include "wifi_events.h"
 #if DEF_SDK_VERSION == 1019
 #include "../main/include/libmain.h"
@@ -429,6 +429,7 @@ struct bss_scan_info buf_scan_infos[max_scan_bss] DATA_IRAM_ATTR;
 LOCAL void ICACHE_FLASH_ATTR quit_scan(void)
 {
 	ets_set_idle_cb(NULL, NULL);
+	ets_intr_unlock();
 	New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
 }
 #endif

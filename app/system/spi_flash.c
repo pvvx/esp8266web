@@ -6,8 +6,8 @@
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "hw/spi_register.h"
-#include "flash.h"
-#include "rom2ram.h"
+#include "sdk/flash.h"
+#include "sdk/rom2ram.h"
 #include "user_interface.h"
 
 #ifdef USE_OVERLAP_MODE
@@ -60,8 +60,8 @@ SpiFlashOpResult spi_flash_read(uint32 faddr, void *des, uint32 size)
 	if(flash_read != NULL) return flash_read(flashchip, faddr, des, size);
 #endif
 	if(size != 0) {
-		if(faddr>>20) {
-			faddr <<= 8; faddr >>= 8; //	faddr &= (1 << 24) - 1; //	if((faddr >> 24) || ((faddr + size) >> 24)) return SPI_FLASH_RESULT_ERR;
+		if((faddr + size) >> 20) { // > 1 MBytes ? 
+			faddr <<= 8; faddr >>= 8; // ограничение на 16 MBytes (1<<24)
 			Cache_Read_Disable();
 			Wait_SPI_Idle(flashchip);
 			uint32 blksize = (uint32)des & 3;
@@ -118,7 +118,7 @@ SpiFlashOpResult spi_flash_read(uint32 faddr, void *des, uint32 size)
 			}
 			Cache_Read_Enable_def();
 		}
-		else copy_s4d1((char *)des, (void *)(faddr + 0x40200000), size );
+		else copy_s4d1((char *)des, (void *)(faddr + FLASH_BASE), size );
 	}
 	return SPI_FLASH_RESULT_OK;
 }

@@ -8,7 +8,7 @@
 #include "hw/esp8266.h"
 #include "hw/eagle_soc.h"
 #include "hw/uart_register.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "ets_sys.h"
 #include "osapi.h"
 #include "flash_eep.h"

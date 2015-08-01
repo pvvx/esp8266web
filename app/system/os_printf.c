@@ -6,8 +6,8 @@
 *******************************************************************************/
 #include "bios.h"
 #include <stdarg.h>
-#include "rom2ram.h"
-#include "os_printf.h"
+#include "sdk/rom2ram.h"
+#include "sdk/os_printf.h"
 
 extern char * _sprintf_buf;  // 0x3FFFE360
 extern char print_mem_buf[1024]; // 0x3FFFE364..0x3FFFEA80 max 1820 bytes
@@ -39,7 +39,7 @@ void ICACHE_FLASH_ATTR _sprintf_out(char c)
 {
 	if(_sprintf_buf != NULL) {
 		// *_sprintf_buf++ = c;
-		// write_iram_chr(_sprintf_buf++, c);
+		// write_align4_chr(_sprintf_buf++, c);
 		union {
 			uint8 uc[4];
 			uint32 ud;

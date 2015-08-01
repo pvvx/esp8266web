@@ -68,7 +68,6 @@ err_t ICACHE_FLASH_ATTR mdb_tcp_recv(TCP_SERV_CONN *conn) {
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR mdb_tcp_close(void)
 {
-//	syscfg.mdb_tcp_port = 0;
 	if(mdb_tcp_servcfg != NULL) {
 		tcpsrv_close(mdb_tcp_servcfg);
 	}

@@ -7,7 +7,7 @@
 *******************************************************************************/
 #include "user_config.h"
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "ets_sys.h"
 #include "os_type.h"
 #include "osapi.h"
@@ -18,12 +18,12 @@
 #include "web_srv_int.h"
 #include "web_utils.h"
 #include "web_iohw.h"
-#include "flash.h"
+#include "sdk/flash.h"
 #include "flash_eep.h"
 #include "hw/esp8266.h"
-#include "sys_const.h"
+#include "sys_const_utils.h"
 #include "wifi.h"
-#include "rom2ram.h"
+#include "sdk/rom2ram.h"
 
 #ifdef WEBSOCKET_ENA
 #include "websocket.h"
