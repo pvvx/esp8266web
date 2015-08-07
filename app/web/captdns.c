@@ -5,10 +5,10 @@
 #include "hw/esp8266.h"
 #include "lwip/err.h"
 #include "lwip/udp.h"
-#include "rom2ram.h"
+#include "sdk/rom2ram.h"
 #include "captdns.h"
 #include "lwip/ip_addr.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 
 
 /*

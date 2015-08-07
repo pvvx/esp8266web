@@ -25,6 +25,8 @@
 
 #define udpbufsize 1024
 
+extern int rom_atoi(const char *);
+#define atoi rom_atoi
 //#define udp_puts(...) udpbuflen += os_sprintf(&pudpbuf[udpbuflen], __VA_ARGS__)
 
 #define udp_puts(fmt, ...) do { \

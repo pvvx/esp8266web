@@ -8,11 +8,12 @@
 #ifndef _INCLUDE_WEB_UTILS_H_
 #define _INCLUDE_WEB_UTILS_H_
 
+int rom_atoi(const char *s) ICACHE_FLASH_ATTR;
 void copy_align4(void *ptrd, void *ptrs, uint32 len);
 uint32 hextoul(uint8 *s) ICACHE_FLASH_ATTR;
 uint32 ahextoul(uint8 *s) ICACHE_FLASH_ATTR;
 uint8 * cmpcpystr(uint8 *pbuf, uint8 *pstr, uint8 a, uint8 b, uint16 len) ICACHE_FLASH_ATTR;
-char* web_strnstr(const uint8* buffer, const uint8* token, int n) ICACHE_FLASH_ATTR;
+uint8 * web_strnstr(const uint8* buffer, const uint8* token, int n) ICACHE_FLASH_ATTR;
 bool base64decode(const uint8 *in, int len, uint8_t *out, int *outlen) ICACHE_FLASH_ATTR;
 size_t base64encode(char* target, size_t target_len, const char* source, size_t source_len) ICACHE_FLASH_ATTR;
 void strtomac(uint8 *s, uint8 *macaddr) ICACHE_FLASH_ATTR;

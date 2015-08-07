@@ -7,7 +7,7 @@
 #include "user_config.h"
 #ifdef USE_MODBUS
 #include "bios.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "c_types.h"
 #include "osapi.h"
 #include "lwip/tcp.h"

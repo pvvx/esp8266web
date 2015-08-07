@@ -13,6 +13,7 @@
 #include "osapi.h"
 #include "sdk/flash.h"
 #include "flash_eep.h"
+#include "hw/esp8266.h"
 #include "web_srv.h"
 
 //-----------------------------------------------------------------------------
@@ -35,6 +36,16 @@ typedef union // заголовок объекта сохранения
 //-----------------------------------------------------------------------------
 
 #define align(a) ((a + 3) & 0xFFFFFFFC)
+
+//-----------------------------------------------------------------------------
+#if ((FMEMORY_SCFG_BASE_ADDR + (FMEMORY_SCFG_BANK_SIZE*FMEMORY_SCFG_BANKS)) < FLASH_CACHE_MAX_SIZE)
+#include "sdk/rom2ram.h"
+#define flash_read(a, d, s) (copy_s4d1((unsigned char *)(d), (void *)((a) + FLASH_BASE), s) != 0)
+#else
+#define flash_read(a, d, s) (spi_flash_read(a, (uint32 *)(d), s) != SPI_FLASH_RESULT_OK)
+#endif
+#define flash_write(a, d, s) (spi_flash_write(a, (uint32 *)(d), s) != SPI_FLASH_RESULT_OK)
+#define flash_erase_sector(a) (spi_flash_erase_sector(a>>12) != SPI_FLASH_RESULT_OK)
 //-----------------------------------------------------------------------------
 // FunctionName : get_addr_bscfg
 // Опции:
@@ -48,7 +59,7 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_bscfg(bool flg)
 	uint32 faddr = FMEMORY_SCFG_BASE_ADDR;
 	uint32 reta = FMEMORY_SCFG_BASE_ADDR;
 	do {
-		if(spi_flash_read(faddr, &x2, 4) != SPI_FLASH_RESULT_OK) return 1;
+		if(flash_read(faddr, &x2, 4)) return 1;
 		if(flg) { // поиск нового сегмента для записи (pack)
 			if(x2 > x1 || x2 == 0xFFFFFFFF) {
 				x1 = x2;
@@ -64,9 +75,8 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_bscfg(bool flg)
 
 	if((!flg)&&(x1 == 0xFFFFFFFF)&&(reta == FMEMORY_SCFG_BASE_ADDR)) {
 		x1--;
-		if(spi_flash_write(reta, &x1, 4) != SPI_FLASH_RESULT_OK)	return 1;
+		if(flash_write(reta, &x1, 4)) return 1;
 	}
-
 #if DEBUGSOO > 3
 		if(flg) os_printf("bsseg:%p ", reta);
 		else os_printf("brseg:%p ", reta);
@@ -89,9 +99,7 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj(uint32 base, fobj_head *obj, bool f
 	uint32 fend = base + FMEMORY_SCFG_BANK_SIZE - align(fobj_head_size);
 	uint32 reta = 0;
 	do {
-		if(spi_flash_read(faddr,(uint32 *) &fobj, fobj_head_size) != SPI_FLASH_RESULT_OK) {
-			return 1;
-		}
+		if(flash_read(faddr, &fobj, fobj_head_size)) return 1;
 		if(fobj.x == fobj_x_free) break;
 		if(fobj.n.size <= MAX_FOBJ_SIZE) {
 			if(fobj.n.id == obj->n.id) {
@@ -119,9 +127,7 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj_save(uint32 base, fobj_head obj)
 	uint32 faddr = base + 4;
 	uint32 fend = base + FMEMORY_SCFG_BANK_SIZE - align(obj.n.size + fobj_head_size);
 	do {
-		if(spi_flash_read(faddr, (uint32 *) &fobj, fobj_head_size) != SPI_FLASH_RESULT_OK) {
-			return 1; // ошибка
-		}
+		if(flash_read(faddr, &fobj, fobj_head_size)) return 1; // ошибка
 		if(fobj.x == fobj_x_free) {
 			if(faddr < fend) {
 				return faddr;
@@ -137,8 +143,8 @@ LOCAL ICACHE_FLASH_ATTR uint32 get_addr_fobj_save(uint32 base, fobj_head obj)
 	return 0; // не влезет, на pack
 }
 //=============================================================================
-// FunctionName : spi_flash_save_struct
-// Returns      : false/true
+// FunctionName : pack_cfg_fmem
+// Returns      : адрес для записи объекта
 //-----------------------------------------------------------------------------
 LOCAL ICACHE_FLASH_ATTR uint32 pack_cfg_fmem(fobj_head obj)
 {
@@ -151,10 +157,10 @@ LOCAL ICACHE_FLASH_ATTR uint32 pack_cfg_fmem(fobj_head obj)
 	uint32 faddr = foldseg;
 	uint32 xaddr;
 	uint16 len;
-	if(spi_flash_erase_sector(fnewseg>>12) != SPI_FLASH_RESULT_OK) return 1;
+	if(flash_erase_sector(fnewseg)) return 1;
 	faddr += 4;
 	do {
-		if(spi_flash_read(faddr, (uint32 *) &fobj, fobj_head_size) != SPI_FLASH_RESULT_OK) return 1; // последовательное чтение id из старого сегмента
+		if(flash_read(faddr, &fobj, fobj_head_size)) return 1; // последовательное чтение id из старого сегмента
 		if(fobj.x == fobj_x_free) break;
 		if(fobj.n.size > MAX_FOBJ_SIZE) len = align(MAX_FOBJ_SIZE + fobj_head_size);
 		else len = align(fobj.n.size + fobj_head_size);
@@ -164,19 +170,19 @@ LOCAL ICACHE_FLASH_ATTR uint32 pack_cfg_fmem(fobj_head obj)
 				if(xaddr < 4) return xaddr; // ???
 				// прочитаем заголовок с телом объекта в буфер
 				os_memcpy(buf, &fobj, fobj_head_size);
-				if((spi_flash_read(xaddr + fobj_head_size,(uint32 *) &buf[fobj_head_size], fobj.n.size) != SPI_FLASH_RESULT_OK)) return 1;
+				if(flash_read(xaddr + fobj_head_size, &buf[fobj_head_size], fobj.n.size)) return 1;
 				xaddr = get_addr_fobj_save(fnewseg, fobj); // адрес для записи объекта
 				if(xaddr < 4) return xaddr; // ???
 				// запишем заголовок с телом объекта во flash
-				if((spi_flash_write(xaddr, (uint32 *)buf, align(fobj.n.size + fobj_head_size)) != SPI_FLASH_RESULT_OK)) return 1;
+				if(flash_write(xaddr, buf, align(fobj.n.size + fobj_head_size))) return 1;
 			};
 		};
 		faddr += len;
 	} while(faddr  < (foldseg + FMEMORY_SCFG_BANK_SIZE - align(fobj_head_size+1)));
 
-	if(spi_flash_read(foldseg, &xaddr, 4) != SPI_FLASH_RESULT_OK)	return 1;
+	if(flash_read(foldseg, &xaddr, 4))	return 1;
 	xaddr--;
-	if(spi_flash_write(fnewseg, &xaddr, 4) != SPI_FLASH_RESULT_OK)	return 1;
+	if(flash_write(fnewseg, &xaddr, 4))	return 1;
 	return get_addr_fobj_save(fnewseg, obj); // адрес для записи объекта;
 }
 //=============================================================================
@@ -196,7 +202,7 @@ bool ICACHE_FLASH_ATTR flash_save_cfg(void *ptr, uint16 id, uint16 size)
 	{
 		uint32 xfaddr = get_addr_fobj(faddr, &fobj, false);
 		if(xfaddr > 3 && size == fobj.n.size) {
-			if((size)&&(spi_flash_read(xfaddr, (uint32 *) buf, size + fobj_head_size) != SPI_FLASH_RESULT_OK)) return false; // error
+			if((size)&&(flash_read(xfaddr, buf, size + fobj_head_size))) return false; // error
 			if(!os_memcmp(ptr, &buf[fobj_head_size], size)) return true; // уже записано то-же самое
 		}
 	}
@@ -213,7 +219,7 @@ bool ICACHE_FLASH_ATTR flash_save_cfg(void *ptr, uint16 id, uint16 size)
 	uint16 len = align(size + fobj_head_size);
 	os_memcpy(buf, &fobj, fobj_head_size);
 	os_memcpy(&buf[fobj_head_size], ptr, size);
-	spi_flash_write(faddr, (uint32 *)buf, len);
+	if(flash_write(faddr, (uint32 *)buf, len)) return false; // error
 #if DEBUGSOO > 2
 	os_printf("ok ");
 #endif
@@ -245,7 +251,7 @@ sint16 ICACHE_FLASH_ATTR flash_read_cfg(void *ptr, uint16 id, uint16 maxsize)
 	faddr = get_addr_fobj(faddr, &fobj, false);
 	if(faddr < 4) return -faddr-1;
 	maxsize = mMIN(fobj.n.size, maxsize);
-	if((maxsize)&&(spi_flash_read(faddr + fobj_head_size, ptr, maxsize) != SPI_FLASH_RESULT_OK)) return -2; // error
+	if((maxsize)&&(flash_read(faddr + fobj_head_size, ptr, maxsize))) return -2; // error
 #if DEBUGSOO > 2
 		os_printf("ok,size:%u ", fobj.n.size);
 #endif

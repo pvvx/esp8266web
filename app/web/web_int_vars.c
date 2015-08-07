@@ -50,6 +50,9 @@ struct ping_option pingopt; // for test
 
 extern TCP_SERV_CONN * tcp2uart_conn;
 
+extern int rom_atoi(const char *);
+#define atoi rom_atoi
+
 typedef uint32 (* call_func)(uint32 a, uint32 b, uint32 c);
 
 void ICACHE_FLASH_ATTR reg_sct_bits(volatile uint32 * addr, uint32 bits, uint32 val)

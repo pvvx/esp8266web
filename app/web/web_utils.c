@@ -11,9 +11,24 @@
 #include "os_type.h"
 #include "osapi.h"
 #include "user_interface.h"
+#include "web_utils.h"
 
 
 #define mMIN(a, b)  ((a<b)?a:b)
+
+int ICACHE_FLASH_ATTR rom_atoi(const char *s)
+{
+	int n=0, neg=0;
+	while (*s == ' ') s++;
+	switch (*s) {
+	case '-': neg=1;
+	case '+': s++;
+	}
+	/* Compute n as a negative number to avoid overflow on INT_MIN */
+	while (*s >= '0' && *s <= '9')
+		n = 10*n - (*s++ - '0');
+	return neg ? n : -n;
+}
 /******************************************************************************
  * copy_align4
  * копирует данные из области кеширования flash и т.д.
@@ -106,7 +121,7 @@ uint32 ICACHE_FLASH_ATTR ahextoul(uint8 *s)
 	return ret;
 */
 	if((s[0]=='0') && ((s[1] | 0x20) =='x')) return hextoul(s+2);
-	return atoi(s);
+	return rom_atoi(s);
 }
 /******************************************************************************
  * FunctionName : cmpcpystr

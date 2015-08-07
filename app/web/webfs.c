@@ -953,8 +953,7 @@ uint32 ICACHE_FLASH_ATTR WEBFS_max_size(void)
 	uint32 size = spi_flash_real_size();
 	if(size > FLASH_MIN_SIZE) size -= WEBFS_DISK_ADDR_BIGFLASH;
 	else {
-		size >>= 1;
-		size -= WEBFS_DISK_ADDR_MINFLASH;
+		size = WEBFS_DISK_ADDR_MINFLASH_END - WEBFS_DISK_ADDR_MINFLASH_START;
 	}
 	return size;
 }
@@ -972,7 +971,7 @@ uint32 ICACHE_FLASH_ATTR WEBFS_curent_size(void)
  ***************************************************************************/
 uint32 ICACHE_FLASH_ATTR WEBFS_base_addr(void)
 {
-	uint32 addr = WEBFS_DISK_ADDR_MINFLASH;
+	uint32 addr = WEBFS_DISK_ADDR_MINFLASH_START;
 	if(spi_flash_real_size() > FLASH_MIN_SIZE)	addr = WEBFS_DISK_ADDR_BIGFLASH;
 	return addr;
 }

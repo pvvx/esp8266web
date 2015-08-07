@@ -27,7 +27,7 @@ uint8 ICACHE_FLASH_ATTR read_sys_const(uint8 idx) {
 bool ICACHE_FLASH_ATTR write_sys_const(uint8 idx, uint8 data) {
 	if (idx >= MAX_IDX_SYS_CONST)
 		return false;
-	uint8 buf[MAX_IDX_SYS_CONST + MAX_IDX_USER_CONST*4];
+	uint8 buf[SIZE_USYS_CONST];
 	uint32 faddr = esp_init_data_default_addr;
 //	os_memset(buf, 0xff, sizeof(buf));
 	if ((spi_flash_read(faddr, (uint32 *)buf, sizeof(buf)) != SPI_FLASH_RESULT_OK)
@@ -58,7 +58,7 @@ uint32 ICACHE_FLASH_ATTR read_user_const(uint8 idx) {
 bool ICACHE_FLASH_ATTR write_user_const(uint8 idx, uint32 data) {
 	if (idx >= MAX_IDX_USER_CONST)
 		return false;
-	uint8 buf[MAX_IDX_SYS_CONST + MAX_IDX_USER_CONST*4];
+	uint8 buf[SIZE_USYS_CONST];
 	uint32 faddr = esp_init_data_default_addr;
 //	os_memset(buf, 0xff, sizeof(buf));
 	if ((spi_flash_read(faddr, (uint32 *)buf, sizeof(buf)) != SPI_FLASH_RESULT_OK)

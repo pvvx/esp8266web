@@ -47,6 +47,9 @@
 #define mMIN(a, b)  ((a<b)?a:b)
 #define mMAX(a, b)  ((a>b)?a:b)
 
+extern int rom_atoi(const char *);
+#define atoi(s) rom_atoi(s)
+
 LOCAL void web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR ;
 
 //LOCAL void webserver_discon(void *arg) ICACHE_FLASH_ATTR;
@@ -1225,6 +1228,7 @@ Content-Disposition: form-data; name="stop"\r\n\r\n
 0x1B000\r\n
 ------WebKitFormBoundaryugGNBVFOk6qxfe22--\r\n */
 //-----------------------------------------------------------------------------
+const char crlf_end_boundary[] ICACHE_RODATA_ATTR = "--" CRLF;
 LOCAL int ICACHE_FLASH_ATTR find_boundary(HTTP_UPLOAD *pupload, uint8 *pstr, uint16 len)
 {
 	int x = len - 6 - pupload->sizeboundary;
@@ -1239,7 +1243,7 @@ LOCAL int ICACHE_FLASH_ATTR find_boundary(HTTP_UPLOAD *pupload, uint8 *pstr, uin
 			pcmp += 2;
 			if(os_memcmp(pcmp, pupload->boundary, pupload->sizeboundary)) return 0; // разделитель (boundary) не найден
 			pcmp += pupload->sizeboundary;
-			if(os_memcmp("--" CRLF, pcmp, 4)==0) {
+			if(rom_xstrcmp(pcmp, crlf_end_boundary)) {
 				pcmp += 4;
 				pupload->pnext = pcmp; // указатель в заголовке boundary (описание новых данных);
 				return 200; // найден завершающий разделитель
@@ -1260,6 +1264,15 @@ LOCAL int ICACHE_FLASH_ATTR find_boundary(HTTP_UPLOAD *pupload, uint8 *pstr, uin
 // 200 - найден завершающий разделитель: "\r\n--boundary--"
 // 400 - неизвестный формат content-а
 //-----------------------------------------------------------------------------
+const char disk_ok_filename[] ICACHE_RODATA_ATTR = "/disk_ok.htm";
+const char disk_err1_filename[] ICACHE_RODATA_ATTR = "/disk_er1.htm";
+const char disk_err2_filename[] ICACHE_RODATA_ATTR = "/disk_er2.htm";
+const char disk_err3_filename[] ICACHE_RODATA_ATTR = "/disk_er3.htm";
+const char sysconst_filename[] ICACHE_RODATA_ATTR = "sysconst";
+const char sector_filename[] ICACHE_RODATA_ATTR = "fsec_";
+#define sector_filename_size 5
+const char file_label[] ICACHE_RODATA_ATTR = "file";
+
 LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLOAD pupload, uint8 pstr, uint16 len)
 {
 	HTTP_UPLOAD *pupload = (HTTP_UPLOAD *)ts_conn->pbufo;
@@ -1334,20 +1347,20 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 				os_printf("tst,fn='%s' ", pupload->filename);
 #endif
 				if(pupload->filename[0]!='\0') { // загрузка файла?
-					if(!os_memcmp((void*)pupload->name, "file", 4)) {
+					if(rom_xstrcmp(pupload->name, file_label)) { // !os_memcmp((void*)pupload->name, "file", 4)
 						if(len < sizeof(WEBFS_DISK_HEADER)) return 0; // докачивать
 						WEBFS_DISK_HEADER *dhead = (WEBFS_DISK_HEADER *)pstr;
 						if(dhead->id != WEBFS_DISK_ID || dhead->ver != WEBFS_DISK_VER
 								|| (web_conn->content_len - pupload->sizeboundary - 8 < dhead->disksize)) {
 							if(isWEBFSLocked) return 400;
 							SetSCB(SCB_REDIR);
-							os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // неверный формат
+							rom_xstrcpy(pupload->filename, disk_err1_filename); // os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // неверный формат
 							return 200;
 						};
 						if(dhead->disksize > WEBFS_max_size()) {
 							if(isWEBFSLocked) return 400;
 							SetSCB(SCB_REDIR);
-							os_memcpy(pupload->filename,"/disk_er2.htm\0",14); // не влезет
+							rom_xstrcpy(pupload->filename, disk_err2_filename); // os_memcpy(pupload->filename,"/disk_er2.htm\0",14); // не влезет
 							return 200;
 						};
 						pupload->fsize = dhead->disksize;
@@ -1359,21 +1372,21 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 						isWEBFSLocked = true;
 						break;
 					}
-					else if(!os_memcmp((void*)pupload->name, "sysconst", 8)) {
-						pupload->fsize = SIZE_USER_CONST;
+					else if(rom_xstrcmp(pupload->name, sysconst_filename)) {
+						pupload->fsize = SIZE_USYS_CONST;
 						pupload->faddr = esp_init_data_default_addr;
 						pupload->status = 2; // = 2 загрузка файла во flash
 						break;
 					}
-					else if(!os_memcmp((void*)pupload->name, "fsec_", 5)){
+					else if(rom_xstrcmp(pupload->name, sector_filename)){
 						pupload->fsize = SPI_FLASH_SEC_SIZE;
-						pupload->faddr = ahextoul(&pupload->name[5]) << 12;
+						pupload->faddr = ahextoul(&pupload->name[sector_filename_size]) << 12;
 						pupload->status = 2; // = 2 загрузка файла сектора во flash
 						break;
 					};
 					if(isWEBFSLocked) return 400;
 					SetSCB(SCB_REDIR);
-					os_memcpy(pupload->filename,"/disk_er3.htm\0",14); // неизвестный тип
+					rom_xstrcpy(pupload->filename, disk_err3_filename); // os_memcpy(pupload->filename,"/disk_er3.htm\0",14); // неизвестный тип
 					return 200;
 				}
 				else {
@@ -1475,7 +1488,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 					if(pupload->fsize != 0) {
 						if(!isWEBFSLocked) {
 							SetSCB(SCB_REDIR);
-							os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // не всё передано или неверный формат
+							rom_xstrcpy(pupload->filename, disk_err1_filename); // os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // не всё передано или неверный формат
 							return 200;
 						}
 						return 400; //  не всё передано или неверный формат
@@ -1483,7 +1496,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 					else {
 						if(!isWEBFSLocked) {
 							SetSCB(SCB_REDIR);
-							os_memcpy(pupload->filename,"/disk_ok.htm\0",13);
+							rom_xstrcpy(pupload->filename, disk_ok_filename); // os_memcpy(pupload->filename,"/disk_ok.htm\0",13);
 						};
 					};
 					if(ret == 1) pupload->status = 0; // = 0 найден следующий boundary

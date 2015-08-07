@@ -2,6 +2,7 @@
 #define __KEY_H__
 
 #include "gpio.h"
+#include "os_type.h"
 
 typedef void (* key_function)(void);
 

@@ -49,6 +49,9 @@ extern uint8 phy_set_most_tpw_disbg;
 extern uint8 phy_set_most_tpw_index; // uint32? */
 extern uint8 phy_in_vdd33_offset;
 
+//extern int rom_atoi(const char *);
+#define atoi rom_atoi
+
 #define mMIN(a, b)  ((a<b)?a:b)
 //-------------------------------------------------------------------------------
 // Test adc
@@ -161,7 +164,7 @@ void ICACHE_FLASH_ATTR web_hexdump(TCP_SERV_CONN *ts_conn)
 	web_conn->udata_stop &= 0xfffffff0;
 	while(web_conn->msgbuflen + (9+3*16+17+2) <= web_conn->msgbufsize) {
 		if(((uint32)addr >= 0x20000000)&&(((uint32)addr < 0x60002000)||((uint32)addr >= 0x60008000))) {
-			tcp_puts("%p:", addr);
+			tcp_puts("0x%08x:", addr);
 			for(i=0 ; i < 4 ; i++) data.dw[i] = *addr++;
 			web_conn->udata_start = (uint32)addr;
 			if(ts_conn->flag.user_option1) {
@@ -571,7 +574,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
             		}
             		else ifcmp("const") {
             	    	web_conn->udata_start = esp_init_data_default_addr;
-            	    	web_conn->udata_stop = web_conn->udata_start + SIZE_USER_CONST;
+            	    	web_conn->udata_stop = web_conn->udata_start + SIZE_USYS_CONST;
             	    	web_get_flash(ts_conn);
             		}
             		else ifcmp("disk") {

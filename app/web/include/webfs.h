@@ -12,7 +12,10 @@
 
 #define WEBFS_USE_SPI_FLASH
 
-#define WEBFS_DISK_ADDR_MINFLASH      0x0a000 // SDK < 0.9.5 = 0x1E000, SDK 0.9.5 = 0x0a000
+extern uint32 _irom0_text_end;
+
+#define WEBFS_DISK_ADDR_MINFLASH_START (((uint32)&_irom0_text_end + 0xFFF)&(0xFF000))
+#define WEBFS_DISK_ADDR_MINFLASH_END   (0x79000)
 #define WEBFS_DISK_ADDR_BIGFLASH      0x80000
 
 #define WEBFS_DISK_ID 	0x42455746 // заголовок WEBFiles.bin

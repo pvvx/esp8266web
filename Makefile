@@ -12,13 +12,20 @@ SPI_SPEED?=80
 SPI_MODE?=QIO
 # SPI_SIZE: 512KB for all size Flash ! (512 kbytes .. 16 Mbytes Flash autodetect)
 SPI_SIZE?=512
-
-# 
-USERFADDR = 0x0A000
-USERFBIN = ./webbin/WEBFiles.bin
 # 
 ADDR_FW1 = 0x00000
-ADDR_FW2 = 0x40000
+ADDR_FW2 = 0x06000
+# 
+USERFADDR = 0x38000
+USERFBIN = ./webbin/WEBFiles.bin
+#
+FIRMWAREDIR := bin
+CLREEPBIN := ./$(FIRMWAREDIR)/clear_eep.bin
+CLREEPADDR := 0x79000
+DEFAULTBIN := ./$(FIRMWAREDIR)/esp_init_data_default.bin
+DEFAULTADDR := 0x7C000
+BLANKBIN := ./$(FIRMWAREDIR)/blank.bin
+BLANKADDR := 0x7E000
 
 # Base directory for the compiler
 XTENSA_TOOLS_ROOT ?= c:/Espressif/xtensa-lx106-elf/bin
@@ -35,23 +42,6 @@ NM := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-nm
 CPP = $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-cpp
 OBJCOPY = $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objcopy
 OBJDUMP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objdump
-
-CCFLAGS += -Wall -Wno-pointer-sign -mno-target-align -fno-tree-ccp -mno-serialize-volatile -foptimize-register-move
-# -fomit-frame-pointer
-# -Wall -Wno-pointer-sign -mno-target-align -mno-serialize-volatile -foptimize-register-move
-# -fomit-frame-pointer -fmerge-all-constants
-#
-# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
-# https://gcc.gnu.org/onlinedocs/gcc-4.8.2/gcc/Xtensa-Options.html#Xtensa-Options
-#
-
-FIRMWAREDIR := bin
-DEFAULTBIN := ./$(FIRMWAREDIR)/esp_init_data_default.bin
-DEFAULTADDR := 0x7C000
-BLANKBIN := ./$(FIRMWAREDIR)/blank.bin
-BLANKADDR := 0x7E000
-CLREEPBIN := ./$(FIRMWAREDIR)/clear_eep.bin
-CLREEPADDR := 0x79000
 
 SDK_TOOLS	?= c:/Espressif/utils
 #ESPTOOL		?= $(SDK_TOOLS)/esptool
@@ -86,22 +76,20 @@ OUTBIN1 := ./$(FIRMWAREDIR)/$(ADDR_FW1).bin
 OUTBIN2 := ./$(FIRMWAREDIR)/$(ADDR_FW2).bin
 
 CCFLAGS += \
+	-std=gnu90	\
+	-Os	\
 	-Wall	\
+	-Werror	\
 	-Wno-pointer-sign	\
 	-mtarget-align	\
-	-fno-tree-ccp	\
-	-mno-serialize-volatile	\
-	-foptimize-register-move \
-	-Wundef			\
-	-Wpointer-arith	\
-	-Werror	\
-	-Wl,-EL	\
-	-fno-inline-functions	\
-	-nostdlib	\
 	-mlongcalls	\
-	-mtext-section-literals
-#	-Wall	\
-#
+	-mno-serialize-volatile	\
+	-mtext-section-literals	\
+	-fno-tree-ccp	\
+	-foptimize-register-move	\
+	-fno-inline-functions	\
+	-Wl,-EL	\
+	-nostdlib
 
 ifeq ($(SPI_SPEED), 26.7)
     freqdiv = 1
@@ -168,9 +156,10 @@ else
     endif
 endif
 
+CCFLAGS += -DUSE_FIX_QSPI_FLASH=$(SPI_SPEED)
 
-CFLAGS = -Os $(CCFLAGS) $(DEFINES)  $(INCLUDES)
-DFLAGS = -Os $(CCFLAGS) $(DDEFINES)  $(INCLUDES)
+CFLAGS = $(CCFLAGS) $(DEFINES) $(INCLUDES)
+DFLAGS = $(CCFLAGS) $(DDEFINES) $(INCLUDES)
 
 define ShortcutRule
 $(1): .subdirs $(2)/$(1)
@@ -181,10 +170,10 @@ DEP_LIBS_$(1) = $$(foreach lib,$$(filter %.a,$$(COMPONENTS_$(1))),$$(dir $$(lib)
 DEP_OBJS_$(1) = $$(foreach obj,$$(filter %.o,$$(COMPONENTS_$(1))),$$(dir $$(obj))$$(OBJODIR)/$$(notdir $$(obj)))
 $$(LIBODIR)/$(1).a: $$(OBJS) $$(DEP_OBJS_$(1)) $$(DEP_LIBS_$(1)) $$(DEPENDS_$(1))
 	@mkdir -p $$(LIBODIR)
-	$$(if $$(filter %.a,$$?),mkdir -p $$(EXTRACT_DIR)_$(1))
-	$$(if $$(filter %.a,$$?),cd $$(EXTRACT_DIR)_$(1); $$(foreach lib,$$(filter %.a,$$?),$$(AR) xo $$(UP_EXTRACT_DIR)/$$(lib);))
-	$$(AR) ru $$@ $$(filter %.o,$$?) $$(if $$(filter %.a,$$?),$$(EXTRACT_DIR)_$(1)/*.o)
-	$$(if $$(filter %.a,$$?),$$(RM) -r $$(EXTRACT_DIR)_$(1))
+	@$$(if $$(filter %.a,$$?),mkdir -p $$(EXTRACT_DIR)_$(1))
+	@$$(if $$(filter %.a,$$?),cd $$(EXTRACT_DIR)_$(1); $$(foreach lib,$$(filter %.a,$$?),$$(AR) xo $$(UP_EXTRACT_DIR)/$$(lib);))
+	@$$(AR) ru $$@ $$(filter %.o,$$?) $$(if $$(filter %.a,$$?),$$(EXTRACT_DIR)_$(1)/*.o)
+	@$$(if $$(filter %.a,$$?),$$(RM) -r $$(EXTRACT_DIR)_$(1))
 endef
 
 define MakeImage
@@ -200,7 +189,7 @@ $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p ../$(FIRMWAREDIR)
 	@$(ESPTOOL) elf2image -o ../$(FIRMWAREDIR)/ $(flashimageoptions) $<
 	@echo "------------------------------------------------------------------------------"
-	@echo "Add rapid_loader:"
+	@echo "Add rapid_loader..."
 	@mv -f ../bin/$(ADDR_FW1).bin ../bin/0.bin 
 ifeq ($(freqdiv), 15)	
 	@dd if=../bin/rapid_loader.bin >../bin/$(ADDR_FW1).bin
@@ -208,25 +197,31 @@ else
 	@dd if=../bin/rapid_loader_40m.bin >../bin/$(ADDR_FW1).bin
 endif	
 	@dd if=../bin/0.bin >>../bin/$(ADDR_FW1).bin
-	
-#	$(ESPTOOL-CK) -eo $< -bo $(FIRMWAREDIR)/$(ADDR_FW1).bin -bs .text -bs .data -bs .rodata -bc -ec
-#	$(ESPTOOL-CK) -eo $< -es .irom0.text $(FIRMWAREDIR)/$(ADDR_FW2).bin -ec
 
 all: .subdirs $(OBJS) $(OLIBS) $(OIMAGES) $(OBINS) $(SPECIAL_MKTARGETS)
 
+$(SPECIAL_MKTARGETS): $(INPLIB) 
+	@$(RM) -f $@
+	@mkdir -p _temp
+	cd _temp; $(AR) xo ../$<; $(foreach lib,$(ADDLIBS_libsdk),$(AR) xo ../$(ADDLIBDIR)$(lib);)
+	@$(AR) ru $@ _temp/*.o
+	@$(RM) -r _temp
+
 clean:
-	$(foreach d, $(SUBDIRS), $(MAKE) -C $(d) clean;)
-	$(RM) -r $(ODIR)/$(TARGET)
+	@$(foreach d, $(SUBDIRS), $(MAKE) -C $(d) clean;)
+	@$(RM) -r $(ODIR)/$(TARGET)
+	@$(RM) -f lib/libsdk.a
 
 clobber: $(SPECIAL_CLOBBER)
-	$(foreach d, $(SUBDIRS), $(MAKE) -C $(d) clobber;)
-	$(RM) -r $(ODIR)
+	@$(foreach d, $(SUBDIRS), $(MAKE) -C $(d) clobber;)
+	@$(RM) -r $(ODIR)
+	@$(RM) -f lib/libsdk.a
 
 FlashUserFiles: $(USERFBIN)
 	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(USERFADDR) $(USERFBIN)
 
 FlashAll: $(OUTBIN1)  $(USERFBIN) $(OUTBIN2) $(DEFAULTBIN) $(BLANKBIN) $(CLREEPBIN)
-	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(ADDR_FW1) $(OUTBIN1) $(USERFADDR) $(USERFBIN) $(ADDR_FW2) $(OUTBIN2) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
+	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(ADDR_FW1) $(OUTBIN1) $(ADDR_FW2) $(OUTBIN2) $(USERFADDR) $(USERFBIN)  $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
 
 FlashClearSetings: $(CLREEPBIN) $(DEFAULTBIN) $(BLANKBIN)
 	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
@@ -250,11 +245,10 @@ endif
 
 $(OBJODIR)/%.o: %.c
 	@mkdir -p $(OBJODIR);
-	$(CC) $(if $(findstring $<,$(DSRCS)),$(DFLAGS),$(CFLAGS)) $(COPTS_$(*F)) -o $@ -c $<
+	$(CC) $(if $(findstring $<,$(DSRCS)),$(DFLAGS),$(CFLAGS)) $(COPTS_$(*F)) -o $@ -c $< 
 
 $(OBJODIR)/%.d: %.c
 	@mkdir -p $(OBJODIR);
-	@echo DEPEND: $(CC) -M $(CFLAGS) $<
 	@set -e; rm -f $@; \
 	$(CC) -M $(CFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\.o\)[ :]*,$(OBJODIR)/\1 $@ : ,g' < $@.$$$$ > $@; \
@@ -292,6 +286,6 @@ $(foreach lib,$(GEN_LIBS),$(eval $(call MakeLibrary,$(basename $(lib)))))
 
 $(foreach image,$(GEN_IMAGES),$(eval $(call MakeImage,$(basename $(image)))))
 
-INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)include/$(TARGET)
+INCLUDES := $(INCLUDES) -I $(PDIR)include
 #PDIR := ../$(PDIR)
 #sinclude $(PDIR)Makefile

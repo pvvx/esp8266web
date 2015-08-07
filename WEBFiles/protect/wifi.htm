@@ -159,13 +159,11 @@
 		</form>
 	</div>
 ~inc:footer.inc~
-<script>
-
+<script type="text/javascript">
 var chlnum = document.forms[0].wifi_ap_chl;
 for (var i=1; i < 14; i++) {
 	chlnum.options[i] = new Option(((i<10)?'0':'')+i,i);
 }
-
 var cfg = {
 	wifi_ap_chl:"~wifi_ap_chl~",
 	wifi_ap_aum:"~wifi_ap_aum~",
