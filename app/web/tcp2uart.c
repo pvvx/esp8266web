@@ -250,7 +250,7 @@ void ICACHE_FLASH_ATTR term_disconnect(TCP_SERV_CONN *conn) {
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR tcp2uart_close(void)
 {
-	syscfg.tcp2uart_port = 0;
+//	syscfg.tcp2uart_port = 0;
 	if(tcp2uart_servcfg != NULL) {
 		tcp2uart_int_rxtx_disable();
 		tcpsrv_close(tcp2uart_servcfg);
@@ -268,6 +268,7 @@ err_t ICACHE_FLASH_ATTR tcp2uart_server_init(uint16 portn) {
 	&& tcp2uart_servcfg->port == portn) {
 		return  ERR_USE;
 	}
+//	syscfg.tcp2uart_port = 0;
 	tcp2uart_close();
 	if(portn <= ID_CLIENTS_PORT) return ERR_OK;
 	TCP_SERV_CFG *p = tcpsrv_init(portn);
@@ -315,6 +316,7 @@ err_t ICACHE_FLASH_ATTR tcp2uart_client_init(uint32 ip, uint16 portn)
 	&& tcp2uart_servcfg->conn_links->remote_port == portn) {
 		return  err;
 	}
+//	syscfg.tcp2uart_port = 0;
 	tcp2uart_close();
 	if(portn <= ID_CLIENTS_PORT) return ERR_OK;
 	TCP_SERV_CFG * p = tcpsrv_init_client1();
@@ -359,6 +361,8 @@ err_t ICACHE_FLASH_ATTR tcp2uart_start(uint16 newportn)
 		ip.addr = 0;
 		if(newportn <= ID_CLIENTS_PORT) {
 			tcp2uart_close();
+			syscfg.tcp2uart_port = 0;
+			update_mux_uart0();
 			return ERR_OK;
 		}
 		if(tcp2uart_url != NULL) {

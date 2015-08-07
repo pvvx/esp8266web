@@ -17,6 +17,10 @@
 
 #include "wifi.h"
 
+#if 0
+#undef DEBUGSOO
+#define DEBUGSOO 4
+#endif
 // Lwip funcs - http://www.ecoscentric.com/ecospro/doc/html/ref/lwip.html
 
 TCP_SERV_CFG *phcfg DATA_IRAM_ATTR; // = NULL; // начальный указатель в памяти на структуры открытых сервачков
@@ -506,7 +510,10 @@ static void ICACHE_FLASH_ATTR tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) {
 {
 	if (ts_conn != NULL) {
 		os_timer_disarm(&ts_conn->ptimer);
-		if(ts_conn->state != SRVCONN_CLIENT) {
+		if(ts_conn->state != SRVCONN_CLIENT) { // не установка соединения (клиент)?
+#if DEBUGSOO > 3
+			os_printf("Client free\n");
+#endif
 			if(ts_conn->state != SRVCONN_CLOSED) {
 				ts_conn->state = SRVCONN_CLOSED; // исключить повторное вхождение из запросов в func_discon_cb()
 				if (ts_conn->pcfg->func_discon_cb != NULL) ts_conn->pcfg->func_discon_cb(ts_conn);
@@ -530,16 +537,6 @@ static void ICACHE_FLASH_ATTR tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) {
 			ts_conn->unrecved_bytes = 0;
 			ts_conn->ptrtx = NULL;
 			ts_conn->flag = ts_conn->pcfg->flag;
-		}
-		else {
-			struct tcp_pcb *pcb;
-			if(ts_conn->pcb != NULL) {
-				pcb = find_tcp_pcb(ts_conn);
-				if(pcb != NULL) {
-					tcp_abandon(ts_conn->pcb, 0);
-					ts_conn->pcb = NULL;
-				}
-			}
 		}
 #if DEBUGSOO > 1
 		os_printf("Waiting next connection %u ms...\n", TCP_CLIENT_NEXT_CONNECT_MS);
@@ -621,6 +618,9 @@ static void ICACHE_FLASH_ATTR tcpsrv_error(void *arg, err_t err) {
 							&& (ts_conn->pcfg->max_conn == 0
 									|| ts_conn->recv_check < ts_conn->pcfg->max_conn)))) {
 				ts_conn->recv_check++;
+#if DEBUGSOO > 3
+				os_printf("go_reconnect\n");
+#endif
 				tcpsrv_client_reconnect(ts_conn);
 			}
 			else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
@@ -634,7 +634,10 @@ static void ICACHE_FLASH_ATTR tcpsrv_error(void *arg, err_t err) {
  *******************************************************************************/
 static void ICACHE_FLASH_ATTR tcpsrv_client_connect(TCP_SERV_CONN * ts_conn)
 {
-	if (ts_conn != NULL) {
+#if DEBUGSOO > 3
+		os_printf("tcpsrv_client_connect()\n");
+#endif
+		if (ts_conn != NULL) {
 		struct tcp_pcb *pcb;
 		if(ts_conn->pcb != NULL) {
 			pcb = find_tcp_pcb(ts_conn);
@@ -646,7 +649,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_client_connect(TCP_SERV_CONN * ts_conn)
 		pcb = tcp_new();
 		if(pcb != NULL) {
 			ts_conn->pcb = pcb;
-			ts_conn->state = SRVCONN_CLIENT;
+			ts_conn->state = SRVCONN_CLIENT; // установка соединения (клиент)
 			ts_conn->recv_check = 0;
 			err_t err = tcp_bind(pcb, IP_ADDR_ANY, 0); // Binds pcb to a local IP address and new port number. // &netif_default->ip_addr
 #if DEBUGSOO > 2
@@ -936,7 +939,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, 
 		if (ts_conn != NULL) {
 			ts_conn->flag = p->flag; // перенести флаги по умолчанию на данное соединение
 			ts_conn->pcfg = p;
-			ts_conn->state = SRVCONN_CLIENT;
+			ts_conn->state = SRVCONN_CLIENT; // установка соединения (клиент)
 			ts_conn->remote_port = remote_port;
 			ts_conn->remote_ip.dw = remote_ip;
 			tcpsrv_client_connect(ts_conn);
