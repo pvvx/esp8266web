@@ -5,7 +5,7 @@
 @C:\Python27\python.exe  ..\esptool.py elf2image -o ..\bin\ -ff 80m -fm qio -fs 4m %1
 @echo ------------------------------------------------------------------------------
 @echo Add rapid_loader...
-@mv -f ../bin/0x00000.bin ../bin/0.bin 
+@rename ..\bin\0x00000.bin 0.bin >nul
 @copy /b ..\bin\rapid_loader.bin + ..\bin\0.bin ..\bin\0x00000.bin >nul
 goto end
 :aaa_end
