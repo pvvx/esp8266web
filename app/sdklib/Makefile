@@ -20,6 +20,7 @@ UP_EXTRACT_DIR = ..
 COMPONENTS_libsdk = \
 	system/libaddmmain.a	\
 	phy/libaddmphy.a	\
+	pp/libaddpp.a	\
 	wpa/libaddwpa.a	
 
 ifdef USE_OPEN_LWIP
@@ -36,6 +37,7 @@ GEN_LIBS = libsdk.a
 SUBDIRS =	\
 	system	\
 	phy		\
+	pp	\
 	wpa		
 
 ifdef USE_OPEN_LWIP

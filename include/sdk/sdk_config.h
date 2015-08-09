@@ -1,7 +1,7 @@
 #ifndef _sdk_config_h_
 #define _sdk_config_h_
 
-#define DEF_SDK_VERSION 1200   
+#define DEF_SDK_VERSION 1300   
 
 #define DEBUGSOO	2  // 0 - откл вывода, 1 - минимум, 2 - норма, >3 - текушая отладка, >4 - удалить что найдется :)
 

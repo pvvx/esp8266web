@@ -39,7 +39,7 @@ ETSTimer check_timeouts_timer DATA_IRAM_ATTR; // timer_lwip
 uint8 user_init_flag;
 
 #if DEF_SDK_VERSION >= 1200
-uint8 SDK_VERSION[] = {"1.2.0"};
+uint8 SDK_VERSION[] = {"1.3.0"};
 uint16 lwip_timer_interval;
 #endif
 
@@ -67,12 +67,22 @@ const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
 //-----------------------------------------------------------------------------
 //=============================================================================
 // IRAM code
+//-----------------------------------------------------------------------------
+void call_user_start1(void);
+//=============================================================================
+// ROM-BIOS запускает код с адреса 0x40100000
+// при опцииях перезагрузки 'Jump Boot', если:
+// GPIO0 = "0", GPIO1 = "1", GPIO2 = "0" (boot mode:(2,x))
+void __attribute__((section(".entry.text"))) call_user_start(void)
+{
+	asm volatile ("j call_user_start1");
+}
 //=============================================================================
 // call_user_start() - вызов из заголовка, загрузчиком
 // ENTRY(call_user_start) in eagle.app.v6.ld
 //-----------------------------------------------------------------------------
 #ifdef USE_FIX_QSPI_FLASH 
-void call_user_start(void)
+void __attribute__((section(".entry.text"))) call_user_start1(void)
 {
 		// коррекция QSPI на 80 MHz
 		SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS = 0x80000064
@@ -96,7 +106,7 @@ void call_user_start(void)
 		ets_run();
 }		
 #else
-void call_user_start(void)
+void __attribute__((section(".entry.text"))) call_user_start1(void)
 {
 	    // Загрузка заголовка flash
 	    struct SPIFlashHead fhead;
@@ -407,7 +417,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #endif
 #ifdef DEBUG_UART
 	startup_uart_init();
-	os_printf("\n\nOpenSDK 1.2.0\n");
+	os_printf("\n\nmeSDK %s\n", SDK_VERSION);
 #endif
 	// Очистка сегмента bss //	mem_clr_bss();
 	uint8 * ptr = &_bss_start;
@@ -595,5 +605,3 @@ void user_uart_wait_tx_fifo_empty(uint32 uart_num, uint32 x)
 	if(uart_num) while((UART1_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT);
 	else while(((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) && (x--));
 }
-
-

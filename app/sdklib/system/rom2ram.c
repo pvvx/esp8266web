@@ -29,7 +29,9 @@ int ICACHE_FLASH_ATTR iram_buf_init(void)
 		 while(ptr < end) *ptr++ = 0;
 	 }
 #if DEBUGSOO > 0
-	 else os_printf("No free IRAM!");
+	 else {
+		 os_printf("No free IRAM!");
+	 }
 #endif	 
 	 return eraminfo.size;
 }
