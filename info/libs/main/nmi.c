@@ -38,7 +38,7 @@ void NMI_Handler(void)
 }
 
 
-/* asm 
+/* disasm 
 .text:40100020
 _NMIExceptionVector:
 	wsr             0xD3, a0
@@ -58,7 +58,7 @@ _NMILevelVector:                        ; CODE XREF: .text:40100023p
                 s32i.n          a1, a0, 0x24
                 l32i.n          a2, a2, 0
                 s32i.n          a3, a0, 0x2C
-                xsr             0xD3, a2
+                xsr             0xD3, a2 ; EXCSAVE_3
                 s32i.n          a4, a0, 0x30
                 s32i.n          a2, a0, 0x20
                 rsr.epc1        a3
@@ -67,7 +67,7 @@ _NMILevelVector:                        ; CODE XREF: .text:40100023p
                 s32i.n          a4, a0, 0x10
                 rsr.excvaddr    a3
                 s32i.n          a3, a0, 0x14
-                rsr             0xD1, a4
+                rsr             0xD1, a4 ; EXCSAVE_1
                 s32i.n          a4, a0, 0x18
                 s32i.n          a5, a0, 0x34
                 s32i.n          a6, a0, 0x38
@@ -109,18 +109,18 @@ _NMILevelVector:                        ; CODE XREF: .text:40100023p
                 l32i.n          a2, a1, 0xC
                 l32i.n          a3, a1, 0x10
                 wsr.epc1        a2
-                wsr             0xE8, a3
+                wsr             0xE8, a3 ; EXCCAUSE
                 l32i.n          a2, a1, 0x14
-                wsr             0xEE, a2
+                wsr             0xEE, a2 ; EXCVADDR
                 l32i.n          a3, a1, 0x18
-                wsr             0xD1, a3
+                wsr             0xD1, a3 ; EXCSAVE_1
                 l32i.n          a0, a1, 0x20
                 rsr.sar         a3
                 movi            a2, 0x3FF
                 slli            a2, a2, 0x14
                 wsr.sar         a3
                 movi.n          a3, 0xF
-                s32i.n          a3, a2, 0
+                s32i.n          a3, a2, 0 ; 0x3FF00000 = 0x0f (DPORT_BASE[0])
                 l32i.n          a2, a1, 0x28
                 l32i.n          a3, a1, 0x2C
                 l32i.n          a1, a1, 0x24
