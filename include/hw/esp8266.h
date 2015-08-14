@@ -98,6 +98,9 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define IOREG(ADDR) 		(*((volatile unsigned int *)(ADDR)))
 
 /* DPORT regs */
+/* NMI_INT_: 0x3FF00000
+	bit0: TIMER0 nmi enable ? */
+
 /* INTC_EDGE_EN: 0x3FF00004
 	bit0: WDT edge int enable
 	bit1: TIMER0 edge int enable	*/

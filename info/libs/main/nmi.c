@@ -1,18 +1,13 @@
 /******************************************************************************
  * FileName: nmi.c
  * Description: disasm nmi functions SDK 1.3.0
- * Author: PV`
- * (c) PV` 2015
+ * Author: PV` 2015
  ******************************************************************************/
 #include "user_config.h"
 #include "bios.h"
 #include "hw/esp8266.h"
 #include "hw/specreg.h"
-#include "hw/gpio_register.h"
-//#include "user_interface.h"
-#include "sdk/add_func.h"
 #include "os_type.h"
-//#include "user_interface.h"
 
 
 typedef void (*nmi_tim_func_t)(void);
