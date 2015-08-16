@@ -509,6 +509,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
             }
             else {
             	ifcmp("rssi") tcp_puts("%d", wifi_station_get_rssi());
+                else ifcmp("rect") tcp_puts("%u", wificonfig.st.reconn_timeout);
             	else {
                 	if (((opmode & STATION_MODE) == 0) || (!wifi_get_ip_info(STATION_IF, &wifi_info))) wifi_info = wificonfig.st.ipinfo;
                     ifcmp("ip") tcp_puts(IPSTR, IP2STR(&wifi_info.ip));

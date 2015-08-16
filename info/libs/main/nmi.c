@@ -14,6 +14,34 @@ typedef void (*nmi_tim_func_t)(void);
 
 nmi_tim_func_t pNmiTimFunc;
 
+struct nmi_store_regs_t
+{
+	uint32 nn00;	// +0x00
+	uint32 nn04;	// +0x04
+	uint32 nn08;	// +0x08
+	uint32 epc1; // +0x0c
+	uint32 exccause;	// +0x10
+	uint32 excvaddr;	// +0x14
+	uint32 excsave_1;	// +0x18
+	uint32 nn1c;	// +0x1c
+	uint32 a0;	// +0x20
+	uint32 a1;	// +0x24
+	uint32 a2;	// +0x28
+	uint32 a3;	// +0x2c
+	uint32 a4;	// +0x30
+	uint32 a5;	// +0x34
+	uint32 a6;	// +0x38
+	uint32 a7;	// +0x3c
+	uint32 a8;	// +0x40
+	uint32 a9;	// +0x44
+	uint32 a10;	// +0x48
+	uint32 a11;	// +0x4c
+	uint32 a12;	// +0x50
+	uint32 a13;	// +0x54
+	uint32 a14;	// +0x58
+	uint32 a15;	// +0x5c
+} nmi_store_regs;
+
 void NmiTimSetFunc(nmi_tim_func_t func)
 {
 	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F;
@@ -32,6 +60,13 @@ void NMI_Handler(void)
 	TIMER0_INT &= 0xFFE;
 }
 
+void __attribute__((section(".NMIExceptionVector.text"))) _NMIExceptionVector(void)
+{
+	__asm__ __volatile__ (
+			"wsr.excsave3 a0\n"         // preserve original a0 register
+			"callx0 _NMILevelVector\n"
+			);
+}
 
 /* disasm 
 .text:40100020

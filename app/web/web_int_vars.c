@@ -27,6 +27,9 @@
 #include "sys_const_utils.h"
 #include "sdk/rom2ram.h"
 
+extern void start_nmi(uint32);
+extern void init_nmi(bool);
+
 #ifdef USE_NETBIOS
 #include "netbios.h"
 #endif
@@ -295,6 +298,10 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     	  cstr+=3;
           ifcmp("dncp") 		wificonfig.b.st_dhcp_enable = val;
           else ifcmp("aucn") 	wificonfig.st.auto_connect = val;
+          else ifcmp("rect") 	{
+        	  if(val < 8192) wificonfig.st.reconn_timeout = val;
+        	  else wificonfig.st.reconn_timeout = 8192;
+          }
           ifcmp("ssid") {
         	  if(pvar[0]!='\0'){
         		  os_memset(wificonfig.st.config.ssid, 0, sizeof(wificonfig.st.config.ssid));
@@ -484,6 +491,10 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	}
 #endif
 	else ifcmp("test") {
+		init_nmi(val);
+	}
+	else ifcmp("nmi") {
+		start_nmi(val);
 	}
 #if DEBUGSOO > 5
     else os_printf(" - none! ");

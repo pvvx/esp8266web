@@ -21,8 +21,8 @@ COMPONENTS_libsdk = \
 	system/libaddmmain.a	\
 	phy/libaddmphy.a	\
 	pp/libaddpp.a	\
-	wpa/libaddwpa.a	
-
+	wpa/libaddwpa.a
+		
 ifdef USE_OPEN_LWIP
 COMPONENTS_libsdk += lwip/liblwip.a	
 CONFIGURATION_DEFINES += -DUSE_OPEN_LWIP
@@ -36,10 +36,10 @@ ifndef PDIR # {
 GEN_LIBS = libsdk.a
 SUBDIRS =	\
 	system	\
-	phy		\
+	phy	\
 	pp	\
-	wpa		
-
+	wpa
+		
 ifdef USE_OPEN_LWIP
 SUBDIRS += lwip
 endif
@@ -53,8 +53,8 @@ ADDLIBS_libsdk = \
 	libmmain.a	\
 	libmphy.a	\
 	libpp.a	\
-	libnet80211.a	\
-	libmwpa.a	
+	libmwpa.a	\
+	libnet80211.a
 
 ifndef USE_OPEN_LWIP 
 ADDLIBS_libsdk += \

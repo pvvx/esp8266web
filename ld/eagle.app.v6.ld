@@ -126,6 +126,7 @@ SECTIONS
   {
     _stext = .;
     _text_start = ABSOLUTE(.);
+    *(.vectors.text)
     *(.entry.text)
     *(.init.literal)
     *(.init)

@@ -68,15 +68,16 @@ const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
 //=============================================================================
 // IRAM code
 //-----------------------------------------------------------------------------
-void call_user_start1(void);
+void call_user_start(void);
 //=============================================================================
 // ROM-BIOS запускает код с адреса 0x40100000
 // при опцииях перезагрузки 'Jump Boot', если:
 // GPIO0 = "0", GPIO1 = "1", GPIO2 = "0" (boot mode:(2,x))
-void __attribute__((section(".entry.text"))) call_user_start(void)
+/* перенесено в UserEnter.s
+void __attribute__((section(".UserEnter.text"))) call_user_start(void)
 {
 	asm volatile ("j call_user_start1");
-}
+} */
 //=============================================================================
 // call_user_start() - вызов из заголовка, загрузчиком
 // ENTRY(call_user_start) in eagle.app.v6.ld

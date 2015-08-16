@@ -50,6 +50,8 @@
 	#define USE_US_TIMER
 #endif
 
+// #define USE_NMI_VECTOR	// использовать NMI вектор (перенаправление таблицы векторов CPU) (пока только тест, см main-vectors.c)
+
 /* LwIP Options */
 
 #ifndef LWIP_OPEN_SRC // (назначается в MakeFile -DPBUF_RSV_FOR_WLAN)

@@ -10,7 +10,7 @@
 #include "hw/specreg.h"
 #include "hw/gpio_register.h"
 //#include "user_interface.h"
-#include "add_sdk_func.h"
+#include "sdk/add_func.h"
 #include "os_type.h"
 #include "user_interface.h"
 

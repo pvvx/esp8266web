@@ -104,17 +104,14 @@
 			<tr>
 				<td class="label">Gateway:</td>
 				<td><input name='wifi_ap_gw' maxlength='31' value='~wifi_ap_gw~'></td>
-				<td class="label">MAC:</td>
-				<td><input name='wifi_st_mac' maxlength='17' value='~wifi_st_mac~'></td>
+				<td class="label">ReConnect:</td>
+				<td><input name='wifi_st_rect' title='Reconnect 2..8192 sec. =0 reconnect off, =1 standard reconnect' maxlength='4' value='~wifi_st_rect~'></td>
 			</tr>
 			<tr>
 				<td class="label">MAC:</td>
 				<td><input name='wifi_ap_mac' maxlength='17' value='~wifi_ap_mac~'></td>
-				<td class="label">DHCP:</td>
-				<td>
-					<input type='hidden' name='wifi_st_dncp' value='0'>
-					<input type='checkbox' title='Off: static ip, On: dhcp' name='wifi_st_dncp' value='1'>
-				</td>
+				<td class="label">MAC:</td>
+				<td><input name='wifi_st_mac' maxlength='17' value='~wifi_st_mac~'></td>
 			</tr>
 			<tr>
 				<td class="label">DHCP:</td>
@@ -122,12 +119,17 @@
 					<input type='hidden' name='wifi_ap_dncp' value='0'>
 					<input type='checkbox' name='wifi_ap_dncp' value='1'>
 				</td>
-				<td class="label">RSSI:</td>
-				<td>~wifi_st_rssi~ dB</td>
+				<td class="label">DHCP:</td>
+				<td>
+					<input type='hidden' name='wifi_st_dncp' value='0'>
+					<input type='checkbox' title='Off: static ip, On: dhcp' name='wifi_st_dncp' value='1'>
+				</td>
 			</tr>
 			<tr>
 				<td class="label">Start IP:</td>
 				<td><input name='wifi_ap_sip' maxlength='31' value='~wifi_ap_sip~'></td>
+				<td class="label">RSSI:</td>
+				<td>~wifi_st_rssi~ dB</td>
 			</tr>
 			<tr>
 				<td class="label">End IP:</td>

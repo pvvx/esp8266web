@@ -28,6 +28,9 @@
 #ifndef PHY_MODE
 	#define PHY_MODE PHY_MODE_11G // PHY_MODE_11N // PHY_MODE_11B
 #endif
+#ifndef DEF_ST_RECONNECT_TIME
+	#define DEF_ST_RECONNECT_TIME 30 // если 3 раза не удалось соединиться ST, тогда следующая проба соединения произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
+#endif
 
 #ifndef DEBUGSOO
 	#define DEBUGSOO 1
@@ -104,6 +107,7 @@ struct wifi_config {	// структура конфигурации wifi
 		uint8 macaddr[6];
 	}ap;
 	struct {
+		int reconn_timeout; // если 3 раза не удалось соединиться ST, тогда следующая проба соединения произойдет через reconn_timeout секунд. При reconn_timeout == 1 данный алго отключен.
 		struct ip_info ipinfo;
 		struct station_config config;
 	    uint8  auto_connect;
@@ -140,4 +144,7 @@ void wifi_start_scan(void) ICACHE_FLASH_ATTR;
 
 void get_macaddr_from_otp(uint8 *mac) ICACHE_FLASH_ATTR;
 
+#if DEBUGSOO > 1
+void print_wifi_config(void) ICACHE_FLASH_ATTR;
+#endif
 #endif // __WIFI_H__

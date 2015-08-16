@@ -148,7 +148,7 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
 {
 #if DEBUGSOO > 1
-	os_printf("wdrv: txi(%u)\n", sample_idx);
+	os_printf("wdrv: txi(%u)\n", sample_idx>>10);
 #endif
 	if(pcb_wdrv == NULL ||out_wave_pbuf == NULL) return;
 	void * pudpbuf;
