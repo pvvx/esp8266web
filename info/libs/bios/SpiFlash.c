@@ -205,15 +205,15 @@ void SPIFlashCnfig(uint32_t spi_interface, uint32_t spi_freg)
 	//	IOMUX_BASE = 0x205
 	uint32 a6 = 0; // spi_interface > 4
 	uint32 a2;
-	SPI0_USER |= 4;
-	if(spi_interface == 0) a6 = 1<<24; // SPI_QIO_MODE
-	else if(spi_interface == 1) a6 = 1<<20; // SPI_QOUT_MODE
-	else if(spi_interface == 2) a6 = 1<<23; // SPI_DIO_MODE
-	else if(spi_interface == 3) a6 = 1<<14; // SPI_DOUT_MODE
-	else if(spi_interface == 4) a6 = 1<<13; // SPI_FASTRD_MODE
+	SPI0_USER |= 4;	// SPI_CS_SETUP
+	if(spi_interface == 0) a6 = 1<<24; // SPI_QIO_MODE			0x1000000
+	else if(spi_interface == 1) a6 = 1<<20; // SPI_QOUT_MODE	0x0100000
+	else if(spi_interface == 2) a6 = 1<<23; // SPI_DIO_MODE		0x0800000
+	else if(spi_interface == 3) a6 = 1<<14; // SPI_DOUT_MODE	0x0004000
+	else if(spi_interface == 4) a6 = 1<<13; // SPI_FASTRD_MODE	0x0002000
 	if(spi_freg < 2) {
 		a2 = 0x100;
-		SPI0_CTRL |= 0x1000; // ???
+		SPI0_CTRL |= 0x1000; // 80MHz CLC
 		GPIO_MUX_CFG |= a2;
 	}
 	else {
@@ -226,9 +226,6 @@ void SPIFlashCnfig(uint32_t spi_interface, uint32_t spi_freg)
 	SPI0_CTRL |= a2;
 	SPI0_CMD = 0x100000;
 	while(SPI0_CMD != 0);
-	// [0x60000208] = 0x016aa101;
-	//				  0x00288000
-	//				  0x00411000 // BIT12 BIT16 BIT22
 }
 
 // ROM:400042AC

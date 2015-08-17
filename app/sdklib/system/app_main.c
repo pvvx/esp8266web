@@ -85,14 +85,14 @@ void __attribute__((section(".UserEnter.text"))) call_user_start(void)
 #ifdef USE_FIX_QSPI_FLASH 
 void __attribute__((section(".entry.text"))) call_user_start1(void)
 {
-		// коррекция QSPI на 80 MHz
 		SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS = 0x80000064
+		// SPI на 80 MHz
 #if USE_FIX_QSPI_FLASH == 80
-		GPIO_MUX_CFG |= (1<< MUX_SPI0_CLK_BIT); // QSPI = 80 MHz
-		SPI0_CTRL = 0x016ab000; // ((SPI0_CTRL >> 12) << 12) | BIT(12);
-#else
-		GPIO_MUX_CFG &= 0xfffffeff;
-		SPI0_CTRL = 0x016aa101;
+		GPIO_MUX_CFG |= BIT(MUX_SPI0_CLK_BIT); // QSPI = 80 MHz
+		SPI0_CTRL = (SPI0_CTRL & SPI_CTRL_F_MASK) | SPI_CTRL_F80MHZ;
+#else  // SPI на 40 MHz
+		GPIO_MUX_CFG &= ~(1<< MUX_SPI0_CLK_BIT);
+		SPI0_CTRL = (SPI0_CTRL & SPI_CTRL_F_MASK) | SPI_CTRL_F40MHZ;
 #endif
 		flashchip->chip_size = 512*1024; // песочница для SDK в 512 килобайт flash
 		// Всё - включаем кеширование, далее можно вызывать процедуры из flash

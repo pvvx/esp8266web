@@ -7,7 +7,7 @@
 0x7C000 - bin/esp_init_data_default.bin - RF SDK options
 0x7E000 - bin/blank.bin			- Default SDK WiFi config
 
-bin/rapid_loader.bin - loader QSPI CLK x2 (80MHz)
-bin/rapid_loader_m40.bin - loader QSPI CLK x1 (40MHz)
+bin/rapid_loader.bin - loader FlashSPI CLK x2 (80MHz)
+bin/rapid_loader_m40.bin - loader FlashSPI CLK x1 (40MHz)
 
 
