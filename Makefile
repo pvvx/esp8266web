@@ -8,7 +8,7 @@ ESPOPTION ?= -p COM2 -b 460800
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80
-# SPI_MODE: QIO only
+# SPI_MODE: QIO, DIO, QOUT, DOUT
 SPI_MODE?=QIO
 # SPI_SIZE: 512KB for all size Flash ! (512 kbytes .. 16 Mbytes Flash autodetect)
 SPI_SIZE?=512

@@ -14,30 +14,29 @@
 
 struct nmi_store_regs_t
 {
-	uint32 sar;	// +0x00
-	uint32 nn04;	// +0x04
-	uint32 nn08;	// +0x08
-	uint32 epc1; // +0x0c
-	uint32 exccause;	// +0x10
-	uint32 excvaddr;	// +0x14
-	uint32 excsave_1;	// +0x18
-	uint32 nn1c;	// +0x1c
-	uint32 a0;	// +0x20
-	uint32 a1;	// +0x24
-	uint32 a2;	// +0x28
-	uint32 a3;	// +0x2c
-	uint32 a4;	// +0x30
-	uint32 a5;	// +0x34
-	uint32 a6;	// +0x38
-	uint32 a7;	// +0x3c
-	uint32 a8;	// +0x40
-	uint32 a9;	// +0x44
-	uint32 a10;	// +0x48
-	uint32 a11;	// +0x4c
-	uint32 a12;	// +0x50
-	uint32 a13;	// +0x54
-	uint32 a14;	// +0x58
-	uint32 a15;	// +0x5c
+	uint32 a0;	// +0x00
+	uint32 a1;	// +0x04
+	uint32 a2;	// +0x08
+	uint32 a3;	// +0x0c
+	uint32 a4;	// +0x10
+	uint32 a5;	// +0x14
+	uint32 a6;	// +0x18
+	uint32 a7;	// +0x1c
+	uint32 a8;	// +0x20
+	uint32 a9;	// +0x24
+	uint32 a10;	// +0x28
+	uint32 a11;	// +0x2c
+	uint32 a12;	// +0x30
+	uint32 a13;	// +0x34
+	uint32 a14;	// +0x38
+	uint32 a15;	// +0x3c
+//	uint32 sar;	// +0x40
+//	uint32 epc1; // +0x44
+//	uint32 exccause;	// +0x48
+//	uint32 excvaddr;	// +0x4c
+//	uint32 excsave1;	// +0x50
+//	uint32 excsave2;	// +0x54
+//	uint32 excsave3;	// +0x58
 };
 
 typedef void (*nmi_func_t)(void);
@@ -152,7 +151,12 @@ void __attribute__((section(".vectors.text"))) call_user_start(void)
 			".align 	16\n"
 //			".global	_NMIExceptionVector\n"
 "_NMIExceptionVector:\n"	// +0x20
-			"wsr.excsave3 a0\n"         // preserve original a0 register
+//			"wsr.excsave3 a0\n"         // preserve original a0 register
+			"addmi	a1, a1, -108\n"
+			"s32i.n	a0, a1, 0x00\n" // a0
+			"s32i.n	a2, a1, 0x08\n" // a2
+			"addmi	a2, a1, 108\n"
+			"s32i.n	a2, a1, 0x04\n" // a1
 			"j 		_NMILevelVector\n"
 			".align 	16\n"
 //			".global	_KernelExceptionVector\n"
@@ -181,74 +185,50 @@ void __attribute__((section(".vectors.text"))) call_user_start(void)
 			"j			3b\n"	// infinite loop - unexpected kernel exception
 			".align 	4\n"
 "_NMILevelVector:\n"
-			"mov	a0, a1\n"
-			"addmi	a1, a1, -108\n"
-			"s32i.n	a2, a1, 40\n"
-			"s32i.n	a0, a1, 36\n" // a1
-			"movi.n	a2, 0\n"
-			"s32i.n	a3, a1, 44\n"
-			"xsr.excsave3	a2\n"
-			"s32i.n	a4, a1, 48\n"
-			"s32i.n	a2, a1, 32\n" // a0
-//			"rsr.epc1	a3\n"
-//			"rsr.exccause	a4\n"
-//			"s32i.n	a3, a1, 12\n"
-//			"s32i.n	a4, a1, 16\n"
-//			"rsr.excvaddr	a3\n"
-//			"s32i.n	a3, a1, 20\n"
-//			"rsr.excsave1	a4\n"
-//			"s32i.n	a4, a1, 24\n"
-			"s32i.n	a5, a1, 52\n"
-			"s32i.n	a6, a1, 56\n"
-			"s32i.n	a7, a1, 60\n"
-			"s32i.n	a8, a1, 64\n"
-			"s32i.n	a9, a1, 68\n"
-			"s32i.n	a10, a1, 72\n"
-			"s32i.n	a11, a1, 76\n"
-			"s32i.n	a12, a1, 80\n"
-			"s32i.n	a13, a1, 84\n"
-			"s32i.n	a14, a1, 88\n"
-			"s32i.n	a15, a1, 92\n"
-			"movi.n	a0, 0\n"
-			"movi.n	a2, 35\n"
+			"s32i.n	a3, a1, 0x0c\n" // a3
+			"s32i.n	a4, a1, 0x10\n" // a4
+			"s32i.n	a5, a1, 0x14\n" // a5
+			"s32i.n	a6, a1, 0x18\n" // a6
+			"s32i.n	a7, a1, 0x1c\n" // a7
+			"s32i.n	a8, a1, 0x20\n" // a8
+			"s32i.n	a9, a1, 0x24\n" // a9
+			"s32i.n	a10, a1, 0x28\n" // a10
+			"s32i.n	a11, a1, 0x2c\n" // a11
+//			"s32i.n	a12, a1, 0x30\n" // a12
+//			"s32i.n	a13, a1, 0x34\n" // a13
+//			"s32i.n	a14, a1, 0x38\n" // a14
+//			"s32i.n	a15, a1, 0x3c\n" // a15
+			"movi.n	a3, 0x23\n"
+			"wsr.ps	a3\n"
+			"rsync\n"
+			"rsr.sar	a4\n"
+			"s32i.n	a4, a1, 0x30\n" // sar
+			"l32r	a0, pNmiFunc\n"
+			"callx0	a0\n"
+			"l32i.n	a4, a1, 0x30\n" // sar
+			"wsr.sar	a4\n"
+			"movi.n	a2, 0x33\n"
 			"wsr.ps	a2\n"
 			"rsync\n"
-			"rsr.sar	a14\n"
-			"s32i.n	a14, a1, 0\n"
-			"l32r	a13, pNmiFunc\n"
-			"callx0	a13\n"
-			"l32i.n	a15, a1, 0\n"
-			"wsr.sar	a15\n"
-			"movi.n	a2, 51\n"
-			"wsr.ps	a2\n"
-			"rsync\n"
-			"l32i.n	a4, a1, 48\n"
-			"l32i.n	a5, a1, 52\n"
-			"l32i.n	a6, a1, 56\n"
-			"l32i.n	a7, a1, 60\n"
-			"l32i.n	a8, a1, 64\n"
-			"l32i.n	a9, a1, 68\n"
-			"l32i.n	a10, a1, 72\n"
-			"l32i.n	a11, a1, 76\n"
-			"l32i.n	a12, a1, 80\n"
-			"l32i.n	a13, a1, 84\n"
-			"l32i.n	a14, a1, 88\n"
-			"l32i.n	a15, a1, 92\n"
-//			"l32i.n	a2, a1, 12\n"
-//			"l32i.n	a3, a1, 16\n"
-//			"wsr.epc1	a2\n"
-//			"wsr.exccause	a3\n"
-//			"l32i.n	a2, a1, 20\n"
-//			"wsr.excvaddr	a2\n"
-//			"l32i.n	a3, a1, 24\n"
-//			"wsr.excsave1	a3\n"
-			"l32i.n	a0, a1, 32\n"
-			"l32r 	a2, p_dport_\n" // DPORT_BASE[0] = 0x0F;
-			"movi.n	a3, 15\n"
-			"s32i.n	a3, a2, 0\n"
-			"l32i.n	a2, a1, 40\n"
-			"l32i.n	a3, a1, 44\n"
-			"l32i.n	a1, a1, 36\n"
+			"l32i.n	a3, a1, 0x0c\n" // a3
+			"l32i.n	a4, a1, 0x10\n" // a4
+			"l32i.n	a5, a1, 0x14\n" // a5
+			"l32i.n	a6, a1, 0x18\n" // a6
+			"l32i.n	a7, a1, 0x1c\n" // a7
+			"l32i.n	a8, a1, 0x20\n" // a8
+			"l32i.n	a9, a1, 0x24\n" // a9
+			"l32i.n	a10, a1, 0x28\n" // a10
+			"l32i.n	a11, a1, 0x2c\n" // a11
+//			"l32i.n	a12, a1, 0x30\n" // a12
+//			"l32i.n	a13, a1, 0x34\n" // a13
+//			"l32i.n	a14, a1, 0x38\n" // a14
+//			"l32i.n	a15, a1, 0x3c\n" // a15
+			"l32r 	a0, p_dport_\n" // DPORT_BASE[0] = 0x0F;
+			"movi.n	a2, 0x0F\n"
+			"s32i.n	a2, a0, 0\n"
+			"l32i.n	a0, a1, 0x00\n" // a0
+			"l32i.n	a2, a1, 0x08\n" // a2
+			"l32i.n	a1, a1, 0x04\n" // a1
 			"rfi	3\n"
 #endif
 		);
