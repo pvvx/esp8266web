@@ -30,7 +30,8 @@
 
 int st_reconn_count DATA_IRAM_ATTR;
 
-#if DEF_SDK_VERSION >= 1301 // ждем patch
+#if DEF_SDK_VERSION >= 1303 // ждем следующий patch от китайцев
+// (При выполнении wifi_station_disconnect() в событии EVENT_STAMODE_DISCONNECTED иногда AP отваливается на всегда. Требуется использовать обход данного глюка...
 os_timer_t st_disconn_timer DATA_IRAM_ATTR;
 
 /******************************************************************************
@@ -51,7 +52,7 @@ void ICACHE_FLASH_ATTR station_connect_timer(void)
 	}
 }
 #endif
-#if	DEF_SDK_VERSION < 1301
+#if	DEF_SDK_VERSION < 1303
 
 extern void cnx_connect_timeout(void);
 
@@ -75,14 +76,16 @@ LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 		}
 		else {
 			// Восстановить режим AP
+#if DEBUGSOO > 1
 			os_printf("Reconnect off\n");
+#endif
 			wifi_station_disconnect();
 		}
 		wifi_softap_set_config(&wificonfig.ap.config);
 	}
 }
-#elif DEF_SDK_VERSION >= 1301 // ждем patch
-// #warning "Bag none AP fixed?"
+#else // ждем patch
+ #warning "Bag none AP fixed?"
 #endif
 /******************************************************************************
  * FunctionName : wifi_handle_event_cb
@@ -101,9 +104,8 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.connected.channel);
 #endif
 			st_reconn_count = 0;
-#if DEF_SDK_VERSION >= 1301 // ждем patch
+#if DEF_SDK_VERSION >= 1303 // ждем patch
 			ets_timer_disarm(&st_disconn_timer);
-//#warning "Bag wifi events fixed?"
 #endif
 			break;
 		}
@@ -117,7 +119,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 #endif
 			if(st_reconn_count >= MAX_RESCONN_ST && (wifi_get_opmode() & STATION_MODE)) {
 				if(wificonfig.st.reconn_timeout != 1) {
-#if DEF_SDK_VERSION >= 1301 // ждем patch
+#if DEF_SDK_VERSION >= 1303 // ждем patch
 						wifi_station_disconnect();
 // #warning "Bag none AP fixed?"
 #else
@@ -125,7 +127,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 #endif
 				}
 				if(wificonfig.st.reconn_timeout > 1 && wifi_station_get_auto_connect() != 0) {
-#if DEF_SDK_VERSION >= 1301 // ждем patch
+#if DEF_SDK_VERSION >= 1303 // ждем patch
 						ets_timer_disarm(&st_disconn_timer);
 						os_timer_setfn(&st_disconn_timer, (os_timer_func_t *)station_connect_timer, NULL);
 						ets_timer_arm_new(&st_disconn_timer, wificonfig.st.reconn_timeout * 1000, 0, 1);
@@ -139,9 +141,8 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 		case EVENT_STAMODE_AUTHMODE_CHANGE:
 		{
 			st_reconn_count = 0;
-#if DEF_SDK_VERSION >= 1301 // ждем patch
+#if DEF_SDK_VERSION >= 1303 // ждем patch
 			ets_timer_disarm(&st_disconn_timer);
-// #warning "Bag wifi events fixed?"
 #endif
 #if DEBUGSOO > 1
 			os_printf("New AuthMode: %d -> %d\n",
@@ -153,9 +154,8 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 		case EVENT_STAMODE_GOT_IP:
 		{
 			st_reconn_count = 0;
-#if DEF_SDK_VERSION >= 1301 // ждем patch
+#if DEF_SDK_VERSION >= 1303 // ждем patch
 			ets_timer_disarm(&st_disconn_timer);
-// #warning "Bag wifi events fixed?"
 #endif
 #if DEBUGSOO > 1
 			os_printf("Station ip:" IPSTR ", mask:" IPSTR ", gw:" IPSTR "\n",

@@ -249,9 +249,8 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 	};
 	if(wset.b.st_connect || wset.b.st_autocon) {
 		st_reconn_count = 0;
-#if DEF_SDK_VERSION > 1300 // ждем patch
+#if DEF_SDK_VERSION > 1303 // ждем patch
 		ets_timer_disarm(&st_disconn_timer);
-// #warning "Bag wifi events fixed?"
 #endif
 		if(wcfg->st.auto_connect) {
 			if(!wifi_station_connect()) werr.b.st_connect = 1;
@@ -431,14 +430,14 @@ bool ICACHE_FLASH_ATTR wifi_read_fcfg(void)
 uint32 total_scan_infos DATA_IRAM_ATTR;
 struct bss_scan_info buf_scan_infos[max_scan_bss] DATA_IRAM_ATTR;
 
-#if	DEF_SDK_VERSION >= 1200
+#if	DEF_SDK_VERSION < 1303
 LOCAL void ICACHE_FLASH_ATTR quit_scan(void)
 {
 	ets_set_idle_cb(NULL, NULL);
 	ets_intr_unlock();
 	New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
 }
-#elif DEF_SDK_VERSION > 1300
+#else
 #warning "Bag Fatal exception (28) over wifi_set_opmode() fixed?"
 #endif
 LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
