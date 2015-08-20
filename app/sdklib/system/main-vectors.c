@@ -26,10 +26,10 @@ struct nmi_store_regs_t
 	uint32 a9;	// +0x24
 	uint32 a10;	// +0x28
 	uint32 a11;	// +0x2c
-	uint32 a12;	// +0x30
-	uint32 a13;	// +0x34
-	uint32 a14;	// +0x38
-	uint32 a15;	// +0x3c
+//	uint32 a12;	// +0x30
+//	uint32 a13;	// +0x34
+//	uint32 a14;	// +0x38
+//	uint32 a15;	// +0x3c
 //	uint32 sar;	// +0x40
 //	uint32 epc1; // +0x44
 //	uint32 exccause;	// +0x48

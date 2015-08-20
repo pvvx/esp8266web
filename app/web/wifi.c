@@ -251,7 +251,7 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 		st_reconn_count = 0;
 #if DEF_SDK_VERSION > 1300 // ждем patch
 		ets_timer_disarm(&st_disconn_timer);
-#warning "Bag wifi events fixed?"
+// #warning "Bag wifi events fixed?"
 #endif
 		if(wcfg->st.auto_connect) {
 			if(!wifi_station_connect()) werr.b.st_connect = 1;

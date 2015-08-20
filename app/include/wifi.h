@@ -107,7 +107,7 @@ struct wifi_config {	// структура конфигурации wifi
 		uint8 macaddr[6];
 	}ap;
 	struct {
-		int reconn_timeout; // если 3 раза не удалось соединиться ST, тогда следующая проба соединения произойдет через reconn_timeout секунд. При reconn_timeout == 1 данный алго отключен.
+		int reconn_timeout; // если не удалось соединиться ST, тогда следующая проба соединения произойдет через reconn_timeout секунд. При reconn_timeout == 1 данный алго отключен.
 		struct ip_info ipinfo;
 		struct station_config config;
 	    uint8  auto_connect;
