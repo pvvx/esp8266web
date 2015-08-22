@@ -11,7 +11,16 @@
 #include "user_interface.h"
 #include "sdk/app_main.h"
 
+#ifdef USE_TIMER0
 
+typedef void (*nmi_func_t)(uint32 par);
+
+extern nmi_func_t timer0_cb;
+extern uint32 timer0_arg;
+
+#ifdef TIMER0_USE_NMI_VECTOR
+
+/*
 struct nmi_store_regs_t
 {
 	uint32 a0;	// +0x00
@@ -39,11 +48,6 @@ struct nmi_store_regs_t
 //	uint32 excsave3;	// +0x58
 };
 
-typedef void (*nmi_func_t)(void);
-extern nmi_func_t pNmiFunc;
-
-#ifdef USE_NMI_VECTOR // пока в режиме отладки, но уже работает c текущим тестом
-
 void NMI_Handler(void)
 {
 	do {
@@ -51,76 +55,88 @@ void NMI_Handler(void)
 		MEMW();
 	} while (DPORT_BASE[0]&1);
 	// User code
-	// ...
-	uart0_write_char('*');
-	xthal_set_intclear(8);
+	// ...	uart0_write_char('*');
 	TIMER0_INT &= 0xFFE;
 	if((TIMER0_CTRL & TM_AUTO_RELOAD_CNT) == 0) {
 		INTC_EDGE_EN &= ~BIT(1);
 	}
+	xthal_set_intclear(8);
+}
+*/
+#endif
+
+void _timer0_isr(void * arg)
+{
+	if(timer0_cb != NULL) {
+		timer0_cb(timer0_arg);
+		if((TIMER0_CTRL & TM_AUTO_RELOAD_CNT) == 0) {
+			INTC_EDGE_EN &= ~BIT(1);
+		}
+		TIMER0_INT &= (~1);
+	}
+	else {
+		INTC_EDGE_EN &= ~BIT(1);
+		TIMER0_CTRL = 0;
+		TIMER0_INT &= (~1);
+	}
 }
 
-void ICACHE_FLASH_ATTR NmiSetFunc(nmi_func_t func)
+void ICACHE_FLASH_ATTR timer0_stop(void)
 {
-	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F;
-	pNmiFunc = func;
-}
-
-void ICACHE_FLASH_ATTR init_nmi(bool flg)
-{
-	os_printf("init_nmi(%d)\n", flg);
-    INTC_EDGE_EN &= ~BIT(1);
-    if (flg) TIMER0_CTRL =   TM_DIVDED_BY_16
-                      | TM_ENABLE_TIMER
-					  | TM_AUTO_RELOAD_CNT
-                      | TM_EDGE_INT;
-    else	TIMER0_CTRL =   TM_DIVDED_BY_16
-                  | TM_ENABLE_TIMER
-                  | TM_EDGE_INT;
-    NmiSetFunc(NMI_Handler);
-    ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM));
-}
-
-void ICACHE_FLASH_ATTR stop_nmi(void)
-{
-	os_printf("stop_nmi()\n");
 	ets_isr_mask(BIT(ETS_FRC_TIMER0_INUM));
 	TIMER0_CTRL = 0;
 	INTC_EDGE_EN &= ~BIT(1);
-	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0E;
 }
 
-void ICACHE_FLASH_ATTR start_nmi(uint32 us)
+void ICACHE_FLASH_ATTR timer0_start(uint32 us, bool repeat_flg)
 {
-	os_printf("start_nmi(%d)\n", us);
-    if(us != 0 && us <= 1677721 ) {
-    	TIMER0_LOAD = us * 5;
-    	INTC_EDGE_EN |= BIT(1);
-    }
-    else {
-    	stop_nmi();
-    }
+	TIMER0_LOAD = 0xFFFFFFFF;
+	if(repeat_flg) {
+		TIMER0_CTRL =   TM_DIVDED_BY_16
+		                  | TM_AUTO_RELOAD_CNT
+		                  | TM_ENABLE_TIMER
+		                  | TM_EDGE_INT;
+	}
+	else {
+		TIMER0_CTRL =   TM_DIVDED_BY_16
+		                  | TM_ENABLE_TIMER
+		                  | TM_EDGE_INT;
+	}
+	if(us < 5) {
+		TIMER0_LOAD = 40;
+	}
+	else if(us <= 1677721) {
+		TIMER0_LOAD = us * 5;
+	}
+	ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM));
+	INTC_EDGE_EN |= BIT(1);
 }
+
+#ifdef TIMER0_USE_NMI_VECTOR
+void timer0_init(void *func, uint32 par, bool nmi_flg)
 #else
-void ICACHE_FLASH_ATTR init_nmi(bool flg)
-{
-
-}
-void ICACHE_FLASH_ATTR NmiSetFunc(nmi_func_t func)
-{
-
-}
-void ICACHE_FLASH_ATTR stop_nmi(void)
-{
-
-}
-void ICACHE_FLASH_ATTR start_nmi(uint32 us)
-{
-
-}
-
+void timer0_init(void *func, uint32 par)
 #endif
-
+{
+#if DEBUGSOO > 3
+	os_printf("timer0_init(%d)\n", flg);
+#endif
+	timer0_stop();
+	timer0_cb = func;
+	timer0_arg = par;
+#ifdef TIMER0_USE_NMI_VECTOR
+	if(nmi_flg) {
+		DPORT_BASE[0] |= 0x0F;
+	}
+	else
+#endif
+	{
+		DPORT_BASE[0] = 0;
+		ets_isr_attach(ETS_FRC_TIMER0_INUM, _timer0_isr, NULL);
+	}
+	ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM));
+}
+#endif // USE_TIMER0
 /* In eagle.app.v6.ld:
   .text : ALIGN(4)
   {
@@ -132,22 +148,24 @@ void ICACHE_FLASH_ATTR start_nmi(uint32 us)
 void __attribute__((section(".vectors.text"))) call_user_start(void)
 {
 	__asm__ __volatile__ (
-#ifdef USE_NMI_VECTOR
+#if defined(USE_TIMER0) && defined(TIMER0_USE_NMI_VECTOR)
 			"movi	a2, 0x401\n"
 			"slli	a2, a2, 20\n" // a2 = 0x40100000
 			"wsr.vecbase	a2\n"
 #endif
 			"j			call_user_start1\n"
-#ifdef USE_NMI_VECTOR
+#if defined(USE_TIMER0) && defined(TIMER0_USE_NMI_VECTOR)
 			".align 	16\n"
 //			".global	_DebugExceptionVector\n"
 "_DebugExceptionVector:\n"	// +0x10
 			"1:	waiti	2\n" // XCHAL_DEBUGLEVEL // unexpected debug exception, loop in low-power mode
 			"j			1b\n" 		// infinite loop - unexpected debug exception
+#endif
 			".align 	4\n"
-			".global	pNmiFunc\n"
-"pNmiFunc:	.word	NMI_Handler\n"
-"p_dport_:	.word	0x3ff00000\n"
+			".global	timer0_cb, timer0_arg\n"
+"timer0_cb:	.word	0\n"
+"timer0_arg:.word	0\n"
+#if defined(USE_TIMER0) && defined(TIMER0_USE_NMI_VECTOR)
 			".align 	16\n"
 //			".global	_NMIExceptionVector\n"
 "_NMIExceptionVector:\n"	// +0x20
@@ -166,6 +184,9 @@ void __attribute__((section(".vectors.text"))) call_user_start(void)
 			".align		16\n"
 //			".global	ptab_user_exception_vector\n"
 "ptab_user_exception_vector:	.word 0x3FFFC000\n"
+"ptimer_:	.word timer_\n"
+"pxthal_set_intclear: 	.word xthal_set_intclear\n"
+"p_dport_:	.word	0x3ff00000\n"
 			".align 	16\n"
 //			".global	_UserExceptionVector\n"
 "_UserExceptionVector:\n" // +0x50
@@ -203,8 +224,38 @@ void __attribute__((section(".vectors.text"))) call_user_start(void)
 			"rsync\n"
 			"rsr.sar	a4\n"
 			"s32i.n	a4, a1, 0x30\n" // sar
-			"l32r	a0, pNmiFunc\n"
+			"l32r 	a0, p_dport_\n" // DPORT_BASE[0] = 0x0F;
+			"movi.n	a3, 0x0E\n"
+			"s32i.n	a3, a0, 0\n"
+"4:\n"
+			"memw\n"
+			"l32i.n a3, a0, 0\n"
+			"bbsi	a3, 0, 4b\n"
+
+			"l32r	a0, timer0_cb\n" // if(timer0_cb !=0) timer0_cb(timer0_arg)
+			"beqz	a0, 5f\n"
+			"l32r	a2, timer0_arg\n"
 			"callx0	a0\n"
+"5:\n"
+			"l32r	a0, ptimer_\n"	// TIMER0_INT &= 0xFFE;
+			"l32i.n	a2, a0, 12\n"
+			"movi.n	a3, -2\n"
+			"and	a2, a2, a3\n"
+			"s32i.n	a2, a0, 12\n"
+
+			"l32i.n	a2, a0, 8\n" // if((TIMER0_CTRL & TM_AUTO_RELOAD_CNT) == 0)
+			"bbsi	a2, 6, 6f\n"
+
+			"l32r 	a0, p_dport_\n" // INTC_EDGE_EN &= ~BIT(1);
+			"l32i.n	a2, a0, 4\n"
+			"movi.n	a3, -3\n"
+			"and	a2, a2, a3\n"
+			"s32i.n	a2, a0, 4\n"
+"6:"
+			"l32r	a0, pxthal_set_intclear\n" // xthal_set_intclear(8);
+			"movi.n	a2, 8\n"
+			"callx0	a0\n"
+
 			"l32i.n	a4, a1, 0x30\n" // sar
 			"wsr.sar	a4\n"
 			"movi.n	a2, 0x33\n"
@@ -226,6 +277,7 @@ void __attribute__((section(".vectors.text"))) call_user_start(void)
 			"l32r 	a0, p_dport_\n" // DPORT_BASE[0] = 0x0F;
 			"movi.n	a2, 0x0F\n"
 			"s32i.n	a2, a0, 0\n"
+
 			"l32i.n	a0, a1, 0x00\n" // a0
 			"l32i.n	a2, a1, 0x08\n" // a2
 			"l32i.n	a1, a1, 0x04\n" // a1

@@ -93,13 +93,42 @@ void ets_update_cpu_frequency(uint32_t clk_mhz);
 uint32_t ets_get_cpu_frequency(void);
 /* { user_start_proc = routine; } user_start_proc 0x3FFFDCD0 */
 void ets_set_user_start(void *routine);
-extern void *ets_idle_cb;
+typedef void (tfunc_ets_run_cb)(void *);
+extern tfunc_ets_run_cb * ets_idle_cb;
 extern void *ets_idle_arg;
 /* idle_cb(idle_arg) вызывает ets_run()
  { idle_cb = routine; idle_arg = arg }
   idle_cb 0x3FFFDAB0, idle_arg 0x3FFFDAB4 */
-void ets_set_idle_cb(void *routine, void *arg);
+void ets_set_idle_cb(void * routine, void *arg);
+
+typedef struct _sargc_tsk {
+	uint32 x1;
+	uint32 x2;
+} sargc_tsk;
+
+typedef void (tfunc_tsk)(void *);
+
+typedef struct _ss_task {
+	tfunc_tsk * func;		//+0
+	sargc_tsk * argc;	//+4
+	uint8 size;			//+8
+	uint8 ch_09;		//+9
+	uint8 cnts;			//+10
+	uint8 cnte;			//+11
+	uint32 bitn;		//+12
+} ss_task;
+// RAM_BIOS:3FFFC6FC
+extern uint8 ets_bit_task_priority;
+// RAM_BIOS:3FFFDAB0
+//extern tfunc_tsk ets_idle_cb;
+// RAM_BIOS:3FFFDAB4
+//extern void * ets_idle_arg;
+// RAM_BIOS:3FFFDAB8
+extern uint32 ets_bit_count_task;
+// RAM_BIOS:3FFFDAC0
+extern ss_task ets_tab_task[32]; // 512 bytes, 32x16
 void ets_run(void);
+
 /*{	uint32 x = xthal_get_ccount();
 	uint32 y = cpu_clk_mhz * us;
 	while(x - xthal_get_ccount() > y); }*/

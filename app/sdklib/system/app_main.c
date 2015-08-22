@@ -429,9 +429,9 @@ void ICACHE_FLASH_ATTR startup(void)
 	_xtos_set_exception_handler(EXCCAUSE_ILLEGAL, default_exception_handler);
 	_xtos_set_exception_handler(EXCCAUSE_INSTR_ERROR, default_exception_handler);
 #ifdef USE_READ_ALIGN_ISR
-	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, default_exception_handler);
-#else
 	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, read_align_exception_handler);
+#else
+	_xtos_set_exception_handler(EXCCAUSE_LOAD_STORE_ERROR, default_exception_handler);
 #endif
 	_xtos_set_exception_handler(EXCCAUSE_LOAD_PROHIBITED, default_exception_handler);
 	_xtos_set_exception_handler(EXCCAUSE_STORE_PROHIBITED, default_exception_handler);

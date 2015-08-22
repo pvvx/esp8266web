@@ -198,7 +198,7 @@ else
 endif	
 	@dd if=../bin/0.bin >>../bin/$(ADDR_FW1).bin
 
-all: .subdirs $(OBJS) $(OLIBS) $(OIMAGES) $(OBINS) $(SPECIAL_MKTARGETS)
+all: .subdirs $(OBJS) $(OLIBS) $(SPECIAL_MKTARGETS) $(OIMAGES) $(OBINS) 
 
 $(SPECIAL_MKTARGETS): $(INPLIB) 
 	@$(RM) -f $@

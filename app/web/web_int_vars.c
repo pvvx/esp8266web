@@ -26,9 +26,7 @@
 #include "driver/sigma_delta.h"
 #include "sys_const_utils.h"
 #include "sdk/rom2ram.h"
-
-extern void start_nmi(uint32);
-extern void init_nmi(bool);
+#include "sdk/app_main.h"
 
 #ifdef USE_NETBIOS
 #include "netbios.h"
@@ -66,6 +64,15 @@ void ICACHE_FLASH_ATTR reg_sct_bits(volatile uint32 * addr, uint32 bits, uint32 
 	else x &= ~ bits;
 	*addr =  x;
 }
+#ifdef USE_TIMER0
+// тест
+void timer0_tst_isr(void *arg)
+{
+	if(GPIO_OUT&1) GPIO_OUT_W1TC = 1;
+	else GPIO_OUT_W1TS = 1;
+//	uart0_write_char(((uint32)arg == 0)? '*' : '@');
+}
+#endif
 /******************************************************************************
  * FunctionName : parse_url
  * Description  : parse the received data from the server
@@ -489,13 +496,24 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			wdrv_stop();
 		}
 	}
+#endif // USE_WDRV
+#ifdef USE_TIMER0
+	else ifcmp("tinit") {
+#ifdef TIMER0_USE_NMI_VECTOR
+		timer0_init(timer0_tst_isr, val, val);
+#else
+		timer0_init(timer0_tst_isr, NULL);
 #endif
-	else ifcmp("test") {
-		init_nmi(val);
 	}
-	else ifcmp("nmi") {
-		start_nmi(val);
+	else ifcmp("ttik") {
+		if(val == 0) timer0_stop();
+		timer0_start(val, 0);
 	}
+	else ifcmp("trep") {
+		if(val == 0) timer0_stop();
+		timer0_start(val, 1);
+	}
+#endif // USE_TIMER0
 #if DEBUGSOO > 5
     else os_printf(" - none! ");
 #endif

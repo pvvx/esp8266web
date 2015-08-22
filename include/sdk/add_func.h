@@ -5,6 +5,7 @@
 #include "user_config.h"
 #include "ets_sys.h"
 #include "mem_manager.h"
+#include "sdk/ets_run_new.h"
 
 struct s_info {
 	uint32 ap_ip;	//+00
@@ -33,8 +34,8 @@ bool system_get_os_print(void); // return os_print_enable
 uint32 system_get_rtc_time(void); // return (uint32)(*((uint32*)0x6000071C))
 //const uint8 *system_get_sdk_version(void); // user_interface.h
 uint32 system_get_test_result(void);
-//uint32 system_get_time(void); // x1 ms, return WdevTimOffSet + (uint32)(*((uint32*)0x3FF20C00)) // user_interface.h
-uint32 phy_get_mactime(void); // x1 ms, return (uint32)(*((uint32*)0x3FF20C00))
+//uint32 system_get_time(void); // x1 us, return WdevTimOffSet + (uint32)(*((uint32*)0x3FF20C00)) // user_interface.h
+uint32 phy_get_mactime(void); // x1 us, return (uint32)(*((uint32*)0x3FF20C00))
 uint32 system_get_userbin_addr(void);
 //uint32 system_get_vdd33(void); // user_interface.h
 //void system_init_done_cb(init_done_cb_t cb); typedef void (* init_done_cb_t)(void); // user_interface.h
@@ -117,6 +118,17 @@ void read_macaddr_from_otp(uint8 *mac);
 void wifi_station_set_default_hostname(uint8 * mac);
 
 void user_init(void);
+
+#ifdef USE_TIMER0
+void timer0_start(uint32 us, bool repeat_flg);
+void timer0_stop(void);
+
+#ifdef TIMER0_USE_NMI_VECTOR
+void timer0_init(void *func, uint32 par, bool nmi_flg);
+#else
+void timer0_init(void *func, void *par);
+#endif
+#endif
 
 #endif //_INCLUDE_ADD_FUNC_H_
 

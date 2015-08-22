@@ -38,7 +38,7 @@
 	#define USE_FIX_SDK_FLASH_SIZE  
 #endif
 
-#define USE_READ_ALIGN_ISR // побайтный доступ к IRAM и cache Flash через EXCCAUSE_LOAD_STORE_ERROR
+//#define USE_READ_ALIGN_ISR // побайтный доступ к IRAM и cache Flash через EXCCAUSE_LOAD_STORE_ERROR
 
 //#define USE_OVERLAP_MODE // используются две и более flash
 
@@ -50,8 +50,12 @@
 	#define USE_US_TIMER
 #endif
 
-#define USE_NMI_VECTOR	// использовать NMI вектор (перенаправление таблицы векторов CPU) (пока только тест, см main-vectors.c)
+#define USE_TIMER0 // использовать аппаратный таймер 0 (NMI или стандартное прерывание)
+#define TIMER0_USE_NMI_VECTOR	// использовать NMI вектор для таймера 0 (перенаправление таблицы векторов CPU) (см main-vectors.c)
 
+//#define USE_ETS_RUN_NEW // использовать ets_run_new() вместо ets_run()
+
+//------------------------------------------------------------------------------
 /* LwIP Options */
 
 #ifndef LWIP_OPEN_SRC // (назначается в MakeFile -DPBUF_RSV_FOR_WLAN)
@@ -63,6 +67,10 @@
 #endif
 #ifndef EBUF_LWIP // (назначается в MakeFile -DEBUF_LWIP)
 	#define EBUF_LWIP
+#endif
+//------------------------------------------------------------------------------
+#ifdef USE_ETS_RUN_NEW
+	#define ets_run ets_run_new
 #endif
 
 #endif // _sdk_config_h_
