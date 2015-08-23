@@ -325,7 +325,7 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
     struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
 	wifi_softap_set_default_ssid();
 	wifi_station_set_default_hostname(info.st_mac);
-	if(wifi_config->wfmode[0] == 0xff) wifi_config->wfmode[0] = 2;
+	if(wifi_config->wfmode[0] == 0xff) wifi_config->wfmode[0] = SOFTAP_MODE;
 	else wifi_config->wfmode[0] &= 3;
 	wifi_config->wfmode[1] = 0;
 	if(wifi_config->field_308[1] >= 14 || wifi_config->field_308[1] == 0) {
@@ -340,13 +340,15 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 		ets_bzero(wifi_config->ap_passw, 64);
 	}
 	if(wifi_config->field_308[3] > 2) wifi_config->field_308[3] = 0;
-	if(wifi_config->field_308[4] > 4) wifi_config->field_308[4] = 4;
+	if(wifi_config->field_308[4] > 8) wifi_config->field_308[4] = 4;
 	if(wifi_config->st_ssid_len == 0xffffffff) {
 		ets_bzero(&wifi_config->st_ssid_len, 36);
 		ets_bzero(&wifi_config->st_passw, 64);
 	}
-	if(wifi_config->field_152[17] > 2) wifi_config->field_152[17] = 0; // +169
+	wifi_config->field_880 = 0;
+	wifi_config->field_884 = 0;
 	if(wifi_config->field_316 > 6) wifi_config->field_316 = 1;
+	if(wifi_config->field_152[17] > 2) wifi_config->field_152[17] = 0; // +169
 	wifi_config->phy_mode &= 3;
 	if(wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
 }
@@ -437,6 +439,9 @@ void ICACHE_FLASH_ATTR startup(void)
 	_xtos_set_exception_handler(EXCCAUSE_STORE_PROHIBITED, default_exception_handler);
 	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, default_exception_handler);
 	// Тест системных данных в RTС
+	if(rtc_get_reset_reason()==2) {
+
+	}
 	if((RTC_RAM_BASE[0x60>>2]>>16) > 4) { // проверка опции phy_rfoption = deep_sleep_option
 #ifdef DEBUG_UART
 		os_printf("\nError phy_rfoption! Set default = 0.\n");
@@ -480,7 +485,11 @@ void ICACHE_FLASH_ATTR startup(void)
 	overlap_hspi_init(); // не используется для модулей с одной flash!
 #endif
 	//
+#if DEF_SDK_VERSION >= 1300
+	uint8 *buf = (uint8 *)pvPortMalloc(256); // esp_init_data_default.bin
+#else
 	uint8 *buf = (uint8 *)pvPortMalloc(esp_init_data_default_size); // esp_init_data_default.bin
+#endif
 	spi_flash_read(flashchip->chip_size - 0x4000,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
 	//
 	if(buf[0] != 5) {
@@ -513,17 +522,13 @@ void ICACHE_FLASH_ATTR startup(void)
 #endif
 	WDT_FEED = WDT_FEED_MAGIC; // WDT
 	//
-#if DEF_SDK_VERSION >= 1200
-	int wfmode = g_ic.g.wifi_store.wfmode[0]; // g_ic.c[0x214] (+532) SDK 1.2.0
-#else
-	int wfmode = g_ic.g.wifi_store.wfmode[0];
-#endif
+	int wfmode = g_ic.g.wifi_store.wfmode[0]; // g_ic.c[0x214] (+532) SDK 1.2.0 // SDK 1.3.0 g_ic.c[472]
 	wifi_mode_set(wfmode);
 	if(wfmode & 1)  wifi_station_start();
 #if DEF_SDK_VERSION >= 1200
 	if(wfmode == 2) {
-//		uint8 x_wfmode = g_ic.g.wifi_store.wfmode[-28];  // g_ic.c[504]?
-		if(g_ic.c[504] != 2) wifi_softap_start(0);
+//		uint8 x_wfmode = g_ic.g.wifi_store.wfmode[0];  // g_ic.c[504]?
+		if(g_ic.c[446] != 2) wifi_softap_start(0);
 		else wifi_softap_start(1);
 	}
 	else if(wfmode == 3) {

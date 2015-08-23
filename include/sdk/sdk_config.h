@@ -50,8 +50,8 @@
 	#define USE_US_TIMER
 #endif
 
-#define USE_TIMER0 // использовать аппаратный таймер 0 (NMI или стандартное прерывание)
-#define TIMER0_USE_NMI_VECTOR	// использовать NMI вектор для таймера 0 (перенаправление таблицы векторов CPU) (см main-vectors.c)
+//#define USE_TIMER0 // использовать аппаратный таймер 0 (NMI или стандартное прерывание)
+//#define TIMER0_USE_NMI_VECTOR	// использовать NMI вектор для таймера 0 (перенаправление таблицы векторов CPU) (см main-vectors.c)
 
 //#define USE_ETS_RUN_NEW // использовать ets_run_new() вместо ets_run()
 

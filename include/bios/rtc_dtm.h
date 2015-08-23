@@ -48,9 +48,10 @@ struct sdtm_params // RAM_BIOS:3FFFDD64
 extern struct sdtm_params dtm_params; // 64 bytes
 // RAM_BIOS:3FFFC700
 extern uint32 rtc_claib; // ~ = 0x7073
-
+/* software_reset: Not work for any mode! */
 void software_reset(void);
 void rtc_set_sleep_mode(uint32 a, uint32 t, uint32 m);
+/*rtc_reset_reason: =1 - ch_pd,  =2 - reset, =4 - Wdt Reset ... > 7 unknown reset */
 uint32 rtc_get_reset_reason(void);
 void save_rxbcn_mactime(uint32 t);
 void save_tsf_us(uint32 us);

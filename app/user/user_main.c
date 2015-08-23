@@ -99,6 +99,7 @@ void ICACHE_FLASH_ATTR init_done_cb(void)
 #ifdef TEST_RTC_RTNTN
 	test_rtc_mem();
 #endif
+	New_WiFi_config(WIFI_MASK_ALL);
 }
 
 /******************************************************************************

@@ -24,7 +24,7 @@ void rtc_set_sleep_mode(uint32 a, uint32 t, uint32 m)
 	rtc_[2] |= a; // 0x60000708
 }
 
-// ROM:400025E0 
+// ROM:400025E0 //  =1 - ch_pd,  =2 - reset, =4 - Wdt Reset ... > 7 unknown reset
 uint32 rtc_get_reset_reason(void)
 {
 	uint32 x = rtc_[5] & 7; // IOREG(0x60000714) & 7;
@@ -130,9 +130,9 @@ void rtc_intr_handler(void)
 void ets_rtc_int_register(void)
 {
 	IO_RTC_INT_ENA &= 0xFF8; // IOREG(0x60000720)
-	ets_isr_attach(3, rtc_intr_handler, 0);
+	ets_isr_attach(ETS_RTC_INUM, rtc_intr_handler, 0); // ETS_RTC_INUM = 3
 	IO_RTC_INT_CLR |= 7; // OREG(0x60000724)
-	ets_isr_unmask(1<<3);
+	ets_isr_unmask(1<<ETS_RTC_INUM);
 }
 
 //RAM_BIOS:3FFFC700

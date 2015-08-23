@@ -132,7 +132,7 @@ extern struct bss_scan_info buf_scan_infos[max_scan_bss];
 
 extern struct wifi_config wificonfig;
 
-uint32 Setup_WiFi(void) ICACHE_FLASH_ATTR; // return bits_wifi_chg/err
+void Setup_WiFi(void) ICACHE_FLASH_ATTR;
 uint32 New_WiFi_config(uint32 set_mask) ICACHE_FLASH_ATTR; // return bits_wifi_chg/err
 uint32 Read_WiFi_config(struct wifi_config *wcfg, uint32 set_mask) ICACHE_FLASH_ATTR; // return bits_wifi_chg/err
 uint32 Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask) ICACHE_FLASH_ATTR; // return bits_wifi_chg/err

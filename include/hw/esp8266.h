@@ -87,6 +87,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 /* interrupt related */
 #define ETS_SLC_INUM		1
 #define ETS_SPI_INUM        2
+#define ETS_RTC_INUM        3 // см. ets_rtc_int_register()
 #define ETS_GPIO_INUM       4
 #define ETS_UART_INUM       5
 #define ETS_MAX_INUM        6

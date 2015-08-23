@@ -22,6 +22,7 @@
 
 #include "udp_test_port.h"
 #include "tcp_srv_conn.h"
+#include "sdk/libmain.h"
 
 #define udpbufsize 1024
 
@@ -226,39 +227,42 @@ udp_test_port_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *a
           system_set_os_print(x);
           break;
       case 'O':
-          udp_puts("wifi_set_opmode(%u)\n", x);
-          wifi_set_opmode(x);
+          udp_puts("wifi_set_opmode(%u):%u\n", x, wifi_set_opmode(x));
           break;
       case 'B':
-          udp_puts("wifi_station_set_auto_connect(%u)\n", x);
-          wifi_station_set_auto_connect(x);
+          udp_puts("wifi_station_set_auto_connect(%u):%u\n", x, wifi_station_set_auto_connect(x));
           break;
       case 'D':
           switch(x) {
           case 0:
-              udp_puts("wifi_station_dhcpc_start\n", x);
-              wifi_station_dhcpc_start();
+              udp_puts("wifi_station_dhcpc_start:%u\n", wifi_station_dhcpc_start());
               break;
           case 1:
-              udp_puts("wifi_station_dhcpc_stop\n", x);
-              wifi_station_dhcpc_stop();
+              udp_puts("wifi_station_dhcpc_stop:%u\n", wifi_station_dhcpc_stop());
               break;
           case 2:
-              udp_puts("wifi_softap_dhcps_start\n", x);
-              wifi_softap_dhcps_start();
+              udp_puts("wifi_softap_dhcps_start:%u\n",wifi_softap_dhcps_start());
               break;
           case 3:
-              udp_puts("wifi_softap_dhcps_stop\n", x);
-              wifi_softap_dhcps_stop();
+              udp_puts("wifi_softap_dhcps_stop:%u\n", wifi_softap_dhcps_stop());
               break;
           default:
               udp_puts("D(%u)?\n", x);
           }
           break;
           case 'F':
-        	  if(flashchip != NULL) udp_puts("FlashID: 0x%08x\nChip size: %d\nBlock size: %d\nSector size: %d\nPage size: %d\nStatus mask: 0x%08x\n", flashchip->deviceId, flashchip->chip_size, flashchip->block_size, flashchip->sector_size, flashchip->page_size, flashchip->status_mask );
+        	  if(flashchip != NULL) {
+        		  udp_puts("FlashID: 0x%08x\nChip size: %d\nBlock size: %d\nSector size: %d\nPage size: %d\nStatus mask: 0x%08x\n", flashchip->deviceId, flashchip->chip_size, flashchip->block_size, flashchip->sector_size, flashchip->page_size, flashchip->status_mask );
+        		  udp_puts("Real Flash size: %u\n", spi_flash_real_size());
+        	  }
         	  else udp_puts("Unknown Flash type!\n");
               break;
+          case 'E':
+        	  udp_puts("wifi_set_sleep_type(%d):%u\n", x, wifi_set_sleep_type(x));
+        	  break;
+          case 'G':
+        	  udp_puts("g_ic = %p\n", &g_ic);
+        	  break;
       default:
           udp_puts("???\n");
     }

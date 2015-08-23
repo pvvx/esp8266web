@@ -106,7 +106,7 @@ bool system_os_task(os_task_t task, uint8 prio, os_event_t *queue, uint8 qlen)
 		os_printf("err: task queue error\n");
 		return false;
 	}
-	ets_task(task, prio +22, queue, qlen);
+	ets_task(task, prio + 22, queue, qlen);
 	return true;
 }
 
@@ -188,16 +188,18 @@ void system_restart(void)
 	if(mode == STATIONAP_MODE || mode == SOFTAP_MODE ) wifi_softap_stop();
 	ets_timer_disarm(sta_con_timer);
 	ets_timer_setfn(sta_con_timer, system_restart_local, 0);
-	ets_timer_arm_new(sta_con_timer, 110, 0 ,1);
+	ets_timer_arm_new(sta_con_timer, 100, 0 ,1);
 }
 
 void system_restore(void)
 {
-	uint32 * a12 = pvPortMalloc(0x370);
-	ets_memset(a12, 0xff, 0x370);
-	ets_memcpy(a12, 0x3FFF17E8, 8);
-	wifi_param_save_protect(a12);
-	vPortFree(a12);
+	uint8 * buf_a12 = pvPortMalloc(sizeof(struct s_wifi_store));
+	ets_memset(buf_a12, 0xff, sizeof(struct s_wifi_store));
+	ets_memcpy(buf_a12, &g_ic.g.wifi_store, 8);
+	uint32 sctrs = flashchip->chip_size/flashchip->sector_size;
+	sctrs -= 4;
+	wifi_param_save_protect(sctrs, buf_a12, sizeof(struct s_wifi_store));
+	vPortFree(buf_a12);
 }
 
 /*

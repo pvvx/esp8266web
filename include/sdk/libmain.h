@@ -55,7 +55,7 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
 	uint8	ap_ssid[32];	//+180
 	uint8	ap_passw[64];	//+212
 	uint8	field_276[32];	//+276
-	uint8	field_308[8];	//+308
+	uint8	field_308[8];	//+308 // field_308[1] = WiFi Channel
 	uint16	field_316;		//+316
 	uint8	field_318[2];	//+318
 	uint32	st1ssid_len;	//+320
@@ -66,7 +66,9 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
 	uint32  phy_mode;		//+836 // g_ic+1300 (+514h) // 3FFF0B78
 	uint8	field_840[36];	//+840
 	uint16	beacon;			//+876 // 0x3FFF289C g_ic+1400
-	uint8	field_878[10];	//+878
+	uint8	field_878[2];	//+878
+	uint32  field_880;		//+880
+	uint32  field_884;		//+880
 #elif DEF_SDK_VERSION >= 1200 // SDK >= 1.2.0
 	uint8	field_000[8];	//+000  g_ic+? 488 boot_version // 0x3FFF2530
 	uint8 	wfmode[4];		//+008  g_ic.c[0x214] (+532) SDK 1.2.0 // 3FFF2538

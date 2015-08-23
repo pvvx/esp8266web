@@ -35,12 +35,12 @@ struct SPIFlashHeader { // полный заголовок flash (использ
 }  __attribute__((packed));
 
 typedef struct{
-	uint32_t	deviceId;
-	uint32_t	chip_size;    // chip size in byte
-	uint32_t	block_size;
-	uint32_t	sector_size;
-	uint32_t	page_size;
-	uint32_t	status_mask;
+	uint32_t	deviceId;		//+00
+	uint32_t	chip_size;    	//+04 chip size in byte
+	uint32_t	block_size;		//+08
+	uint32_t	sector_size;	//+0c
+	uint32_t	page_size;		//+10
+	uint32_t	status_mask;	//+14
 } SpiFlashChip;
 
 typedef enum {

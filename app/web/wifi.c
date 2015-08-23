@@ -171,6 +171,19 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 			&& (!(wifi_set_phy_mode(wcfg->b.phy)))) werr.b.phy = 1;
 	if ((wset.b.chl)
 			&& (!(wifi_set_channel(wcfg->b.chl))))	werr.b.chl = 1;
+	if (wset.b.sleep) {
+		if(!(wifi_set_sleep_type(wcfg->b.sleep))) werr.b.sleep = 1;
+#if DEF_SDK_VERSION <= 1019
+		else if(wcfg->b.sleep == 1) {
+			extern ETSTimer check_timeouts_timer;
+			ets_timer_disarm(&check_timeouts_timer);
+			// wifi_set_sleep_type: NONE = 25, LIGHT = 3000 + reset_noise_timer(3000), MODEM = 25 + reset_noise_timer(100);
+			ets_timer_arm_new(&check_timeouts_timer, 100, 1, 1);
+		}
+#else
+// #warning "Test LIGHT mode?"
+#endif
+	}
 	if ((wset.b.ap_config) || (wset.b.ap_ipinfo) || (wset.b.ap_ipdhcp)) {
 		wifi_softap_dhcps_stop();
 		if (wset.b.ap_config) {
@@ -228,18 +241,6 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 		if ((wset.b.st_ipinfo)
 				&& (!(wifi_set_ip_info(STATION_IF, &wcfg->st.ipinfo)))) werr.b.st_ipinfo = 1;
 	};
-	if (wset.b.sleep) {
-		if(!(wifi_set_sleep_type(wcfg->b.sleep))) werr.b.sleep = 1;
-#if DEF_SDK_VERSION <= 1019
-		else if(wcfg->b.sleep == 1) {
-			ets_timer_disarm(&check_timeouts_timer);
-			// wifi_set_sleep_type: NONE = 25, LIGHT = 3000 + reset_noise_timer(3000), MODEM = 25 + reset_noise_timer(100);
-			ets_timer_arm_new(&check_timeouts_timer, 100, 1, 1);
-		}
-#elif DEF_SDK_VERSION > 1019
-// #warning "Test LIGHT mode?"
-#endif
-	}
 	if (wset.b.st_dhcp) {
 		if (wcfg->b.st_dhcp_enable) {
 			if (!(wifi_station_dhcpc_start())) werr.b.st_dhcp = 1;
@@ -249,7 +250,7 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 	};
 	if(wset.b.st_connect || wset.b.st_autocon) {
 		st_reconn_count = 0;
-#if DEF_SDK_VERSION > 1303 // ждем patch
+#if DEF_SDK_VERSION >= 1303 // ждем patch
 		ets_timer_disarm(&st_disconn_timer);
 #endif
 		if(wcfg->st.auto_connect) {
@@ -261,7 +262,7 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 		if(wset.b.st_autocon && (!wifi_station_set_auto_connect(wcfg->st.auto_connect))) werr.b.st_autocon = 1;
 	}
 #if DEBUGSOO > 1
-		if(werr.ui) os_printf("ErrWiFiSet: 0x%x\n", werr.ui);
+	if(werr.ui) os_printf("ErrWiFiSet: %p\n", werr.ui);
 #endif
 	return werr.ui;
 }
@@ -280,7 +281,7 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	if (wset.b.chl)
 		wcfg->b.chl = 1;
 	if (wset.b.sleep)
-		wcfg->b.sleep = NONE_SLEEP_T; // LIGHT_SLEEP_T; // NONE_SLEEP_T MODEM_SLEEP_T
+		wcfg->b.sleep = MODEM_SLEEP_T; // LIGHT_SLEEP_T; // NONE_SLEEP_T
 	if (wset.b.ap_config) {
 		wcfg->ap.config.ssid_len = rom_xstrcpy(wcfg->ap.config.ssid, wifi_ap_name);
 		rom_xstrcpy(wcfg->ap.config.password, wifi_ap_password);
@@ -349,7 +350,7 @@ void ICACHE_FLASH_ATTR print_wifi_config(void) {
 			IP2STR(&wificonfig.st.ipinfo.ip), IP2STR(&wificonfig.st.ipinfo.gw),
 			IP2STR(&wificonfig.st.ipinfo.netmask),
 			MAC2STR(wificonfig.st.macaddr));
-	os_printf("sleep:%u\n", wificonfig.b.sleep);
+	os_printf("sleep:%u, rect:%u\n", wificonfig.b.sleep, wificonfig.st.reconn_timeout);
 }
 #endif
 /******************************************************************************
@@ -358,7 +359,7 @@ void ICACHE_FLASH_ATTR print_wifi_config(void) {
 uint32 ICACHE_FLASH_ATTR New_WiFi_config(uint32 set_mask) {
 	uint32 uiwset = Cmp_WiFi_chg(&wificonfig) & set_mask;
 #if DEBUGSOO > 1
-	os_printf("WiFi_set(0x%x)=0x%x\n", set_mask, uiwset);
+	os_printf("WiFi_set(%p)=%p\n", set_mask, uiwset);
 	print_wifi_config();
 #endif
 	if (uiwset != 0) uiwset = Set_WiFi(&wificonfig, uiwset);
@@ -369,28 +370,12 @@ uint32 ICACHE_FLASH_ATTR New_WiFi_config(uint32 set_mask) {
 /******************************************************************************
  * FunctionName : Setup_wifi
  ******************************************************************************/
-uint32 ICACHE_FLASH_ATTR Setup_WiFi(void) {
-#if 0
- #if DEBUGSOO > 1
-	os_printf("Default Start WiFi:\n");
-	Read_WiFi_config(&wificonfig, WIFI_MASK_ALL);
-	print_wifi_config();
- #endif
-#endif
-
-#if DEBUGSOO > 1
-	os_printf("\nSetup WiFi:\n");
-#endif
+void ICACHE_FLASH_ATTR Setup_WiFi(void) {
 	total_scan_infos = 0;
 	wifi_read_fcfg();
 	if (wificonfig.b.mode == 0) Set_default_wificfg(&wificonfig, WIFI_MASK_ALL);
-	uint32 wifi_set_err = New_WiFi_config(WIFI_MASK_ALL);
-/*	uint32 wifi_set_err = Set_WiFi(&wificonfig, WIFI_MASK_ALL);
-#if DEBUGSOO > 1
-	print_wifi_config();
-#endif */
 	wifi_set_event_handler_cb(wifi_handle_event_cb);
-	return wifi_set_err;
+	return;
 }
 /******************************************************************************
  * FunctionName : wifi_save_fcfg
