@@ -94,7 +94,6 @@ Steve Reynolds
 #include "lwip/stats.h"
 
 #include "string.h"
-#include "stdlib.h"
 
 /* 
  * IGMP constants
@@ -140,13 +139,13 @@ static struct igmp_group *igmp_lookup_group(struct netif *ifp, ip_addr_t *addr)I
 static err_t  igmp_remove_group(struct igmp_group *group)ICACHE_FLASH_ATTR;
 static void   igmp_timeout( struct igmp_group *group)ICACHE_FLASH_ATTR;
 static void   igmp_start_timer(struct igmp_group *group, u8_t max_time)ICACHE_FLASH_ATTR;
-void   igmp_stop_timer(struct igmp_group *group)ICACHE_FLASH_ATTR;
+//static void   igmp_stop_timer(struct igmp_group *group)ICACHE_FLASH_ATTR;
 static void   igmp_delaying_member(struct igmp_group *group, u8_t maxresp)ICACHE_FLASH_ATTR;
 static err_t  igmp_ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest, struct netif *netif)ICACHE_FLASH_ATTR;
 static void   igmp_send(struct igmp_group *group, u8_t type)ICACHE_FLASH_ATTR;
 
 
-static struct igmp_group* igmp_group_list;
+static struct igmp_group* igmp_group_list LWIP_DATA_IRAM_ATTR;
 static ip_addr_t     allsystems;
 static ip_addr_t     allrouters;
 
@@ -154,7 +153,7 @@ static ip_addr_t     allrouters;
 /**
  * Initialize the IGMP module
  */
-void ICACHE_FLASH_ATTR
+void
 igmp_init(void)
 {
   LWIP_DEBUGF(IGMP_DEBUG, ("igmp_init: initializing\n"));
@@ -189,7 +188,7 @@ igmp_dump_group_list()
  *
  * @param netif network interface on which start IGMP processing
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 igmp_start(struct netif *netif)
 {
   struct igmp_group* group;
@@ -221,7 +220,7 @@ igmp_start(struct netif *netif)
  *
  * @param netif network interface on which stop IGMP processing
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 igmp_stop(struct netif *netif)
 {
   struct igmp_group *group = igmp_group_list;
@@ -265,7 +264,7 @@ igmp_stop(struct netif *netif)
  *
  * @param netif network interface on which report IGMP memberships
  */
-void ICACHE_FLASH_ATTR
+void
 igmp_report_groups(struct netif *netif)
 {
   struct igmp_group *group = igmp_group_list;
@@ -288,7 +287,7 @@ igmp_report_groups(struct netif *netif)
  * @return a struct igmp_group* if the group has been found,
  *         NULL if the group wasn't found.
  */
-struct igmp_group * ICACHE_FLASH_ATTR
+struct igmp_group *
 igmp_lookfor_group(struct netif *ifp, ip_addr_t *addr)
 {
   struct igmp_group *group = igmp_group_list;
@@ -314,7 +313,7 @@ igmp_lookfor_group(struct netif *ifp, ip_addr_t *addr)
  * @return a struct igmp_group*,
  *         NULL on memory error.
  */
-struct igmp_group * ICACHE_FLASH_ATTR
+struct igmp_group *
 igmp_lookup_group(struct netif *ifp, ip_addr_t *addr)
 {
   struct igmp_group *group = igmp_group_list;
@@ -353,7 +352,7 @@ igmp_lookup_group(struct netif *ifp, ip_addr_t *addr)
  * @param group the group to remove from the global igmp_group_list
  * @return ERR_OK if group was removed from the list, an err_t otherwise
  */
-static err_t ICACHE_FLASH_ATTR
+static err_t
 igmp_remove_group(struct igmp_group *group)
 {
   err_t err = ERR_OK;
@@ -387,7 +386,7 @@ igmp_remove_group(struct igmp_group *group)
  * @param inp network interface on which the packet was received
  * @param dest destination ip address of the igmp packet
  */
-void ICACHE_FLASH_ATTR
+void
 igmp_input(struct pbuf *p, struct netif *inp, ip_addr_t *dest)
 {
   struct ip_hdr *    iphdr;
@@ -513,7 +512,7 @@ igmp_input(struct pbuf *p, struct netif *inp, ip_addr_t *dest)
  * @param groupaddr the ip address of the group which to join
  * @return ERR_OK if group was joined on the netif(s), an err_t otherwise
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
 {
   err_t              err = ERR_VAL; /* no matching interface */
@@ -583,7 +582,7 @@ igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
  * @param groupaddr the ip address of the group which to leave
  * @return ERR_OK if group was left on the netif(s), an err_t otherwise
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
 {
   err_t              err = ERR_VAL; /* no matching interface */
@@ -653,7 +652,7 @@ igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
  * The igmp timer function (both for NO_SYS=1 and =0)
  * Should be called every IGMP_TMR_INTERVAL milliseconds (100 ms is default).
  */
-void ICACHE_FLASH_ATTR
+void
 igmp_tmr(void)
 {
   struct igmp_group *group = igmp_group_list;
@@ -675,7 +674,7 @@ igmp_tmr(void)
  *
  * @param group an igmp_group for which a timeout is reached
  */
-static void ICACHE_FLASH_ATTR
+static void
 igmp_timeout(struct igmp_group *group)
 {
   /* If the state is IGMP_GROUP_DELAYING_MEMBER then we send a report for this group */
@@ -696,7 +695,7 @@ igmp_timeout(struct igmp_group *group)
  * @param max_time the time in multiples of IGMP_TMR_INTERVAL (decrease with
  *        every call to igmp_tmr())
  */
-static void ICACHE_FLASH_ATTR
+static void
 igmp_start_timer(struct igmp_group *group, u8_t max_time)
 {
   /* ensure the input value is > 0 */
@@ -707,15 +706,18 @@ igmp_start_timer(struct igmp_group *group, u8_t max_time)
   group->timer = (LWIP_RAND() % (max_time - 1)) + 1;
 }
 
+#if 0
 /**
  * Stop a timer for an igmp_group
  *
  * @param group the igmp_group for which to stop the timer
  */
-void ICACHE_FLASH_ATTR igmp_stop_timer(struct igmp_group *group)
+static void
+igmp_stop_timer(struct igmp_group *group)
 {
   group->timer = 0;
 }
+#endif
 
 /**
  * Delaying membership report for a group if necessary
@@ -723,7 +725,7 @@ void ICACHE_FLASH_ATTR igmp_stop_timer(struct igmp_group *group)
  * @param group the igmp_group for which "delaying" membership report
  * @param maxresp query delay
  */
-static void ICACHE_FLASH_ATTR
+static void
 igmp_delaying_member(struct igmp_group *group, u8_t maxresp)
 {
   if ((group->group_state == IGMP_GROUP_IDLE_MEMBER) ||
@@ -753,7 +755,7 @@ igmp_delaying_member(struct igmp_group *group, u8_t maxresp)
  *         ERR_BUF if p doesn't have enough space for IP/LINK headers
  *         returns errors returned by netif->output
  */
-static err_t ICACHE_FLASH_ATTR
+static err_t
 igmp_ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest, struct netif *netif)
 {
   /* This is the "router alert" option */
@@ -770,7 +772,7 @@ igmp_ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest, struct netif 
  * @param group the group to which to send the packet
  * @param type the type of igmp packet to send
  */
-static void ICACHE_FLASH_ATTR
+static void
 igmp_send(struct igmp_group *group, u8_t type)
 {
   struct pbuf*     p    = NULL;

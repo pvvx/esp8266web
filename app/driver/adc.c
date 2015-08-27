@@ -22,7 +22,7 @@
 #define i2c_saradc_en_test_msb				5
 #define i2c_saradc_en_test_lsb				5
 
-extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb, int indata);
+//extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb, int indata);
 //extern int rom_i2c_readReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb);
 //extern void read_sar_dout(uint16 * buf);
 

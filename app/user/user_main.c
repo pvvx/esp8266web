@@ -144,7 +144,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
 	if(syscfg.cfg.b.netbios_ena) netbios_init();
 #endif
 /* #ifdef USE_SNTP
-	if(syscfg.cfg.b.sntp_ena) sntp_init();
+	if(syscfg.cfg.b.sntp_ena) sntp_inits();
 #endif */
 #ifdef UDP_TEST_PORT
 	if(syscfg.udp_port) udp_test_port_init(syscfg.udp_port);

@@ -55,8 +55,7 @@
 #include "lwip/autoip.h"
 #include "lwip/stats.h"
 #include "arch/perf.h"
-#include "bios/ets.h"
-#include "sdk/add_func.h"
+#include "netif/wlan_lwip_if.h"
 
 #include <string.h>
 
@@ -99,12 +98,12 @@
  * The interface that provided the packet for the current callback
  * invocation.
  */
-struct netif *current_netif LWIP_DATA_IRAM_ATTR;
+struct netif *current_netif;
 
 /**
  * Header of the input packet currently being processed.
  */
-const struct ip_hdr *current_header LWIP_DATA_IRAM_ATTR;
+const struct ip_hdr *current_header;
 /** Source IP address of current_header */
 ip_addr_t current_iphdr_src;
 /** Destination IP address of current_header */
@@ -123,7 +122,7 @@ static u16_t ip_id;
  * @return the netif on which to send to reach dest
  */
 struct netif *
-ICACHE_FLASH_ATTR ip_route(ip_addr_t *dest)
+ip_route(ip_addr_t *dest)
 {
   struct netif *netif;
 
@@ -135,7 +134,13 @@ ICACHE_FLASH_ATTR ip_route(ip_addr_t *dest)
         /* return netif on which to forward IP packet */
         return netif;
       }
-      if (!ip_addr_isbroadcast(dest, netif) && netif != netif_default) {
+    }
+  }
+  /* iterate through netifs */
+  for(netif = netif_list; netif != NULL; netif = netif->next) {
+    /* network mask matches? */
+    if (netif_is_up(netif)) {
+      if (!ip_addr_isbroadcast(dest, netif) && netif == (struct netif *)eagle_lwip_getif(0)) {
         return netif;
       }
     }
@@ -287,7 +292,7 @@ return_noroute:
  * @return ERR_OK if the packet was processed (could return ERR_* if it wasn't
  *         processed, but currently always returns ERR_OK)
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 ip_input(struct pbuf *p, struct netif *inp)
 {
   struct ip_hdr *iphdr;
@@ -450,7 +455,6 @@ ip_input(struct pbuf *p, struct netif *inp)
 #if IP_ACCEPT_LINK_LAYER_ADDRESSING
   /* DHCP servers need 0.0.0.0 to be allowed as source address (RFC 1.1.2.2: 3.2.1.3/a) */
   if (check_ip_src && current_iphdr_src.addr != IPADDR_ANY)
-
 #endif /* IP_ACCEPT_LINK_LAYER_ADDRESSING */
   {  if ((ip_addr_isbroadcast(&current_iphdr_src, inp)) ||
          (ip_addr_ismulticast(&current_iphdr_src))) {
@@ -618,7 +622,7 @@ ip_input(struct pbuf *p, struct netif *inp)
  * @note ip_id: RFC791 "some host may be able to simply use
  *  unique identifiers independent of destination"
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
              u8_t ttl, u8_t tos,
              u8_t proto, struct netif *netif)
@@ -633,7 +637,7 @@ ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
  * @ param ip_options pointer to the IP options, copied into the IP header
  * @ param optlen length of ip_options
  */
-err_t ICACHE_FLASH_ATTR ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, struct netif *netif, void *ip_options,
        u16_t optlen)
 {
@@ -672,7 +676,7 @@ err_t ICACHE_FLASH_ATTR ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr
       MEMCPY(p->payload, ip_options, optlen);
       if (optlen < optlen_aligned) {
         /* zero the remaining bytes */
-        memset(((char*)p->payload) + optlen, 0, optlen_aligned - optlen);
+        os_memset(((char*)p->payload) + optlen, 0, optlen_aligned - optlen);
       }
 #if CHECKSUM_GEN_IP_INLINE
       for (i = 0; i < optlen_aligned/2; i++) {
@@ -794,7 +798,7 @@ err_t ICACHE_FLASH_ATTR ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr
  * @return ERR_RTE if no route is found
  *         see ip_output_if() for more return values
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 ip_output(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
           u8_t ttl, u8_t tos, u8_t proto)
 {

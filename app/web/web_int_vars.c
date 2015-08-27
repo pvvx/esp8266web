@@ -100,9 +100,6 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 		else ifcmp("reset") {
 			if(val == 12345) web_conn->web_disc_cb = (web_func_disc_cb)_ResetVector;
 		}
-#ifdef USE_ESPCONN
-		else ifcmp("maxcns") 	espconn_tcp_set_max_con(((val<=5)&&(val>0))? val : 5);
-#endif
 		else ifcmp("ram") 	{ uint32 ptr = ahextoul(cstr+3)&0xfffffffc; *((uint32 *)ptr) = val; }
 		else ifcmp("debug") 	system_set_os_print(val);
 #ifdef USE_LWIP_PING
@@ -214,7 +211,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #ifdef USE_SNTP
 		else ifcmp("sntp") {
 			syscfg.cfg.b.sntp_ena = (val)? 1 : 0;
-			if(syscfg.cfg.b.sntp_ena) sntp_init();
+			if(syscfg.cfg.b.sntp_ena) sntp_inits();
 			else sntp_close();
 		}
 #endif

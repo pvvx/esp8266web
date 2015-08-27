@@ -17,6 +17,7 @@ GEN_LIBS = liblwipapi.a
 
 endif
 
+
 #############################################################
 # Configuration i.e. compile options etc.
 # Target specific stuff (defines etc.) goes in here!
@@ -38,8 +39,8 @@ endif
 # Required for each makefile to inherit from the parent
 #
 
-#INCLUDES := $(INCLUDES) -I $(PDIR)include
-#INCLUDES += -I ./
+INCLUDES := $(INCLUDES) -I $(PDIR)include
+INCLUDES += -I ./
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile
 

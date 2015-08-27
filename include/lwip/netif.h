@@ -135,24 +135,24 @@ typedef err_t (*netif_igmp_mac_filter_fn)(struct netif *netif,
  *  function for the device driver: hwaddr_len, hwaddr[], mtu, flags */
 struct netif {
   /** pointer to next in linked list */
-  struct netif *next; //+00
+  struct netif *next;
 
   /** IP address configuration in network byte order */
-  ip_addr_t ip_addr; // +04
-  ip_addr_t netmask; // +08
-  ip_addr_t gw; // +12
+  ip_addr_t ip_addr;
+  ip_addr_t netmask;
+  ip_addr_t gw;
 
   /** This function is called by the network device driver
-   *  to pass a packet up the TCP/IP stack. ï¿½ï¿½IPï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½*/
-  netif_input_fn input; // +16
+   *  to pass a packet up the TCP/IP stack. ÏòIP²ãÊäÈëÊý¾Ý°ü*/
+  netif_input_fn input;
   /** This function is called by the IP module when it wants
    *  to send a packet on the interface. This function typically
-   *  first resolves the hardware address, then sends the packet. ï¿½ï¿½ï¿½ï¿½IPï¿½ï¿½ï¿½Ý°ï¿½*/
-  netif_output_fn output; // +20
+   *  first resolves the hardware address, then sends the packet. ·¢ËÍIPÊý¾Ý°ü*/
+  netif_output_fn output;
   /** This function is called by the ARP module when it wants
    *  to send a packet on the interface. This function outputs
-   *  the pbuf as-is on the link medium. ï¿½×²ï¿½ï¿½ï¿½ï¿½Ý°ï¿½ï¿½ï¿½ï¿½ï¿½*/
-  netif_linkoutput_fn linkoutput; // +24
+   *  the pbuf as-is on the link medium. µ×²ãÊý¾Ý°ü·¢ËÍ*/
+  netif_linkoutput_fn linkoutput;
 #if LWIP_NETIF_STATUS_CALLBACK
   /** This function is called when the netif state is set to up or down
    */
@@ -164,35 +164,33 @@ struct netif {
   netif_status_callback_fn link_callback;
 #endif /* LWIP_NETIF_LINK_CALLBACK */
   /** This field can be set by the device driver and could point
-   *  to state information for the device. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¶Î£ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½×²ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢*/
-  void *state; // +28
+   *  to state information for the device. ×ÔÓÉÉèÖÃ×Ö¶Î£¬±ÈÈçÖ¸Ïòµ×²ãÉè±¸Ïà¹ØÐÅÏ¢*/
+  void *state;
 #if LWIP_DHCP
   /** the DHCP client state information for this netif */
-  struct dhcp *dhcp; // +32
+  struct dhcp *dhcp;
+  struct udp_pcb *dhcps_pcb;	//dhcps
 #endif /* LWIP_DHCP */
-#if 1
-  struct udp_pcb *dhcps; // +36
-#endif
 #if LWIP_AUTOIP
   /** the AutoIP client state information for this netif */
   struct autoip *autoip;
 #endif
 #if LWIP_NETIF_HOSTNAME
   /* the hostname for this netif, NULL is a valid value */
-  char*  hostname; // + 40
+  char*  hostname;
 #endif /* LWIP_NETIF_HOSTNAME */
-  /** maximum transfer unit (in bytes) ï¿½Ã½Ó¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½ï¿½ï¿½ï¿½È£ï¿½ï¿½ï¿½ï¿½ï¿½1500*/
-  u16_t mtu; // + 44
-  /** number of bytes used in hwaddrï¿½Ã½Ó¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ */
-  u8_t hwaddr_len; // +46
-  /** link level hardware address of this interface ï¿½Ã½Ó¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·*/
-  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +47 [6]
-  /** flags (see NETIF_FLAG_ above) ï¿½Ã½Ó¿ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¶ï¿½*/
-  u8_t flags; // +53
-  /** descriptive abbreviation ï¿½Ã½Ó¿Úµï¿½ï¿½ï¿½ï¿½ï¿½*/
-  char name[2]; // +54
-  /** number of this interface ï¿½Ã½Ó¿ÚµÄ±ï¿½ï¿½*/
-  u8_t num;		// +56
+  /** maximum transfer unit (in bytes) ¸Ã½Ó¿ÚÔÊÐíµÄ×î´óÊý¾Ý°ü³¤¶È£¬¶àÊÇ1500*/
+  u16_t mtu;
+  /** number of bytes used in hwaddr¸Ã½Ó¿ÚÎïÀíµØÖ·³¤¶È */
+  u8_t hwaddr_len;
+  /** link level hardware address of this interface ¸Ã½Ó¿ÚÎïÀíµØÖ·*/
+  u8_t hwaddr[NETIF_MAX_HWADDR_LEN];
+  /** flags (see NETIF_FLAG_ above) ¸Ã½Ó¿Ú×´Ì¬¡¢ÊôÐÔ×Ö¶Î*/
+  u8_t flags;
+  /** descriptive abbreviation ¸Ã½Ó¿ÚµÄÃû×Ö*/
+  char name[2];
+  /** number of this interface ¸Ã½Ó¿ÚµÄ±àºÅ*/
+  u8_t num;
 #if LWIP_SNMP
   /** link type (from "snmp_ifType" enum from snmp.h) */
   u8_t link_type;
@@ -213,20 +211,20 @@ struct netif {
 #if LWIP_IGMP
   /** This function could be called to add or delete a entry in the multicast
       filter table of the ethernet MAC.*/
-  netif_igmp_mac_filter_fn igmp_mac_filter; // +60
+  netif_igmp_mac_filter_fn igmp_mac_filter;
 #endif /* LWIP_IGMP */
 #if LWIP_NETIF_HWADDRHINT
   u8_t *addr_hint;
 #endif /* LWIP_NETIF_HWADDRHINT */
 #if ENABLE_LOOPBACK
-  /* List of packets to be queued for ourselves. Ö¸ï¿½ï¿½ï¿½Í¸ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½ï¿½ï¿½pbuf*/
-  struct pbuf *loop_first;//ï¿½ï¿½Ò»ï¿½ï¿½
-  struct pbuf *loop_last;//ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+  /* List of packets to be queued for ourselves. Ö¸Ïò·¢ËÍ¸ø×Ô¼ºµÄÊý¾Ý°üµÄpbuf*/
+  struct pbuf *loop_first;//µÚÒ»¸ö
+  struct pbuf *loop_last;//×îºóÒ»¸ö
 #if LWIP_LOOPBACK_MAX_PBUFS
   u16_t loop_cnt_current;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
 #endif /* ENABLE_LOOPBACK */
-}; // [64]
+};
 
 #if LWIP_SNMP
 #define NETIF_INIT_SNMP(netif, type, speed) \

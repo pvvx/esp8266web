@@ -45,6 +45,10 @@
 #else
 #define LWIP_DATA_IRAM_ATTR
 #endif
+
+// #define USE_ESPCONN 1
+#define LWIP_SNTP 0
+
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------
@@ -777,7 +781,17 @@
 #ifndef LWIP_IGMP
 #define LWIP_IGMP                       1
 #endif
-
+/*
+   ----------------------------------
+   ---------- MDNS options ----------
+   ----------------------------------
+*/
+/*
+ * LWIP_MDNS==1: Turn on MDNS module.
+ */
+#ifndef LWIP_MDNS
+#define LWIP_MDNS                      0
+#endif
 /*
    ----------------------------------
    ---------- DNS options -----------
@@ -893,21 +907,24 @@
  * (2 * TCP_MSS) for things to work well
  */
 #ifndef TCP_WND
-#define TCP_WND                         (4 * TCP_MSS)
+//#define TCP_WND                         (4 * TCP_MSS)
+#define TCP_WND                         (*(volatile uint32*)0x600011F0)
 #endif
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
  */
 #ifndef TCP_MAXRTX
-#define TCP_MAXRTX                      3
+//#define TCP_MAXRTX                      3
+#define TCP_MAXRTX                      (*(volatile uint32*)0x600011E8)
 #endif
 
 /**
  * TCP_SYNMAXRTX: Maximum number of retransmissions of SYN segments.
  */
 #ifndef TCP_SYNMAXRTX
-#define TCP_SYNMAXRTX                   3
+//#define TCP_SYNMAXRTX                   3
+#define TCP_SYNMAXRTX                   (*(volatile uint32*)0x600011E4)
 #endif
 
 /**

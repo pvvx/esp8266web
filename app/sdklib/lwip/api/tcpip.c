@@ -70,7 +70,7 @@ sys_mutex_t lock_tcpip_core;
  *
  * @param arg unused argument
  */
-static void ICACHE_FLASH_ATTR
+static void
 tcpip_thread(void *arg)
 {
   struct tcpip_msg *msg;
@@ -152,7 +152,7 @@ tcpip_thread(void *arg)
  *          NETIF_FLAG_ETHERNET flags)
  * @param inp the network interface on which the packet was received
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_input(struct pbuf *p, struct netif *inp)
 {
 #if LWIP_TCPIP_CORE_LOCKING_INPUT
@@ -202,7 +202,7 @@ tcpip_input(struct pbuf *p, struct netif *inp)
  * @param block 1 to block until the request is posted, 0 to non-blocking mode
  * @return ERR_OK if the function was called, another err_t if not
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8_t block)
 {
   struct tcpip_msg *msg;
@@ -238,7 +238,7 @@ tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8_t block)
  * @param arg argument to pass to timeout function h
  * @return ERR_MEM on memory error, ERR_OK otherwise
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_timeout(u32_t msecs, sys_timeout_handler h, void *arg)
 {
   struct tcpip_msg *msg;
@@ -267,7 +267,7 @@ tcpip_timeout(u32_t msecs, sys_timeout_handler h, void *arg)
  * @param arg argument to pass to timeout function h
  * @return ERR_MEM on memory error, ERR_OK otherwise
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_untimeout(sys_timeout_handler h, void *arg)
 {
   struct tcpip_msg *msg;
@@ -297,7 +297,7 @@ tcpip_untimeout(sys_timeout_handler h, void *arg)
  * @param apimsg a struct containing the function to call and its parameters
  * @return ERR_OK if the function was called, another err_t if not
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_apimsg(struct api_msg *apimsg)
 {
   struct tcpip_msg msg;
@@ -305,7 +305,7 @@ tcpip_apimsg(struct api_msg *apimsg)
   /* catch functions that don't set err */
   apimsg->msg.err = ERR_VAL;
 #endif
-
+  
   if (sys_mbox_valid(&mbox)) {//内核邮箱有效
     msg.type = TCPIP_MSG_API;
     msg.msg.apimsg = apimsg;
@@ -325,7 +325,7 @@ tcpip_apimsg(struct api_msg *apimsg)
  * @param apimsg a struct containing the function to call and its parameters
  * @return ERR_OK (only for compatibility fo tcpip_apimsg())
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_apimsg_lock(struct api_msg *apimsg)
 {
 #ifdef LWIP_DEBUG
@@ -351,18 +351,18 @@ tcpip_apimsg_lock(struct api_msg *apimsg)
  * @param netifapimsg a struct containing the function to call and its parameters
  * @return error code given back by the function that was called
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_netifapi(struct netifapi_msg* netifapimsg)
 {
   struct tcpip_msg msg;
-
+  
   if (sys_mbox_valid(&mbox)) {
     err_t err = sys_sem_new(&netifapimsg->msg.sem, 0);
     if (err != ERR_OK) {
       netifapimsg->msg.err = err;
       return err;
     }
-
+    
     msg.type = TCPIP_MSG_NETIFAPI;
     msg.msg.netifapimsg = netifapimsg;
     sys_mbox_post(&mbox, &msg);
@@ -381,10 +381,10 @@ tcpip_netifapi(struct netifapi_msg* netifapimsg)
  * @param netifapimsg a struct containing the function to call and its parameters
  * @return ERR_OK (only for compatibility fo tcpip_netifapi())
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 tcpip_netifapi_lock(struct netifapi_msg* netifapimsg)
 {
-  LOCK_TCPIP_CORE();
+  LOCK_TCPIP_CORE();  
   netifapimsg->function(&(netifapimsg->msg));
   UNLOCK_TCPIP_CORE();
   return netifapimsg->msg.err;
@@ -400,7 +400,7 @@ tcpip_netifapi_lock(struct netifapi_msg* netifapimsg)
  * @param initfunc a function to call when tcpip_thread is running and finished initializing
  * @param arg argument to pass to initfunc
  */
-void ICACHE_FLASH_ATTR
+void
 tcpip_init(tcpip_init_done_fn initfunc, void *arg)
 {
   lwip_init();//初始化内核
@@ -425,7 +425,7 @@ tcpip_init(tcpip_init_done_fn initfunc, void *arg)
  *
  * @param p The pbuf (chain) to be dereferenced.
  */
-static void ICACHE_FLASH_ATTR
+static void
 pbuf_free_int(void *p)
 {
   struct pbuf *q = (struct pbuf *)p;
@@ -438,7 +438,7 @@ pbuf_free_int(void *p)
  * @param p The pbuf (chain) to be dereferenced.
  * @return ERR_OK if callback could be enqueued, an err_t if not
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 pbuf_free_callback(struct pbuf *p)
 {
   return tcpip_callback_with_block(pbuf_free_int, p, 0);
@@ -451,7 +451,7 @@ pbuf_free_callback(struct pbuf *p)
  * @param m the heap memory to free
  * @return ERR_OK if callback could be enqueued, an err_t if not
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 mem_free_callback(void *m)
 {
   return tcpip_callback_with_block(mem_free, m, 0);

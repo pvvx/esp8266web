@@ -268,7 +268,7 @@ lwip_standard_chksum(void *dataptr, int len)
  * @param proto_len length of the ip data part (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
-u16_t ICACHE_FLASH_ATTR
+u16_t
 inet_chksum_pseudo(struct pbuf *p,
        ip_addr_t *src, ip_addr_t *dest,
        u8_t proto, u16_t proto_len)
@@ -328,7 +328,7 @@ inet_chksum_pseudo(struct pbuf *p,
  * @param proto_len length of the ip data part (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
-u16_t ICACHE_FLASH_ATTR
+u16_t
 inet_chksum_pseudo_partial(struct pbuf *p,
        ip_addr_t *src, ip_addr_t *dest,
        u8_t proto, u16_t proto_len, u16_t chksum_len)
@@ -392,7 +392,7 @@ inet_chksum_pseudo_partial(struct pbuf *p,
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
 
-u16_t ICACHE_FLASH_ATTR
+u16_t
 inet_chksum(void *dataptr, u16_t len)
 {
   return ~LWIP_CHKSUM(dataptr, len);
@@ -405,7 +405,7 @@ inet_chksum(void *dataptr, u16_t len)
  * @param p pbuf chain over that the checksum should be calculated
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
-u16_t ICACHE_FLASH_ATTR
+u16_t
 inet_chksum_pbuf(struct pbuf *p)
 {
   u32_t acc;

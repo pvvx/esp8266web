@@ -50,7 +50,6 @@
 #include "lwipopts.h"
 #include "lwip/stats.h"
 #include "lwip/snmp.h"
-#include "bios/ets.h"
 
 #include <string.h>
 
@@ -64,7 +63,7 @@
 /* The amount of data from the original packet to return in a dest-unreachable */
 #define ICMP_DEST_UNREACH_DATASIZE 8
 
-static void icmp_send_response(struct pbuf *p, u8_t type, u8_t code) ICACHE_FLASH_ATTR;
+static void icmp_send_response(struct pbuf *p, u8_t type, u8_t code);
 
 /**
  * Processes ICMP input packets, called from ip_input().
@@ -75,7 +74,7 @@ static void icmp_send_response(struct pbuf *p, u8_t type, u8_t code) ICACHE_FLAS
  * @param p the icmp echo request packet, p->payload pointing to the ip header
  * @param inp the netif on which this packet was received
  */
-void ICACHE_FLASH_ATTR
+void
 icmp_input(struct pbuf *p, struct netif *inp)
 {
   u8_t type;
@@ -255,7 +254,7 @@ memerr:
  *          p->payload pointing to the IP header
  * @param t type of the 'unreachable' packet
  */
-void ICACHE_FLASH_ATTR
+void
 icmp_dest_unreach(struct pbuf *p, enum icmp_dur_type t)
 {
   icmp_send_response(p, ICMP_DUR, t);

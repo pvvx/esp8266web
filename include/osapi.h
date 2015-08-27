@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include "user_config.h"
+#include "bios.h"
 #include "sdk/os_printf.h"
 
 #define os_bzero ets_bzero
@@ -23,7 +24,7 @@
 #define os_memset ets_memset
 #define os_putc ets_putc
 #define os_str2macaddr ets_str2macaddr
-#define os_strcat strcat
+//#define os_strcat strcat
 #define os_strchr rom_strchr
 #define os_strrchr ets_strrchr
 #define os_strcmp ets_strcmp
@@ -32,6 +33,8 @@
 #define os_strncmp ets_strncmp
 #define os_strncpy ets_strncpy
 #define os_strstr ets_strstr
+#define os_random phy_get_rand
+extern uint32 phy_get_rand(void);
 #ifdef USE_US_TIMER
 #define os_timer_arm_us(a, b, c) ets_timer_arm_new(a, b, c, 0)
 #endif

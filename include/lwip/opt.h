@@ -44,8 +44,6 @@
  */
 #include "lwipopts.h"
 #include "lwip/debug.h"
-#include "bios/ets.h"
-#include "sdk/add_func.h"
 
 /*
    -----------------------------------------------

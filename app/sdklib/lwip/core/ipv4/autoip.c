@@ -105,28 +105,28 @@
 #endif /* LWIP_AUTOIP_CREATE_SEED_ADDR */
 
 /* static functions */
-static void ICACHE_FLASH_ATTR autoip_handle_arp_conflict(struct netif *netif);
+static void autoip_handle_arp_conflict(struct netif *netif);
 
 /* creates a pseudo random LL IP-Address for a network interface */
-static void ICACHE_FLASH_ATTR autoip_create_addr(struct netif *netif, ip_addr_t *ipaddr);
+static void autoip_create_addr(struct netif *netif, ip_addr_t *ipaddr);
 
 /* sends an ARP probe */
-static err_t ICACHE_FLASH_ATTR autoip_arp_probe(struct netif *netif);
+static err_t autoip_arp_probe(struct netif *netif);
 
 /* sends an ARP announce */
-static err_t ICACHE_FLASH_ATTR autoip_arp_announce(struct netif *netif);
+static err_t autoip_arp_announce(struct netif *netif);
 
 /* configure interface for use with current LL IP-Address */
-static err_t ICACHE_FLASH_ATTR autoip_bind(struct netif *netif);
+static err_t autoip_bind(struct netif *netif);
 
 /* start sending probes for llipaddr */
-static void ICACHE_FLASH_ATTR autoip_start_probing(struct netif *netif);
+static void autoip_start_probing(struct netif *netif);
 
 /**
  * Initialize this module
  */
 void
-ICACHE_FLASH_ATTR autoip_init(void)
+autoip_init(void)
 {
   LWIP_DEBUGF(AUTOIP_DEBUG | LWIP_DBG_TRACE, ("autoip_init()\n"));
 }
@@ -138,14 +138,14 @@ ICACHE_FLASH_ATTR autoip_init(void)
  * @param dhcp (uninitialised) dhcp struct allocated by the application
  */
 void
-ICACHE_FLASH_ATTR autoip_set_struct(struct netif *netif, struct autoip *autoip)
+autoip_set_struct(struct netif *netif, struct autoip *autoip)
 {
   LWIP_ASSERT("netif != NULL", netif != NULL);
   LWIP_ASSERT("autoip != NULL", autoip != NULL);
   LWIP_ASSERT("netif already has a struct autoip set", netif->autoip == NULL);
 
   /* clear data structure */
-  memset(autoip, 0, sizeof(struct autoip));
+  os_memset(autoip, 0, sizeof(struct autoip));
   /* autoip->state = AUTOIP_STATE_OFF; */
   netif->autoip = autoip;
 }
@@ -155,7 +155,7 @@ ICACHE_FLASH_ATTR autoip_set_struct(struct netif *netif, struct autoip *autoip)
  * @param netif The netif under AutoIP control
  */
 static void
-ICACHE_FLASH_ATTR autoip_restart(struct netif *netif)
+autoip_restart(struct netif *netif)
 {
   netif->autoip->tried_llipaddr++;
   autoip_start(netif);
@@ -165,7 +165,7 @@ ICACHE_FLASH_ATTR autoip_restart(struct netif *netif)
  * Handle a IP address conflict after an ARP conflict detection
  */
 static void
-ICACHE_FLASH_ATTR autoip_handle_arp_conflict(struct netif *netif)
+autoip_handle_arp_conflict(struct netif *netif)
 {
   /* Somehow detect if we are defending or retreating */
   unsigned char defend = 1; /* tbd */
@@ -201,7 +201,7 @@ ICACHE_FLASH_ATTR autoip_handle_arp_conflict(struct netif *netif)
  * @param ipaddr ip address to initialize
  */
 static void
-ICACHE_FLASH_ATTR autoip_create_addr(struct netif *netif, ip_addr_t *ipaddr)
+autoip_create_addr(struct netif *netif, ip_addr_t *ipaddr)
 {
   /* Here we create an IP-Address out of range 169.254.1.0 to 169.254.254.255
    * compliant to RFC 3927 Section 2.1
@@ -234,7 +234,7 @@ ICACHE_FLASH_ATTR autoip_create_addr(struct netif *netif, ip_addr_t *ipaddr)
  * @param netif network interface used to send the probe
  */
 static err_t
-ICACHE_FLASH_ATTR autoip_arp_probe(struct netif *netif)
+autoip_arp_probe(struct netif *netif)
 {
   return etharp_raw(netif, (struct eth_addr *)netif->hwaddr, &ethbroadcast,
     (struct eth_addr *)netif->hwaddr, IP_ADDR_ANY, &ethzero,
@@ -246,7 +246,7 @@ ICACHE_FLASH_ATTR autoip_arp_probe(struct netif *netif)
  *
  * @param netif network interface used to send the announce
  */
-static err_t ICACHE_FLASH_ATTR
+static err_t
 autoip_arp_announce(struct netif *netif)
 {
   return etharp_raw(netif, (struct eth_addr *)netif->hwaddr, &ethbroadcast,
@@ -259,7 +259,7 @@ autoip_arp_announce(struct netif *netif)
  *
  * @param netif network interface to configure with current LL IP-Address
  */
-static err_t ICACHE_FLASH_ATTR
+static err_t
 autoip_bind(struct netif *netif)
 {
   struct autoip *autoip = netif->autoip;
@@ -289,7 +289,7 @@ autoip_bind(struct netif *netif)
  *
  * @param netif network interface on which start the AutoIP client
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 autoip_start(struct netif *netif)
 {
   struct autoip *autoip = netif->autoip;
@@ -319,7 +319,7 @@ autoip_start(struct netif *netif)
         ("autoip_start(): could not allocate autoip\n"));
       return ERR_MEM;
     }
-    memset(autoip, 0, sizeof(struct autoip));
+    os_memset(autoip, 0, sizeof(struct autoip));
     /* store this AutoIP client in the netif */
     netif->autoip = autoip;
     LWIP_DEBUGF(AUTOIP_DEBUG | LWIP_DBG_TRACE, ("autoip_start(): allocated autoip"));
@@ -337,7 +337,7 @@ autoip_start(struct netif *netif)
   return result;
 }
 
-static void ICACHE_FLASH_ATTR
+static void
 autoip_start_probing(struct netif *netif)
 {
   struct autoip *autoip = netif->autoip;
@@ -371,7 +371,7 @@ autoip_start_probing(struct netif *netif)
  * If there is an AutoIP address configured, take the interface down
  * and begin probing with the same address.
  */
-void ICACHE_FLASH_ATTR
+void
 autoip_network_changed(struct netif *netif)
 {
   if (netif->autoip && netif->autoip->state != AUTOIP_STATE_OFF) {
@@ -385,7 +385,7 @@ autoip_network_changed(struct netif *netif)
  *
  * @param netif network interface on which stop the AutoIP client
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 autoip_stop(struct netif *netif)
 {
   netif->autoip->state = AUTOIP_STATE_OFF;
@@ -396,7 +396,7 @@ autoip_stop(struct netif *netif)
 /**
  * Has to be called in loop every AUTOIP_TMR_INTERVAL milliseconds
  */
-void ICACHE_FLASH_ATTR
+void
 autoip_tmr()
 {
   struct netif *netif = netif_list;
@@ -482,7 +482,7 @@ autoip_tmr()
  * @param netif network interface to use for autoip processing
  * @param hdr Incoming ARP packet
  */
-void ICACHE_FLASH_ATTR
+void
 autoip_arp_reply(struct netif *netif, struct etharp_hdr *hdr)
 {
   LWIP_DEBUGF(AUTOIP_DEBUG | LWIP_DBG_TRACE, ("autoip_arp_reply()\n"));

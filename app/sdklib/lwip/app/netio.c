@@ -32,7 +32,7 @@
  */
 #include "lwip/opt.h"
 
-#ifdef USE_LWIP_NETIO
+#ifdef USE_NETIO
 
 #if LWIP_TCP
 #include "lwip/tcp.h"
@@ -363,6 +363,6 @@ void ICACHE_FLASH_ATTR netio_init(void)
   pcb = tcp_listen(pcb);
   tcp_accept(pcb, netio_accept);
 }
+#endif // USE_NETIO
 
 #endif /* LWIP_TCP */
-#endif // USE_LWIP_NETIO

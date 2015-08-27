@@ -5,7 +5,7 @@
  */
 
 /*
- * Redistribution and use in source and binary forms, with or without modification,
+ * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -14,24 +14,24 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ *    derived from this software without specific prior written permission. 
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- *
+ * 
  */
 
-/**
+/** 
  * This is an example of a "ping" sender (with raw API and socket API).
  * It can be used as a start point to maintain opened a network connection, or
  * like a network "watchdog" for your device.
@@ -43,8 +43,7 @@
  */
 
 #include "lwip/opt.h"
-
-#ifdef USE_LWIP_PING
+#ifdef USE_PING
 
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
 
@@ -95,6 +94,9 @@ ping_prepare_echo( struct icmp_echo_hdr *iecho, u16_t len)
   iecho->chksum = 0;
   iecho->id     = PING_ID;
   ++ ping_seq_num;
+  if (ping_seq_num == 0x7fff)
+	  ping_seq_num = 0;
+
   iecho->seqno  = htons(ping_seq_num);
 
   /* fill the additional data buffer with some data */
@@ -104,7 +106,7 @@ ping_prepare_echo( struct icmp_echo_hdr *iecho, u16_t len)
 
   iecho->chksum = inet_chksum(iecho, len);
 }
-/*
+
 static void ICACHE_FLASH_ATTR
 ping_prepare_er(struct icmp_echo_hdr *iecho, u16_t len)
 {
@@ -115,7 +117,7 @@ ping_prepare_er(struct icmp_echo_hdr *iecho, u16_t len)
 
 	iecho->chksum = inet_chksum(iecho, len);
 }
-*/
+
 /* Ping using the raw ip */
 static u8_t ICACHE_FLASH_ATTR
 ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr)
@@ -235,7 +237,7 @@ ping_coarse_tmr(void *arg)
 	} else {
 		uint32 delay = system_relative_time(pingmsg->ping_start);
 		delay /= PING_COARSE;
-		ping_seq_num = 0;
+//		ping_seq_num = 0;
 		if (ping_opt->sent_function == NULL){
 			os_printf("ping %d, timeout %d, total payload %d bytes, %d ms\n",
 					pingmsg->max_count, pingmsg->timeout_count, PING_DATA_SIZE*(pingmsg->max_count - pingmsg->timeout_count),delay);
@@ -321,7 +323,6 @@ ping_regist_sent(struct ping_option *ping_opt, ping_sent_function ping_sent)
 	return true;
 }
 
+#endif // USE_PING
+
 #endif /* LWIP_RAW */
-
-#endif // USE_LWIP_PING
-

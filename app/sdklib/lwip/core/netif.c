@@ -64,13 +64,13 @@
 #define NETIF_STATUS_CALLBACK(n) do{ if (n->status_callback) { (n->status_callback)(n); }}while(0)
 #else
 #define NETIF_STATUS_CALLBACK(n)
-#endif /* LWIP_NETIF_STATUS_CALLBACK */
+#endif /* LWIP_NETIF_STATUS_CALLBACK */ 
 
 #if LWIP_NETIF_LINK_CALLBACK
 #define NETIF_LINK_CALLBACK(n) do{ if (n->link_callback) { (n->link_callback)(n); }}while(0)
 #else
 #define NETIF_LINK_CALLBACK(n)
-#endif /* LWIP_NETIF_LINK_CALLBACK */
+#endif /* LWIP_NETIF_LINK_CALLBACK */ 
 
 struct netif *netif_list LWIP_DATA_IRAM_ATTR;
 struct netif *netif_default LWIP_DATA_IRAM_ATTR;
@@ -101,7 +101,7 @@ netif_loopif_init(struct netif *netif)
 #endif /* LWIP_HAVE_LOOPIF */
 
 void
-ICACHE_FLASH_ATTR netif_init(void)
+netif_init(void)
 {
 #if LWIP_HAVE_LOOPIF
   ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
@@ -133,7 +133,7 @@ ICACHE_FLASH_ATTR netif_init(void)
  *
  * @return netif, or NULL if failed.
  */
-struct netif * ICACHE_FLASH_ATTR
+struct netif *
 netif_add(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
   ip_addr_t *gw, void *state, netif_init_fn init, netif_input_fn input)
 {
@@ -149,6 +149,7 @@ netif_add(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
 #if LWIP_DHCP
   /* netif not under DHCP control by default */
   netif->dhcp = NULL;
+  netif->dhcps_pcb = NULL;
 #endif /* LWIP_DHCP */
 #if LWIP_AUTOIP
   /* netif not under AutoIP control by default */
@@ -219,7 +220,7 @@ netif_add(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
  * @param gw the new default gateway
  */
 void
-ICACHE_FLASH_ATTR netif_set_addr(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
+netif_set_addr(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
     ip_addr_t *gw)
 {
   netif_set_ipaddr(netif, ipaddr);
@@ -233,7 +234,7 @@ ICACHE_FLASH_ATTR netif_set_addr(struct netif *netif, ip_addr_t *ipaddr, ip_addr
  * @param netif the network interface to remove
  */
 void
-ICACHE_FLASH_ATTR netif_remove(struct netif *netif)
+netif_remove(struct netif *netif)
 {
   if (netif == NULL) {
     return;
@@ -283,7 +284,7 @@ ICACHE_FLASH_ATTR netif_remove(struct netif *netif)
  * in ascii representation (e.g. 'en0')
  */
 struct netif *
-ICACHE_FLASH_ATTR netif_find(char *name)
+netif_find(char *name)
 {
   struct netif *netif;
   u8_t num;
@@ -316,7 +317,7 @@ ICACHE_FLASH_ATTR netif_find(char *name)
  * default gateway
  */
 void
-ICACHE_FLASH_ATTR netif_set_ipaddr(struct netif *netif, ip_addr_t *ipaddr)
+netif_set_ipaddr(struct netif *netif, ip_addr_t *ipaddr)
 {
   /* TODO: Handling of obsolete pcbs */
   /* See:  http://mail.gnu.org/archive/html/lwip-users/2003-03/msg00118.html */
@@ -381,7 +382,7 @@ ICACHE_FLASH_ATTR netif_set_ipaddr(struct netif *netif, ip_addr_t *ipaddr)
  * @note call netif_set_addr() if you also want to change ip address and netmask
  */
 void
-ICACHE_FLASH_ATTR netif_set_gw(struct netif *netif, ip_addr_t *gw)
+netif_set_gw(struct netif *netif, ip_addr_t *gw)
 {
   ip_addr_set(&(netif->gw), gw);
   LWIP_DEBUGF(NETIF_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, ("netif: GW address of interface %c%c set to %"U16_F".%"U16_F".%"U16_F".%"U16_F"\n",
@@ -402,7 +403,7 @@ ICACHE_FLASH_ATTR netif_set_gw(struct netif *netif, ip_addr_t *gw)
  * default gateway
  */
 void
-ICACHE_FLASH_ATTR netif_set_netmask(struct netif *netif, ip_addr_t *netmask)
+netif_set_netmask(struct netif *netif, ip_addr_t *netmask)
 {
   snmp_delete_iprteidx_tree(0, netif);
   /* set new netmask to netif */
@@ -423,7 +424,7 @@ ICACHE_FLASH_ATTR netif_set_netmask(struct netif *netif, ip_addr_t *netmask)
  * @param netif the default network interface
  */
 void
-ICACHE_FLASH_ATTR netif_set_default(struct netif *netif)
+netif_set_default(struct netif *netif)
 {
   if (netif == NULL) {
     /* remove default route */
@@ -440,17 +441,17 @@ ICACHE_FLASH_ATTR netif_set_default(struct netif *netif)
 /**
  * Bring an interface up, available for processing
  * traffic.
- *
+ * 
  * @note: Enabling DHCP on a down interface will make it come
  * up once configured.
- *
+ * 
  * @see dhcp_start()
- */
-void ICACHE_FLASH_ATTR netif_set_up(struct netif *netif)
+ */ 
+void netif_set_up(struct netif *netif)
 {
   if (!(netif->flags & NETIF_FLAG_UP)) {
     netif->flags |= NETIF_FLAG_UP;
-
+    
 #if LWIP_SNMP
     snmp_get_sysuptime(&netif->ts);
 #endif /* LWIP_SNMP */
@@ -459,7 +460,7 @@ void ICACHE_FLASH_ATTR netif_set_up(struct netif *netif)
 
     if (netif->flags & NETIF_FLAG_LINK_UP) {
 #if LWIP_ARP
-      /* For Ethernet network interfaces, we would like to send a "gratuitous ARP" */
+      /* For Ethernet network interfaces, we would like to send a "gratuitous ARP" */ 
       if (netif->flags & (NETIF_FLAG_ETHARP)) {
         etharp_gratuitous(netif);
       }
@@ -480,10 +481,10 @@ void ICACHE_FLASH_ATTR netif_set_up(struct netif *netif)
  *
  * @note: Enabling DHCP on a down interface will make it come
  * up once configured.
- *
+ * 
  * @see dhcp_start()
- */
-void ICACHE_FLASH_ATTR netif_set_down(struct netif *netif)
+ */ 
+void netif_set_down(struct netif *netif)
 {
   if (netif->flags & NETIF_FLAG_UP) {
     netif->flags &= ~NETIF_FLAG_UP;
@@ -504,7 +505,7 @@ void ICACHE_FLASH_ATTR netif_set_down(struct netif *netif)
 /**
  * Set callback to be called when interface is brought up/down
  */
-void ICACHE_FLASH_ATTR netif_set_status_callback(struct netif *netif, netif_status_callback_fn status_callback)
+void netif_set_status_callback(struct netif *netif, netif_status_callback_fn status_callback)
 {
   if (netif) {
     netif->status_callback = status_callback;
@@ -515,7 +516,7 @@ void ICACHE_FLASH_ATTR netif_set_status_callback(struct netif *netif, netif_stat
 /**
  * Called by a driver when its link goes up
  */
-void ICACHE_FLASH_ATTR netif_set_link_up(struct netif *netif )
+void netif_set_link_up(struct netif *netif )
 {
   if (!(netif->flags & NETIF_FLAG_LINK_UP)) {
     netif->flags |= NETIF_FLAG_LINK_UP;
@@ -534,7 +535,7 @@ void ICACHE_FLASH_ATTR netif_set_link_up(struct netif *netif )
 
     if (netif->flags & NETIF_FLAG_UP) {
 #if LWIP_ARP
-      /* For Ethernet network interfaces, we would like to send a "gratuitous ARP" */
+      /* For Ethernet network interfaces, we would like to send a "gratuitous ARP" */ 
       if (netif->flags & NETIF_FLAG_ETHARP) {
         etharp_gratuitous(netif);
       }
@@ -554,7 +555,7 @@ void ICACHE_FLASH_ATTR netif_set_link_up(struct netif *netif )
 /**
  * Called by a driver when its link goes down
  */
-void ICACHE_FLASH_ATTR netif_set_link_down(struct netif *netif )
+void netif_set_link_down(struct netif *netif )
 {
   if (netif->flags & NETIF_FLAG_LINK_UP) {
     netif->flags &= ~NETIF_FLAG_LINK_UP;
@@ -566,7 +567,7 @@ void ICACHE_FLASH_ATTR netif_set_link_down(struct netif *netif )
 /**
  * Set callback to be called when link is brought up/down
  */
-void ICACHE_FLASH_ATTR netif_set_link_callback(struct netif *netif, netif_status_callback_fn link_callback)
+void netif_set_link_callback(struct netif *netif, netif_status_callback_fn link_callback)
 {
   if (netif) {
     netif->link_callback = link_callback;
@@ -590,7 +591,7 @@ void ICACHE_FLASH_ATTR netif_set_link_callback(struct netif *netif, netif_status
  *         ERR_MEM if the pbuf used to copy the packet couldn't be allocated
  */
 err_t
-ICACHE_FLASH_ATTR netif_loop_output(struct netif *netif, struct pbuf *p,
+netif_loop_output(struct netif *netif, struct pbuf *p,
        ip_addr_t *ipaddr)
 {
   struct pbuf *r;
@@ -678,7 +679,7 @@ ICACHE_FLASH_ATTR netif_loop_output(struct netif *netif, struct pbuf *p,
  * netif_poll().
  */
 void
-ICACHE_FLASH_ATTR netif_poll(struct netif *netif)
+netif_poll(struct netif *netif)
 {
   struct pbuf *in;
   /* If we have a loopif, SNMP counters are adjusted for it,
@@ -743,7 +744,7 @@ ICACHE_FLASH_ATTR netif_poll(struct netif *netif)
  * Calls netif_poll() for every netif on the netif_list.
  */
 void
-ICACHE_FLASH_ATTR netif_poll_all(void)
+netif_poll_all(void)
 {
   struct netif *netif = netif_list;
   /* loop through netifs */

@@ -75,10 +75,10 @@ typedef enum {
 
 struct pbuf {
   /** next pbuf in singly linked pbuf chain */
-  struct pbuf *next; //+00
+  struct pbuf *next;
 
   /** pointer to the actual data in the buffer */
-  void *payload; //+04
+  void *payload;
 
   /**
    * total length of this buffer and all next buffers in chain
@@ -87,26 +87,26 @@ struct pbuf {
    * For non-queue packet chains this is the invariant:
    * p->tot_len == p->len + (p->next? p->next->tot_len: 0)
    */
-  u16_t tot_len; //+08
+  u16_t tot_len;
 
   /** length of this buffer */
-  u16_t len; //+10
+  u16_t len;
 
   /** pbuf_type as u8_t instead of enum to save space */
-  u8_t /*pbuf_type*/ type; //+12
+  u8_t /*pbuf_type*/ type;
 
   /** misc flags */
-  u8_t flags; //+13
+  u8_t flags;
 
   /**
    * the reference count always equals the number of pointers
    * that refer to this pbuf. This can be pointers from an application,
    * the stack itself, or pbuf->next pointers from a chain.
    */
-  u16_t ref; //+14
+  u16_t ref;
   
   /* add a pointer for esf_buf */
-  void * eb; //+16
+  void * eb; 
 };
 
 #if LWIP_SUPPORT_CUSTOM_PBUF

@@ -270,7 +270,7 @@ plug_holes(struct mem *mem)
  * Zero the heap and initialize start, end and lowest-free
  */
 void
-ICACHE_FLASH_ATTR mem_init(void)
+mem_init(void)
 {
   struct mem *mem;
 
@@ -470,7 +470,7 @@ mem_trim(void *rmem, mem_size_t newsize)
   /* else {
     next struct mem is used but size between mem and mem2 is not big enough
     to create another struct mem
-    -> don't do anyhting.
+    -> don't do anyhting. 
     -> the remaining space stays unused since it is too small
   } */
 #if LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT
@@ -636,7 +636,7 @@ void *mem_calloc(mem_size_t count, mem_size_t size)
   p = mem_malloc(count * size);
   if (p) {
     /* zero the memory */
-    memset(p, 0, count * size);
+    os_memset(p, 0, count * size);
   }
   return p;
 }

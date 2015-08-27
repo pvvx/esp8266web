@@ -21,6 +21,7 @@ struct dhcps_lease {
 #ifndef LWIP_OPEN_SRC
 #include "net80211/ieee80211_var.h"
 #endif
+#include "netif/wlan_lwip_if.h"
 #include "user_interface.h"
 #include "sdk/flash.h"
 
@@ -42,11 +43,13 @@ static struct ip_addr broadcast_dhcps;
 static struct ip_addr server_address;
 static struct ip_addr client_address;
 static struct ip_addr client_address_plus;
-static struct dhcps_msg msg_dhcps;
+// static struct dhcps_msg msg_dhcps;
 struct dhcps_state s;
 
 struct dhcps_lease dhcps_lease;
 bool dhcps_lease_flag = true;
+static uint8 offer = 0xFF;
+
 static list_node *plist LWIP_DATA_IRAM_ATTR; // = NULL;
 /******************************************************************************
  * FunctionName : node_insert_to_list
@@ -127,7 +130,7 @@ static uint8_t* ICACHE_FLASH_ATTR add_offer_options(uint8_t *optptr)
 {
         struct ip_addr ipadd;
 
-        ipadd.addr = *( (uint32_t *) &server_address);
+        ipadd.addr = server_address.addr;
 
 #ifdef USE_CLASS_B_NET
         *optptr++ = DHCP_OPTION_SUBNET_MASK;
@@ -159,12 +162,18 @@ static uint8_t* ICACHE_FLASH_ATTR add_offer_options(uint8_t *optptr)
         *optptr++ = ip4_addr3( &ipadd);
         *optptr++ = ip4_addr4( &ipadd);
 
-	    *optptr++ = DHCP_OPTION_ROUTER;
-	    *optptr++ = 4;
-	    *optptr++ = ip4_addr1( &ipadd);
-	    *optptr++ = ip4_addr2( &ipadd);
-	    *optptr++ = ip4_addr3( &ipadd);
-	    *optptr++ = ip4_addr4( &ipadd);
+        if (dhcps_router_enabled(offer)){
+        	struct ip_info if_ip;
+			os_bzero(&if_ip, sizeof(struct ip_info));
+			wifi_get_ip_info(SOFTAP_IF, &if_ip);
+
+			*optptr++ = DHCP_OPTION_ROUTER;
+			*optptr++ = 4;
+			*optptr++ = ip4_addr1( &if_ip.gw);
+			*optptr++ = ip4_addr2( &if_ip.gw);
+			*optptr++ = ip4_addr3( &if_ip.gw);
+			*optptr++ = ip4_addr4( &if_ip.gw);
+        }
 
 #ifdef USE_DNS
 	    *optptr++ = DHCP_OPTION_DNS_SERVER;
@@ -264,7 +273,7 @@ static void ICACHE_FLASH_ATTR create_msg(struct dhcps_msg *m)
 {
         struct ip_addr client;
 
-        client.addr = *( (uint32_t *) &client_address);
+        client.addr = client_address.addr;
 
         m->op = DHCP_REPLY;
         m->htype = DHCP_HTYPE_ETHERNET;
@@ -512,7 +521,7 @@ static uint8_t ICACHE_FLASH_ATTR parse_options(uint8_t *optptr, sint16_t len)
         struct ip_addr client;
     	bool is_dhcp_parse_end = false;
 
-        client.addr = *( (uint32_t *) &client_address);// Ҫ�����DHCP�ͻ��˵�IP
+        client.addr = client_address.addr;
 
         u8_t *end = optptr + len;
         u16_t type = 0;
@@ -638,7 +647,7 @@ static sint16_t ICACHE_FLASH_ATTR parse_msg(struct dhcps_msg *m, u16_t len)
 						list_node *pnode = NULL;
 						list_node *pback_node = NULL;
 
-						POOL_START:
+//						POOL_START:
 						client_address.addr = client_address_plus.addr;
 //							addr_tmp.addr =  htonl(client_address_plus.addr);
 //							addr_tmp.addr++;
@@ -671,9 +680,14 @@ static sint16_t ICACHE_FLASH_ATTR parse_msg(struct dhcps_msg *m, u16_t len)
 
 						POOL_CHECK:
 						if ((client_address_plus.addr > dhcps_lease.end_ip.addr) || (client_address.addr == IPADDR_ANY)){
-
-							client_address_plus.addr = dhcps_lease.start_ip.addr;
-							goto POOL_START;
+							os_printf("client_address_plus.addr %x %d\n", client_address_plus.addr, system_get_free_heap_size());
+							node_remove_from_list(&plist,pnode);
+							os_free(pdhcps_pool);
+							pdhcps_pool = NULL;
+							os_free(pnode);
+							pnode = NULL;
+//							client_address_plus.addr = dhcps_lease.start_ip.addr;
+							return 4;
 						}
 
                         if (wifi_softap_set_station_info(m->chaddr, &client_address) == false) {
@@ -712,48 +726,53 @@ static void ICACHE_FLASH_ATTR handle_dhcp(void *arg,
 									struct ip_addr *addr,
 									uint16_t port)
 {
-
-		sint16_t tlen;
-        u16_t i;
-	    u16_t dhcps_msg_cnt=0;
-	    u8_t *p_dhcps_msg = (u8_t *)&msg_dhcps;
-	    u8_t *data;
+		struct dhcps_msg *pmsg_dhcps = NULL;
+		sint16_t tlen = 0;
+        u16_t i = 0;
+	    u16_t dhcps_msg_cnt = 0;
+	    u8_t *p_dhcps_msg = NULL;
+	    u8_t *data = NULL;
 
 #if DHCPS_DEBUG
     	os_printf("dhcps: handle_dhcp-> receive a packet\n");
 #endif
 	    if (p==NULL) return;
 
+	    pmsg_dhcps = (struct dhcps_msg *)os_zalloc(sizeof(struct dhcps_msg));
+	    if (NULL == pmsg_dhcps){
+	    	pbuf_free(p);
+	    	return;
+	    }
+	    p_dhcps_msg = (u8_t *)pmsg_dhcps;
 		tlen = p->tot_len;
 	    data = p->payload;
 
 #if DHCPS_DEBUG
 	    os_printf("dhcps: handle_dhcp-> p->tot_len = %d\n", tlen);
 	    os_printf("dhcps: handle_dhcp-> p->len = %d\n", p->len);
-#endif
+#endif		
 
-	    os_memset(&msg_dhcps, 0, sizeof(dhcps_msg));
 	    for(i=0; i<p->len; i++){
 	        p_dhcps_msg[dhcps_msg_cnt++] = data[i];
-#if DHCPS_DEBUG
+#if DHCPS_DEBUG					
 			os_printf("%02x ",data[i]);
 			if((i+1)%16 == 0){
 				os_printf("\n");
 			}
 #endif
 	    }
-
+		
 		if(p->next != NULL) {
 #if DHCPS_DEBUG
 	        os_printf("dhcps: handle_dhcp-> p->next != NULL\n");
 	        os_printf("dhcps: handle_dhcp-> p->next->tot_len = %d\n",p->next->tot_len);
 	        os_printf("dhcps: handle_dhcp-> p->next->len = %d\n",p->next->len);
 #endif
-
+			
 	        data = p->next->payload;
 	        for(i=0; i<p->next->len; i++){
 	            p_dhcps_msg[dhcps_msg_cnt++] = data[i];
-#if DHCPS_DEBUG
+#if DHCPS_DEBUG					
 				os_printf("%02x ",data[i]);
 				if((i+1)%16 == 0){
 					os_printf("\n");
@@ -768,26 +787,26 @@ static void ICACHE_FLASH_ATTR handle_dhcp(void *arg,
 #if DHCPS_DEBUG
     	os_printf("dhcps: handle_dhcp-> parse_msg(p)\n");
 #endif
-
-        switch(parse_msg(&msg_dhcps, tlen - 240)) {
+		
+        switch(parse_msg(pmsg_dhcps, tlen - 240)) {
 
 	        case DHCPS_STATE_OFFER://1
-#if DHCPS_DEBUG
+#if DHCPS_DEBUG            
             	 os_printf("dhcps: handle_dhcp-> DHCPD_STATE_OFFER\n");
-#endif
-	             send_offer(&msg_dhcps);
+#endif			
+	             send_offer(pmsg_dhcps);
 	             break;
 	        case DHCPS_STATE_ACK://3
 #if DHCPS_DEBUG
             	 os_printf("dhcps: handle_dhcp-> DHCPD_STATE_ACK\n");
-#endif
-	             send_ack(&msg_dhcps);
+#endif			
+	             send_ack(pmsg_dhcps);
 	             break;
 	        case DHCPS_STATE_NAK://4
-#if DHCPS_DEBUG
+#if DHCPS_DEBUG            
             	 os_printf("dhcps: handle_dhcp-> DHCPD_STATE_NAK\n");
 #endif
-	             send_nak(&msg_dhcps);
+	             send_nak(pmsg_dhcps);
 	             break;
 			default :
 				 break;
@@ -796,6 +815,8 @@ static void ICACHE_FLASH_ATTR handle_dhcp(void *arg,
     	os_printf("dhcps: handle_dhcp-> pbuf_free(p)\n");
 #endif
         pbuf_free(p);
+        os_free(pmsg_dhcps);
+        pmsg_dhcps = NULL;
 }
 ///////////////////////////////////////////////////////////////////////////////////
 static void ICACHE_FLASH_ATTR wifi_softap_init_dhcps_lease(uint32 ip)
@@ -821,13 +842,18 @@ static void ICACHE_FLASH_ATTR wifi_softap_init_dhcps_lease(uint32 ip)
 ///////////////////////////////////////////////////////////////////////////////////
 void ICACHE_FLASH_ATTR dhcps_start(struct ip_info *info)
 {
-	os_memset(&msg_dhcps, 0, sizeof(dhcps_msg));
+	struct netif * apnetif = (struct netif *)eagle_lwip_getif(0x01);
+
+	if(apnetif->dhcps_pcb != NULL) {
+        udp_remove(apnetif->dhcps_pcb);
+    }
+
 	pcb_dhcps = udp_new();
 	if (pcb_dhcps == NULL || info ==NULL) {
-#if DEBUGSOO > 0
 		os_printf("dhcps_start(): could not obtain pcb\n");
-#endif
 	}
+
+	apnetif->dhcps_pcb = pcb_dhcps;
 
 	IP4_ADDR(&broadcast_dhcps, 255, 255, 255, 255);
 
@@ -840,15 +866,20 @@ void ICACHE_FLASH_ATTR dhcps_start(struct ip_info *info)
 #if DHCPS_DEBUG
 	os_printf("dhcps:dhcps_start->udp_recv function Set a receive callback handle_dhcp for UDP_PCB pcb_dhcps\n");
 #endif
-
 }
 
 void ICACHE_FLASH_ATTR dhcps_stop(void)
 {
-//	struct netif * nif = eagle_lwip_getif(1);
+	struct netif * apnetif = (struct netif *)eagle_lwip_getif(0x01);
+
 	udp_disconnect(pcb_dhcps);
-	udp_remove(pcb_dhcps);
-//	nif->dhcp = NULL;
+	dhcps_lease_flag = true;
+    if(apnetif->dhcps_pcb != NULL) {
+        udp_remove(apnetif->dhcps_pcb);
+        apnetif->dhcps_pcb = NULL;
+    }
+
+	//udp_remove(pcb_dhcps);
 	list_node *pnode = NULL;
 	list_node *pback_node = NULL;
 	pnode = plist;
@@ -861,7 +892,6 @@ void ICACHE_FLASH_ATTR dhcps_stop(void)
 		os_free(pback_node);
 		pback_node = NULL;
 	}
-	dhcps_lease_flag = true;
 }
 
 bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_lease(struct dhcps_lease *please)
@@ -901,8 +931,51 @@ bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_lease(struct dhcps_lease *please)
 	return true;
 }
 
+/******************************************************************************
+ * FunctionName : wifi_softap_get_dhcps_lease
+ * Description  : get the lease information of DHCP server
+ * Parameters   : please -- Additional argument to get the lease information,
+ * 							Little-Endian.
+ * Returns      : true or false
+*******************************************************************************/
+bool ICACHE_FLASH_ATTR wifi_softap_get_dhcps_lease(struct dhcps_lease *please)
+{
+	if (NULL == please)
+		return false;
+	please->start_ip = dhcps_lease.start_ip;
+	please->end_ip = dhcps_lease.end_ip;
+	return true;
+}
+
+static void ICACHE_FLASH_ATTR kill_oldest_dhcps_pool(void)
+{
+	list_node *pre = NULL, *p = NULL;
+	list_node *minpre = NULL, *minp = NULL;
+	struct dhcps_pool *pdhcps_pool = NULL, *pmin_pool = NULL;
+	pre = plist;
+	p = pre->pnext;
+	minpre = pre;
+	minp = p;
+	while (p != NULL){
+		pdhcps_pool = p->pnode;
+		pmin_pool = minp->pnode;
+		if (pdhcps_pool->lease_timer < pmin_pool->lease_timer){
+			minp = p;
+			minpre = pre;
+		}
+		pre = p;
+		p = p->pnext;
+	}
+	minpre->pnext = minp->pnext;
+	os_free(minp->pnode);
+	minp->pnode = NULL;
+	os_free(minp);
+	minp = NULL;
+}
+
 void ICACHE_FLASH_ATTR dhcps_coarse_tmr(void)
 {
+	uint8 num_dhcps_pool = 0;
 	list_node *pback_node = NULL;
 	list_node *pnode = NULL;
 	struct dhcps_pool *pdhcps_pool = NULL;
@@ -920,8 +993,33 @@ void ICACHE_FLASH_ATTR dhcps_coarse_tmr(void)
 			pback_node = NULL;
 		} else {
 			pnode = pnode ->pnext;
+			num_dhcps_pool ++;
 		}
 	}
+
+	if (num_dhcps_pool >= MAX_STATION_NUM)
+		kill_oldest_dhcps_pool();
+}
+
+bool ICACHE_FLASH_ATTR wifi_softap_set_dhcps_offer_option(uint8 level, void* optarg)
+{
+	bool offer_flag = true;
+	if (optarg == NULL && wifi_softap_dhcps_status() == false)
+		return false;
+
+	if (level <= OFFER_START || level >= OFFER_END)
+		return false;
+
+	switch (level){
+		case OFFER_ROUTER:
+			offer = (*(uint8 *)optarg) & 0x01;
+			offer_flag = true;
+			break;
+		default :
+			offer_flag = false;
+			break;
+	}
+	return offer_flag;
 }
 
 #endif // USE_OPEN_DHCPS

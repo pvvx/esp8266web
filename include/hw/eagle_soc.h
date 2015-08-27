@@ -34,7 +34,7 @@
 #define BIT6    0x00000040
 #define BIT5    0x00000020
 #define BIT4    0x00000010
-#define BIT3    0x00000008
+#define BIT3    0x0000008
 #define BIT2    0x00000004
 #define BIT1    0x00000002
 #define BIT0    0x00000001

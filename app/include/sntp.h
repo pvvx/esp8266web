@@ -4,7 +4,7 @@
 #include "lwip/ip_addr.h"
 #include <time.h>
 
-bool sntp_init(void);
+bool sntp_inits(void);
 void sntp_close(void);
 time_t get_sntp_time(void);
 

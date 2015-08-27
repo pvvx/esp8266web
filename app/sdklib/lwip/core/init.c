@@ -6,9 +6,9 @@
 
 /*
  * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
+ * All rights reserved. 
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -17,21 +17,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ *    derived from this software without specific prior written permission. 
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- *
+ * 
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
@@ -99,18 +99,18 @@
 //#if (LWIP_TCP && (MEMP_NUM_TCP_PCB<=0))
 //  #error "If you want to use TCP, you have to define MEMP_NUM_TCP_PCB>=1 in your lwipopts.h"
 //#endif
-#if (LWIP_TCP && (TCP_WND > 0xffff))
-  #error "If you want to use TCP, TCP_WND must fit in an u16_t, so, you have to reduce it in your lwipopts.h"
-#endif
+//#if (LWIP_TCP && (TCP_WND > 0xffff))
+//  #error "If you want to use TCP, TCP_WND must fit in an u16_t, so, you have to reduce it in your lwipopts.h"
+//#endif
 #if (LWIP_TCP && (TCP_SND_QUEUELEN > 0xffff))
   #error "If you want to use TCP, TCP_SND_QUEUELEN must fit in an u16_t, so, you have to reduce it in your lwipopts.h"
 #endif
 #if (LWIP_TCP && (TCP_SND_QUEUELEN < 2))
   #error "TCP_SND_QUEUELEN must be at least 2 for no-copy TCP writes to work"
 #endif
-#if (LWIP_TCP && ((TCP_MAXRTX > 12) || (TCP_SYNMAXRTX > 12)))
-  #error "If you want to use TCP, TCP_MAXRTX and TCP_SYNMAXRTX must less or equal to 12 (due to tcp_backoff table), so, you have to reduce them in your lwipopts.h"
-#endif
+//#if (LWIP_TCP && ((TCP_MAXRTX > 12) || (TCP_SYNMAXRTX > 12)))
+//  #error "If you want to use TCP, TCP_MAXRTX and TCP_SYNMAXRTX must less or equal to 12 (due to tcp_backoff table), so, you have to reduce them in your lwipopts.h"
+//#endif
 #if (LWIP_TCP && TCP_LISTEN_BACKLOG && (TCP_DEFAULT_LISTEN_BACKLOG < 0) || (TCP_DEFAULT_LISTEN_BACKLOG > 0xff))
   #error "If you want to use TCP backlog, TCP_DEFAULT_LISTEN_BACKLOG must fit into an u8_t"
 #endif
@@ -257,8 +257,13 @@ lwip_sanity_check(void)
  * Perform Sanity check of user-configurable values, and initialize all modules.
  */
 void
-ICACHE_FLASH_ATTR lwip_init(void)
+lwip_init(void)
 {
+  MEMP_NUM_TCP_PCB = 5;
+  TCP_WND = (4 * TCP_MSS);
+  TCP_MAXRTX = 3;
+  TCP_SYNMAXRTX = 6;
+
   /* Sanity check user-configurable values */
   lwip_sanity_check();
 
@@ -275,36 +280,35 @@ ICACHE_FLASH_ATTR lwip_init(void)
   pbuf_init();
 
   netif_init();
-
+ 
 #if LWIP_SOCKET
   lwip_socket_init();
 #endif /* LWIP_SOCKET */
   ip_init();
-
+ 
 #if LWIP_ARP
   etharp_init();
 
 #endif /* LWIP_ARP */
 #if LWIP_RAW
   raw_init();
-
+ 
 #endif /* LWIP_RAW */
 #if LWIP_UDP
   udp_init();
-
+ 
 #endif /* LWIP_UDP */
 #if LWIP_TCP
-  MEMP_NUM_TCP_PCB = 5;
   tcp_init();
-
+  
 #endif /* LWIP_TCP */
 #if LWIP_SNMP
   snmp_init();
-
+  
 #endif /* LWIP_SNMP */
 #if LWIP_AUTOIP
   autoip_init();
-
+ 
 #endif /* LWIP_AUTOIP */
 #if LWIP_IGMP
   igmp_init();

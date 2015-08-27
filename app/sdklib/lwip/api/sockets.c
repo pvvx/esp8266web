@@ -75,7 +75,7 @@ struct lwip_sock {
       tested by select */
   u16_t sendevent;
   /** error happened for this socket, set by event_callback(), tested by select */
-  u16_t errevent;
+  u16_t errevent; 
   /** last error that occurred on this socket */
   int err;
   /** counter of how many threads are waiting for this socket using select */
@@ -181,7 +181,7 @@ static void lwip_setsockopt_internal(void *arg);
  * functions in this module!
  */
 void
-ICACHE_FLASH_ATTR lwip_socket_init(void)
+lwip_socket_init(void)
 {
 }
 
@@ -192,7 +192,7 @@ ICACHE_FLASH_ATTR lwip_socket_init(void)
  * @return struct lwip_sock for the socket or NULL if not found
  */
 static struct lwip_sock *
-ICACHE_FLASH_ATTR get_socket(int s)
+get_socket(int s)
 {
   struct lwip_sock *sock;
 
@@ -220,7 +220,7 @@ ICACHE_FLASH_ATTR get_socket(int s)
  * @return struct lwip_sock for the socket or NULL if not found
  */
 static struct lwip_sock *
-ICACHE_FLASH_ATTR tryget_socket(int s)
+tryget_socket(int s)
 {
   if ((s < 0) || (s >= NUM_SOCKETS)) {
     return NULL;
@@ -240,7 +240,7 @@ ICACHE_FLASH_ATTR tryget_socket(int s)
  * @return the index of the new socket; -1 on error
  */
 static int
-ICACHE_FLASH_ATTR alloc_socket(struct netconn *newconn, int accepted)
+alloc_socket(struct netconn *newconn, int accepted)
 {
   int i;
   SYS_ARCH_DECL_PROTECT(lev);
@@ -277,7 +277,7 @@ ICACHE_FLASH_ATTR alloc_socket(struct netconn *newconn, int accepted)
  * @param is_tcp != 0 for TCP sockets, used to free lastdata
  */
 static void
-ICACHE_FLASH_ATTR free_socket(struct lwip_sock *sock, int is_tcp)
+free_socket(struct lwip_sock *sock, int is_tcp)
 {
   void *lastdata;
   SYS_ARCH_DECL_PROTECT(lev);
@@ -309,7 +309,7 @@ ICACHE_FLASH_ATTR free_socket(struct lwip_sock *sock, int is_tcp)
  */
 
 int
-ICACHE_FLASH_ATTR lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
+lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 {
   struct lwip_sock *sock, *nsock;
   struct netconn *newconn;
@@ -398,7 +398,7 @@ ICACHE_FLASH_ATTR lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 }
 
 int
-ICACHE_FLASH_ATTR lwip_bind(int s, const struct sockaddr *name, socklen_t namelen)
+lwip_bind(int s, const struct sockaddr *name, socklen_t namelen)
 {
   struct lwip_sock *sock;
   ip_addr_t local_addr;
@@ -438,7 +438,7 @@ ICACHE_FLASH_ATTR lwip_bind(int s, const struct sockaddr *name, socklen_t namele
 }
 
 int
-ICACHE_FLASH_ATTR lwip_close(int s)
+lwip_close(int s)
 {
   struct lwip_sock *sock;
   int is_tcp = 0;
@@ -464,7 +464,7 @@ ICACHE_FLASH_ATTR lwip_close(int s)
 }
 
 int
-ICACHE_FLASH_ATTR lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
+lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
 {
   struct lwip_sock *sock;
   err_t err;
@@ -518,7 +518,7 @@ ICACHE_FLASH_ATTR lwip_connect(int s, const struct sockaddr *name, socklen_t nam
  * @return 0 on success, non-zero on failure
  */
 int
-ICACHE_FLASH_ATTR lwip_listen(int s, int backlog)
+lwip_listen(int s, int backlog)
 {
   struct lwip_sock *sock;
   err_t err;
@@ -546,7 +546,7 @@ ICACHE_FLASH_ATTR lwip_listen(int s, int backlog)
 }
 
 int
-ICACHE_FLASH_ATTR lwip_recvfrom(int s, void *mem, size_t len, int flags,
+lwip_recvfrom(int s, void *mem, size_t len, int flags,
         struct sockaddr *from, socklen_t *fromlen)
 {
   struct lwip_sock *sock;
@@ -572,7 +572,7 @@ ICACHE_FLASH_ATTR lwip_recvfrom(int s, void *mem, size_t len, int flags,
       buf = sock->lastdata;
     } else {
       /* If this is non-blocking call, then check first */
-      if (((flags & MSG_DONTWAIT) || netconn_is_nonblocking(sock->conn)) &&
+      if (((flags & MSG_DONTWAIT) || netconn_is_nonblocking(sock->conn)) && 
           (sock->rcvevent <= 0)) {
         if (off > 0) {
           /* update receive window */
@@ -644,9 +644,9 @@ ICACHE_FLASH_ATTR lwip_recvfrom(int s, void *mem, size_t len, int flags,
     if (netconn_type(sock->conn) == NETCONN_TCP) {
       LWIP_ASSERT("invalid copylen, len would underflow", len >= copylen);
       len -= copylen;
-      if ( (len <= 0) ||
-           (p->flags & PBUF_FLAG_PUSH) ||
-           (sock->rcvevent <= 0) ||
+      if ( (len <= 0) || 
+           (p->flags & PBUF_FLAG_PUSH) || 
+           (sock->rcvevent <= 0) || 
            ((flags & MSG_PEEK)!=0)) {
         done = 1;
       }
@@ -731,18 +731,18 @@ ICACHE_FLASH_ATTR lwip_recvfrom(int s, void *mem, size_t len, int flags,
 }
 
 int
-ICACHE_FLASH_ATTR lwip_read(int s, void *mem, size_t len)
+lwip_read(int s, void *mem, size_t len)
 {
   return lwip_recvfrom(s, mem, len, 0, NULL, NULL);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_recv(int s, void *mem, size_t len, int flags)
 {
   return lwip_recvfrom(s, mem, len, flags, NULL, NULL);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_send(int s, const void *data, size_t size, int flags)
 {
   struct lwip_sock *sock;
@@ -784,7 +784,7 @@ lwip_send(int s, const void *data, size_t size, int flags)
   return (err == ERR_OK ? (int)size : -1);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_sendto(int s, const void *data, size_t size, int flags,
        const struct sockaddr *to, socklen_t tolen)
 {
@@ -868,7 +868,7 @@ lwip_sendto(int s, const void *data, size_t size, int flags,
 #endif /* LWIP_UDP */
       }
       UNLOCK_TCPIP_CORE();
-
+      
       pbuf_free(p);
     } else {
       err = ERR_MEM;
@@ -927,7 +927,7 @@ lwip_sendto(int s, const void *data, size_t size, int flags,
   return (err == ERR_OK ? short_size : -1);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_socket(int domain, int type, int protocol)
 {
   struct netconn *conn;
@@ -983,7 +983,7 @@ lwip_socket(int domain, int type, int protocol)
   return i;
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_write(int s, const void *data, size_t size)
 {
   return lwip_send(s, data, size, 0);
@@ -1005,7 +1005,7 @@ lwip_write(int s, const void *data, size_t size)
  * @param exceptset_out: set os sockets that had error events
  * @return number of sockets that had events (read/write/exception) (>= 0)
  */
-static int ICACHE_FLASH_ATTR
+static int
 lwip_selscan(int maxfdp1, fd_set *readset_in, fd_set *writeset_in, fd_set *exceptset_in,
              fd_set *readset_out, fd_set *writeset_out, fd_set *exceptset_out)
 {
@@ -1067,7 +1067,7 @@ lwip_selscan(int maxfdp1, fd_set *readset_in, fd_set *writeset_in, fd_set *excep
 /**
  * Processing exceptset is not yet implemented.
  */
-int ICACHE_FLASH_ATTR
+int
 lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
             struct timeval *timeout)
 {
@@ -1226,7 +1226,7 @@ return_copy_fdsets:
  * Callback registered in the netconn layer for each socket-netconn.
  * Processes recvevent (data available) and wakes up tasks waiting for select.
  */
-static void ICACHE_FLASH_ATTR
+static void
 event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len)
 {
   int s;
@@ -1346,7 +1346,7 @@ again:
  * Unimplemented: Close one end of a full-duplex connection.
  * Currently, the full connection is closed.
  */
-int ICACHE_FLASH_ATTR
+int
 lwip_shutdown(int s, int how)
 {
   struct lwip_sock *sock;
@@ -1387,7 +1387,7 @@ lwip_shutdown(int s, int how)
   return (err == ERR_OK ? 0 : -1);
 }
 
-static int ICACHE_FLASH_ATTR
+static int
 lwip_getaddrname(int s, struct sockaddr *name, socklen_t *namelen, u8_t local)
 {
   struct lwip_sock *sock;
@@ -1422,19 +1422,19 @@ lwip_getaddrname(int s, struct sockaddr *name, socklen_t *namelen, u8_t local)
   return 0;
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_getpeername(int s, struct sockaddr *name, socklen_t *namelen)
 {
   return lwip_getaddrname(s, name, namelen, 0);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_getsockname(int s, struct sockaddr *name, socklen_t *namelen)
 {
   return lwip_getaddrname(s, name, namelen, 1);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
 {
   err_t err = ERR_OK;
@@ -1452,11 +1452,11 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
 
   /* Do length and type checks for the various options first, to keep it readable. */
   switch (level) {
-
+   
 /* Level: SOL_SOCKET */
   case SOL_SOCKET:
     switch (optname) {
-
+       
     case SO_ACCEPTCONN:
     case SO_BROADCAST:
     /* UNIMPL case SO_DEBUG: */
@@ -1505,7 +1505,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
       err = ENOPROTOOPT;
     }  /* switch (optname) */
     break;
-
+                     
 /* Level: IPPROTO_IP */
   case IPPROTO_IP:
     switch (optname) {
@@ -1545,7 +1545,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
       err = ENOPROTOOPT;
     }  /* switch (optname) */
     break;
-
+         
 #if LWIP_TCP
 /* Level: IPPROTO_TCP */
   case IPPROTO_TCP:
@@ -1553,7 +1553,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
       err = EINVAL;
       break;
     }
-
+    
     /* If this is no TCP socket, ignore any options. */
     if (sock->conn->type != NETCONN_TCP)
       return 0;
@@ -1567,7 +1567,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
     case TCP_KEEPCNT:
 #endif /* LWIP_TCP_KEEPALIVE */
       break;
-
+       
     default:
       LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_getsockopt(%d, IPPROTO_TCP, UNIMPL: optname=0x%x, ..)\n",
                                   s, optname));
@@ -1582,7 +1582,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
       err = EINVAL;
       break;
     }
-
+    
     /* If this is no UDP lite socket, ignore any options. */
     if (sock->conn->type != NETCONN_UDPLITE) {
       return 0;
@@ -1592,7 +1592,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
     case UDPLITE_SEND_CSCOV:
     case UDPLITE_RECV_CSCOV:
       break;
-
+       
     default:
       LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_getsockopt(%d, IPPROTO_UDPLITE, UNIMPL: optname=0x%x, ..)\n",
                                   s, optname));
@@ -1607,7 +1607,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
       err = ENOPROTOOPT;
   }  /* switch */
 
-
+   
   if (err != ERR_OK) {
     sock_set_errno(sock, err);
     return -1;
@@ -1632,7 +1632,7 @@ lwip_getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen)
   return err ? -1 : 0;
 }
 
-static void ICACHE_FLASH_ATTR
+static void
 lwip_getsockopt_internal(void *arg)
 {
   struct lwip_sock *sock;
@@ -1702,7 +1702,7 @@ lwip_getsockopt_internal(void *arg)
       /* only overwrite ERR_OK or tempoary errors */
       if ((sock->err == 0) || (sock->err == EINPROGRESS)) {
         sock_set_errno(sock, err_to_errno(sock->conn->last_err));
-      }
+      } 
       *(int *)optval = sock->err;
       sock->err = 0;
       LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_getsockopt(%d, SOL_SOCKET, SO_ERROR) = %d\n",
@@ -1835,7 +1835,7 @@ lwip_getsockopt_internal(void *arg)
   sys_sem_signal(&sock->conn->op_completed);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_setsockopt(int s, int level, int optname, const void *optval, socklen_t optlen)
 {
   struct lwip_sock *sock = get_socket(s);
@@ -2042,7 +2042,7 @@ lwip_setsockopt(int s, int level, int optname, const void *optval, socklen_t opt
   return err ? -1 : 0;
 }
 
-static void ICACHE_FLASH_ATTR
+static void
 lwip_setsockopt_internal(void *arg)
 {
   struct lwip_sock *sock;
@@ -2246,7 +2246,7 @@ lwip_setsockopt_internal(void *arg)
   sys_sem_signal(&sock->conn->op_completed);
 }
 
-int ICACHE_FLASH_ATTR
+int
 lwip_ioctl(int s, long cmd, void *argp)
 {
   struct lwip_sock *sock = get_socket(s);
@@ -2312,7 +2312,7 @@ lwip_ioctl(int s, long cmd, void *argp)
  * Currently only the commands F_GETFL and F_SETFL are implemented.
  * Only the flag O_NONBLOCK is implemented.
  */
-int ICACHE_FLASH_ATTR
+int
 lwip_fcntl(int s, int cmd, int val)
 {
   struct lwip_sock *sock = get_socket(s);

@@ -80,7 +80,7 @@
 #include <string.h>
 
 #ifdef EBUF_LWIP
-#include "pp/esf_buf.h"
+#define EP_OFFSET 36
 #else
 #define EP_OFFSET 0
 #endif /* ESF_LWIP */
@@ -187,7 +187,7 @@ pbuf_pool_is_empty(void)
  * @return the allocated pbuf. If multiple pbufs where allocated, this
  * is the first pbuf of a pbuf chain.
  */
-struct pbuf * ICACHE_FLASH_ATTR
+struct pbuf *
 pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
 {
   struct pbuf *p, *q, *r;
@@ -329,6 +329,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
     p->len = p->tot_len = length;
     p->next = NULL;
     p->type = type;
+    p->eb = NULL;
 
     LWIP_ASSERT("pbuf_alloc: pbuf->payload properly aligned",
            ((mem_ptr_t)p->payload % MEM_ALIGNMENT) == 0);
@@ -363,6 +364,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
   /* set flags */
   p->flags = 0;
   LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_alloc(length=%"U16_F") == %p\n", length, (void *)p));
+
   return p;
 }
 
@@ -443,7 +445,7 @@ pbuf_alloced_custom(pbuf_layer l, u16_t length, pbuf_type type, struct pbuf_cust
  *
  * @note Despite its name, pbuf_realloc cannot grow the size of a pbuf (chain).
  */
-void ICACHE_FLASH_ATTR
+void
 pbuf_realloc(struct pbuf *p, u16_t new_len)
 {
   struct pbuf *q;
@@ -524,7 +526,7 @@ pbuf_realloc(struct pbuf *p, u16_t new_len)
  * @return non-zero on failure, zero on success.
  *
  */
-u8_t ICACHE_FLASH_ATTR
+u8_t
 pbuf_header(struct pbuf *p, s16_t header_size_increment)
 {
   u16_t type;
@@ -603,7 +605,6 @@ pbuf_header(struct pbuf *p, s16_t header_size_increment)
   return 0;
 }
 
-extern void system_pp_recycle_rx_pkt(void *eb);
 /**
  * Dereference a pbuf chain or queue and deallocate any no-longer-used
  * pbufs at the head of this chain or queue.
@@ -637,7 +638,8 @@ extern void system_pp_recycle_rx_pkt(void *eb);
  * 1->1->1 becomes .......
  *
  */
-u8_t ICACHE_FLASH_ATTR
+extern void system_pp_recycle_rx_pkt(void *eb);
+u8_t
 pbuf_free(struct pbuf *p)
 {
   u16_t type;
@@ -734,7 +736,7 @@ pbuf_free(struct pbuf *p)
  * @return the number of pbufs in a chain
  */
 
-u8_t ICACHE_FLASH_ATTR
+u8_t
 pbuf_clen(struct pbuf *p)
 {
   u8_t len;
@@ -753,7 +755,7 @@ pbuf_clen(struct pbuf *p)
  * @param p pbuf to increase reference counter of
  *
  */
-void ICACHE_FLASH_ATTR
+void
 pbuf_ref(struct pbuf *p)
 {
   SYS_ARCH_DECL_PROTECT(old_level);
@@ -775,7 +777,7 @@ pbuf_ref(struct pbuf *p)
  * @see pbuf_chain()
  */
 
-void ICACHE_FLASH_ATTR
+void
 pbuf_cat(struct pbuf *h, struct pbuf *t)
 {
   struct pbuf *p;
@@ -816,7 +818,7 @@ pbuf_cat(struct pbuf *h, struct pbuf *t)
  * The ->ref field of the first pbuf of the tail chain is adjusted.
  *
  */
-void ICACHE_FLASH_ATTR
+void
 pbuf_chain(struct pbuf *h, struct pbuf *t)
 {
   pbuf_cat(h, t);
@@ -833,7 +835,7 @@ pbuf_chain(struct pbuf *h, struct pbuf *t)
  * @return remainder of the pbuf chain, or NULL if it was de-allocated.
  * @note May not be called on a packet queue.
  */
-struct pbuf * ICACHE_FLASH_ATTR
+struct pbuf *
 pbuf_dechain(struct pbuf *p)
 {
   struct pbuf *q;
@@ -882,7 +884,7 @@ pbuf_dechain(struct pbuf *p)
  *         ERR_ARG if one of the pbufs is NULL or p_to is not big
  *                 enough to hold p_from
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 pbuf_copy(struct pbuf *p_to, struct pbuf *p_from)
 {
   u16_t offset_to=0, offset_from=0, len;
@@ -948,7 +950,7 @@ pbuf_copy(struct pbuf *p_to, struct pbuf *p_from)
  * @param offset offset into the packet buffer from where to begin copying len bytes
  * @return the number of bytes copied, or 0 on failure
  */
-u16_t ICACHE_FLASH_ATTR
+u16_t
 pbuf_copy_partial(struct pbuf *buf, void *dataptr, u16_t len, u16_t offset)
 {
   struct pbuf *p;
@@ -996,7 +998,7 @@ pbuf_copy_partial(struct pbuf *buf, void *dataptr, u16_t len, u16_t offset)
  *
  * @return ERR_OK if successful, ERR_MEM if the pbuf is not big enough
  */
-err_t ICACHE_FLASH_ATTR
+err_t
 pbuf_take(struct pbuf *buf, const void *dataptr, u16_t len)
 {
   struct pbuf *p;
@@ -1040,7 +1042,7 @@ pbuf_take(struct pbuf *buf, const void *dataptr, u16_t len)
  * @return a new, single pbuf (p->next is NULL)
  *         or the old pbuf if allocation fails
  */
-struct pbuf* ICACHE_FLASH_ATTR
+struct pbuf*
 pbuf_coalesce(struct pbuf *p, pbuf_layer layer)
 {
   struct pbuf *q;
@@ -1107,7 +1109,7 @@ pbuf_fill_chksum(struct pbuf *p, u16_t start_offset, const void *dataptr,
  * @param offset offset into p of the byte to return
  * @return byte at an offset into p OR ZERO IF 'offset' >= p->tot_len
  */
-u8_t ICACHE_FLASH_ATTR
+u8_t
 pbuf_get_at(struct pbuf* p, u16_t offset)
 {
   u16_t copy_from = offset;
@@ -1134,7 +1136,7 @@ pbuf_get_at(struct pbuf* p, u16_t offset)
  * @return zero if equal, nonzero otherwise
  *         (0xffff if p is too short, diffoffset+1 otherwise)
  */
-u16_t ICACHE_FLASH_ATTR
+u16_t
 pbuf_memcmp(struct pbuf* p, u16_t offset, const void* s2, u16_t n)
 {
   u16_t start = offset;
@@ -1170,7 +1172,7 @@ pbuf_memcmp(struct pbuf* p, u16_t offset, const void* s2, u16_t n)
  * @param start_offset offset into p at which to start searching
  * @return 0xFFFF if substr was not found in p or the index where it was found
  */
-u16_t ICACHE_FLASH_ATTR
+u16_t
 pbuf_memfind(struct pbuf* p, const void* mem, u16_t mem_len, u16_t start_offset)
 {
   u16_t i;
@@ -1198,14 +1200,14 @@ pbuf_memfind(struct pbuf* p, const void* mem, u16_t mem_len, u16_t start_offset)
  * @param substr string to search for in p, maximum length is 0xFFFE
  * @return 0xFFFF if substr was not found in p or the index where it was found
  */
-u16_t ICACHE_FLASH_ATTR
+u16_t
 pbuf_strstr(struct pbuf* p, const char* substr)
 {
   size_t substr_len;
   if ((substr == NULL) || (substr[0] == 0) || (p->tot_len == 0xFFFF)) {
     return 0xFFFF;
   }
-  substr_len = strlen(substr);
+  substr_len = os_strlen(substr);
   if (substr_len >= 0xFFFF) {
     return 0xFFFF;
   }

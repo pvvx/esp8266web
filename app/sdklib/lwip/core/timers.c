@@ -95,7 +95,7 @@ tcpip_tcp_timer(void *arg)
  * the reason is to have the TCP timer only running when
  * there are active (or time-wait) PCBs.
  */
-void ICACHE_FLASH_ATTR
+void
 tcp_timer_needed(void)
 {
   /* timer is off but needed again? */
@@ -236,7 +236,7 @@ dns_timer(void *arg)
 #endif /* LWIP_DNS */
 
 /** Initialize this module */
-void ICACHE_FLASH_ATTR sys_timeouts_init(void)
+void sys_timeouts_init(void)
 {
 #if IP_REASSEMBLY
   sys_timeout(IP_TMR_INTERVAL, ip_reass_timer, NULL);
@@ -280,10 +280,10 @@ void ICACHE_FLASH_ATTR sys_timeouts_init(void)
  * @param arg argument to pass to the callback function
  */
 #if LWIP_DEBUG_TIMERNAMES
-void ICACHE_FLASH_ATTR
+void
 sys_timeout_debug(u32_t msecs, sys_timeout_handler handler, void *arg, const char* handler_name)
 #else /* LWIP_DEBUG_TIMERNAMES */
-void ICACHE_FLASH_ATTR
+void
 sys_timeout(u32_t msecs, sys_timeout_handler handler, void *arg)
 #endif /* LWIP_DEBUG_TIMERNAMES */
 {
@@ -338,7 +338,7 @@ sys_timeout(u32_t msecs, sys_timeout_handler handler, void *arg)
  * @param handler callback function that would be called by the timeout
  * @param arg callback argument that would be passed to handler
 */
-void ICACHE_FLASH_ATTR
+void
 sys_untimeout(sys_timeout_handler handler, void *arg)
 {
   struct sys_timeo *prev_t, *t;
@@ -375,7 +375,7 @@ extern uint8 timer2_ms_flag;
  *
  * Must be called periodically from your main loop.
  */
-void ICACHE_FLASH_ATTR
+void
 sys_check_timeouts(void)
 {
   struct sys_timeo *tmptimeout;
@@ -426,7 +426,7 @@ sys_check_timeouts(void)
  * time (e.g. while saving energy) to prevent all timer functions of that
  * period being called.
  */
-void ICACHE_FLASH_ATTR
+void
 sys_restart_timeouts(void)
 {
   timeouts_last_time = NOW();
@@ -441,7 +441,7 @@ sys_restart_timeouts(void)
  * @param mbox the mbox to fetch the message from
  * @param msg the place to store the message
  */
-void ICACHE_FLASH_ATTR
+void
 sys_timeouts_mbox_fetch(sys_mbox_t *mbox, void **msg)
 {
   u32_t time_needed;
@@ -502,7 +502,7 @@ sys_timeouts_mbox_fetch(sys_mbox_t *mbox, void **msg)
 
 #else /* LWIP_TIMERS */
 /* Satisfy the TCP code which calls this function */
-void ICACHE_FLASH_ATTR
+void
 tcp_timer_needed(void)
 {
 }

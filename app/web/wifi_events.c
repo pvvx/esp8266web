@@ -164,7 +164,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					IP2STR(&evt->event_info.got_ip.gw));
 #endif
 #ifdef USE_SNTP
-			if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
+			if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
 #endif
 			if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
 			break;
@@ -180,7 +180,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 #endif
 			if(i == 1) {
 #ifdef USE_SNTP
-					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_init();
+					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
 #endif
 					if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
 #ifdef USE_CAPTDNS

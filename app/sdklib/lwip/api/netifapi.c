@@ -5,7 +5,7 @@
  */
 
 /*
- * Redistribution and use in source and binary forms, with or without modification,
+ * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -14,21 +14,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ *    derived from this software without specific prior written permission. 
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- *
+ * 
  */
 
 #include "lwip/opt.h"
@@ -42,7 +42,7 @@
  * Call netif_add() inside the tcpip_thread context.
  */
 void
-ICACHE_FLASH_ATTR do_netifapi_netif_add(struct netifapi_msg_msg *msg)
+do_netifapi_netif_add(struct netifapi_msg_msg *msg)
 {
   if (!netif_add( msg->netif,
                   msg->msg.add.ipaddr,
@@ -62,7 +62,7 @@ ICACHE_FLASH_ATTR do_netifapi_netif_add(struct netifapi_msg_msg *msg)
  * Call netif_set_addr() inside the tcpip_thread context.
  */
 void
-ICACHE_FLASH_ATTR do_netifapi_netif_set_addr(struct netifapi_msg_msg *msg)
+do_netifapi_netif_set_addr(struct netifapi_msg_msg *msg)
 {
   netif_set_addr( msg->netif,
                   msg->msg.add.ipaddr,
@@ -77,7 +77,7 @@ ICACHE_FLASH_ATTR do_netifapi_netif_set_addr(struct netifapi_msg_msg *msg)
  * tcpip_thread context.
  */
 void
-ICACHE_FLASH_ATTR do_netifapi_netif_common(struct netifapi_msg_msg *msg)
+do_netifapi_netif_common(struct netifapi_msg_msg *msg)
 {
   if (msg->msg.common.errtfunc != NULL) {
     msg->err = msg->msg.common.errtfunc(msg->netif);
@@ -123,7 +123,7 @@ netifapi_netif_add(struct netif *netif,
  * @note for params @see netif_set_addr()
  */
 err_t
-ICACHE_FLASH_ATTR netifapi_netif_set_addr(struct netif *netif,
+netifapi_netif_set_addr(struct netif *netif,
                         ip_addr_t *ipaddr,
                         ip_addr_t *netmask,
                         ip_addr_t *gw)
@@ -145,7 +145,7 @@ ICACHE_FLASH_ATTR netifapi_netif_set_addr(struct netif *netif,
  * @note use only for functions where there is only "netif" parameter.
  */
 err_t
-ICACHE_FLASH_ATTR netifapi_netif_common(struct netif *netif, netifapi_void_fn voidfunc,
+netifapi_netif_common(struct netif *netif, netifapi_void_fn voidfunc,
                        netifapi_errt_fn errtfunc)
 {
   struct netifapi_msg msg;

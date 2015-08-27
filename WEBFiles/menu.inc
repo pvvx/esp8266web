@@ -6,7 +6,7 @@
 		<a href="/protect/wifi.htm">WiFi settings</a>
 		<a href="/protect/scan.htm">WiFi Scan</a>
 		<a href="/protect/upload.htm">WebFS Upload</a>
-		<a href="/protect/setup.htm">Sytem Setup</a>
+		<a href="/protect/setup.htm">System Setup</a>
 	</div>
 	<div>
 		<a href="/protect/gpio.htm">GPIO</a>

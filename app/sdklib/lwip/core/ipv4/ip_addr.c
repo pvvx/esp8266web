@@ -6,9 +6,9 @@
 
 /*
  * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
+ * All rights reserved. 
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -17,21 +17,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ *    derived from this software without specific prior written permission. 
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- *
+ * 
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
@@ -41,17 +41,17 @@
 #include "lwip/netif.h"
 
 /* used by IP_ADDR_ANY and IP_ADDR_BROADCAST in ip_addr.h */
-const ip_addr_t ip_addr_any = { IPADDR_ANY };
-const ip_addr_t ip_addr_broadcast = { IPADDR_BROADCAST };
+const ip_addr_t ip_addr_any  = { IPADDR_ANY }; // ICACHE_RODATA_ATTR ?
+const ip_addr_t ip_addr_broadcast  = { IPADDR_BROADCAST }; // ICACHE_RODATA_ATTR ?
 
 /**
- * Determine if an address is a broadcast address on a network interface
- *
+ * Determine if an address is a broadcast address on a network interface 
+ * 
  * @param addr address to be checked
  * @param netif the network interface against which the address is checked
  * @return returns non-zero if the address is a broadcast address
  */
-u8_t ICACHE_FLASH_ATTR
+u8_t
 ip4_addr_isbroadcast(u32_t addr, const struct netif *netif)
 {
   ip_addr_t ipaddr;
@@ -86,7 +86,7 @@ ip4_addr_isbroadcast(u32_t addr, const struct netif *netif)
  * @param netmask the IPv4 netmask to check (in network byte order!)
  * @return 1 if the netmask is valid, 0 if it is not
  */
-u8_t ICACHE_FLASH_ATTR
+u8_t
 ip4_addr_netmask_valid(u32_t netmask)
 {
   u32_t mask;
@@ -126,7 +126,7 @@ ip4_addr_netmask_valid(u32_t netmask)
  * @param cp IP address in ascii represenation (e.g. "127.0.0.1")
  * @return ip address in network order
  */
-u32_t ICACHE_FLASH_ATTR
+u32_t
 ipaddr_addr(const char *cp)
 {
   ip_addr_t val;
@@ -148,12 +148,15 @@ ipaddr_addr(const char *cp)
  * @param addr pointer to which to save the ip address in network order
  * @return 1 if cp could be converted to addr, 0 on failure
  */
-int ICACHE_FLASH_ATTR
+int
 ipaddr_aton(const char *cp, ip_addr_t *addr)
 {
   u32_t val;
   u8_t base;
   char c;
+  char ch;
+  unsigned long cutoff;
+  int cutlim;
   u32_t parts[4];
   u32_t *pp = parts;
 
@@ -176,12 +179,26 @@ ipaddr_aton(const char *cp, ip_addr_t *addr)
       } else
         base = 8;
     }
+
+    cutoff =(unsigned long)0xffffffff / (unsigned long)base;
+    cutlim =(unsigned long)0xffffffff % (unsigned long)base;
+
     for (;;) {
       if (isdigit(c)) {
+    	ch = (int)(c - '0');
+
+    	if (val > cutoff || (val == cutoff && ch > cutlim))
+    		return (0);
+
         val = (val * base) + (int)(c - '0');
         c = *++cp;
       } else if (base == 16 && isxdigit(c)) {
-        val = (val << 4) | (int)(c + 10 - (islower(c) ? 'a' : 'A'));
+    	ch = (int)(c + 10 - (islower(c) ? 'a' : 'A'));
+
+    	if (val > cutoff || (val == cutoff && ch > cutlim))
+    		return (0);
+
+    	val = (val << 4) | (int)(c + 10 - (islower(c) ? 'a' : 'A'));
         c = *++cp;
       } else
         break;
@@ -220,21 +237,21 @@ ipaddr_aton(const char *cp, ip_addr_t *addr)
     break;
 
   case 2:             /* a.b -- 8.24 bits */
-    if (val > 0xffffffUL) {
+    if ((val > 0xffffffUL) || (parts[0] > 0xff)) {
       return (0);
     }
     val |= parts[0] << 24;
     break;
 
   case 3:             /* a.b.c -- 8.8.16 bits */
-    if (val > 0xffff) {
+    if ((val > 0xffff) || (parts[0] > 0xff) || (parts[1] > 0xff)) {
       return (0);
     }
     val |= (parts[0] << 24) | (parts[1] << 16);
     break;
 
   case 4:             /* a.b.c.d -- 8.8.8.8 bits */
-    if (val > 0xff) {
+    if ((val > 0xff) || (parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xff)) {
       return (0);
     }
     val |= (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8);
@@ -257,7 +274,7 @@ ipaddr_aton(const char *cp, ip_addr_t *addr)
  * @return pointer to a global static (!) buffer that holds the ASCII
  *         represenation of addr
  */
-char * ICACHE_FLASH_ATTR
+char *
 ipaddr_ntoa(const ip_addr_t *addr)
 {
   static char str[16];
@@ -273,7 +290,7 @@ ipaddr_ntoa(const ip_addr_t *addr)
  * @return either pointer to buf which now holds the ASCII
  *         representation of addr or NULL if buf was too small
  */
-char ICACHE_FLASH_ATTR *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen)
+char *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen)
 {
   u32_t s_addr;
   char inv[3];

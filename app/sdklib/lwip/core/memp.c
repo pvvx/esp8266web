@@ -8,9 +8,9 @@
 
 /*
  * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
+ * All rights reserved. 
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -19,21 +19,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ *    derived from this software without specific prior written permission. 
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- *
+ * 
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
@@ -114,7 +114,7 @@ struct memp {
 
 /** This array holds the first free element of each pool.
  *  Elements form a linked list. */
-static struct memp *memp_tab[MEMP_MAX];
+static struct memp *memp_tab[MEMP_MAX] LWIP_DATA_IRAM_ATTR;
 
 #else /* MEMP_MEM_MALLOC */
 
@@ -126,7 +126,7 @@ static struct memp *memp_tab[MEMP_MAX];
 #if !MEM_USE_POOLS && !MEMP_MEM_MALLOC
 static
 #endif
-const u16_t memp_sizes[MEMP_MAX] = { //LWIP_MEM_ALIGN_SIZE
+const u32_t memp_sizes[MEMP_MAX] ICACHE_RODATA_ATTR = { //LWIP_MEM_ALIGN_SIZE
 #define LWIP_MEMPOOL(name,num,size,desc,attr)  LWIP_MEM_ALIGN_SIZE(size),
 #include "lwip/memp_std.h"
 };
@@ -158,19 +158,19 @@ const char *memp_desc[MEMP_MAX] = {
  *   extern u8_t __attribute__((section(".onchip_mem"))) memp_memory_UDP_PCB_base[];
  */
 #define LWIP_MEMPOOL(name,num,size,desc,attr) u8_t memp_memory_ ## name ## _base \
-  [((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size)))] attr;
+  [((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size)))] attr;   
 #include "lwip/memp_std.h"
 
 /** This array holds the base of each memory pool. */
-static u8_t *const memp_bases[] = {
-#define LWIP_MEMPOOL(name,num,size,desc,attr) memp_memory_ ## name ## _base,
+static u8_t *const memp_bases[] = { 
+#define LWIP_MEMPOOL(name,num,size,desc,attr) memp_memory_ ## name ## _base,   
 #include "lwip/memp_std.h"
 };
 
 #else /* MEMP_SEPARATE_POOLS */
 
 /** This is the actual memory used by the pools (all pools in one big block). */
-static u8_t memp_memory[MEM_ALIGNMENT - 1
+static u8_t memp_memory[MEM_ALIGNMENT - 1 
 #define LWIP_MEMPOOL(name,num,size,desc, attr) + ( (num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size) ) )
 #include "lwip/memp_std.h"
 ];
@@ -229,12 +229,12 @@ memp_overflow_check_element_overflow(struct memp *p, u16_t memp_type)
       char digit[] = "0";
       if(memp_type >= 10) {
         digit[0] = '0' + (memp_type/10);
-        strcat(errstr, digit);
+        os_strcat(errstr, digit);
       }
       digit[0] = '0' + (memp_type%10);
-      strcat(errstr, digit);
+      os_strcat(errstr, digit);
 #if defined(LWIP_DEBUG) && MEMP_STATS
-      strcat(errstr, memp_overflow_names[memp_type]);
+      os_strcat(errstr, memp_overflow_names[memp_type]);
 #endif
       LWIP_ASSERT(errstr, 0);
     }
@@ -262,12 +262,12 @@ memp_overflow_check_element_underflow(struct memp *p, u16_t memp_type)
       char digit[] = "0";
       if(memp_type >= 10) {
         digit[0] = '0' + (memp_type/10);
-        strcat(errstr, digit);
+        os_strcat(errstr, digit);
       }
       digit[0] = '0' + (memp_type%10);
-      strcat(errstr, digit);
+      os_strcat(errstr, digit);
 #if defined(LWIP_DEBUG) && MEMP_STATS
-      strcat(errstr, memp_overflow_names[memp_type]);
+      os_strcat(errstr, memp_overflow_names[memp_type]);
 #endif
       LWIP_ASSERT(errstr, 0);
     }
@@ -320,11 +320,11 @@ memp_overflow_init(void)
     for (j = 0; j < memp_num[i]; ++j) {
 #if MEMP_SANITY_REGION_BEFORE_ALIGNED > 0
       m = (u8_t*)p + MEMP_SIZE - MEMP_SANITY_REGION_BEFORE_ALIGNED;
-      memset(m, 0xcd, MEMP_SANITY_REGION_BEFORE_ALIGNED);
+      os_memset(m, 0xcd, MEMP_SANITY_REGION_BEFORE_ALIGNED);
 #endif
 #if MEMP_SANITY_REGION_AFTER_ALIGNED > 0
       m = (u8_t*)p + MEMP_SIZE + memp_sizes[i];
-      memset(m, 0xcd, MEMP_SANITY_REGION_AFTER_ALIGNED);
+      os_memset(m, 0xcd, MEMP_SANITY_REGION_AFTER_ALIGNED);
 #endif
       p = (struct memp*)((u8_t*)p + MEMP_SIZE + memp_sizes[i] + MEMP_SANITY_REGION_AFTER_ALIGNED);
     }
@@ -334,11 +334,11 @@ memp_overflow_init(void)
 
 /**
  * Initialize this module.
- *
+ * 
  * Carves out memp_memory into linked lists for each pool-type.
  */
 void
-ICACHE_FLASH_ATTR memp_init(void)
+memp_init(void)
 {
   struct memp *memp;
   u16_t i, j;
@@ -397,7 +397,7 @@ memp_malloc_fn(memp_t type, const char* file, const int line)
 {
   struct memp *memp;
   SYS_ARCH_DECL_PROTECT(old_level);
-
+ 
   LWIP_ERROR("memp_malloc: type < MEMP_MAX", (type < MEMP_MAX), return NULL;);
 
   SYS_ARCH_PROTECT(old_level);
@@ -406,7 +406,7 @@ memp_malloc_fn(memp_t type, const char* file, const int line)
 #endif /* MEMP_OVERFLOW_CHECK >= 2 */
 
   memp = memp_tab[type];
-
+  
   if (memp != NULL) {
     memp_tab[type] = memp->next;
 #if MEMP_OVERFLOW_CHECK
@@ -458,9 +458,9 @@ memp_free(memp_t type, void *mem)
 #endif /* MEMP_OVERFLOW_CHECK >= 2 */
 #endif /* MEMP_OVERFLOW_CHECK */
 
-  MEMP_STATS_DEC(used, type);
-
-  memp->next = memp_tab[type];
+  MEMP_STATS_DEC(used, type); 
+  
+  memp->next = memp_tab[type]; 
   memp_tab[type] = memp;
 
 #if MEMP_SANITY_CHECK

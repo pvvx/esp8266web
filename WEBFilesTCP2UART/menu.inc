@@ -5,7 +5,7 @@
 	<a href="/protect/wifi_ap.htm">WiFi AP Settings</a>
 	<a href="/protect/wifi_sta.htm">WiFi Station Settings</a>
 	<a href="/protect/upload.htm">WebFS Upload</a>
-	<a href="/protect/setup.htm">Sytem Setup</a>
+	<a href="/protect/setup.htm">System Setup</a>
 	<a href="/protect/gpio.htm">GPIO</a>
 </div>
 <script>

@@ -377,8 +377,7 @@ typedef enum {
 #define TIMER1_ALARM	timer_[12] // the alarm value for the counter
 #define TIMER1_ALARM_DATA_MASK	0xffffffff
 /*	Returns	the	current	time	according	to	the	timer	timer. */
-#define	NOW()			TIMER1_COUNT // FRC2_COUNT
-
+#define	NOW()			TIMER1_COUNT // RTC_REG_READ(FRC2_COUNT_ADDRESS)
 
 /* WDT:0x60000900 registers */
 /* WDT_CTRL:0x60000900 register */

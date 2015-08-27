@@ -614,7 +614,7 @@ void ICACHE_FLASH_ATTR ntp_time_update(void *ignored)
  * Initialize this module.
  * Send out request instantly or after SNTP_STARTUP_DELAY.
  */
-bool ICACHE_FLASH_ATTR sntp_init(void)
+bool ICACHE_FLASH_ATTR sntp_inits(void)
 {
 	if (sntp == NULL) {
 		sntp = (struct ssntp *)os_zalloc(sizeof(struct ssntp));
