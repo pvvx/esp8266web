@@ -14,7 +14,9 @@
 #include "wifi.h"
 #include "flash_eep.h"
 #include "sdk/rom2ram.h"
+#include "sdk/sys_const.h"
 #include "wifi_events.h"
+#include "lwip/netif.h"
 #if DEF_SDK_VERSION == 1019
 #include "../main/include/libmain.h"
 #include "../main/include/app_main.h"
@@ -115,6 +117,9 @@ uint32 ICACHE_FLASH_ATTR Cmp_WiFi_chg(struct wifi_config *wcfg) {
 				wchg.b.ap_macaddr = 1;
 		}
 	}
+	if (wcfg->phy_max_tpw > MAX_PHY_TPW) wcfg->phy_max_tpw = MAX_PHY_TPW;
+	if (phy_in_most_power != wcfg->phy_max_tpw) wchg.b.maxtpw = 1;
+	if (hostname == NULL || (ets_strcmp(wcfg->st.hostname, hostname) != 0)) wchg.b.st_hostname = 1;
 	return wchg.ui;
 }
 /******************************************************************************
@@ -155,6 +160,13 @@ uint32 ICACHE_FLASH_ATTR Read_WiFi_config(struct wifi_config *wcfg,
 			werr.b.st_macaddr = 1;
 		if (wset.b.st_autocon)
 			wcfg->st.auto_connect = wifi_station_get_auto_connect();
+	}
+	if (wset.b.maxtpw) wcfg->phy_max_tpw = phy_in_most_power;
+	if (wset.b.st_hostname) {
+		if (hostname == NULL) {
+			wifi_station_set_default_hostname(info.st_mac);
+		}
+		ets_strcpy(wcfg->st.hostname, hostname);
 	}
 	return werr.ui;
 }
@@ -224,6 +236,26 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 			wcfg->st.auto_connect = 1;
 		}
 		if(!wcfg->b.st_dhcp_enable) wset.b.st_ipinfo = 1;
+		if (wset.b.st_hostname) {
+	      	  if(hostname != NULL) {
+	      		  vPortFree(hostname);
+	      		  hostname = NULL;
+	      	  };
+	      	  hostname = pvPortMalloc(ets_strlen(wcfg->st.hostname) + 1);
+	      	  if(hostname != NULL) {
+	          	  extern struct netif * eagle_lwip_getif(int index);
+	          	  struct netif * nif = eagle_lwip_getif(0);
+	          	  ets_strcpy(hostname, wcfg->st.hostname);
+	          	  if(nif != NULL) {
+	          		  nif->hostname = hostname;
+	          		  default_hostname = false;
+	          	  };
+	      	  };
+		};
+	}
+	if (wset.b.maxtpw) {
+		if(phy_in_most_power != wcfg->phy_max_tpw) system_phy_set_max_tpw(wcfg->phy_max_tpw);
+		if(phy_in_most_power != wcfg->phy_max_tpw) werr.b.maxtpw = 1;
 	}
 	if ((wset.b.st_config) || (wset.b.st_ipinfo)) {
 		if(opmode & STATION_MODE) {
@@ -281,11 +313,11 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	if (wset.b.chl)
 		wcfg->b.chl = 1;
 	if (wset.b.sleep)
-		wcfg->b.sleep = MODEM_SLEEP_T; // LIGHT_SLEEP_T; // NONE_SLEEP_T
+		wcfg->b.sleep = DEF_WIFI_SLEEP;
 	if (wset.b.ap_config) {
 		wcfg->ap.config.ssid_len = rom_xstrcpy(wcfg->ap.config.ssid, wifi_ap_name);
 		rom_xstrcpy(wcfg->ap.config.password, wifi_ap_password);
-		wcfg->ap.config.authmode = AUTH_OPEN;
+		wcfg->ap.config.authmode = DEF_WIFI_AUTH_MODE;
 		wcfg->ap.config.ssid_hidden = 0; // no
 		wcfg->ap.config.channel = wcfg->b.chl;
 		wcfg->ap.config.max_connection = 4; // default
@@ -322,6 +354,11 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 		read_macaddr_from_otp(wcfg->st.macaddr);
 	}
 	wcfg->st.reconn_timeout = DEF_ST_RECONNECT_TIME;
+	if (wset.b.maxtpw) wcfg->phy_max_tpw = DEF_MAX_PHY_TPW;
+	if (wset.b.st_hostname) {
+		wifi_station_set_default_hostname(info.st_mac);
+		ets_strcpy(wcfg->st.hostname, hostname);
+	}
 	//}
 }
 /******************************************************************************
@@ -350,7 +387,7 @@ void ICACHE_FLASH_ATTR print_wifi_config(void) {
 			IP2STR(&wificonfig.st.ipinfo.ip), IP2STR(&wificonfig.st.ipinfo.gw),
 			IP2STR(&wificonfig.st.ipinfo.netmask),
 			MAC2STR(wificonfig.st.macaddr));
-	os_printf("sleep:%u, rect:%u\n", wificonfig.b.sleep, wificonfig.st.reconn_timeout);
+	os_printf("sleep:%u, rect:%u, maxtpw:%u, sthn:[%s]\n", wificonfig.b.sleep, wificonfig.st.reconn_timeout, wificonfig.phy_max_tpw, wificonfig.st.hostname);
 }
 #endif
 /******************************************************************************

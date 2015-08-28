@@ -28,9 +28,20 @@
 #ifndef PHY_MODE
 	#define PHY_MODE PHY_MODE_11G // PHY_MODE_11N // PHY_MODE_11B
 #endif
-#ifndef DEF_ST_RECONNECT_TIME
-	#define DEF_ST_RECONNECT_TIME 30 // если 3 раза не удалось соединиться ST, тогда следующая проба соединения произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
+
+#ifndef DEF_WIFI_SLEEP
+	#define DEF_WIFI_SLEEP NONE_SLEEP_T; // MODEM_SLEEP_T; // LIGHT_SLEEP_T;
 #endif
+#ifndef DEF_WIFI_AUTH_MODE
+	#define DEF_WIFI_AUTH_MODE AUTH_OPEN; // AUTH_WPA_PSK, AUTH_WPA2_PSK, AUTH_WPA_WPA2_PSK
+#endif
+
+#ifndef DEF_ST_RECONNECT_TIME
+	#define DEF_ST_RECONNECT_TIME 30 // следующая проба соединения ST произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
+#endif
+
+#define MAX_PHY_TPW 82
+#define DEF_MAX_PHY_TPW 82 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
 
 #ifndef DEBUGSOO
 	#define DEBUGSOO 1
@@ -56,13 +67,15 @@ struct bits_wifi_chg { // структура передачи изменений
 	unsigned st_dhcp	: 1;	//11 0x00000800
 	unsigned st_autocon	: 1;	//12 0x00001000
 	unsigned st_macaddr	: 1;	//13 0x00002000
-	unsigned st_connect : 1;	//14 0x00004000
-	unsigned none    	: 1;	//15 0x00008000
-	unsigned save_cfg 	: 1;	//16 0x00010000
-	unsigned reboot 	: 1;	//17 0x00020000
+	unsigned st_hostname : 1;	//15 0x00004000
+	unsigned maxtpw    	: 1;	//16 0x00008000
+	unsigned st_connect : 1;	//14 0x00010000
+	unsigned save_cfg 	: 1;	//30 0x00020000
+	unsigned reboot 	: 1;	//31 0x00040000
+
 } __attribute__((packed));
 
-#define WIFI_MASK_ALL		0x00003FFF // 0x00003FFF
+#define WIFI_MASK_ALL		0x0000FFFF // 0x0000FFFF
 #define WIFI_MASK_MODE		0x00000001
 #define WIFI_MASK_PHY		0x00000002
 #define WIFI_MASK_CHL		0x00000004
@@ -77,8 +90,10 @@ struct bits_wifi_chg { // структура передачи изменений
 #define WIFI_MASK_STDHCP	0x00000800
 #define WIFI_MASK_STACN		0x00001000
 #define WIFI_MASK_STMAC		0x00002000
-#define WIFI_MASK_SAVE		0x00010000
-#define WIFI_MASK_REBOOT	0x00020000
+#define WIFI_MASK_STHNM		0x00004000
+#define WIFI_MASK_STMTPW	0x00008000
+#define WIFI_MASK_SAVE		0x00020000
+#define WIFI_MASK_REBOOT	0x00040000
 
 struct wifi_bits_cfg { // общие установки wifi
 	unsigned mode	: 2;
@@ -96,10 +111,7 @@ typedef union {
 }uwifi_chg;
 
 struct wifi_config {	// структура конфигурации wifi
-//	uwifi_chg err;
 	struct wifi_bits_cfg b;
-//	uint8 phy_max_tpw; // unit: 0.25dBm, range [0, 82], 34th byte esp_init_data_default.bin
-//	uint16 phy_tpw_via_vdd33; //  Adjust RF TX Power according to VDD33, unit: 1/1024V, range [1900, 3300]
 	struct {
 		struct ip_info ipinfo;
 		struct softap_config config;
@@ -112,7 +124,10 @@ struct wifi_config {	// структура конфигурации wifi
 		struct station_config config;
 	    uint8  auto_connect;
 	    uint8 macaddr[6];
+	    uint8 hostname[32];
 	}st;
+	uint8 phy_max_tpw; // unit: 0.25dBm, range [0, 82], 34th byte esp_init_data_default.bin
+//	uint16 phy_tpw_via_vdd33; //  Adjust RF TX Power according to VDD33, unit: 1/1024V, range [1900, 3300]
 };
 
 struct bss_scan_info { // структуры, сохранямые для вывода scan.xml (в iram)

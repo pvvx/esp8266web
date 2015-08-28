@@ -81,7 +81,7 @@ uint32 system_phy_set_max_tpw(uint32 tpw)
 {
 	return phy_set_most_tpw(tpw);
 }
-// получить текущее значение tpw мождно использовав chip6_phy_init_ctrl[sys_const_target_power_qdb_0] - см: esp8266web/include/sdk/sys_const.h
+// получить текущее значение tpw мождно использовав phy_in_most_power
 
 uint32 system_get_time(void)
 {

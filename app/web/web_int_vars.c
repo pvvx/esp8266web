@@ -259,7 +259,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       }
       else ifcmp("rfopt") system_phy_set_rfoption(val); // phy_afterwake_set_rfoption(val); // phy_afterwake_set_rfoption(option);
       else ifcmp("vddpw") system_phy_set_tpw_via_vdd33(val); // = pphy_vdd33_set_tpw(vdd_x_1000); Adjust RF TX Power according to VDD33, unit: 1/1024V, range [1900, 3300]
-      else ifcmp("maxpw") system_phy_set_max_tpw(val); // = phy_set_most_tpw(pow_db); unit: 0.25dBm, range [0, 82], 34th byte esp_init_data_default.bin
+      else ifcmp("maxpw") wificonfig.phy_max_tpw = (val > MAX_PHY_TPW)? MAX_PHY_TPW : val;
       else ifcmp("ap_") {
     	  cstr+=3;
           ifcmp("ssid") {
@@ -306,7 +306,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
         	  if(val < 8192) wificonfig.st.reconn_timeout = val;
         	  else wificonfig.st.reconn_timeout = 8192;
           }
-          ifcmp("ssid") {
+          else ifcmp("ssid") {
         	  if(pvar[0]!='\0'){
         		  os_memset(wificonfig.st.config.ssid, 0, sizeof(wificonfig.st.config.ssid));
         		  int len = os_strlen(pvar);
@@ -330,6 +330,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           else ifcmp("gw") 		wificonfig.st.ipinfo.gw.addr = ipaddr_addr(pvar);
           else ifcmp("msk") 	wificonfig.st.ipinfo.netmask.addr = ipaddr_addr(pvar);
           else ifcmp("mac") 	strtomac(pvar,wificonfig.st.macaddr);
+          else ifcmp("hostname") rom_strcpy(wificonfig.st.hostname, pvar, 31);
 #if DEBUGSOO > 5
           else os_printf(" - none!\n");
 #endif

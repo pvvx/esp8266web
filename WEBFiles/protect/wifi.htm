@@ -154,14 +154,15 @@
 				<td><input title='100...60000' name='wifi_ap_bint' maxlength='5' value='~wifi_ap_bint~'></td>
 			</tr>
 			<tr>
-				<td class="label">Cur. RF Tx Power:</td>
+				<td class="label">RF Tx Power:</td>
 				<td><input title='Current maximum RF Tx Power, unit: 0.25dBm, range 0..82' name='wifi_maxpw' maxlength='3' value='~wifi_maxpw~'></td>
-				<td><a href="/protect/rfinit1.htm">Set 'target_power_qdb_0'</a></td><td></td>
+				<td class="label">ST Host Name:</td>
+				<td><input name='wifi_st_hostname' maxlength='31' value='~wifi_st_hostname~'></td>
 			</tr>
 		</table>
 		<p class="center">
 			<input type='submit' value='Set Config' class="button">
-			<input type='hidden' name='wifi_newcfg' value='0x13fff'>
+			<input type='hidden' name='wifi_newcfg' value='0x2ffff'>
 		</p>
 		</form>
 	</div>

@@ -240,3 +240,4 @@ wfs_size
 wfs_addr
 wfs_max_size
 wifi_st_rect
+wifi_st_hostname

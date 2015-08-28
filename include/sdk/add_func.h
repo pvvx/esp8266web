@@ -21,6 +21,7 @@ struct s_info {
 extern struct s_info info;
 
 extern uint8 * hostname; // wifi_station_get_hostname(), wlan_lwip_if.h
+extern bool default_hostname; // eagle_lwip_if.c
 
 #if DEF_SDK_VERSION > 999 // SDK > 0.9.6 b1
 //uint32 system_adc_read(void); // user_interface.h
