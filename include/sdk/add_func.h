@@ -20,6 +20,8 @@ struct s_info {
 
 extern struct s_info info;
 
+extern uint8 * hostname; // wifi_station_get_hostname(), wlan_lwip_if.h
+
 #if DEF_SDK_VERSION > 999 // SDK > 0.9.6 b1
 //uint32 system_adc_read(void); // user_interface.h
 //void system_deep_sleep(uint32 time_in_us); // user_interface.h
@@ -129,6 +131,7 @@ void timer0_init(void *func, uint32 par, bool nmi_flg);
 void timer0_init(void *func, void *par);
 #endif
 #endif
+
 
 #endif //_INCLUDE_ADD_FUNC_H_
 

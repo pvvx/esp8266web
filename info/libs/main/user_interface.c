@@ -55,16 +55,16 @@ bool wifi_station_set_hostname(uint8 * name)
 	uint32 opmode = wifi_get_opmode();
 	if(opmode == 1 || opmode == 3) {
 		default_hostname = false;
-		if(hostname.phostname != NULL) {
-			vPortFree(hostname.phostname);
-			hostname.phostname = NULL;
+		if(hostname != NULL) {
+			vPortFree(hostname);
+			hostname = NULL;
 		}
-		hostname.phostname = pvPortMalloc(len);
-		if(hostname.phostname == NULL) return false;
+		hostname = pvPortMalloc(len);
+		if(hostname == NULL) return false;
 		struct netif * nif = eagle_lwip_getif(0);
-		ets_strcpy(hostname.phostname, name);
+		ets_strcpy(hostname, name);
 		if(nif != NULL) {
-			nif->hostname = hostname.phostname;
+			nif->hostname = hostname;
 		}
 		return true;
 	}
@@ -81,6 +81,7 @@ uint32 system_phy_set_max_tpw(uint32 tpw)
 {
 	return phy_set_most_tpw(tpw);
 }
+// получить текущее значение tpw мождно использовав chip6_phy_init_ctrl[sys_const_target_power_qdb_0] - см: esp8266web/include/sdk/sys_const.h
 
 uint32 system_get_time(void)
 {

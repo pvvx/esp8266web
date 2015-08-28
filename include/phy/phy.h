@@ -25,7 +25,7 @@ struct phy_funcs{
 };
 
 extern struct phy_func_tab * g_phyFuns; 
-extern uint8 chip6_phy_init_ctrl[3];
+//extern uint8 chip6_phy_init_ctrl[128]; // in sys_const.h
 
 void register_phy_ops(struct phy_funcs * phy_base);
 void register_get_phy_addr(struct phy_funcs * prt);

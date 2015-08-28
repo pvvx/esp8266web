@@ -194,8 +194,8 @@ udp_test_port_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *a
           struct softap_config wiconfig;
           wifi_softap_get_config(&wiconfig);
           udp_puts("OPMode:%u SSID:'%s' Pwd:'%s' Ch:%u Authmode:%u MaxCon:%u Phu:%u ACon:%u\n", wifi_get_opmode(), wiconfig.ssid, wiconfig.password, wiconfig.channel, wiconfig.authmode, wiconfig.max_connection, wifi_get_phy_mode(), wifi_station_get_auto_connect());
-          udp_puts("Connect status:%u\n", wifi_station_get_connect_status());
-        };
+          udp_puts("Connect status:%u, Station hostname:'%s'\n", wifi_station_get_connect_status(), wifi_station_get_hostname());
+        }
       case 'I':
           udp_puts("heapsize: %d\n", system_get_free_heap_size() + udpbufsize);
           udpbuflen += print_udp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
@@ -304,7 +304,7 @@ void ICACHE_FLASH_ATTR udp_test_port_init(uint16 portn)
 	   }
 	   else {
 #if DEBUGSOO > 0
-	   os_printf("Error mem\n");
+		   os_printf("Error mem\n");
 #endif
 	   }
 #if DEBUGSOO > 0

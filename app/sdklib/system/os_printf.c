@@ -39,19 +39,8 @@ int ICACHE_FLASH_ATTR rom_printf(const char *format, ...)
 void ICACHE_FLASH_ATTR _sprintf_out(char c)
 {
 	if(_sprintf_buf != NULL) {
-#if 1
 		write_align4_chr(_sprintf_buf++, c); // *_sprintf_buf++ = c;
-#else
-		union {
-			uint8 uc[4];
-			uint32 ud;
-		}tmp;
-  	  	register uint32 *p = (uint32 *)((uint32)_sprintf_buf & (~3));
-		tmp.ud = *p;
-		tmp.uc[(uint32)_sprintf_buf & 3] = c;
-		_sprintf_buf++;
-		*p = tmp.ud;
-#endif
+		write_align4_chr(_sprintf_buf, 0); // *_sprintf_buf = 0;
 	}
 }
 

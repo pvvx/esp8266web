@@ -26,7 +26,7 @@ err_t ieee80211_output_pbuf(struct netif *ifp, struct pbuf* pb);
 err_t ieee80211_output_pbuf(struct ieee80211_conn *conn, esf_buf *eb);
 #endif
 
-extern uint8 * * phostname;
+extern uint8 * hostname;
 extern bool default_hostname; //  = true;
 
 #endif /*  _WLAN_LWIP_IF_H_ */
