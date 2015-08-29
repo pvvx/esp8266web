@@ -353,6 +353,11 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	if (wset.b.st_macaddr) {
 		read_macaddr_from_otp(wcfg->st.macaddr);
 	}
+	if (wset.b.st_ipinfo) {
+		IP4_ADDR(&wcfg->st.ipinfo.ip, 192, 168, 1, 50);
+		IP4_ADDR(&wcfg->st.ipinfo.gw, 192, 168, 1, 1);
+		IP4_ADDR(&wcfg->st.ipinfo.netmask, 255, 255, 255, 0);
+	}
 	wcfg->st.reconn_timeout = DEF_ST_RECONNECT_TIME;
 	if (wset.b.maxtpw) wcfg->phy_max_tpw = DEF_MAX_PHY_TPW;
 	if (wset.b.st_hostname) {

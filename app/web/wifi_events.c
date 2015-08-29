@@ -85,7 +85,7 @@ LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 	}
 }
 #else // ждем patch
- #warning "Bag none AP fixed?"
+// #warning "Bag none AP fixed?"
 #endif
 /******************************************************************************
  * FunctionName : wifi_handle_event_cb

@@ -184,7 +184,7 @@ typedef union _u_g_ic{
 	struct s_g_ic g;
 	uint8 c[1368];
 	uint16 w[1368/2];
-	uint32 d[1668/4];
+	uint32 d[1368/4];
 }u_g_ic;
 
 extern u_g_ic g_ic;

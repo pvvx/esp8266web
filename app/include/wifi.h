@@ -20,27 +20,27 @@
 	#define WIFI_ST_PASSWORD	"0123456789"
 #endif
 #ifndef WIFI_MODE
-	#define WIFI_MODE  STATIONAP_MODE // STATION_MODE // SOFTAP_MODE
+	#define WIFI_MODE STATIONAP_MODE // SOFTAP_MODE // STATION_MODE
 #endif
 #ifndef WIFI_ST_AUTOCONNECT
 	#define WIFI_ST_AUTOCONNECT 0
 #endif
 #ifndef PHY_MODE
-	#define PHY_MODE PHY_MODE_11G // PHY_MODE_11N // PHY_MODE_11B
+	#define PHY_MODE PHY_MODE_11N // PHY_MODE_11G // PHY_MODE_11B
 #endif
 
 #ifndef DEF_WIFI_SLEEP
-	#define DEF_WIFI_SLEEP NONE_SLEEP_T; // MODEM_SLEEP_T; // LIGHT_SLEEP_T;
+	#define DEF_WIFI_SLEEP NONE_SLEEP_T // MODEM_SLEEP_T; // LIGHT_SLEEP_T;
 #endif
 #ifndef DEF_WIFI_AUTH_MODE
-	#define DEF_WIFI_AUTH_MODE AUTH_OPEN; // AUTH_WPA_PSK, AUTH_WPA2_PSK, AUTH_WPA_WPA2_PSK
+	#define DEF_WIFI_AUTH_MODE AUTH_OPEN // AUTH_WPA_PSK, AUTH_WPA2_PSK, AUTH_WPA_WPA2_PSK
 #endif
 
 #ifndef DEF_ST_RECONNECT_TIME
 	#define DEF_ST_RECONNECT_TIME 30 // следующая проба соединения ST произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
 #endif
 
-#define MAX_PHY_TPW 82
+#define MAX_PHY_TPW 82 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
 #define DEF_MAX_PHY_TPW 82 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
 
 #ifndef DEBUGSOO

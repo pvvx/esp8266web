@@ -68,8 +68,8 @@ void ICACHE_FLASH_ATTR reg_sct_bits(volatile uint32 * addr, uint32 bits, uint32 
 // тест
 void timer0_tst_isr(void *arg)
 {
-	if(GPIO_OUT&1) GPIO_OUT_W1TC = 1;
-	else GPIO_OUT_W1TS = 1;
+	GPIO_OUT = GPIO_OUT^1;
+	GPIO_OUT = GPIO_OUT^1;
 //	uart0_write_char(((uint32)arg == 0)? '*' : '@');
 }
 #endif
