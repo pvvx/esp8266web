@@ -67,7 +67,7 @@ enum srvconn_state {
 #define tcpsrv_init_client2() tcpsrv_init(2)
 #define tcpsrv_init_client3() tcpsrv_init(3)
 
-#define TCP_CLIENT_NEXT_CONNECT_MS		5000 // через 5 сек
+#define TCP_CLIENT_NEXT_CONNECT_MS		syscfg.tcp_client_twait // 5000 // через 5 сек
 #define TCP_CLIENT_MAX_CONNECT_RETRY	7 // 7 раз через 5 сек
 
 //--------------------------------------------------------------------------

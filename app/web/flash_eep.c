@@ -293,6 +293,7 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 #endif
 		syscfg.tcp2uart_twrec = 0;
 		syscfg.tcp2uart_twcls = 0;
+		syscfg.tcp_client_twait = 5000;
 #ifdef USE_SRV_WEB_PORT
 		syscfg.web_port = USE_SRV_WEB_PORT;
 #else

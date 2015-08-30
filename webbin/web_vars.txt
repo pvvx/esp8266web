@@ -232,6 +232,7 @@ wifi_scan
 cfg_tcp_url
 cfg_tcp_twrec
 cfg_tcp_twcls
+cfg_tcp_tcrec
 wdrv_ip
 wdrv_port
 wdrv_freq

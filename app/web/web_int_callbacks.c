@@ -410,6 +410,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 		    	ifcmp("port") tcp_puts("%u", syscfg.tcp2uart_port);
 	        	else ifcmp("twrec") tcp_puts("%u", syscfg.tcp2uart_twrec);
 	        	else ifcmp("twcls") tcp_puts("%u", syscfg.tcp2uart_twcls);
+	        	else ifcmp("tcrec") tcp_puts("%u", syscfg.tcp_client_twait);
 	        	else ifcmp("url") {
 	        		if(tcp2uart_url == NULL) tcp_puts("none");
 	        		else tcp_puts("%s", tcp2uart_url);

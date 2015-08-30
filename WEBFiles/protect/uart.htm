@@ -104,6 +104,10 @@
 				<td class="label">TCP close timeout:</td>
 				<td><input title='1...65535 sec, 0 - not limited' name='cfg_tcp_twcls' maxlength='5' value='~cfg_tcp_twcls~'></td>
 			</tr>
+			<tr>
+				<td class="label">Client reconnect timeout:</td>
+				<td><input title='100...65000 ms (max ping time * 2)' name='cfg_tcp_tcrec' maxlength='5' value='~cfg_tcp_tcrec~'></td>
+			</tr>
 			</table>
 			<p class="center">
 				<input type='hidden' name='uart_save' value='1'>

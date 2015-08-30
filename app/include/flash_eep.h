@@ -92,6 +92,7 @@ struct SystemCfg { // структура сохранения системных
 	uint16 tcp2uart_port;	// номер порта TCP-UART
 	uint16 tcp2uart_twrec;	// время (сек) стартового ожидания приема/передачи первого пакета, до авто-закрытия соединения
 	uint16 tcp2uart_twcls;	// время (сек) до авто-закрытия соединения после приема или передачи
+	uint16 tcp_client_twait;  // время (миллисек) до повтора соединения клиента
 	uint16 web_port;	// номер порта WEB
 	uint16 udp_port;	// номер порта UDP (sample-debug-test)
 } __attribute__((packed));
