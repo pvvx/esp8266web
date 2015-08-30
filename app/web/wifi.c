@@ -281,10 +281,7 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 		};
 	};
 	if(wset.b.st_connect || wset.b.st_autocon) {
-		st_reconn_count = 0;
-#if DEF_SDK_VERSION >= 1303 // ждем patch
-		ets_timer_disarm(&st_disconn_timer);
-#endif
+		station_reconnect_off();
 		if(wcfg->st.auto_connect) {
 			if(!wifi_station_connect()) werr.b.st_connect = 1;
 		}
@@ -519,7 +516,7 @@ void ICACHE_FLASH_ATTR wifi_start_scan(void)
 	int x = wifi_get_opmode();
 	if(!(x&1)) {
 		wifi_station_set_auto_connect(0);
-		wifi_set_opmode_current(x|1);
+		wifi_set_opmode_current(x|STATION_MODE);
 	}
     if(! wifi_station_scan(NULL, wifi_scan_cb)) {
 #if DEBUGSOO > 1

@@ -570,7 +570,7 @@
  * (requires IP_FRAG_USES_STATIC_BUF==1)
  */
 #if IP_FRAG_USES_STATIC_BUF && !defined(IP_FRAG_MAX_MTU)
-#define IP_FRAG_MAX_MTU                 1500
+#define IP_FRAG_MAX_MTU                 (TCP_MSS+40) // 1500
 #endif
 
 /**

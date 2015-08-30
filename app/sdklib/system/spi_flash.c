@@ -198,11 +198,9 @@ SpiFlashOpResult spi_flash_write(uint32 des_addr, uint32 *src_addr, uint32 size)
 SpiFlashOpResult spi_flash_erase_block(uint32 blk)
 {
 	Cache_Read_Disable();
-//	ets_intr_lock();
 	open_16m();
 	SpiFlashOpResult ret = SPIEraseBlock(blk);
 	close_16m();
-//	ets_intr_unlock();
 	Cache_Read_Enable_def();
 	return ret;
 }
