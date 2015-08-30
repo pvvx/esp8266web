@@ -579,18 +579,33 @@ void ICACHE_FLASH_ATTR sntp_request(void *arg)
 
 	LWIP_DEBUGF(SNTP_DEBUG_STATE, ("Sending request to %s.\n", buf_sntp_server_addresses));
 	/* initialize SNTP server address */
+	
+	ip_addr_t *dhcpntp;
+	dhcpntp = &dhcp_sntp_server_address;
+
 #if SNTP_SERVER_DNS
-	err = dns_gethostbyname(buf_sntp_server_addresses,
-		&sntp_server_address, sntp_dns_found, NULL);
-	if (err == ERR_INPROGRESS) {
-		/* DNS request sent, wait for sntp_dns_found being called */
-		LWIP_DEBUGF(SNTP_DEBUG_STATE, ("sntp_request: Waiting for server address to be resolved.\n"));
-		return;
+	if (!ip_addr_isany(dhcpntp)) {
+		sntp_server_address=*dhcpntp;
+		err = ERR_OK;
+	}
+	else {
+		err = dns_gethostbyname(buf_sntp_server_addresses,
+			&sntp_server_address, sntp_dns_found, NULL);
+		if (err == ERR_INPROGRESS) {
+			/* DNS request sent, wait for sntp_dns_found being called */
+			LWIP_DEBUGF(SNTP_DEBUG_STATE, ("sntp_request: Waiting for server address to be resolved.\n"));
+			return;
+		}
 	}
 #else /* SNTP_SERVER_DNS */
-	err = ipaddr_aton(buf_sntp_server_addresses, &sntp_server_address)
-		? ERR_OK : ERR_ARG;
-
+	if (!ip_addr_isany(dhcpntp)) {
+		sntp_server_address=*dhcpntp;
+		err = ERR_OK;
+	}
+	else {
+		err = ipaddr_aton(buf_sntp_server_addresses, &sntp_server_address)
+			? ERR_OK : ERR_ARG;
+	}
 #endif /* SNTP_SERVER_DNS */
 
 	if (err == ERR_OK) {

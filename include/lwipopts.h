@@ -793,6 +793,18 @@
 #define LWIP_MDNS                      0
 #endif
 /*
+	----------------------------------
+	------- DHCP NTP options ---------
+	----------------------------------
+*/
+#ifndef LWIP_DHCP_NTP
+#define LWIP_DHCP_NTP 1
+#endif
+/** The maximum of NTP servers */
+#ifndef NTP_MAX_SERVERS
+#define NTP_MAX_SERVERS 1
+#endif
+/*
    ----------------------------------
    ---------- DNS options -----------
    ----------------------------------

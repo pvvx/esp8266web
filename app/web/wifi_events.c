@@ -156,11 +156,8 @@ LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 {
 	ets_set_idle_cb(NULL, NULL);
 	ets_intr_unlock();
-	int opmode = wifi_get_opmode();
-	if((opmode & STATION_MODE) && wifi_station_get_auto_connect() != 0)	{
+	if((wifi_get_opmode() & STATION_MODE) && wifi_station_get_auto_connect() != 0)	{
 		wifi_station_disconnect();
-//		wifi_set_opmode_current(opmode & SOFTAP_MODE);
-//		wifi_set_opmode_current(wificonfig.b.mode);
 		if(wificonfig.st.reconn_timeout > 1) {
 #if DEBUGSOO > 1
 			os_printf("Set reconnect after %d sec\n", wificonfig.st.reconn_timeout);
