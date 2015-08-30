@@ -180,7 +180,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	   				tcp2uart_servcfg->time_wait_cls = val;
 	   			}
 	   		}
-	   		else ifcmp("twcls") {
+	   		else ifcmp("tcrec") {
 	   			if(val < 100) syscfg.tcp_client_twait = 100;
 	   			else if(val > 65000) syscfg.tcp_client_twait = 65000;
 	   			else syscfg.tcp_client_twait = val;
