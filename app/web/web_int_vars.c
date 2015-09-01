@@ -268,6 +268,11 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       else ifcmp("rfopt") system_phy_set_rfoption(val); // phy_afterwake_set_rfoption(val); // phy_afterwake_set_rfoption(option);
       else ifcmp("vddpw") system_phy_set_tpw_via_vdd33(val); // = pphy_vdd33_set_tpw(vdd_x_1000); Adjust RF TX Power according to VDD33, unit: 1/1024V, range [1900, 3300]
       else ifcmp("maxpw") wificonfig.phy_max_tpw = (val > MAX_PHY_TPW)? MAX_PHY_TPW : val;
+      else ifcmp("aps_") {
+    	  cstr+=4;
+    	  ifcmp("cnt") wifi_station_ap_number_set(val);
+    	  else ifcmp("cur") wifi_station_ap_change(val);
+      }
       else ifcmp("ap_") {
     	  cstr+=3;
           ifcmp("ssid") {

@@ -29,6 +29,7 @@ BLANKADDR := 0x7E000
 
 # Base directory for the compiler
 XTENSA_TOOLS_ROOT ?= c:/Espressif/xtensa-lx106-elf/bin
+
 #PATH := $(XTENSA_TOOLS_ROOT);$(PATH)
 
 # base directory of the ESP8266 SDK package, absolute

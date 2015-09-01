@@ -91,6 +91,7 @@
   <dncp_ip_start>~wifi_ap_sip~</dncp_ip_start>
   <dncp_ip_stop>~wifi_ap_eip~</dncp_ip_stop>
   <beacon_interval>~wifi_ap_bint~</beacon_interval>
+  <max_rf_tx_power>~wifi_maxpw~</max_rf_tx_power>
  </ap>
  <st>
   <ssid>~wifi_st_ssid~</ssid>
@@ -104,6 +105,13 @@
   <dncp>~wifi_st_dncp~</dncp>
   <rssi>~wifi_st_rssi~</rssi>
   <autoconnect>~wifi_aucn~</autoconnect>
+  <hostname>~wifi_st_hostname~</hostname>
  </st>
 </wifi>
+<webfs>
+  <addr>~wfs_addr~</addr>
+  <files>~wfs_files~</files>
+  <cur_size>~wfs_size~</cur_size>
+  <max_size>~wfs_max_size~</max_size>
+</webfs>
 </response>

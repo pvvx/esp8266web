@@ -146,7 +146,13 @@ wifi_st_mac
 wifi_st_dncp
 wifi_st_rssi
 wifi_aucn
+wifi_st_hostname
+wfs_addr
+wfs_files
+wfs_size
+wfs_max_size
 sys_ucnst_0
+wifi_aps_xml
 sys_const_107
 sys_vdd
 sys_const_108
@@ -236,9 +242,4 @@ cfg_tcp_tcrec
 wdrv_ip
 wdrv_port
 wdrv_freq
-wfs_files
-wfs_size
-wfs_addr
-wfs_max_size
 wifi_st_rect
-wifi_st_hostname

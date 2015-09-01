@@ -190,14 +190,22 @@ udp_test_port_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *a
           system_print_meminfo();
       case 'A':
         {
-          udp_puts("\nChip_id: %08x Flash_id: %08x\nsys_time:%08x ADC:%d\n", system_get_chip_id(), spi_flash_get_id(), system_get_time(), system_adc_read());
+          udp_puts("\nChip_id: %08x Flash_id: %08x\n", system_get_chip_id(), spi_flash_get_id());
           struct softap_config wiconfig;
           wifi_softap_get_config(&wiconfig);
           udp_puts("OPMode:%u SSID:'%s' Pwd:'%s' Ch:%u Authmode:%u MaxCon:%u Phu:%u ACon:%u\n", wifi_get_opmode(), wiconfig.ssid, wiconfig.password, wiconfig.channel, wiconfig.authmode, wiconfig.max_connection, wifi_get_phy_mode(), wifi_station_get_auto_connect());
           udp_puts("Connect status:%u, Station hostname:'%s'\n", wifi_station_get_connect_status(), wifi_station_get_hostname());
+       	  struct station_config config[5];
+       	  x = wifi_station_get_ap_info(config);
+       	  udp_puts("APs recorded %u\n", x);
+       	  int i;
+       	  for(i = 0; i < x; i++) {
+       		  udp_puts("AP[%u] SSID:'%s', PSW:'%s'\n", i, config[i].ssid, config[i].password);
+       	  }
+          udp_puts("heapsize: %d\n", system_get_free_heap_size() + udpbufsize);
+          break;
         }
       case 'I':
-          udp_puts("heapsize: %d\n", system_get_free_heap_size() + udpbufsize);
           udpbuflen += print_udp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
           udpbuflen += print_tcp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
           udpbuflen += chow_tcp_connection_info(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
@@ -206,62 +214,49 @@ udp_test_port_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *a
           udp_puts("heapsize: %d\n", system_get_free_heap_size() + udpbufsize);
           break;
       case 'U':
-          udp_puts("heapsize: %d\n", system_get_free_heap_size() + udpbufsize);
-          udpbuflen += print_udp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
+          udpbuflen = print_udp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
           break;
       case 'T':
-          udp_puts("heapsize: %d\n", system_get_free_heap_size() + udpbufsize);
-          udpbuflen += print_tcp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
+          udpbuflen = print_tcp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
           break;
 #ifdef USE_SRV_WEB_PORT
       case 'S':
-          udp_puts("heapsize: %d\n", system_get_free_heap_size() + udpbufsize);
-          udpbuflen += chow_tcp_connection_info(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
+          udpbuflen = chow_tcp_connection_info(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
           break;
 #endif
       case 'R':
           system_restart();
           break;
       case 'P':
-          udp_puts("system_set_os_print(%u)\n", x);
+          udp_puts("debug_print(%u)\n", x);
           system_set_os_print(x);
           break;
       case 'O':
-          udp_puts("wifi_set_opmode(%u):%u\n", x, wifi_set_opmode(x));
+          udp_puts("set_opmode(%u):%u\n", x, wifi_set_opmode(x));
           break;
       case 'B':
-          udp_puts("wifi_station_set_auto_connect(%u):%u\n", x, wifi_station_set_auto_connect(x));
+          udp_puts("st_set_auto_connect(%u):%u\n", x, wifi_station_set_auto_connect(x));
           break;
       case 'D':
           switch(x) {
           case 0:
-              udp_puts("wifi_station_dhcpc_start:%u\n", wifi_station_dhcpc_start());
+              udp_puts("st_dhcpc_start:%u\n", wifi_station_dhcpc_start());
               break;
           case 1:
-              udp_puts("wifi_station_dhcpc_stop:%u\n", wifi_station_dhcpc_stop());
+              udp_puts("st_dhcpc_stop:%u\n", wifi_station_dhcpc_stop());
               break;
           case 2:
-              udp_puts("wifi_softap_dhcps_start:%u\n",wifi_softap_dhcps_start());
+              udp_puts("ap_dhcps_start:%u\n",wifi_softap_dhcps_start());
               break;
           case 3:
-              udp_puts("wifi_softap_dhcps_stop:%u\n", wifi_softap_dhcps_stop());
+              udp_puts("ap_dhcps_stop:%u\n", wifi_softap_dhcps_stop());
               break;
           default:
               udp_puts("D(%u)?\n", x);
           }
           break;
-          case 'F':
-        	  if(flashchip != NULL) {
-        		  udp_puts("FlashID: 0x%08x\nChip size: %d\nBlock size: %d\nSector size: %d\nPage size: %d\nStatus mask: 0x%08x\n", flashchip->deviceId, flashchip->chip_size, flashchip->block_size, flashchip->sector_size, flashchip->page_size, flashchip->status_mask );
-        		  udp_puts("Real Flash size: %u\n", spi_flash_real_size());
-        	  }
-        	  else udp_puts("Unknown Flash type!\n");
-              break;
-          case 'E':
-        	  udp_puts("wifi_set_sleep_type(%d):%u\n", x, wifi_set_sleep_type(x));
-        	  break;
           case 'G':
-        	  udp_puts("g_ic = %p\n", &g_ic);
+        	  udp_puts("g_ic = %p \n", &g_ic);
         	  break;
       default:
           udp_puts("???\n");

@@ -53,6 +53,9 @@ extern uint8 phy_in_vdd33_offset;
 #define atoi rom_atoi
 
 #define mMIN(a, b)  ((a<b)?a:b)
+//#define ifcmp(a)   if(!os_memcmp((void*)cstr, a , sizeof(a)))
+#define ifcmp(a)  if(rom_xstrcmp(cstr, a))
+
 //-------------------------------------------------------------------------------
 // Test adc
 // Читает adc в одиночный буфер (~2килобайта) на ~20ksps и сохраняет в виде WAV
@@ -106,6 +109,51 @@ void ICACHE_FLASH_ATTR web_test_adc(TCP_SERV_CONN *ts_conn)
     	web_conn->msgbuflen += len << 1;
     }
     SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
+}
+//===============================================================================
+// WiFi Saved Aps XML
+//-------------------------------------------------------------------------------
+void ICACHE_FLASH_ATTR wifi_aps_xml(TCP_SERV_CONN *ts_conn)
+{
+	struct buf_html_string {
+		uint8 ssid[32*6 + 1];
+		uint8 psw[64*6 + 1];
+	};
+	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *) ts_conn->linkd;
+	struct station_config config[5];
+	struct buf_html_string * buf = (struct buf_html_string *)os_malloc(sizeof(struct buf_html_string));
+	if(buf == NULL) return;
+	int total_aps = wifi_station_get_ap_info(config);
+    // Check if this is a first round call
+    if(CheckSCB(SCB_RETRYCB)==0) {
+    	tcp_puts_fd("<total>%u</total><cur>%u</cur>", total_aps, wifi_station_get_current_ap_id());
+    	if(total_aps == 0) return;
+    	web_conn->udata_start = 0;
+    }
+	while(web_conn->msgbuflen + 74 + 32 <= web_conn->msgbufsize) {
+	    if(web_conn->udata_start < total_aps) {
+	    	struct station_config *p = (struct station_config *)&config[web_conn->udata_start];
+	    	if(web_conn->msgbuflen + 74 + htmlcode(buf->ssid, p->ssid, 32*6, 32) + htmlcode(buf->psw, p->password, 64*6, 64) > web_conn->msgbufsize) break;
+			tcp_puts_fd("<aps id=\"%u\"><ss>%s</ss><ps>%s</ps><bs>" MACSTR "</bs><bt>%d</bt></aps>",
+					web_conn->udata_start, buf->ssid, buf->psw, MAC2STR(p->bssid), p->bssid_set);
+	   		web_conn->udata_start++;
+	    	if(web_conn->udata_start >= total_aps) {
+			    ClrSCB(SCB_RETRYCB);
+			    os_free(buf);
+			    return;
+	    	}
+	    }
+	    else {
+		    ClrSCB(SCB_RETRYCB);
+		    os_free(buf);
+		    return;
+	    }
+	}
+	// repeat in the next call ...
+    SetSCB(SCB_RETRYCB);
+    SetNextFunSCB(wifi_aps_xml);
+    os_free(buf);
+    return;
 }
 //===============================================================================
 // WiFi Scan XML
@@ -311,16 +359,12 @@ void ICACHE_FLASH_ATTR get_new_url(TCP_SERV_CONN *ts_conn)
 	};
 	if(syscfg.web_port != 80) tcp_puts(":%u", syscfg.web_port);
 }
-
 /******************************************************************************
  * FunctionName : web_callback
  * Description  : callback
  * Parameters   : struct TCP_SERV_CONN
  * Returns      : none
  ******************************************************************************/
-//#define ifcmp(a)   if(!os_memcmp((void*)cstr, a , sizeof(a)))
-#define ifcmp(a)  if(rom_xstrcmp(cstr, a))
-
 void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 {
     WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
@@ -336,7 +380,6 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 #if DEBUGSOO > 2
         os_printf("[%s]\n", cstr);
 #endif
-//        ifcmp("start") tcp_puts("0x%08x", web_conn->udata_start);
         ifcmp("start") tcp_puts("0x%08x", web_conn->udata_start);
         else ifcmp("stop") tcp_puts("0x%08x", web_conn->udata_stop);
         else ifcmp("xml_") {
@@ -462,6 +505,25 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           else ifcmp("rfopt") tcp_puts("%u",(RTC_RAM_BASE[24]>>16)&7); // system_phy_set_rfoption | phy_afterwake_set_rfoption(option); 0..4
           else ifcmp("vddpw") tcp_puts("%u", phy_in_vdd33_offset); // system_phy_set_tpw_via_vdd33(val); // = pphy_vdd33_set_tpw(vdd_x_1000); Adjust RF TX Power according to VDD33, unit: 1/1024V, range [1900, 3300]
           else ifcmp("maxpw") tcp_puts("%u", phy_in_most_power); // read_sys_const(34));// system_phy_set_max_tpw(val); // = phy_set_most_tpw(pow_db); unit: 0.25dBm, range [0, 82], 34th byte esp_init_data_default.bin
+          else ifcmp("aps_xml") wifi_aps_xml(ts_conn);
+/*
+          else ifcmp("aps_") {
+        	  cstr+=4;
+        	  struct station_config config[5];
+        	  int x = wifi_station_get_ap_info(config);
+              if(cstr[1] != '_' || cstr[0]<'0' || cstr[0]>'4' ) {
+            	  ifcmp("cnt") tcp_puts("%d", x);
+            	  else tcp_put('?');
+              }
+              int i = cstr[0]-'0';
+       	      if(i < x) {
+       	    	  ifcmp("ssid") tcp_htmlstrcpy(config[i].ssid, sizeof(config[0].ssid));
+       	    	  else ifcmp("psw") tcp_htmlstrcpy(config[i].password, sizeof(config[0].password));
+       	    	  else ifcmp("sbss") tcp_puts("%d", config[i].bssid_set);
+       	      	  else ifcmp("bssid") tcp_puts(MACSTR, MAC2STR(config[i].bssid));
+              	  else tcp_put('?');
+       	      }
+          } */
           else {
             uint8 if_index;
             ifcmp("ap_") if_index = SOFTAP_IF;
