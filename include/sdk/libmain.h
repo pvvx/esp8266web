@@ -33,7 +33,7 @@ struct ets_FlashHeader { // Header flash (Use BIOS)
 struct ets_store_wifi_hdr { // Sector flash addr flashchip->chip_size-0x1000  (0x4027F000)
     uint8 bank;     // +00 = 0, 1 // WiFi config flash addr: 0 - flashchip->chip_size-0x3000 (0x7D000), 1 - flashchip->chip_size-0x2000
 	uint32 flag;	// +04 = 0x55AA55AA
-	uint32 x; 		// +08 = 0x00000119
+	uint32 wr_cnt;	// +08 = 0x00000119
 	uint32 xx[2];	// +12 = 28, 28
 	uint32 chk[2];	// +20 = 0x91, 0x91
 };

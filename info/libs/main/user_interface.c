@@ -576,22 +576,158 @@ const char *system_get_sdk_version(void)
 	return "1.1.2";
 }
 
+uint32 ICACHE_FLASH_ATTR system_get_checksum(uint8 *ptr, uint32 len)
+{
+	uint8 checksum = 0xEF;
+	while(len--) checksum ^= *ptr++;
+	return checksum;
+}
+
+bool wifi_softap_dhcps_start(void)
+{
+	int opmode = wifi_get_opmode();
+	if(opmode == STATION_MODE || opmode == NULL_MODE || g_ic.c[0x180+0x3E] == 0) return false;
+	struct netif * nif;
+	nif = eagle_lwip_getif(1);
+	if(nif == NULL && (!dhcps_flag)) {
+		struct ip_info *ipinfo;
+		wifi_get_ip_info(SOFTAP_IF, &ipinfo);
+		dhcps_start(ipinfo);
+	}
+	dhcps_flag = true;
+	return true;
+}
+bool wifi_softap_dhcps_stop(void)
+{
+	int opmode = wifi_get_opmode();
+	if(opmode == STATION_MODE || opmode == NULL_MODE || g_ic.c[0x180+0x3E] != 0) return false;
+	struct netif * nif;
+	nif = eagle_lwip_getif(1);
+	if(nif != NULL && dhcps_flag) dhcps_stop();
+	dhcps_flag = false;
+	return true;
+}
+
+enum dhcp_status wifi_softap_dhcps_status(void)
+{
+	return dhcps_flag;
+}
+
+bool wifi_station_dhcpc_start(void)
+{
+	int opmode = wifi_get_opmode();
+	if(opmode == STATION_MODE || opmode == NULL_MODE || g_ic.c[0x180+0x3E] != 0) return false;
+	struct netif * nif;
+	nif = eagle_lwip_getif(0);
+	if(nif == NULL && (!dhcpc_flag)) {
+		if(nif->flags & 1) { // nif->[+0x35]
+			nif->ip_addr.addr = 0;
+			nif->gw.addr = 0;
+			nif->netmask.addr = 0;
+			if( dhcp_start() != ERR_OK) return false;
+		}
+	}
+	dhcpc_flag = true;
+	return true;
+}
+
+bool wifi_station_dhcpc_stop(void){
+	int opmode = wifi_get_opmode();
+	if(opmode == STATION_MODE || opmode == NULL_MODE || g_ic.c[0x180+0x3E] != 0) return false; // g_ic.c[0x1BE] g_ic +446
+	struct netif * nif;
+	nif = eagle_lwip_getif(0);
+	if(nif == NULL && (!dhcpc_flag)) {
+		dhcp_stop();
+	}
+	dhcpc_flag = false;
+	return true;
+}
+enum dhcp_status wifi_station_dhcpc_status(void)
+{
+	return dhcpc_flag;
+}
+
+
+bool system_param_save_with_protect(uint16 start_sec, void *param, uint16 len)
+{
+	struct ets_store_wifi_hdr whd;
+	if(param == NULL) return false;
+	if(flashchip->sector_size < len) return false;
+	spi_flash_read(sec, &whd, sizeof(whd));
+	if(whd.bank == 0) whd.bank = 1;
+	wifi_param_save_protect_with_check(start_sec + whd.bank, flashchip->sector_size, param, len);
+	whd.flag = 0x55AA55AA;
+	if(++whd.wr_cnt == 0) whd.wr_cnt = 1;
+	whd.xx[whd.bank] = 28;
+	whd.chk[whd.bank] = system_get_checksum(param, 28);
+	wifi_param_save_protect_with_check(start_sec + 2, flashchip->sector_size, &whd, 28);
+	return true;
+}
+
+void wifi_param_save_protect_with_check(uint16 startsector, int sectorsize, void *pdata, uint16 len)
+{
+	uint8 * pbuf = pvPortMalloc(len);
+	int i;
+	if(pbuf == NULL) return;
+	do {
+		spi_flash_erase_sector(startsector);
+		spi_flash_write(startsector*sectorsize, pdata, len);
+		spi_flash_read(startsector*sectorsize, pbuf, len);
+		i = ets_memcmp(pdata, pbuf, len);
+		if(i) {
+			os_printf("[W]sec %x error\n", startsector);
+		}
+	} while(i != 0);
+	vPortFree(pbuf);
+}
+
+uint8 wifi_get_channel(void)
+{
+	uint8 *ptr = chm_get_current_channel();
+	return ptr[6];
+}
+
+bool wifi_set_channel(uint8 channel)
+{
+	if(channel > 13) return false;
+	ets_intr_lock();
+	uint32 * p = &g_ic;
+	p[300] = channel*6 + 0x78; // ???
+	ets_intr_unlock();
+	chm_set_current_channel(channel);
+	return true;
+}
+
+enum sleep_type wifi_get_sleep_type(void)
+{
+	return pm_get_sleep_type();
+}
+
+bool wifi_set_sleep_type(enum sleep_type type)
+{
+	if(type > MODEM_SLEEP_T) return false;
+	pm_set_sleep_type_from_upper(type);
+	return true;
+}
+
+bool wifi_promiscuous_set_mac(const uint8_t *address)
+{
+	if(g_ic.c[0x180+0x3e] != 1) return false;
+	volatile uint32 * preg = (volatile uint32 *)0x3FF20000;
+	preg[27] |= 1;
+	preg[27] |= 2;
+	preg[27] |= 4;
+	wDev_SetMacAddress(0, address);
+	return true;
+}
 /* WiFi функции
-system_get_checksum
 system_station_got_ip_set
-wifi_softap_dhcps_start
-wifi_softap_dhcps_stop
-wifi_softap_dhcps_status
-wifi_station_dhcpc_start
-wifi_station_dhcpc_stop
-wifi_station_dhcpc_status
 wifi_get_opmode
 wifi_get_opmode_default
 wifi_get_broadcast_if
 wifi_set_broadcast_if
 wifi_set_opmode
 wifi_set_opmode_current
-wifi_param_save_protect
 wifi_station_get_config
 wifi_station_get_config_default
 wifi_station_get_ap_info
@@ -620,10 +756,8 @@ wifi_softap_deauth
 wifi_get_phy_mode
 wifi_set_phy_mode
 wifi_set_sleep_type
-wifi_get_sleep_type
-wifi_get_channel
+
 wifi_set_channel
-wifi_promiscuous_set_mac
 wifi_promiscuous_enable
 wifi_set_promiscuous_rx_cb
 wifi_get_ip_info
