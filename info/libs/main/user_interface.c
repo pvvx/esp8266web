@@ -653,7 +653,7 @@ bool system_param_save_with_protect(uint16 start_sec, void *param, uint16 len)
 	struct ets_store_wifi_hdr whd;
 	if(param == NULL) return false;
 	if(flashchip->sector_size < len) return false;
-	spi_flash_read(sec, &whd, sizeof(whd));
+	spi_flash_read(start_sec + 2, &whd, sizeof(whd));
 	if(whd.bank == 0) whd.bank = 1;
 	wifi_param_save_protect_with_check(start_sec + whd.bank, flashchip->sector_size, param, len);
 	whd.flag = 0x55AA55AA;
@@ -720,6 +720,12 @@ bool wifi_promiscuous_set_mac(const uint8_t *address)
 	wDev_SetMacAddress(0, address);
 	return true;
 }
+
+wifi_promiscuous_cb_t promiscuous_cb;
+void wifi_set_promiscuous_rx_cb(wifi_promiscuous_cb_t cb)
+{
+	promiscuous_cb = cb;
+}
 /* WiFi функции
 system_station_got_ip_set
 wifi_get_opmode
@@ -759,7 +765,6 @@ wifi_set_sleep_type
 
 wifi_set_channel
 wifi_promiscuous_enable
-wifi_set_promiscuous_rx_cb
 wifi_get_ip_info
 wifi_set_ip_info
 wifi_get_macaddr

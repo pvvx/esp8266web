@@ -387,6 +387,7 @@ PROVIDE ( uart0_	= 0x60000000);
 PROVIDE ( spi1_		= 0x60000100);
 PROVIDE ( spi0_		= 0x60000200);
 PROVIDE ( gpio_		= 0x60000300);
+PROVIDE ( hdrf_		= 0x60000500);
 PROVIDE ( timer_	= 0x60000600);
 PROVIDE ( rtc_		= 0x60000700);
 PROVIDE ( iomux_	= 0x60000800);
