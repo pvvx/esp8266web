@@ -87,7 +87,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 	uint32 val = ahextoul(pvar);
 	char *cstr = pcmd;
-#if DEBUGSOO > 2
+#if DEBUGSOO > 1
     os_printf("[%s=%s]\n", pcmd, pvar);
 #endif
 	ifcmp("start") 		web_conn->udata_start = val;
