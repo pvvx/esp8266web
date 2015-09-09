@@ -12,6 +12,7 @@
 #include "sdk/fatal_errs.h"
 #include "user_interface.h"
 #include "sdk/add_func.h"
+#include "sdk/app_main.h"
 
 #if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1..1.1.2)
 
@@ -145,6 +146,7 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 			os_printf("\n");
 			}
 		}
+		uart_wait_tx_fifo_empty();
 	}
 	rst_inf->reason = 0;
 }

@@ -24,6 +24,7 @@ void startup(void) ICACHE_FLASH_ATTR;
 void read_wifi_config(void)  ICACHE_FLASH_ATTR;
 void init_wifi(uint8 * init_data, uint8 * mac) ICACHE_FLASH_ATTR;
 void uart_wait_tx_fifo_empty(void) ICACHE_FLASH_ATTR;
+void user_uart_wait_tx_fifo_empty(uint32 uart_num, uint32 x);
 //-----------------------------------------------------------------------------
 void uart1_write_char(char c);
 void uart0_write_char(char c);

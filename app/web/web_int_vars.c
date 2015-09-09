@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: webserver.c
- * Description: The web server mode configration.
+ * Description: The web server mode configuration.
 *******************************************************************************/
 
 #include "user_config.h"

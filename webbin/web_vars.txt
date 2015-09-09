@@ -232,6 +232,7 @@ sys_const_97
 sys_const_98
 sys_const_112
 sys_const_113
+sys_const_114
 sys_const_93
 sys_const_96
 wifi_scan

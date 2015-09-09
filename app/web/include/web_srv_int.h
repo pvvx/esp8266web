@@ -39,5 +39,6 @@ void web_int_cookie(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATT
 void web_int_callback(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
 
 void web_hexdump(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
+bool web_inc_fopen(TCP_SERV_CONN *ts_conn, uint8 *cFile) ICACHE_FLASH_ATTR;
 
 #endif /* _INCLUDE_WEB_SRV_INT_H_ */
