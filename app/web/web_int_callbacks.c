@@ -415,8 +415,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 //          else ifcmp("test") tcp_puts("%d", cal_rf_ana_gain() ); //
           else ifcmp("reset") web_conn->web_disc_cb = (web_func_disc_cb)_ResetVector;
           else ifcmp("restart") web_conn->web_disc_cb = (web_func_disc_cb)system_restart;
-          else ifcmp("ram") tcp_puts("0x%08x", *((uint32 *)ahextoul(cstr+3)));
-          else ifcmp("reg") tcp_puts("0x%08x", IOREG(ahextoul(cstr+3)));
+          else ifcmp("ram") tcp_puts("0x%08x", *((uint32 *)(ahextoul(cstr+3)&0xFFFFFFFC)));
+          else ifcmp("rdec") tcp_puts("%d", *((uint32 *)(ahextoul(cstr+4)&0xFFFFFFFC)));
+//          else ifcmp("reg") tcp_puts("0x%08x", IOREG(ahextoul(cstr+3)));
           else ifcmp("ip") {
 /*        	  uint32 cur_ip = 0;
         	  if(netif_default != NULL) cur_ip = netif_default->ip_addr.addr; */

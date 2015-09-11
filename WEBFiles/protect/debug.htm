@@ -13,6 +13,7 @@ Save <a href="/adc.wav">Test WAV</a>, <a href="/protect/udpwave.htm">UDP Wave Po
 Page <a href="/sample.htm">Sample</a><br><br>
 Get <a href="/system.xml">system.xml</a>, <a href="/protect/aps.xml">aps.xml</a><br><br>
 <a title='Not work for any mode...' href='/timeout.htm?sys_reset=12345'>SoftWare Reset</a>, <a title='Not work for any mode...' href='/timeout.htm?sys_restart=12345'>System Restart</a><br><br>
+Counter erase the last flash sector in the Chinese SDK, to save 28 bytes: ~sys_rdec0x4027F008~!<br><br>
 </p>
 </div>
 <div class="content">
@@ -36,7 +37,7 @@ system_adc_read() = ~sys_adc~, system_get_vdd33() = ~sys_vdd~<br><br>
 <form method='post' action='/fsupload' enctype='multipart/form-data' class="center">
 Select esp_init_data_default.bin file... <a href="/protect/rfinit1.htm">Next constants</a><br><br>
 <input type='file' name='sysconst'> <input type='submit' value='Upload' class="button"><br><br>
-<a title='144 bytes' href='/protect/esp_init_data_default.bin'>Download esp_init_data_default.bin</a>
+<a title='256 bytes' href='/protect/esp_init_data_default.bin'>Download esp_init_data_default.bin</a>
 </form>
 </p>
 </div>

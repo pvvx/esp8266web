@@ -203,6 +203,13 @@ void system_restore(void)
 	vPortFree(buf_a12);
 }
 
+void system_restart_core(void)
+{
+	Cache_Read_Disable();
+	DPORT_OFF24 &= 0x67; // 0x3FF00024 &= 0x67;
+	Call _ResetVector(); // ROM:0x40000080
+}
+
 /*
 void _wait_con_timer(uint8 x) // ????
 {
@@ -546,34 +553,26 @@ void system_init_done_cb(init_done_cb_t cb)
     done_cb = cb;	//*((init_done_cb_t *)(&system_option[0xF4])) = cb;
 }
 
-bool system_os_task(os_task_t task, uint8 prio, os_event_t *queue, uint8 qlen)
-{
-	if(prio < 3) {
-		os_printf("err: task prio < %d\n", 3);
-		return false;
-	}
-	if(qlen == 0 || queue == NULL) {
-		os_printf("err: task queue error\n");
-		return false;
-	}
-	ets_task(task, prio +22, queue, qlen);
-	return true;
-}
-
 void system_uart_swap(void)
 {
 	user_uart_wait_tx_fifo_empty(0, 500000);
 	user_uart_wait_tx_fifo_empty(1, 500000);
 
-	HWREG(IOMUX_BASE,0x08) &= 0xECF; // PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, FUNC_UART0_CTS); ?
-	HWREG(IOMUX_BASE,0x08) |= 0x100;
-	HWREG(IOMUX_BASE,0x10) &= 0xECF; // PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_UART0_RTS); ?
-	HWREG(IOMUX_BASE,0x10) |= 0x100;
-	HWREG(PERIPHS_DPORT_BASEADDR,0x28) |= BIT2;
+	GPIO13_MUX = (GPIO13_MUX & 0xECF) | 0x100;
+	GPIO15_MUX = (GPIO15_MUX & 0xECF) | 0x100;
+	PERI_IO_SWAP |= BIT2;
 }
+
+void system_uart_de_swap(void)
+{
+	user_uart_wait_tx_fifo_empty(0, 500000);
+	user_uart_wait_tx_fifo_empty(1, 500000);
+	PERI_IO_SWAP &= 0x7B;
+}
+
 const char *system_get_sdk_version(void)
 {
-	return "1.1.2";
+	return "1.3.0";
 }
 
 uint32 ICACHE_FLASH_ATTR system_get_checksum(uint8 *ptr, uint32 len)
@@ -597,6 +596,7 @@ bool wifi_softap_dhcps_start(void)
 	dhcps_flag = true;
 	return true;
 }
+
 bool wifi_softap_dhcps_stop(void)
 {
 	int opmode = wifi_get_opmode();
@@ -703,14 +703,14 @@ enum sleep_type wifi_get_sleep_type(void)
 	return pm_get_sleep_type();
 }
 
-bool wifi_set_sleep_type(enum sleep_type type)
+bool ICACHE_FLASH_ATTR wifi_set_sleep_type(enum sleep_type type)
 {
 	if(type > MODEM_SLEEP_T) return false;
 	pm_set_sleep_type_from_upper(type);
 	return true;
 }
 
-bool wifi_promiscuous_set_mac(const uint8_t *address)
+bool ICACHE_FLASH_ATTR wifi_promiscuous_set_mac(const uint8_t *address)
 {
 	if(g_ic.c[0x180+0x3e] != 1) return false;
 	volatile uint32 * preg = (volatile uint32 *)0x3FF20000;
@@ -722,54 +722,227 @@ bool wifi_promiscuous_set_mac(const uint8_t *address)
 }
 
 wifi_promiscuous_cb_t promiscuous_cb;
-void wifi_set_promiscuous_rx_cb(wifi_promiscuous_cb_t cb)
+void ICACHE_FLASH_ATTR wifi_set_promiscuous_rx_cb(wifi_promiscuous_cb_t cb)
 {
 	promiscuous_cb = cb;
 }
-/* WiFi функции
-system_station_got_ip_set
-wifi_get_opmode
-wifi_get_opmode_default
-wifi_get_broadcast_if
-wifi_set_broadcast_if
-wifi_set_opmode
-wifi_set_opmode_current
-wifi_station_get_config
-wifi_station_get_config_default
-wifi_station_get_ap_info
-wifi_station_ap_number_set
-wifi_station_set_config
-wifi_station_set_config_current
-wifi_station_get_current_ap_id
-wifi_station_ap_check
-wifi_station_ap_change
-wifi_station_scan
-wifi_station_get_auto_connect
-wifi_station_set_auto_connect
-wifi_station_connect
-wifi_station_disconnect
-wifi_station_get_connect_status
-wifi_softap_cacl_mac
-wifi_softap_set_default_ssid
-wifi_softap_get_config
-wifi_softap_get_config_default
-wifi_softap_set_config
-wifi_softap_set_config_current
-wifi_softap_set_station_info
-wifi_softap_get_station_info
-wifi_softap_free_station_info
-wifi_softap_deauth
-wifi_get_phy_mode
-wifi_set_phy_mode
-wifi_set_sleep_type
 
-wifi_set_channel
-wifi_promiscuous_enable
-wifi_get_ip_info
-wifi_set_ip_info
-wifi_get_macaddr
-wifi_set_macaddr
-wifi_status_led_install
-wifi_status_led_uninstall
-wifi_set_status_led_output_level
+uint8 info_st_mac[6];
+
+int ICACHE_FLASH_ATTR wifi_promiscuous_enable(uint8 promiscuous)
+{
+	int opmode	= wifi_get_opmode();
+	if(user_init_flag & opmode == 1) {
+		if(g_ic.c[446] != 3) {
+			if(promiscuous == 0) {
+				if(g_ic.c[446] != 0) {
+					wDevDisableRx();
+					wdev_exit_sniffer();
+					volatile uint32 * preg = (volatile uint32 *)0x3FF20000;
+					preg[27] |= 1;
+					preg[27] |= 2;
+					preg[27] |= 4;
+					wDev_SetMacAddress(0, info_st_mac);
+					g_ic.c[446] = 0;
+					wDevEnableRx();
+					return true;
+				}
+				return true; //??
+			}
+			else {
+				if(g_ic.c[446] == 1) return true;;
+				wifi_station_disconnect();
+				wDevDisableRx();
+				volatile uint32 * preg = (volatile uint32 *)0x3FF20000;
+				preg[27] &= 0xFFE;
+				preg[27] &= 0xFFD;
+				preg[27] &= 0x7B;
+				g_ic.c[446]= 1;
+				wdev_go_sniffer();
+				wDevEnableRx();
+				return true;
+			}
+		}
+	}
+	return 0;
+}
+
+typedef struct {
+    uint32 event;
+    Event_StaMode_Got_IP_t info;
+} System_Event_goy_ip;
+
+wifi_event_handler_cb_t event_cb;
+
+void ICACHE_FLASH_ATTR system_station_got_ip_set(ip_addr_t ip, ip_addr_t netmask, ip_addr_t gw)
+{
+	if(event_cb != NULL || g_ic.g.netif1 != NULL) {
+		if(g_ic.g.netif1->ip_addr != ip
+		|| g_ic.g.netif1->netmask != netmask
+		|| g_ic.g.netif1->gw != gw) {
+			System_Event_goy_ip ev_par;
+			ev_par.info.ip = g_ic.g.netif1->ip_addr;
+			ev_par.info.mask = g_ic.g.netif1->netmask;
+			ev_par.info.gw = g_ic.g.netif1->gw;
+			ev_par.event = EVENT_STAMODE_GOT_IP;
+			event_cb((System_Event_t *)&ev_par);
+		}
+		// os_printf("ip:%d.%d.%d.%d,mask:%d.%d.%d.%d,gw:%d.% ...", g_ic.g.netif1->ip_addr, ... );
+		g_ic.g.netif1[186] = 5; //??
+		g_ic.g.netif1[184] = 5; //??
+		if(g_ic.g.wifi_store.wfmode[1] == 1 && g_ic.g.wifi_store.wfmode[0] == 1) {
+			ets_timer_disarm(sta_con_timer);
+			g_ic.c[90];
+			if(status_led_output_level & 1) {
+				// sll 1 ??
+			}
+			gpio_output_set(, (status_led_output_level & 1)? 0: 1, c,0);
+		}
+	}
+}
+
+extern struct rst_info rst_if;
+struct rst_info* ICACHE_FLASH_ATTR system_get_rst_info(void)
+{
+	return &rst_if;
+}
+
+uint8 ICACHE_FLASH_ATTR system_get_data_of_array_8(void *ps)
+{
+	return (*((unsigned int *)((unsigned int)ps & (~3))))>>(((unsigned int)ps & 3) << 3);
+}
+
+uint16 system_get_data_of_array_16(void *ps)
+{
+	// В данной функции новая ошибка у китаё-программеров от Espressif!
+}
+
+bool wifi_set_phy_mode(enum phy_mode mode)
+{
+
+}
+
+void wifi_status_led_install(uint8 gpio_id, uint32 gpio_name, uint8 gpio_func)
+{
+	g_ic.g.wifi_store.wfmode[3] = gpio_id;
+	g_ic.g.wifi_store.wfmode[2] = g_ic.g.wifi_store.wfmode[1] = 1;
+	volatile uint32 * ptr = (volatile uint32 *)	gpio_name;
+	*ptr = (*ptr & 0xECF) | ((((gpio_func & 4) << 2) | (gpio_func & 3)) << 4);
+}
+
+void wifi_status_led_uninstall(void)
+{
+	if(g_ic.g.wifi_store.wfmode[1] == 1) {
+		wfmode[1] = 0;
+		ets_timer_disarm(sta_con_timer);
+	}
+}
+
+uint8 status_led_output_level;
+wifi_set_status_led_output_level(int x)
+{
+	if(x == 1)	status_led_output_level = 1;
+	else status_led_output_level = 0;
+}
+
+void wifi_set_event_handler_cb(wifi_event_handler_cb_t cb)
+{
+	event_cb = cb;
+}
+
+
+/* WiFi функции
+uint8 wifi_get_broadcast_if(void);
+bool wifi_set_broadcast_if(uint8 interface);
+uint8 wifi_get_opmode(void);
+uint8 wifi_get_opmode_default(void);
+bool wifi_set_opmode(uint8 opmode);
+bool wifi_set_opmode_current(uint8 opmode);
+uint8 wifi_station_get_ap_info(struct station_config config[]);
+bool wifi_station_ap_number_set(uint8 ap_number);
+bool wifi_station_get_config(struct station_config *config);
+bool wifi_station_get_config_default(struct station_config *config);
+bool wifi_station_set_config(struct station_config *config);
+bool wifi_station_set_config_current(struct station_config *config);
+uint8 wifi_station_get_current_ap_id(void);
+wifi_station_ap_check
+bool wifi_station_ap_change(uint8 current_ap_id);
+bool wifi_station_scan(struct scan_config *config, scan_done_cb_t cb);
+uint8 wifi_station_get_auto_connect(void);
+bool wifi_station_set_auto_connect(uint8 set);
+bool wifi_station_connect(void);
+bool wifi_station_disconnect(void)
+uint8 wifi_station_get_connect_status(void);
+void wifi_softap_cacl_mac(uint8 *mac_out, uint8 *mac_in)
+void wifi_softap_set_default_ssid(void)
+bool wifi_softap_get_config(struct softap_config *config);
+bool wifi_softap_get_config_default(struct softap_config *config);
+bool wifi_softap_set_config(struct softap_config *config);
+bool wifi_softap_set_config_current(struct softap_config *config);
+uint8 wifi_softap_get_station_num(void);
+struct station_info * wifi_softap_get_station_info(void);
+void wifi_softap_free_station_info(void);
+int wifi_softap_set_station_info(uint8_t * chaddr, struct ip_addr *ip);
+wifi_softap_deauth
+enum phy_mode wifi_get_phy_mode(void);
+
+bool wifi_get_ip_info(uint8 if_index, struct ip_info *info);
+bool wifi_set_ip_info(uint8 if_index, struct ip_info *info);
+bool wifi_get_macaddr(uint8 if_index, uint8 *macaddr);
+bool wifi_set_macaddr(uint8 if_index, uint8 *macaddr);
 */
+
+void wifi_enable_6m_rate(uint8 x)
+{
+	g_ic.c[461] = x;
+}
+
+uint8 wifi_get_user_fixed_rate(uint8 * a, uint8 * b)
+{
+	if(a == NULL || b == NULL) return 0x7F;
+	*b = g_ic.c[463];
+	*a = g_ic.c[462];
+	return 0;
+}
+
+uint8 wifi_set_user_fixed_rate(uint8 a, uint8 b)
+{
+	if(b >= 32) return 0x7F;
+	if(a > 4) return 0x7E;
+	g_ic.c[463] = b;
+	g_ic.c[462] = a;
+	return 0;
+}
+
+uint8 wifi_send_pkt_freedom(void *a, uint8 b)
+{
+	if(a == NULL || b > 23) return 0x7F;
+	int opmode = wifi_get_opmode();
+	if(opmode == 1) {
+		if(g_ic.g.netif1 == NULL) return 0x76;
+		return ieee80211_freedom_output(g_ic.g.netif1, b, a);
+	}
+	else if(opmode > 4 || opmode < 2) return 0x76;
+	else {
+		if(g_ic.g.netif2 == NULL) return 0x76;
+		return ieee80211_freedom_output(g_ic.g.netif2, b, a);
+	}
+}
+
+extern struct netif *netif_default;
+
+uint8 wifi_get_broadcast_if(void)
+{
+	int opmode = wifi_get_opmode();
+	if(opmode == 3) return opmode;
+	if(default_interface != 0) return default_interface;
+	struct netif * nif = eagle_lwip_getif(0);
+	if(netif_default->next == nif) return 1;
+	else return 2;
+}
+
+uint8 system_get_boot_version(void)
+{
+	return (g_ic.c[464]>>8) & 31; // boot_version
+}
+

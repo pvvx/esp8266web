@@ -137,7 +137,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 /* 0x3ff00024
  bit7 16k IRAM base 0x40108000 = SPI cache flash  
  bit8 16k IRAM base 0x4010C000 = SPI cache flash   */
-//#define DPORT_OFF24		dport_[9]
+#define DPORT_OFF24		dport_[9]
 
 /* PERI_IO_SWAP: 0x3FF00028
 	bit0: swap two uart
