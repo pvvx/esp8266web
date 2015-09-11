@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: user_interface.c
- * Description: disasm user_interface functions SDK 1.1.0 (libmain.a + libpp.a)
+ * Description: disasm user_interface functions SDK 1.1.0..1.3.0 (libmain.a + libpp.a)
  * Author: PV`
  * (c) PV` 2015
  ******************************************************************************/
@@ -653,7 +653,7 @@ bool system_param_save_with_protect(uint16 start_sec, void *param, uint16 len)
 	struct ets_store_wifi_hdr whd;
 	if(param == NULL) return false;
 	if(flashchip->sector_size < len) return false;
-	spi_flash_read(start_sec + 2, &whd, sizeof(whd));
+	spi_flash_read((start_sec + 2)*flashchip->sector_size, &whd, sizeof(whd));
 	if(whd.bank == 0) whd.bank = 1;
 	wifi_param_save_protect_with_check(start_sec + whd.bank, flashchip->sector_size, param, len);
 	whd.flag = 0x55AA55AA;
@@ -679,6 +679,17 @@ void wifi_param_save_protect_with_check(uint16 startsector, int sectorsize, void
 		}
 	} while(i != 0);
 	vPortFree(pbuf);
+}
+
+bool system_param_load(uint16 start_sec, uint16 offset, void *param, uint16 len)
+{
+	struct ets_store_wifi_hdr whd;
+	if(param == NULL || (len + offset) > flashchip->sector_size) return false;
+	spi_flash_read((start_sec + 2)*flashchip->sector_size, &whd, sizeof(whd));
+	uint32 data_sec = start_sec;
+	if(whd.bank) data_sec++;
+	spi_flash_read(data_sec * flashchip->sector_size + offset, param, len);
+	return true;
 }
 
 uint8 wifi_get_channel(void)
@@ -812,17 +823,17 @@ uint8 ICACHE_FLASH_ATTR system_get_data_of_array_8(void *ps)
 	return (*((unsigned int *)((unsigned int)ps & (~3))))>>(((unsigned int)ps & 3) << 3);
 }
 
-uint16 system_get_data_of_array_16(void *ps)
+uint16 ICACHE_FLASH_ATTR system_get_data_of_array_16(void *ps)
 {
 	// В данной функции новая ошибка у китаё-программеров от Espressif!
 }
 
-bool wifi_set_phy_mode(enum phy_mode mode)
+bool ICACHE_FLASH_ATTR wifi_set_phy_mode(enum phy_mode mode)
 {
 
 }
 
-void wifi_status_led_install(uint8 gpio_id, uint32 gpio_name, uint8 gpio_func)
+void ICACHE_FLASH_ATTR wifi_status_led_install(uint8 gpio_id, uint32 gpio_name, uint8 gpio_func)
 {
 	g_ic.g.wifi_store.wfmode[3] = gpio_id;
 	g_ic.g.wifi_store.wfmode[2] = g_ic.g.wifi_store.wfmode[1] = 1;
@@ -830,7 +841,7 @@ void wifi_status_led_install(uint8 gpio_id, uint32 gpio_name, uint8 gpio_func)
 	*ptr = (*ptr & 0xECF) | ((((gpio_func & 4) << 2) | (gpio_func & 3)) << 4);
 }
 
-void wifi_status_led_uninstall(void)
+void ICACHE_FLASH_ATTR wifi_status_led_uninstall(void)
 {
 	if(g_ic.g.wifi_store.wfmode[1] == 1) {
 		wfmode[1] = 0;
@@ -839,13 +850,13 @@ void wifi_status_led_uninstall(void)
 }
 
 uint8 status_led_output_level;
-wifi_set_status_led_output_level(int x)
+void ICACHE_FLASH_ATTR wifi_set_status_led_output_level(int x)
 {
 	if(x == 1)	status_led_output_level = 1;
 	else status_led_output_level = 0;
 }
 
-void wifi_set_event_handler_cb(wifi_event_handler_cb_t cb)
+void ICACHE_FLASH_ATTR wifi_set_event_handler_cb(wifi_event_handler_cb_t cb)
 {
 	event_cb = cb;
 }
@@ -854,8 +865,6 @@ void wifi_set_event_handler_cb(wifi_event_handler_cb_t cb)
 /* WiFi функции
 uint8 wifi_get_broadcast_if(void);
 bool wifi_set_broadcast_if(uint8 interface);
-uint8 wifi_get_opmode(void);
-uint8 wifi_get_opmode_default(void);
 bool wifi_set_opmode(uint8 opmode);
 bool wifi_set_opmode_current(uint8 opmode);
 uint8 wifi_station_get_ap_info(struct station_config config[]);
@@ -892,12 +901,12 @@ bool wifi_get_macaddr(uint8 if_index, uint8 *macaddr);
 bool wifi_set_macaddr(uint8 if_index, uint8 *macaddr);
 */
 
-void wifi_enable_6m_rate(uint8 x)
+void ICACHE_FLASH_ATTR wifi_enable_6m_rate(uint8 x)
 {
 	g_ic.c[461] = x;
 }
 
-uint8 wifi_get_user_fixed_rate(uint8 * a, uint8 * b)
+uint8 ICACHE_FLASH_ATTR wifi_get_user_fixed_rate(uint8 * a, uint8 * b)
 {
 	if(a == NULL || b == NULL) return 0x7F;
 	*b = g_ic.c[463];
@@ -905,7 +914,7 @@ uint8 wifi_get_user_fixed_rate(uint8 * a, uint8 * b)
 	return 0;
 }
 
-uint8 wifi_set_user_fixed_rate(uint8 a, uint8 b)
+uint8 ICACHE_FLASH_ATTR wifi_set_user_fixed_rate(uint8 a, uint8 b)
 {
 	if(b >= 32) return 0x7F;
 	if(a > 4) return 0x7E;
@@ -914,7 +923,7 @@ uint8 wifi_set_user_fixed_rate(uint8 a, uint8 b)
 	return 0;
 }
 
-uint8 wifi_send_pkt_freedom(void *a, uint8 b)
+uint8 ICACHE_FLASH_ATTR wifi_send_pkt_freedom(void *a, uint8 b)
 {
 	if(a == NULL || b > 23) return 0x7F;
 	int opmode = wifi_get_opmode();
@@ -931,7 +940,7 @@ uint8 wifi_send_pkt_freedom(void *a, uint8 b)
 
 extern struct netif *netif_default;
 
-uint8 wifi_get_broadcast_if(void)
+uint8 ICACHE_FLASH_ATTR wifi_get_broadcast_if(void)
 {
 	int opmode = wifi_get_opmode();
 	if(opmode == 3) return opmode;
@@ -941,8 +950,32 @@ uint8 wifi_get_broadcast_if(void)
 	else return 2;
 }
 
-uint8 system_get_boot_version(void)
+uint8 ICACHE_FLASH_ATTR system_get_boot_version(void)
 {
 	return (g_ic.c[464]>>8) & 31; // boot_version
 }
 
+uint8 ICACHE_FLASH_ATTR _wifi_get_opmode(bool flg)
+{
+	uint8 opmode;
+	struct s_wifi_store * wifi_store;
+	if(flg != true) {
+		wifi_store = (struct s_wifi_store *)pvPortMalloc(sizeof(struct s_wifi_store)); // 888 байт в SDK 1.3.0
+		system_param_load((flashchip->chip_size/flashchip->sector_size)-3, 0, wifi_store,  sizeof(struct s_wifi_store));
+	}
+	else wifi_store = &g_ic.g.wifi_store;
+	opmode = wifi_store->wfmode[0];
+	if(opmode > STATIONAP_MODE) opmode = 2;
+	if(flg != true) vPortFree(wifi_store);
+	return opmode;
+}
+
+uint8 ICACHE_FLASH_ATTR wifi_get_opmode(void)
+{
+	return _wifi_get_opmode(true);
+}
+
+uint8 ICACHE_FLASH_ATTR wifi_get_opmode_default(void)
+{
+	return _wifi_get_opmode(false);
+}
