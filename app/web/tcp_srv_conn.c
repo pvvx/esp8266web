@@ -443,7 +443,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_poll(void *arg, struct tcp_pcb *pcb
 	}
 #if DEBUGSOO > 3
 	tcpsrv_print_remote_info(ts_conn);
-	os_printf("poll %d #%d\n", ts_conn->recv_check, pcb->state );
+	os_printf("poll: %d #%d, %d,%d\n", ts_conn->recv_check, pcb->state, ts_conn->pcfg->time_wait_rec, ts_conn->pcfg->time_wait_cls);
 #endif
 	if (ts_conn->state != SRVCONN_CLOSEWAIT) {
 		ts_conn->pcb = pcb;

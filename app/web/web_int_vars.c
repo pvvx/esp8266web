@@ -184,9 +184,6 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	   			if(val < 100) syscfg.tcp_client_twait = 100;
 	   			else if(val > 65000) syscfg.tcp_client_twait = 65000;
 	   			else syscfg.tcp_client_twait = val;
-	   			if(tcp2uart_servcfg != NULL) {
-	   				tcp2uart_servcfg->time_wait_cls = syscfg.tcp_client_twait;
-	   			}
 	   		}
 			else ifcmp("url") {
 				if(new_tcp2uart_url(pvar))
