@@ -459,6 +459,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 	        		if(tcp2uart_url == NULL) tcp_puts("none");
 	        		else tcp_puts("%s", tcp2uart_url);
 	        	}
+	        	else ifcmp("reop") tcp_put((syscfg.cfg.b.tcp2uart_reopen)? '1' : '0');
 		    	else tcp_put('?');
 		    }
 		    else ifcmp("udp_") {

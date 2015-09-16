@@ -135,7 +135,7 @@
 				<td class="label">End IP:</td>
 				<td><input name='wifi_ap_eip' maxlength='31' value='~wifi_ap_eip~'></td>
 				<td class="label">Sleep Mode:</td>
-				<td><select name='wifi_sleep'>
+				<td><select title='Not use LIGHT = TCP errors.' name='wifi_sleep'>
 					<option value='0'>NONE</option>
 					<option value='1'>LIGHT</option>
 					<option value='2'>MODEM</option>
@@ -157,7 +157,7 @@
 				<td class="label">RF Tx Power:</td>
 				<td><input title='Current maximum RF Tx Power, unit: 0.25dBm, range 0..82' name='wifi_maxpw' maxlength='3' value='~wifi_maxpw~'></td>
 				<td class="label">ST Host Name:</td>
-				<td><input name='wifi_st_hostname' maxlength='31' value='~wifi_st_hostname~'></td>
+				<td><input title='DHCP name' name='wifi_st_hostname' maxlength='31' value='~wifi_st_hostname~'></td>
 			</tr>
 		</table>
 		<p class="center">

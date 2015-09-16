@@ -76,19 +76,20 @@ enum srvconn_state {
 typedef struct t_tcpsrv_conn_flags  {
 	uint16 client:				1; //0001 данное соединение не сервер, а клиент!
 	uint16 client_reconnect:	1; //0002 вечный реконнект
-	uint16 pcb_time_wait_free:	1; //0004 уничтожение pcb при вызове disconnect() (иначе pcb TIME_WAIT 60 сек http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html)
-	uint16 nagle_disabled: 		1; //0008 выключение nagle
-	uint16 rx_buf: 				1; //0010 прием в буфер, используется ручное управление размером окна TCP
-	uint16 rx_null:				1; //0020 отключение вызова func_received_data() и прием в null (устанавливается автоматически при вызове tcpsrv_disconnect())
-	uint16 tx_null:				1; //0040 отключение вызова func_sent_callback() и передача в null (устанавливается автоматически при вызове tcpsrv_disconnect())
-	uint16 wait_sent:			1; //0080 ожидет завершения/подтверждения передачи от lwip
-	uint16 busy_bufo:			1; //0100 идет обработка bufo
-	uint16 busy_bufi:			1; //0200 идет обработка bufi
+	uint16 srv_reopen:			1; //0004 открытие нового соединения более max_conn ведет к закрытию наиболее старого соединения.
+	uint16 pcb_time_wait_free:	1; //0008 уничтожение pcb при вызове disconnect() (иначе pcb TIME_WAIT 60 сек http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html)
+	uint16 nagle_disabled: 		1; //0010 выключение nagle
+	uint16 rx_buf: 				1; //0020 прием в буфер, используется ручное управление размером окна TCP
+	uint16 rx_null:				1; //0040 отключение вызова func_received_data() и прием в null (устанавливается автоматически при вызове tcpsrv_disconnect())
+	uint16 tx_null:				1; //0080 отключение вызова func_sent_callback() и передача в null (устанавливается автоматически при вызове tcpsrv_disconnect())
+	uint16 wait_sent:			1; //0100 ожидет завершения/подтверждения передачи от lwip
+	uint16 busy_bufo:			1; //0200 идет обработка bufo
+	uint16 busy_bufi:			1; //0400 идет обработка bufi
 	// далее идут биты не относящиеся к работе tcp_srv_conn
-	uint16 user_flg1:			1; //0400 для нужд процедур уровнем выше (использован в tcp2uart.c)
-	uint16 user_flg2:			1; //0800 для нужд процедур уровнем выше (пока свободен)
-	uint16 user_option1:		1; //1000 для нужд процедур обработки переменных (использован для hexdump в web_int_callbacks.c)
-	uint16 user_option2:		1; //2000 для нужд процедур обработки переменных (пока свободен)
+	uint16 user_flg1:			1; //0800 для нужд процедур уровнем выше (использован в tcp2uart.c)
+	uint16 user_flg2:			1; //1000 для нужд процедур уровнем выше (пока свободен)
+	uint16 user_option1:		1; //2000 для нужд процедур обработки переменных (использован для hexdump в web_int_callbacks.c)
+	uint16 user_option2:		1; //4000 для нужд процедур обработки переменных (пока свободен)
 } __attribute__((packed)) tcpsrv_conn_flags;
 
 typedef struct t_TCP_SERV_CONN {

@@ -192,6 +192,14 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 				if(new_tcp2uart_url(pvar))
 					tcp2uart_start(syscfg.tcp2uart_port);
 			}
+        	else ifcmp("reop") {
+	   			if (val) syscfg.cfg.b.tcp2uart_reopen = 1;
+	   			else syscfg.cfg.b.tcp2uart_reopen = 0;
+	   			if(tcp2uart_servcfg != NULL) {
+	   				if (val) tcp2uart_servcfg->flag.srv_reopen = 1;
+	   				else tcp2uart_servcfg->flag.srv_reopen = 0;
+	   			}
+        	}
 	    }
 	    else ifcmp("udp_") {
 	    	cstr+=4;

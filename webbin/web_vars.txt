@@ -241,6 +241,7 @@ cfg_tcp_url
 cfg_tcp_twrec
 cfg_tcp_twcls
 cfg_tcp_tcrec
+cfg_tcp_reop
 wdrv_ip
 wdrv_port
 wdrv_freq

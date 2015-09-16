@@ -74,6 +74,7 @@ struct sys_bits_config {
 	uint16 netbios_ena			: 1;	//4  0x0000010 =1 включить NetBios
 	uint16 sntp_ena				: 1;	//5  0x0000020 =1 включить SNTP
 	uint16 cdns_ena				: 1;	//6  0x0000040 =1 включить CAPDNS
+	uint16 tcp2uart_reopen		: 1;	//7  0x0000080 =1 открытие нового соединения ведет к закрытию старого соединения (сервер)
 };
 
 #define SYS_CFG_HI_SPEED	0x0000001 // Set CPU 160 MHz ...

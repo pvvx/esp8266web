@@ -277,6 +277,7 @@ err_t ICACHE_FLASH_ATTR tcp2uart_server_init(uint16 portn) {
 		// изменим конфиг на наше усмотрение:
 		p->flag.rx_buf = 1; // прием в буфер с его автосозданием.
 		p->flag.nagle_disabled = 1; // отмена nagle
+		p->flag.srv_reopen = syscfg.cfg.b.tcp2uart_reopen;
 		p->max_conn = 1; // одно соединение (порт UART не многопользовательский!)
 		p->time_wait_rec = syscfg.tcp2uart_twrec; // =0 -> вечное ожидание
 		p->time_wait_cls = syscfg.tcp2uart_twcls; // =0 -> вечное ожидание

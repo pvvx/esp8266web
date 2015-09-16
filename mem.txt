@@ -1,28 +1,14 @@
    Section|                   Description| Start (hex)|   End (hex)|Used space
 ------------------------------------------------------------------------------
       data|        Initialized Data (RAM)|    3FFE8000|    3FFE835C|     860
-    rodata|           ReadOnly Data (RAM)|    3FFE8360|    3FFE8A8C|    1836
-       bss|      Uninitialized Data (RAM)|    3FFE8A90|    3FFEF108|   26232
-      lit4|     Uninitialized Data (IRAM)|    40104D64|    401055D8|    2164
-      text|          Uncached Code (IRAM)|    40100000|    40104D64|   19812
-irom0_text|             Cached Code (SPI)|    40206000|    40238ECC|  208588
+    rodata|           ReadOnly Data (RAM)|    3FFE8360|    3FFE898C|    1580
+       bss|      Uninitialized Data (RAM)|    3FFE8990|    3FFEF008|   26232
+      lit4|     Uninitialized Data (IRAM)|    40104EF8|    4010576C|    2164
+      text|          Uncached Code (IRAM)|    40100000|    40104EF8|   20216
+irom0_text|             Cached Code (SPI)|    40206000|    40238834|  206900
 ------------------------------------------------------------------------------
 Entry Point : 40100000 call_user_start()
-Total Used RAM : 50904
-Free IRam : 10792 or 27176 (option 48k IRAM)
-Free Heap : 52992
-Total Free RAM : 80168
-   Section|                   Description| Start (hex)|   End (hex)|Used space
-------------------------------------------------------------------------------
-      data|        Initialized Data (RAM)|    3FFE8000|    3FFE835C|     860
-    rodata|           ReadOnly Data (RAM)|    3FFE8360|    3FFE8A8C|    1836
-       bss|      Uninitialized Data (RAM)|    3FFE8A90|    3FFEF0E8|   26200
-      lit4|     Uninitialized Data (IRAM)|    40104D64|    401055D8|    2164
-      text|          Uncached Code (IRAM)|    40100000|    40104D64|   19812
-irom0_text|             Cached Code (SPI)|    40206000|    40238F2C|  208684
-------------------------------------------------------------------------------
-Entry Point : 40100000 call_user_start()
-Total Used RAM : 50872
-Free IRam : 10792 or 27176 (option 48k IRAM)
-Free Heap : 53024
-Total Free RAM : 80200
+Total Used RAM : 51052
+Free IRam : 10388 or 26772 (option 48k IRAM)
+Free Heap : 53248
+Total Free RAM : 80020

@@ -108,6 +108,13 @@
 				<td class="label">Client reconnect timeout:</td>
 				<td><input title='100...65000 ms (max ping time * 2)' name='cfg_tcp_tcrec' maxlength='5' value='~cfg_tcp_tcrec~'></td>
 			</tr>
+			<tr>
+				<td class="label">Server connect reopen:</td>
+				<td>
+					<input type="hidden" name='cfg_tcp_reop' value='0'>
+					<input type='checkbox' name='cfg_tcp_reop' value='1'>
+				</td>
+			</tr>
 			</table>
 			<p class="center">
 				<input type='hidden' name='uart_save' value='1'>
@@ -128,7 +135,8 @@ var cfg = {
 	uart_0_rts_inv:"~uart_0_rts_inv~",
 	uart_0_bits:"~uart_0_bits~",
 	uart_0_stop:"~uart_0_stop~",
-	uart_0_even:"~uart_0_even~"
+	uart_0_even:"~uart_0_even~",
+	cfg_tcp_reop: "~cfg_tcp_reop~"
 }
 setFormValues(document.forms[0], cfg);
 </script>

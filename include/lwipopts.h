@@ -935,7 +935,7 @@
  * TCP_SYNMAXRTX: Maximum number of retransmissions of SYN segments.
  */
 #ifndef TCP_SYNMAXRTX
-//#define TCP_SYNMAXRTX                   3
+//#define TCP_SYNMAXRTX                   6
 #define TCP_SYNMAXRTX                   (*(volatile uint32*)0x600011E4)
 #endif
 

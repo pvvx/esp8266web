@@ -10,7 +10,7 @@
 
 #include "tcp_srv_conn.h"
 
-#define WEB_SVERSION "0.1.3"
+#define WEB_SVERSION "0.1.4"
 
 
 /****************************************************************************

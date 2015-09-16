@@ -825,7 +825,8 @@ uint8 ICACHE_FLASH_ATTR system_get_data_of_array_8(void *ps)
 
 uint16 ICACHE_FLASH_ATTR system_get_data_of_array_16(void *ps)
 {
-	// В данной функции новая ошибка у китаё-программеров от Espressif!
+	// В данной функции ошибка у китаё-программеров от Espressif!
+	// Она не используется, как и многие другие, но занимет место в Flash.
 }
 
 bool ICACHE_FLASH_ATTR wifi_set_phy_mode(enum phy_mode mode)
@@ -844,7 +845,7 @@ void ICACHE_FLASH_ATTR wifi_status_led_install(uint8 gpio_id, uint32 gpio_name, 
 void ICACHE_FLASH_ATTR wifi_status_led_uninstall(void)
 {
 	if(g_ic.g.wifi_store.wfmode[1] == 1) {
-		wfmode[1] = 0;
+		g_ic.g.wifi_store.wfmode[1] = 0;
 		ets_timer_disarm(sta_con_timer);
 	}
 }
@@ -893,7 +894,6 @@ struct station_info * wifi_softap_get_station_info(void);
 void wifi_softap_free_station_info(void);
 int wifi_softap_set_station_info(uint8_t * chaddr, struct ip_addr *ip);
 wifi_softap_deauth
-enum phy_mode wifi_get_phy_mode(void);
 
 bool wifi_get_ip_info(uint8 if_index, struct ip_info *info);
 bool wifi_set_ip_info(uint8 if_index, struct ip_info *info);
@@ -939,7 +939,7 @@ uint8 ICACHE_FLASH_ATTR wifi_send_pkt_freedom(void *a, uint8 b)
 }
 
 extern struct netif *netif_default;
-
+extern uint8 default_interface;
 uint8 ICACHE_FLASH_ATTR wifi_get_broadcast_if(void)
 {
 	int opmode = wifi_get_opmode();
@@ -955,7 +955,7 @@ uint8 ICACHE_FLASH_ATTR system_get_boot_version(void)
 	return (g_ic.c[464]>>8) & 31; // boot_version
 }
 
-uint8 ICACHE_FLASH_ATTR _wifi_get_opmode(bool flg)
+static uint8 ICACHE_FLASH_ATTR _wifi_get_opmode(bool flg)
 {
 	uint8 opmode;
 	struct s_wifi_store * wifi_store;
@@ -978,4 +978,130 @@ uint8 ICACHE_FLASH_ATTR wifi_get_opmode(void)
 uint8 ICACHE_FLASH_ATTR wifi_get_opmode_default(void)
 {
 	return _wifi_get_opmode(false);
+}
+
+struct s_wekap { // 0x3FFEA410 ???
+	uint8 flg_timer; //+00 byte_
+	uint8 x[3]; //+01
+	ETSTimer timer;	 //+04
+	uint8 c[16];
+	uint8 flg_0x18;	//+24
+	uint8 cnt_0x19;	//+25
+	uint8 cnt_0x1A;	//+26
+} __attribute__((packed));
+
+extern struct s_wekap swekap;
+
+void ICACHE_FLASH_ATTR fn_timer_wekap(void * arg); // ETSTimerFunc
+
+uint8 unk_3FFEA4CC[11];
+
+static int ICACHE_FLASH_ATTR _wekap(int x)
+{
+	if(fpm_allow_tx()) fpm_do_wakeup();
+	if(pm_is_open() == 0) return 0;
+	if (swekap.flg_timer == 0) {
+		ets_timer_setfn(&swekap.timer, (ETSTimerFunc *) fn_timer_wekap, NULL);
+		swekap.flg_timer = 1;
+
+	}
+	uint8 z = pm_is_waked();
+	if(z != 0 || swekap.flg_0x18 != 1) return 0;
+	if(swekap.flg_0x18 == 0) {
+		pm_post(1);
+		ets_timer_disarm(swekap.timer);
+		ets_timer_arm_new(swekap.timer, 10, 0, 1);
+		swekap.flg_0x18 = 1;
+	}
+	if(++swekap.cnt_0x19 > 10) {
+		os_printf("DEFERRED FUNC NUMBER IS BIGGER THAN 10\n");
+		swekap.cnt_0x19 = 10;
+	}
+	if(swekap.cnt_0x1A + swekap.cnt_0x19 <= 10) { // ??
+		unk_3FFEA4CC[swekap.cnt_0x1A + swekap.cnt_0x19] = x;
+	}
+	unk_3FFEA4CC[10] = x;
+	return 0x7F;
+}
+
+static void ICACHE_FLASH_ATTR _new_opmode(int opmode) {
+	.... // TODO
+}
+
+uint8 unk_0x3FFEA493;
+uint8 unk_0x3FFEA494;
+uint8 unk_0x3FFF083C;
+extern uint8 OpmodChgIsOnGoing;
+
+static bool ICACHE_FLASH_ATTR _wifi_set_opmode(uint8 opmode, bool flg)
+{
+	if(opmode > STATIONAP_MODE || g_ic.c[446] != 0) return false;
+	if(_wekap(5) != 0xFF) { // _wekap() не может возвратить 0xFF !!!
+		if(g_ic.g.wifi_store.wfmode[0] == opmode) return true;
+		g_ic.g.wifi_store.wfmode[0] = opmode;
+		OpmodChgIsOnGoing = 1;
+		if(user_init_flag == 1) {
+			_new_opmode(opmode);
+		}
+		OpmodChgIsOnGoing = 0;
+		if(flg == 1) {
+			system_param_save_with_protect((flashchip->chip_size/flashchip->sector_size)-3, &g_ic.g.wifi_store, sizeof(struct s_wifi_store));
+		}
+		return true;
+	}
+	unk_0x3FFEA493 = opmode;
+	unk_0x3FFEA494 = flg;
+	return true;
+}
+
+bool ICACHE_FLASH_ATTR wifi_set_opmode(uint8 opmode)
+{
+	return _wifi_set_opmode(opmode, true);
+}
+
+bool ICACHE_FLASH_ATTR wifi_set_opmode_current(uint8 opmode)
+{
+	return _wifi_set_opmode(opmode, true);
+}
+
+extern void * bcn_ie; // ??
+
+void * ICACHE_FLASH_ATTR wifi_get_user_ie(int x)
+{
+	if(x) return NULL;
+	else return bcn_ie;
+}
+
+enum phy_mode wifi_get_phy_mode(void){
+	return g_ic.g.wifi_store.phy_mode;
+}
+
+bool wifi_set_phy_mode(enum phy_mode mode)
+{
+	if(mode < PHY_MODE_11B || mode > PHY_MODE_11N) return false;
+	if(g_ic.c[446]) return false;
+	if(g_ic.g.wifi_store.phy_mode == mode) return true;
+	int opmode = wifi_get_opmode();
+	g_ic.g.wifi_store.phy_mode = mode;
+	system_param_save_with_protect((flashchip->chip_size/flashchip->sector_size)-3, &g_ic.g.wifi_store, sizeof(struct s_wifi_store));
+	if(user_init_flag == 1) {
+		wifi_station_stop();
+		wifi_softap_stop();
+	}
+	ieee80211_phy_init(mode);
+	g_ic.g.wifi_store.field_820 = 0;
+	if(mode == PHY_MODE_11N) ieee80211_ht_attach(&g_ic);
+	if(user_init_flag != 1) return true;
+	if(opmode != 1) return true;
+	if(opmode == 1 || opmode == 3) {
+		wifi_station_start();
+		wifi_station_connect();
+	}
+	if(opmode == 2 || opmode == 3) {
+		wifi_softap_start();
+	}
+	if(opmode == 1 && g_ic.g.netif1 != NULL) {
+		netif_set_default(*g_ic.g.netif1);
+	}
+	return true;
 }

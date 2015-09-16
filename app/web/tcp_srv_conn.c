@@ -728,6 +728,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_connected(void *arg, struct tcp_pcb *tpcb,
 static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *pcb, err_t err) {
 	struct tcp_pcb_listen *lpcb = (struct tcp_pcb_listen*) arg;
 	TCP_SERV_CFG *p = tcpsrv_server_port2pcfg(pcb->local_port);
+	TCP_SERV_CONN * ts_conn;
 
 	if (p == NULL)	return ERR_ARG;
 
@@ -738,12 +739,34 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *p
 		return ERR_MEM;
 	}
 	if (p->conn_count >= p->max_conn) {
+		if(p->flag.srv_reopen) {
 #if DEBUGSOO > 1
-		os_printf("srv[%u] new listen - max connection!\n", p->port);
+			os_printf("srv[%u] reconnect!\n", p->port);
 #endif
-		return ERR_CONN;
+			ts_conn = p->conn_links;
+			if (p->conn_links != NULL) {
+				ts_conn->pcb = find_tcp_pcb(ts_conn);
+				os_timer_disarm(&ts_conn->ptimer);
+				if (ts_conn->pcb != NULL) {
+					tcp_arg(ts_conn->pcb, NULL);
+					tcp_recv(ts_conn->pcb, NULL);
+					tcp_err(ts_conn->pcb, NULL);
+					tcp_poll(ts_conn->pcb, NULL, 0);
+					tcp_sent(ts_conn->pcb, NULL);
+					tcp_close(ts_conn->pcb);
+				};
+				tcpsrv_list_delete(ts_conn);
+//				ts_conn = p->conn_links;
+			};
+		}
+		else {
+#if DEBUGSOO > 1
+			os_printf("srv[%u] new listen - max connection!\n", p->port);
+#endif
+			return ERR_CONN;
+		}
 	}
-	TCP_SERV_CONN * ts_conn = (TCP_SERV_CONN *) os_zalloc(sizeof(TCP_SERV_CONN));
+	ts_conn = (TCP_SERV_CONN *) os_zalloc(sizeof(TCP_SERV_CONN));
 	if (ts_conn == NULL) {
 #if DEBUGSOO > 1
 		os_printf("srv[%u] new listen - out of mem!\n", ts_conn->pcfg->port);
