@@ -11,6 +11,7 @@
 #include "hw/esp8266.h"
 #include "lwip/err.h"
 #include "lwip/udp.h"
+#include "sdk/mem_manager.h"
 #include "sdk/rom2ram.h"
 #include "driver/wdrv.h"
 
@@ -27,7 +28,7 @@
 #define i2c_saradc_en_test_msb				5
 #define i2c_saradc_en_test_lsb				5
 
-extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb, int indata);
+//extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb, int indata);
 //extern int rom_i2c_readReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb);
 //extern void read_sar_dout(uint16 * buf);
 //i2c_writeReg_Mask_def(i2c_bbpll, i2c_bbpll_en_audio_clock_out, 1); //Enable clock to i2s subsystem

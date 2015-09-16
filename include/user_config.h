@@ -23,7 +23,7 @@
 
 //#define USE_MODBUS // включить пример Modbus TCP
 
-//#define USE_WDRV // включить пример Modbus TCP
+#define USE_WDRV // включить пример Modbus TCP
 
 //#define USE_CAPTDNS // NDS отвечающий на всё запросы клиента при соединении к AP модуля указанием на данный WebHttp (http://aesp8266/)
 
