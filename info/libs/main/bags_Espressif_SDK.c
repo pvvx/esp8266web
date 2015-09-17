@@ -27,6 +27,7 @@ bool ICACHE_FLASH_ATTR system_deep_sleep_set_option(uint8 option)
 	rtc_mem_check(false); // пересчитать OR
 	// return всегда fasle
 }
+RTC_MEM
 /* CRC (c) ESPRSSIF :)
 ESPRSSIF MIT License
 

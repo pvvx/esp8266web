@@ -403,6 +403,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 		tcp_recved(ts_conn->pcb, ts_conn->unrecved_bytes);
 		ts_conn->unrecved_bytes = 0;
 	}
+	tcp_recved(ts_conn->pcb, TCP_WND);
 	err_t err = tcp_close(pcb); // послать закрытие соединения
 	// The function may return ERR_MEM if no memory was available for closing the connection.
 	// If so, the application should wait and try again either by using the acknowledgment callback or the polling functionality.
@@ -753,6 +754,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *p
 					tcp_err(ts_conn->pcb, NULL);
 					tcp_poll(ts_conn->pcb, NULL, 0);
 					tcp_sent(ts_conn->pcb, NULL);
+					tcp_recved(ts_conn->pcb, TCP_WND);
 					tcp_close(ts_conn->pcb);
 				};
 				tcpsrv_list_delete(ts_conn);
@@ -1023,6 +1025,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_close(TCP_SERV_CFG *p) {
 					tcp_err(ts_conn->pcb, NULL);
 					tcp_poll(ts_conn->pcb, NULL, 0);
 					tcp_sent(ts_conn->pcb, NULL);
+					tcp_recved(ts_conn->pcb, TCP_WND);
 					tcp_abort(ts_conn->pcb);
 				};
 				tcpsrv_list_delete(ts_conn);
