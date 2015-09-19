@@ -126,7 +126,10 @@ class ESPROM:
         self.command(ESPROM.ESP_SYNC, '\x07\x07\x12\x20'+32*'\x55')
         for i in xrange(7):
             self.command()
-
+        # WiFi Off, Power 32 mA -> 14 mA 	
+        self.write_reg(0x60000710, 0x0, 0xffffffff)
+        time.sleep(5.05)
+  
     """ Try connecting repeatedly until successful, or giving up """
     def connect(self):
         print 'Connecting...'

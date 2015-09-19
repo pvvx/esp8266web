@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: user_interface.c
- * Description: disasm user_interface functions SDK 1.1.0..1.3.0 (libmain.a + libpp.a)
+ * Description: disasm user_interface functions SDK 1.1.0..1.4.0 (libmain.a + libpp.a)
  * Author: PV`
  * (c) PV` 2015
  ******************************************************************************/
