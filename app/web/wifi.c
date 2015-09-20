@@ -107,8 +107,15 @@ uint32 ICACHE_FLASH_ATTR Cmp_WiFi_chg(struct wifi_config *wcfg) {
 				&& (os_memcmp((void*) &ipinfo, &wcfg->ap.ipinfo, sizeof(ipinfo))))
 				wchg.b.ap_ipinfo = 1;
 		}
+#ifndef USE_OPEN_DHCPS
+		struct dhcps_lease dhcpslease;
+		wifi_softap_get_dhcps_lease(&dhcpslease);
+		if ((wcfg->ap.ipdhcp.start_ip.addr != dhcpslease.start_ip.addr)
+				|| (wcfg->ap.ipdhcp.end_ip.addr != dhcpslease.end_ip.addr))
+#else
 		if ((wcfg->ap.ipdhcp.start_ip.addr != dhcps_lease.start_ip.addr)
 				|| (wcfg->ap.ipdhcp.end_ip.addr != dhcps_lease.end_ip.addr))
+#endif
 			wchg.b.ap_ipdhcp = 1;
 		{
 			uint8 macaddr[6];
@@ -146,7 +153,11 @@ uint32 ICACHE_FLASH_ATTR Read_WiFi_config(struct wifi_config *wcfg,
 		if ((wset.b.ap_macaddr) && (!wifi_get_macaddr(SOFTAP_IF, wcfg->ap.macaddr)))
 			werr.b.ap_macaddr = 1;
 		if (wset.b.ap_ipdhcp) {
+#ifndef USE_OPEN_DHCPS
+			wifi_softap_get_dhcps_lease(&wcfg->ap.ipdhcp);
+#else
 			wcfg->ap.ipdhcp = dhcps_lease;
+#endif
 		}
 	}
 	if (opmode & STATION_MODE) {
@@ -238,10 +249,10 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 		if(!wcfg->b.st_dhcp_enable) wset.b.st_ipinfo = 1;
 		if (wset.b.st_hostname) {
 	      	  if(hostname != NULL) {
-	      		  vPortFree(hostname);
+	      		  os_free(hostname);
 	      		  hostname = NULL;
 	      	  };
-	      	  hostname = pvPortMalloc(ets_strlen(wcfg->st.hostname) + 1);
+	      	  hostname = os_malloc(ets_strlen(wcfg->st.hostname) + 1);
 	      	  if(hostname != NULL) {
 	          	  extern struct netif * eagle_lwip_getif(int index);
 	          	  struct netif * nif = eagle_lwip_getif(0);
@@ -454,7 +465,7 @@ bool ICACHE_FLASH_ATTR wifi_read_fcfg(void)
 uint32 total_scan_infos DATA_IRAM_ATTR;
 struct bss_scan_info buf_scan_infos[max_scan_bss] DATA_IRAM_ATTR;
 
-#if	DEF_SDK_VERSION < 1303
+#if	(DEF_SDK_VERSION >= 1200 && DEF_SDK_VERSION < 1500)
 LOCAL void ICACHE_FLASH_ATTR quit_scan(void)
 {
 	ets_set_idle_cb(NULL, NULL);
@@ -462,7 +473,7 @@ LOCAL void ICACHE_FLASH_ATTR quit_scan(void)
 	New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
 }
 #else
-#warning "Bag Fatal exception (28) over wifi_set_opmode() fixed?"
+// #warning "Bag Fatal exception (28) over wifi_set_opmode() fixed?"
 #endif
 LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 {
@@ -473,7 +484,7 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 #endif
 	if (status == OK) {
 		struct bss_info * bss_link = (struct bss_info *) arg;
-		bss_link = bss_link->next.stqe_next;
+//		bss_link = bss_link->next.stqe_next;
 		int total_scan = 0;
 //		int max_scan =  eraminfo.size / (sizeof(struct bss_scan_info));
 		uint8 *ptr = (uint8 *)&buf_scan_infos; // ptr_scan_infos;
@@ -483,10 +494,20 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 			total_scan++;
 #if DEBUGSOO > 1
 			ets_memcpy(ssid, bss_link->ssid, 32);
-			if(bss_link != NULL) os_printf("%d: Au:%d, '%s', %d, " MACSTR ", Ch:%d\n", total_scan, bss_link->authmode,
+			if(bss_link != NULL)
+#if	DEF_SDK_VERSION >= 1400
+				os_printf("%d: Au:%d, %d, " MACSTR ", Ch:%d, '%s', F:%u/%u, Mesh:%u\n",
+					total_scan, bss_link->authmode,
+					bss_link->rssi, MAC2STR(bss_link->bssid),
+					bss_link->channel, ssid, bss_link->freq_offset,
+					bss_link->freqcal_val, bss_link->esp_mesh_ie);
+#else
+				os_printf("%d: Au:%d, '%s', %d, " MACSTR ", Ch:%d\n",
+					total_scan, bss_link->authmode,
 					ssid, bss_link->rssi, MAC2STR(bss_link->bssid),
 					bss_link->channel);
 #endif
+#endif // DEBUGSOO > 1
 			bss_link = bss_link->next.stqe_next;
 		}
 		total_scan_infos = total_scan;
@@ -495,10 +516,10 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 #endif
 	}
 	if(wifi_get_opmode() != wificonfig.b.mode) {
-#if	DEF_SDK_VERSION >= 1200
+#if	(DEF_SDK_VERSION >= 1200 && DEF_SDK_VERSION < 1500)
 		ets_set_idle_cb(quit_scan, NULL);
-#elif DEF_SDK_VERSION > 1300
-#warning "Bag Fatal exception (28) over wifi_set_opmode() fixed?"
+#else
+// #warning "Bag Fatal exception (28) over wifi_set_opmode() fixed?"
 		New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
 #endif
 	}

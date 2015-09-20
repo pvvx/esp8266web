@@ -3,7 +3,6 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 	<title>ESP8266EX RF Data Setup 2</title>
 	<link rel="stylesheet" href="../style.css">
-	<script src="/scripts.js"></script>
 </head><body>
 ~inc:menu.inc~
 	<div class="content">
@@ -12,7 +11,7 @@
 			<tr>
 			<tr><form method="post" action="">
 				<td class="label">crystal_26m_en [48]:</td>
-				<td><select name='sys_const_48' title='default: 1'>
+				<td><select id='sc48' name='sys_const_48' title='default: 1'>
 					<option value='0'>0: 40MHz</option>
 					<option value='1'>1: 26MHz</option>
 					<option value='2'>2: 24MHz</option>
@@ -21,7 +20,7 @@
 			</tr></form>
 			<tr><form method="post" action="">
 				<td class="label">sdio_configure [50]:</td>
-				<td><select name='sys_const_50' title='default: 0'>
+				<td><select id='sc50' name='sys_const_50' title='default: 0'>
 					<option value='0'>0: Auto by pin strapping</option>
 					<option value='1'>1: SDIO dataoutput is at negative edges (SDIO V1.1)</option>
 					<option value='2'>2: SDIO dataoutput is at positive edges (SDIO V2.0)</option>
@@ -30,7 +29,7 @@
 			</tr></form>
 			<tr><form method="post" action="">
 				<td class="label">bt_configure [51]:</td>
-				<td><select name='sys_const_51' title='default: 0'>
+				<td><select id='sc51' name='sys_const_51' title='default: 0'>
 					<option value='0'>0: None,no bluetooth</option>
 					<option value='1'>1: GPIO0 -> WLAN_ACTIVE/ANT_SEL_WIFI, MTMS -> BT_ACTIVE, MTCK -> BT_PRIORITY, U0RXD -> ANT_SEL_BT</option>
 					<option value='2'>2: None, have bluetooth</option>
@@ -40,7 +39,7 @@
 			</tr></form>
 			<tr><form method="post" action="">
 				<td class="label">bt_protocol [52]:</td>
-				<td><select name='sys_const_52' title='default: 0'>
+				<td><select id='sc52' name='sys_const_52' title='default: 0'>
 					<option value='0'>0: WiFi-BT are not enabled. Antenna is for WiFi</option>
 					<option value='1'>1: WiFi-BT are not enabled. Antenna is for BT</option>
 					<option value='2'>2: WiFi-BT 2-wire are enabled, (only use BT_ACTIVE), independent ant</option>
@@ -52,7 +51,7 @@
 			</tr></form>
 			<tr><form method="post" action="">
 				<td class="label">dual_ant_configure [53]:</td>
-				<td><select name='sys_const_53' title='default: 0'>
+				<td><select id='sc53' name='sys_const_53' title='default: 0'>
 					<option value='0'>0: None</option>
 					<option value='1'>1: dual_ant (antenna diversity for WiFi-only): GPIO0 + U0RXD</option>
 					<option value='2'>2: T/R switch for External PA/LNA:  GPIO0 is high and U0RXD is low during Tx</option>
@@ -62,7 +61,7 @@
 			</tr></form>
 			<tr><form method="post" action="">
 				<td class="label">share_xtal [55]:</td>
-				<td><select name='sys_const_55' title='default: 0. This option is to share crystal clock for BT. The state of Crystal during sleeping'>
+				<td><select id='sc55' name='sys_const_55' title='default: 0. This option is to share crystal clock for BT. The state of Crystal during sleeping'>
 					<option value='0'>0: Off</option>
 					<option value='1'>1: Forcely On</option>
 					<option value='2'>2: Automatically On according to XPD_DCDC</option>
@@ -123,14 +122,12 @@
 	</div>
 ~inc:footer.inc~
 <script type="text/javascript">
-var cfg = {
-	sys_const_48:"~sys_const_48~",
-	sys_const_50:"~sys_const_50~",
-	sys_const_51:"~sys_const_51~",
-	sys_const_52:"~sys_const_52~",
-	sys_const_53:"~sys_const_53~",
-	sys_const_55:"~sys_const_55~",
-}
-setFormValues(document.forms[0], cfg);
+~inc:$js.inc~
+$('sc48').value = '~sys_const_48~';
+$('sc50').value = '~sys_const_50~';
+$('sc51').value = '~sys_const_51~';
+$('sc52').value = '~sys_const_52~';
+$('sc53').value = '~sys_const_53~';
+$('sc55').value = '~sys_const_55~';
 </script>
 </body></html>

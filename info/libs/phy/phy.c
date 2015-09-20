@@ -119,3 +119,7 @@ void rf_init(int8 ch)
 }
 #endif
 
+void phy_set_powerup_option(int option)
+{
+	IO_RTC_POWERUP = option; // 0x6000073C = option
+}

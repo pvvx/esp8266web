@@ -798,7 +798,9 @@
 	----------------------------------
 */
 #ifndef LWIP_DHCP_NTP
+#ifdef USE_OPEN_DHCPS
 #define LWIP_DHCP_NTP 1
+#endif
 #endif
 /** The maximum of NTP servers */
 #ifndef NTP_MAX_SERVERS

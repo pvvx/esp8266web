@@ -230,10 +230,10 @@ static const HTTP_RESPONSE ICACHE_RODATA_ATTR HTTPResponse[] ICACHE_RODATA_ATTR 
 #endif
 */
 
-const char HTTPsfupload[] ICACHE_RODATA_ATTR = "<html><body style='margin:100px'><form method='post' action='/fsupload' enctype='multipart/form-data'><b>File Upload</b><p><input type='file' name='file' size=40> <input type='submit' value='Upload'></form></body></html>";
+const char HTTPfsupload[] ICACHE_RODATA_ATTR = "<html><body style='margin:100px'><form method='post' action='/fsupload' enctype='multipart/form-data'><b>File Upload</b><p><input type='file' name='file' size=40> <input type='submit' value='Upload'></form></body></html>";
 const char HTTPdefault[] ICACHE_RODATA_ATTR = "<html><h3>ESP8266 Built-in Web server <sup><i>&copy</i></sup></h3></html>";
 
-#define sizeHTTPsfupload 220
+#define sizeHTTPfsupload 220
 #define sizeHTTPdefault 73
 
 //        const uint8 *HTTPCacheControl = "Cache-Control:";
@@ -875,7 +875,7 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 			else if(rom_xstrcmp(pstr, fsupload_fname)) {
 				SetSCB(SCB_AUTH);
 				web_inc_fp(web_conn, WEBFS_UPLOAD_HANDLE);
-				web_conn->content_len = sizeHTTPsfupload;
+				web_conn->content_len = sizeHTTPfsupload;
 				CurHTTP->fileType = HTTP_HTML;
 #if DEBUGSOO > 1
 				os_printf("of%d[%s] ", web_conn->webfile, CurHTTP->pFilename);
@@ -910,7 +910,7 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 	uint32 pdata = 0;
-	uint8 pbuf[mMAX(sizeHTTPdefault,sizeHTTPsfupload)];
+	uint8 pbuf[mMAX(sizeHTTPdefault,sizeHTTPfsupload)];
 	uint16 size = 0;
 	switch(web_conn->webfile) {
 	case WEBFS_NODISK_HANDLE:
@@ -919,8 +919,8 @@ LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 		size = sizeHTTPdefault;
 		break;
 	case WEBFS_UPLOAD_HANDLE:
-		pdata = (uint32)((void *)HTTPsfupload);
-		size = sizeHTTPsfupload;
+		pdata = (uint32)((void *)HTTPfsupload);
+		size = sizeHTTPfsupload;
 		break;
 	}
 	if(pdata != 0 && size != 0) {

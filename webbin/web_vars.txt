@@ -221,6 +221,7 @@ sys_const_70
 sys_const_71
 sys_const_72
 sys_const_73
+inc:$js.inc
 sys_const_48
 sys_const_50
 sys_const_51
@@ -233,9 +234,9 @@ sys_const_97
 sys_const_98
 sys_const_112
 sys_const_113
-sys_const_114
 sys_const_93
 sys_const_96
+sys_const_114
 wifi_scan
 cfg_tcp_url
 cfg_tcp_twrec

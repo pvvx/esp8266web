@@ -487,12 +487,12 @@ typedef enum {
 #define IO_RTC_INT_ENA			rtc_[10]
 /* RTC_SCRATCH0: 0x60000730 */
 #define IO_RTC_SCRATCH0			rtc_[12] // the register for software to save some values for watchdog reset
-/* RTC_SCRATCH0:	0x60000734 */
+/* RTC_SCRATCH1:	0x60000734 */
 #define IO_RTC_SCRATCH1			rtc_[13] // the register for software to save some values for watchdog reset
-/* RTC_SCRATCH0:	0x60000738 */
+/* RTC_SCRATCH2:	0x60000738 */
 #define IO_RTC_SCRATCH2			rtc_[14] // the register for software to save some values for watchdog reset
-/* RTC_SCRATCH0:	0x6000073C */
-#define IO_RTC_SCRATCH3			rtc_[15] // the register for software to save some values for watchdog reset
+/* RTC_SCRATCH3:	0x6000073C */
+#define IO_RTC_POWERUP			rtc_[15] // phy_set_powerup_option()
 /* RTC_GPIO_OUT:	0x60000768 */
 #define IO_RTC_GPIO_OUT			rtc_[26] // used by gpio16
 /* RTC_GPIO_ENABLE:	0x60000774 */

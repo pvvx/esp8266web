@@ -212,7 +212,7 @@ void ICACHE_FLASH_ATTR web_hexdump(TCP_SERV_CONN *ts_conn)
 	web_conn->udata_stop &= 0xfffffff0;
 	while(web_conn->msgbuflen + (9+3*16+17+2) <= web_conn->msgbufsize) {
 		if(((uint32)addr >= 0x20000000)&&(((uint32)addr < 0x60002000)||((uint32)addr >= 0x60008000))) {
-			tcp_puts("0x%08x:", addr);
+			tcp_puts("%08x", addr);
 			for(i=0 ; i < 4 ; i++) data.dw[i] = *addr++;
 			web_conn->udata_start = (uint32)addr;
 			if(ts_conn->flag.user_option1) {
@@ -541,10 +541,16 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 			wifi_get_macaddr(if_index, macaddr);
             uint8 opmode = wifi_get_opmode();
 			struct ip_info wifi_info;
+#ifndef USE_OPEN_DHCPS
+			struct dhcps_lease dhcps_lease = wificonfig.ap.ipdhcp;
+			wifi_softap_get_dhcps_lease(&dhcps_lease);
+#endif
             if(if_index == SOFTAP_IF) {
               if (((opmode & SOFTAP_MODE) == 0) || (!wifi_get_ip_info(SOFTAP_IF, &wifi_info))) {
             	  wifi_info = wificonfig.ap.ipinfo;
+#ifdef USE_OPEN_DHCPS
             	  dhcps_lease = wificonfig.ap.ipdhcp;
+#endif
 //            	  p_dhcps_lease->start_ip = htonl(wificonfig.ap.ipdhcp.start_ip);
 //            	  p_dhcps_lease->end_ip = htonl(wificonfig.ap.ipdhcp.end_ip);
 //            	  p_dhcps_lease->start_ip = wificonfig.ap.ipdhcp.start_ip;

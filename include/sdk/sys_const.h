@@ -9,8 +9,14 @@
 #include "hw/esp8266.h"
 
 #define MAX_IDX_SYS_CONST 128
-#define MAX_IDX_USER_CONST 32
-#define SIZE_USYS_CONST (MAX_IDX_SYS_CONST + MAX_IDX_USER_CONST*4)
+#define SIZE_SYS_CONST 128
+#define MAX_IDX_USER_CONST 30
+#define SIZE_USER_CONST (MAX_IDX_USER_CONST*4)
+#define SIZE_USYS_CONST (SIZE_SYS_CONST + SIZE_USER_CONST)
+#define SIZE_SAVE_SYS_CONST 756 // размер сохранения блока системных констант в секторе с номером (max_flash - 4). SDK 1.4.0
+#if SIZE_SAVE_SYS_CONST < SIZE_USYS_CONST
+#error SIZE_SAVE_SYS_CONST < SIZE_USYS_CONST !
+#endif
 
 #define esp_init_data_default_addr (flashchip->chip_size - 4 * SPI_FLASH_SEC_SIZE)
 

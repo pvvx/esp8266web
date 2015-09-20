@@ -580,15 +580,20 @@ void ICACHE_FLASH_ATTR sntp_request(void *arg)
 	LWIP_DEBUGF(SNTP_DEBUG_STATE, ("Sending request to %s.\n", buf_sntp_server_addresses));
 	/* initialize SNTP server address */
 	
+#if LWIP_DHCP_NTP
 	ip_addr_t *dhcpntp;
 	dhcpntp = &dhcp_sntp_server_address;
-
+#endif
+	
 #if SNTP_SERVER_DNS
+#if LWIP_DHCP_NTP
 	if (!ip_addr_isany(dhcpntp)) {
 		sntp_server_address=*dhcpntp;
 		err = ERR_OK;
 	}
-	else {
+	else 
+#endif	
+	{
 		err = dns_gethostbyname(buf_sntp_server_addresses,
 			&sntp_server_address, sntp_dns_found, NULL);
 		if (err == ERR_INPROGRESS) {
@@ -598,11 +603,14 @@ void ICACHE_FLASH_ATTR sntp_request(void *arg)
 		}
 	}
 #else /* SNTP_SERVER_DNS */
+#if LWIP_DHCP_NTP
 	if (!ip_addr_isany(dhcpntp)) {
 		sntp_server_address=*dhcpntp;
 		err = ERR_OK;
 	}
-	else {
+	else 
+#endif	
+	{
 		err = ipaddr_aton(buf_sntp_server_addresses, &sntp_server_address)
 			? ERR_OK : ERR_ARG;
 	}

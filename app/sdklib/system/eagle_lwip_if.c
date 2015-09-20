@@ -31,6 +31,7 @@
 
 extern uint8 dhcps_flag;
 extern void ppRecycleRxPkt(void *esf_buf); // struct pbuf -> eb
+extern void wifi_station_dhcpc_event(void);
 
 uint8 * hostname LWIP_DATA_IRAM_ATTR;
 bool default_hostname; //  = true;
@@ -71,9 +72,9 @@ static void ICACHE_FLASH_ATTR task_if1(struct ETSEventTag *e)
 
 static err_t ICACHE_FLASH_ATTR init_fn(struct netif *myif)
 {
-    myif->hwaddr_len = 6; // +46
-    myif->mtu = DEFAULT_MTU; //+44 1500
-    myif->flags = NETIF_FLAG_IGMP | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_BROADCAST; // +53 = 0x0B2
+    myif->hwaddr_len = 6; // +46 //+50 SDK 1.4.0
+    myif->mtu = DEFAULT_MTU; //+44 1500 //+48 SDK 1.4.0
+    myif->flags = NETIF_FLAG_IGMP | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_BROADCAST; // +53 = 0x0B2 // +57 SDK 1.4.0
     return 0;
 }
 
@@ -91,43 +92,46 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_getif(int index)
 	return NULL;
 }
 
-struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn, uint8 *macaddr, struct ip_info *info)
+struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn, uint8 *macaddr, struct ip_info *ipinfo)
 {
 	struct netif *myif = conn->myif;
     if (myif == NULL) {
-        myif = (void *) pvPortMalloc(sizeof(struct netif)); // SDK 1.1.2 : pvPortZalloc(64)
+        myif = (void *) os_zalloc(sizeof(struct netif)); // SDK 1.1.2 : os_zalloc(64), SDK 1.4.0: os_zalloc(68)
         conn->myif = myif;
     }
     if(myif == NULL) return NULL;
-    if (conn->dhcps_if == 0) { // +176
+    if (conn->dhcps_if == 0) { // +176 // SDK 1.4.0 +200
         if(default_hostname) {
     		wifi_station_set_default_hostname(macaddr);
     	}
-    	myif->hostname = hostname; // +40
+    	myif->hostname = hostname; // +40 // +44 SDK 1.4.0
     }
-    else myif->hostname = NULL; // +40
+    else myif->hostname = NULL; // +40 // +44 SDK 1.4.0
 
     myif->state = conn; // +28
-    myif->name[0] = 'e'; // + 54
-    myif->name[1] = 'w'; // + 55
+    myif->name[0] = 'e'; // + 54 // SDK 1.4.0 +58
+    myif->name[1] = 'w'; // + 55 // SDK 1.4.0 +59
     myif->output = etharp_output; // +20
     myif->linkoutput = ieee80211_output_pbuf; // +24
-    ets_memcpy(myif->hwaddr, macaddr, 6); // +47
+    ets_memcpy(myif->hwaddr, macaddr, 6); // +47 // SDK 1.4.0 +51
 
-	ETSEvent *queue = (void *) pvPortMalloc(sizeof(struct ETSEventTag) * QUEUE_LEN); // pvPortZalloc(80)
+	ETSEvent *queue = (void *) os_zalloc(sizeof(struct ETSEventTag) * QUEUE_LEN); // os_zalloc(80)
 	if(queue == NULL) return NULL;
 
-    if (conn->dhcps_if != 0) { // +176
+    if (conn->dhcps_if != 0) { // +176 // +200 SDK 1.4.0
 	    lwip_if_queues[1] = queue;
-	    netif_set_addr(myif, &info->ip, &info->netmask, &info->gw);
+	    netif_set_addr(myif, &ipinfo->ip, &ipinfo->netmask, &ipinfo->gw);
 	    ets_task(task_if1, LWIP_IF1_PRIO, (ETSEvent *)lwip_if_queues[1], QUEUE_LEN);
-	    netif_add(myif, &info->ip, &info->netmask, &info->gw, conn, init_fn, ethernet_input);
+	    netif_add(myif, &ipinfo->ip, &ipinfo->netmask, &ipinfo->gw, conn, init_fn, ethernet_input);
 	    if(dhcps_flag) {
-	    	dhcps_start(info);
-	    	os_printf("dhcp server start:(ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR ")\n", IP2STR(&info->ip), IP2STR(&info->netmask), IP2STR(&info->gw));
+	    	dhcps_start(ipinfo);
+	    	os_printf("dhcp server start:(ip:" IPSTR ",mask:" IPSTR ",gw:" IPSTR ")\n", IP2STR(&ipinfo->ip), IP2STR(&ipinfo->netmask), IP2STR(&ipinfo->gw));
 	    }
     }
     else {
+#if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
+    	myif->dhcpc_event = wifi_station_dhcpc_event;
+#endif
     	lwip_if_queues[0] = queue;
 	    ets_task(task_if0, LWIP_IF0_PRIO, (ETSEvent *)lwip_if_queues[0], QUEUE_LEN);
 	    struct ip_info ipn;
@@ -137,7 +141,7 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn
 		    ipn.gw.addr = 0;
 		}
 		else {
-			ipn =  *info;
+			ipn =  *ipinfo;
 		}
 	    netif_add(myif, &ipn.ip, &ipn.netmask, &ipn.gw, conn, init_fn, ethernet_input);
     }
@@ -146,19 +150,19 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn
 
 void ICACHE_FLASH_ATTR eagle_lwip_if_free(struct ieee80211_conn *conn)
 {
-	if(conn->dhcps_if == 0) {
+	if(conn->dhcps_if == 0) { // SDK 1.4.0 +200
 		netif_remove(conn->myif);
 //		if(lwip_if_queues[0] != NULL)
-			vPortFree(lwip_if_queues[0]);
+		os_free(lwip_if_queues[0]);
 	}
 	else {
 		if(dhcps_flag) dhcps_stop();
 		netif_remove(conn->myif);
 //		if(lwip_if_queues[1] != NULL)
-			vPortFree(lwip_if_queues[1]);
+		os_free(lwip_if_queues[1]);
 	}
 	if(conn->myif != NULL) {
-		vPortFree(conn->myif);
+		os_free(conn->myif);
 		conn->myif = NULL;
 	}
 }

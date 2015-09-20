@@ -38,10 +38,10 @@ uint8 * wifi_station_get_hostname(void)
 void wifi_station_set_default_hostname(uint8 * mac)
 {
 	if(hostname != NULL)	{
-		vPortFree(hostname);
+		os_free(hostname);
 		hostname = NULL;
 	}
-	hostname = pvPortMalloc(32);
+	hostname = os_malloc(32);
 	if(hostname == NULL) {
 		ets_sprintf(hostname,"ESP_%02X%02X%02X", mac[3], mac[4], mac[5]);
 	}
@@ -56,10 +56,10 @@ bool wifi_station_set_hostname(uint8 * name)
 	if(opmode == 1 || opmode == 3) {
 		default_hostname = false;
 		if(hostname != NULL) {
-			vPortFree(hostname);
+			os_free(hostname);
 			hostname = NULL;
 		}
-		hostname = pvPortMalloc(len);
+		hostname = os_malloc(len);
 		if(hostname == NULL) return false;
 		struct netif * nif = eagle_lwip_getif(0);
 		ets_strcpy(hostname, name);
@@ -194,13 +194,13 @@ void system_restart(void)
 
 void system_restore(void)
 {
-	uint8 * buf_a12 = pvPortMalloc(sizeof(struct s_wifi_store));
+	uint8 * buf_a12 = os_malloc(sizeof(struct s_wifi_store));
 	ets_memset(buf_a12, 0xff, sizeof(struct s_wifi_store));
 	ets_memcpy(buf_a12, &g_ic.g.wifi_store, 8);
 	uint32 sctrs = flashchip->chip_size/flashchip->sector_size;
 	sctrs -= 4;
 	wifi_param_save_protect(sctrs, buf_a12, sizeof(struct s_wifi_store));
-	vPortFree(buf_a12);
+	os_free(buf_a12);
 }
 
 void system_restart_core(void)
@@ -666,7 +666,7 @@ bool system_param_save_with_protect(uint16 start_sec, void *param, uint16 len)
 
 void wifi_param_save_protect_with_check(uint16 startsector, int sectorsize, void *pdata, uint16 len)
 {
-	uint8 * pbuf = pvPortMalloc(len);
+	uint8 * pbuf = os_malloc(len);
 	int i;
 	if(pbuf == NULL) return;
 	do {
@@ -678,7 +678,7 @@ void wifi_param_save_protect_with_check(uint16 startsector, int sectorsize, void
 			os_printf("[W]sec %x error\n", startsector);
 		}
 	} while(i != 0);
-	vPortFree(pbuf);
+	os_free(pbuf);
 }
 
 bool system_param_load(uint16 start_sec, uint16 offset, void *param, uint16 len)
@@ -960,13 +960,13 @@ static uint8 ICACHE_FLASH_ATTR _wifi_get_opmode(bool flg)
 	uint8 opmode;
 	struct s_wifi_store * wifi_store;
 	if(flg != true) {
-		wifi_store = (struct s_wifi_store *)pvPortMalloc(sizeof(struct s_wifi_store)); // 888 байт в SDK 1.3.0
+		wifi_store = (struct s_wifi_store *)os_malloc(sizeof(struct s_wifi_store)); // 888 байт в SDK 1.3.0
 		system_param_load((flashchip->chip_size/flashchip->sector_size)-3, 0, wifi_store,  sizeof(struct s_wifi_store));
 	}
 	else wifi_store = &g_ic.g.wifi_store;
 	opmode = wifi_store->wfmode[0];
 	if(opmode > STATIONAP_MODE) opmode = 2;
-	if(flg != true) vPortFree(wifi_store);
+	if(flg != true) os_free(wifi_store);
 	return opmode;
 }
 
@@ -1104,4 +1104,9 @@ bool wifi_set_phy_mode(enum phy_mode mode)
 		netif_set_default(*g_ic.g.netif1);
 	}
 	return true;
+}
+
+void system_phy_set_powerup_option(uint8 option)
+{
+	phy_set_powerup_option(option);
 }

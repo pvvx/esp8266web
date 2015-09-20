@@ -185,6 +185,15 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 	os_printf("WiFi event %x\n", evt->event);
 #endif
 	switch (evt->event) {
+		case EVENT_SOFTAPMODE_PROBEREQRECVED:
+		{
+#if DEBUGSOO > 1
+			os_printf("Probe Request (MAC:" MACSTR ", RSSI:%d)\n",
+					MAC2STR(evt->event_info.ap_probereqrecved.mac),
+					evt->event_info.ap_probereqrecved.rssi);
+#endif
+			break;
+		}
 		case EVENT_STAMODE_CONNECTED:
 		{
 #if DEBUGSOO > 1

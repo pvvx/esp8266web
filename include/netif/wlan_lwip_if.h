@@ -12,8 +12,12 @@
 
 struct ieee80211_conn {
     struct netif *myif;	//+0
+#if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
+    uint32_t padding[(200-4)>>2]; //+4 (SDK 1.4.0)
+#else
     uint32_t padding[(176-4)>>2]; //+4
-    uint32_t dhcps_if; //+176 // + 0xB0
+#endif
+    uint32_t dhcps_if; //+176 // + 0xB0 // +200 SDK 1.4.0
 };
 #endif
 

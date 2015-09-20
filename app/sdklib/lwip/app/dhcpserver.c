@@ -9,12 +9,7 @@
 #include "lwip/mem.h"
 #include "osapi.h"
 
-#ifndef USE_OPEN_DHCPS // (назначается в MakeFile)
-struct dhcps_lease {
-	uint32 start_ip;
-	uint32 end_ip;
-} dhcps_lease;  // временная затычка
-#else
+#ifdef USE_OPEN_DHCPS // (назначается в MakeFile)
 
 #include "lwip/app/dhcpserver.h"
 

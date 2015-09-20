@@ -86,7 +86,9 @@ void store_exception_error(uint32_t errn)
 			*ptr++ = RSR(EPC3);
 			*ptr++ = RSR(EXCVADDR);
 			*ptr++ = RSR(DEPC);
-		if(errn > RST_EVENT_WDT) _ResetVector();
+		if(errn > RST_EVENT_WDT) {
+			_ResetVector();
+		}
 }
 
 
@@ -138,6 +140,9 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 		case RST_EVENT_DEEP_SLEEP:
 			os_printf("DeepSleep\n");
 			break;
+		case RST_EXT_SYS:
+			os_printf("ExtReset\n");
+			break;
 		default: {
 			char * txt = (char *)rst_inf->epc1;
 			if(txt == NULL) txt = aNull;
@@ -148,7 +153,7 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 		}
 		uart_wait_tx_fifo_empty();
 	}
-	rst_inf->reason = 0;
+	// rst_inf->reason = 0;
 }
 
 // SDK 1.1.0 + libmain_patch_01.a

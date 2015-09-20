@@ -3,7 +3,6 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 	<title>ESP8266</title>
 	<link rel="stylesheet" href="/style.css">
-	<script src="/scripts.js"></script>
 	<script src="/site.js"></script>
 </head>
 <body onload="allowAJAX=true;" onunload="allowAJAX=false;">
@@ -40,7 +39,7 @@
 	</div>
 ~inc:footer.inc~
 <script type="text/javascript">
-$("ds_option").value = ~sys_sleep_old~;
+document.getElementById("ds_option").value = ~sys_sleep_old~;
 function DeepSleep(){
 	var dstim = parseInt(document.getElementById('ds_time').value,10);
 	newAJAXCommand('/web.cgi?sys_sleep_option='+document.getElementById('ds_option').value.toString(10)+'&sys_sleep_us=0x' + dstim.toString(16), null, 0);

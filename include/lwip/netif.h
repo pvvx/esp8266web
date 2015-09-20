@@ -175,22 +175,25 @@ struct netif {
   /** the AutoIP client state information for this netif */
   struct autoip *autoip;
 #endif
+#if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
+  void * dhcpc_event; // +40 (SDK 1.4.0)
+#endif
 #if LWIP_NETIF_HOSTNAME
   /* the hostname for this netif, NULL is a valid value */
-  char*  hostname;	// + 40
+  char*  hostname;	// + 40 // + 44 (SDK 1.4.0)
 #endif /* LWIP_NETIF_HOSTNAME */
   /** maximum transfer unit (in bytes) �ýӿ������������ݰ����ȣ�����1500*/
-  u16_t mtu;	// + 44
+  u16_t mtu;	// + 44 // + 48 (SDK 1.4.0)
   /** number of bytes used in hwaddr�ýӿ������ַ���� */
-  u8_t hwaddr_len;	// +46
+  u8_t hwaddr_len;	// +46 // + 50 (SDK 1.4.0)
   /** link level hardware address of this interface �ýӿ������ַ*/
-  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +47 [6]
+  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +47 [6] // + 51 (SDK 1.4.0)
   /** flags (see NETIF_FLAG_ above) �ýӿ�״̬�������ֶ�*/
-  u8_t flags;	// +53
+  u8_t flags;	// +53 // + 57 (SDK 1.4.0)
   /** descriptive abbreviation �ýӿڵ�����*/
-  char name[2]; // +54
+  char name[2]; // +54 // // + 58 (SDK 1.4.0)
   /** number of this interface �ýӿڵı��*/
-  u8_t num; // +56
+  u8_t num; // +56 // + 60 (SDK 1.4.0)
 #if LWIP_SNMP
   /** link type (from "snmp_ifType" enum from snmp.h) */
   u8_t link_type;
@@ -211,7 +214,7 @@ struct netif {
 #if LWIP_IGMP
   /** This function could be called to add or delete a entry in the multicast
       filter table of the ethernet MAC.*/
-  netif_igmp_mac_filter_fn igmp_mac_filter; // +60
+  netif_igmp_mac_filter_fn igmp_mac_filter; // +60 // + 64 (SDK 1.4.0)
 #endif /* LWIP_IGMP */
 #if LWIP_NETIF_HWADDRHINT
   u8_t *addr_hint;

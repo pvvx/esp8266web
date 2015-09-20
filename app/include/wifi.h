@@ -133,10 +133,14 @@ struct wifi_config {	// структура конфигурации wifi
 struct bss_scan_info { // структуры, сохранямые для вывода scan.xml (в iram)
     uint8 bssid[6];
     uint8 ssid[32];
+    uint8 ssid_len;
     uint8 channel;
     sint8 rssi;
     AUTH_MODE authmode;
     uint8 is_hidden;
+    sint16 freq_offset;
+    sint16 freqcal_val;
+	uint8 *esp_mesh_ie;
 };
 
 //#define total_scan_infos (*eraminfo.base) // #include "flash_header.h"

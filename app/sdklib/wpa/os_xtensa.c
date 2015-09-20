@@ -13,7 +13,7 @@ char * ICACHE_FLASH_ATTR ets_strdup(char * s)
 	char * pret = (0);
 	if(s != (0)) {
 		uint32 len = ets_strlen(s) + 1;
-		pret = (char *)pvPortMalloc(len);
+		pret = (char *)os_malloc(len);
 		if(pret != (0)) ets_memcpy(pret, s, len);
 	}
 	return pret;

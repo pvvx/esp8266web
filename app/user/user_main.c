@@ -104,7 +104,11 @@ void ICACHE_FLASH_ATTR init_done_cb(void)
 	test_rtc_mem();
 #endif
 	web_fini(inifname);
+#ifdef DEBUG_OFF
 	New_WiFi_config(WIFI_MASK_ALL);
+#else
+//	wifi_set_opmode(SOFTAP_MODE);
+#endif
 }
 
 /******************************************************************************

@@ -3,7 +3,6 @@
 	<meta http-equiv="Content-type" content="text/html; charset=windows-1251">
 	<title>ESP8266 WiFi</title>
 	<link rel="stylesheet" href="/style.css">
-	<script src="/scripts.js"></script>
 </head><body>
 	~inc:menu.inc~
 	<div class="content">
@@ -187,6 +186,7 @@ var cfg = {
 	wifi_csta:(~wifi_csta~>5)?6:~wifi_csta~
 }
 setFormValues(document.forms[0], cfg);
+~inc:$js.inc~
 </script>
 </body>
 </html>

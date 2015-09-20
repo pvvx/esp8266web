@@ -133,6 +133,8 @@ void timer0_init(void *func, void *par);
 #endif
 #endif
 
+//void wifi_param_save_protect_with_check(uint16 startsector, int sectorsize, void *pdata, uint16 len);
+void wifi_param_save_protect_with_check(int startsector, int sectorsize, void *pdata, int len);
 
 #endif //_INCLUDE_ADD_FUNC_H_
 

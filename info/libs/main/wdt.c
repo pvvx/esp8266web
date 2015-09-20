@@ -1,6 +1,6 @@
 /******************************************************************************
  * FileName: wdt.c
- * Description: disasm WDT functions SDK 1.1.0 (libmain.a + libpp.a)
+ * Description: disasm WDT functions SDK 1.1.0.. SDK 1.4.0 (libmain.a + libpp.a)
  * Author: PV`
  * (c) PV` 2015
  ******************************************************************************/
@@ -16,21 +16,39 @@
 ETSTimer SoftWdtTimer;
 int soft_wdt_interval = 1600; // default = 1600 // wifi_set_sleep_type() (pm_set_sleep_type_from_upper()) set 1600 или 3000 в зависимости от режима sleep WiFi (периода timeouts_timer, noise_timer)
 bool wdt_flg;
-uint8 t0x3FFEB460[16]; // 16?
+uint8 t0x3FFEB020[16]; // 16 байт
+uint8 b0x3FFEAE99; // флаг
 
 int pp_post(int x)
 {
+	int ret = 0;
 	ets_intr_lock();
-	if(t0x3FFEB460[x] == 0) {
-		ets_intr_unlock();
-		t0x3FFEB460[x]++;
-		return ets_post(32, x, 0);
+	if(t0x3FFEB020[x] == 0) {
+		t0x3FFEB020[x]++;
+		if(x == 12) {
+			b0x3FFEAE99 = 1;
+		}
+		int ret = ets_post(32, x, 0);
+		if(ret != 0) {
+			ets_intr_lock();
+			t0x3FFEB020[0] = 0;
+			t0x3FFEB020[x]--;
+			WDT_FEED = WDT_FEED_MAGIC;
+		}
 	}
 	ets_intr_unlock();
 	return 0;
 }
 
-void pp_soft_wdt_feed()
+extern uint8 * tcb;
+
+int pp_post2(int x)
+{
+	if(tcb[11] >= 32) return 1;
+	return ets_post(x);
+}
+
+void pp_soft_wdt_feed_local()
 {
 	struct rst_info rst_info;
 	rst_info.exccause = RSR(EXCCAUSE);
@@ -39,14 +57,17 @@ void pp_soft_wdt_feed()
 	rst_info.epc3 = RSR(EPC3);
 	rst_info.excvaddr = RSR(EXCVADDR);
 	rst_info.depc = RSR(DEPC);
-	rst_info.reason = WDT_RST_FLAG;
-	system_rtc_mem_write(0, &rst_info, sizeof(rst_info));
 	if(wdt_flg == true) {
-		Cache_Read_Disable();
+		rst_info.reason = 3; // =3
+		system_rtc_mem_write(0, &rst_info, sizeof(rst_info));
+		ets_intr_lock();
+		Wait_SPI_Idle(flashchip);
 		Cache_Read_Enable_New();
 		system_restart_local();
 	}
 	else {
+		rst_info.reason = 1; // =1
+		system_rtc_mem_write(0, &rst_info, sizeof(rst_info));
 #if DEF_SDK_VERSION >= 1119
 		wDev_MacTim1Arm(soft_wdt_interval);
 #else
@@ -58,6 +79,7 @@ void pp_soft_wdt_feed()
 	}
 }
 
+#if DEF_SDK_VERSION < 1400
 void pp_soft_wdt_stop(void)
 {
 #if DEF_SDK_VERSION >= 1119
@@ -68,7 +90,6 @@ void pp_soft_wdt_stop(void)
 	// ret.n
 #endif
 }
-
 
 void pp_soft_wdt_restart(void)
 {
@@ -81,7 +102,13 @@ void pp_soft_wdt_restart(void)
 #endif
 }
 
-void pp_soft_wdt_init(void)
+void slop_wdt_feed(void)
+{
+	WDT_FEED = WDT_FEED_MAGIC;
+}
+#endif // DEF_SDK_VERSION < 1400
+
+void ICACHE_FLASH_ATTR pp_soft_wdt_init(void)
 {
 #if DEF_SDK_VERSION < 1109 // (SDK 1.1.0 no patch)
 	ets_timer_setfn(SoftWdtTimer, (ETSTimerFunc *)pp_soft_wdt_feed, NULL);
@@ -92,13 +119,13 @@ void pp_soft_wdt_init(void)
 #endif
 }
 
-void PPWdtReset(void)
+void ICACHE_FLASH_ATTR PPWdtReset(void)
 {
 	WDT_FEED = WDT_FEED_MAGIC;
 	wDev_MacTim1Arm(soft_wdt_interval);
 }
 
-void wdt_init(int flg) // wdt_init(1) вызывается в стартовом блоке libmain.a
+void ICACHE_FLASH_ATTR wdt_init(int flg) // wdt_init(1) вызывается в стартовом блоке libmain.a
 {
 	if(flg) {
 		WDT_CTRL &= 0x7e; // Disable WDT  // 0x60000900
@@ -112,11 +139,7 @@ void wdt_init(int flg) // wdt_init(1) вызывается в стартовом
 	pp_soft_wdt_init();
 }
 
-void slop_wdt_feed(void)
-{
-	WDT_FEED = WDT_FEED_MAGIC;
-}
-
+/*
 extern bool dbg_stop_hw_wdt;
 extern bool dbg_stop_sw_wdt;
 
@@ -128,4 +151,26 @@ void _pp_task_12(void)
 		WDT_FEED = WDT_FEED_MAGIC;
 	}
 	ets_intr_unlock();
+}
+*/
+
+void ICACHE_FLASH_ATTR system_soft_wdt_feed(void)
+{
+	wdt_flg = false;
+	WDT_FEED = WDT_FEED_MAGIC;
+}
+
+void ICACHE_FLASH_ATTR system_soft_wdt_stop(void)
+{
+	WDT_FEED = WDT_FEED_MAGIC;
+	wdt_flg = false;
+	wDev_MacTim1Arm(70000000);
+}
+
+void ICACHE_FLASH_ATTR system_soft_wdt_restart(void)
+{
+	wDev_MacTim1SetFunc(pp_soft_wdt_feed_local);
+	wDev_MacTim1Arm(soft_wdt_interval);
+	wdt_flg = false;
+	WDT_FEED = WDT_FEED_MAGIC;
 }

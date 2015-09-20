@@ -110,14 +110,14 @@ void ICACHE_FLASH_ATTR tpm2net_recv(void *arg, struct udp_pcb *upcb, struct pbuf
                 && p->tot_len >= (fhead.framelength + sizeof(fhead) + 1) // input data len
                 && pbuf_get_at(p, fhead.framelength + sizeof(fhead)) == 0x36 ) { // header end (packet stop)
                 if (fhead.numpackages == 0x01) { // no frame split found
-                    uint8 * fdata = (uint8 *) pvPortMalloc(fhead.framelength);
+                    uint8 * fdata = (uint8 *) os_malloc(fhead.framelength);
                     if(fdata != NULL) {
                         if(pbuf_copy_partial(p, fdata, fhead.framelength , sizeof(fhead)) == fhead.framelength) {
                         	os_printf("ws2812 out %u bytes\n", fhead.framelength);
                         	ws2812_strip(fdata, fhead.framelength); // send data to strip
                         }
                         else os_printf("Error copy\n");
-                        vPortFree(fdata);
+                        os_free(fdata);
                     }
                     else os_printf("Error mem\n");
                 }
