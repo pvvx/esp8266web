@@ -114,15 +114,15 @@ void ICACHE_FLASH_ATTR print_event_reason(int reason)
 #define DEF_SDK_ST_RECONNECT_BAG 1
 
 int st_reconn_count DATA_IRAM_ATTR;
-int st_reconn_flg DATA_IRAM_ATTR;
+#define station_reconnect_off()
 
+#if 0 // на SDK 1.4.0  AP+ST reconnect вообще не работает
 #ifdef DEF_SDK_ST_RECONNECT_BAG
+
+int st_reconn_flg DATA_IRAM_ATTR;
 
 os_timer_t st_disconn_timer DATA_IRAM_ATTR;
 
-/******************************************************************************
- * FunctionName : SDK_ST_RECONNECT_BAG
- ******************************************************************************/
 void ICACHE_FLASH_ATTR station_reconnect_off(void)
 {
 	st_reconn_count = 0;
@@ -140,8 +140,8 @@ void ICACHE_FLASH_ATTR station_connect_timer(void)
 			os_printf("New connect ST\n");
 #endif
 			st_reconn_count = 0;
+			wifi_set_opmode_current(wifi_get_opmode() | STATION_MODE);
 			wifi_station_connect();
-
 		}
 		else {
 #if DEBUGSOO > 1
@@ -152,11 +152,16 @@ void ICACHE_FLASH_ATTR station_connect_timer(void)
 	}
 }
 
+
+/******************************************************************************
+ * FunctionName : SDK_ST_RECONNECT_BAG
+ ******************************************************************************/
 LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 {
 	ets_set_idle_cb(NULL, NULL);
 	ets_intr_unlock();
-	if((wifi_get_opmode() & STATION_MODE) && wifi_station_get_auto_connect() != 0)	{
+	int opmode = wifi_get_opmode();
+	if((opmode & STATION_MODE) && wifi_station_get_auto_connect() != 0)	{
 		wifi_station_disconnect();
 		if(wificonfig.st.reconn_timeout > 1) {
 #if DEBUGSOO > 1
@@ -174,8 +179,11 @@ LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 	}
 }
 #else // DEF_SDK_ST_RECONNECT_BAG  ждем patch
- #warning "DEF_SDK_ST_RECONNECT_BAG"
+// #warning "DEF_SDK_ST_RECONNECT_BAG"
 #endif
+
+#endif // if 0
+
 /******************************************************************************
  * FunctionName : wifi_handle_event_cb
  ******************************************************************************/
@@ -201,7 +209,9 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.connected.ssid,
 					evt->event_info.connected.channel);
 #endif
+#if 0 // на SDK 1.4.0 вообще не работает
 			station_reconnect_off();
+#endif
 			break;
 		}
 		case EVENT_STAMODE_DISCONNECTED:
@@ -218,15 +228,31 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.disconnected.reason, st_reconn_count);
 #endif
 #endif // PRINT_EVENT_REASON_ENABLE
-
+#if 0 // на SDK 1.4.0 AP+ST reconnect вообще не работает
 			if(wificonfig.st.reconn_timeout != 1 && st_reconn_count >= COUNT_RESCONN_ST && (wifi_get_opmode() & STATION_MODE)) {
 #ifdef DEF_SDK_ST_RECONNECT_BAG
 						ets_set_idle_cb(stop_scan_st, NULL);
 #else
-						wifi_station_disconnect();
-						....
+						if((wifi_get_opmode() & STATION_MODE) && wifi_station_get_auto_connect() != 0)	{
+							wifi_station_disconnect();
+							if(wificonfig.st.reconn_timeout > 1) {
+					#if DEBUGSOO > 1
+								os_printf("Set reconnect after %d sec\n", wificonfig.st.reconn_timeout);
+					#endif
+								ets_timer_disarm(&st_disconn_timer);
+								os_timer_setfn(&st_disconn_timer, (os_timer_func_t *)station_connect_timer, NULL);
+								ets_timer_arm_new(&st_disconn_timer, wificonfig.st.reconn_timeout * 1000, 0, 1);
+							}
+					#if DEBUGSOO > 1
+							else {
+								os_printf("Reconnect off\n");
+							}
+					#endif
+							wifi_set_opmode_current(2);
+						}
 #endif
 			}
+#endif // if 0
 			int i = wifi_softap_get_station_num(); // Number count of stations which connected to ESP8266 soft-AP
 			if(i == 0) tcp2uart_close();
 			break;
@@ -293,12 +319,14 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 #endif
 				if(wifi_station_get_connect_status() != STATION_GOT_IP) {
 					tcp2uart_close();
+#if 0 // на SDK 1.4.0  AP+ST reconnect вообще не работает
 					if(st_reconn_flg != 0) {
 						if((wifi_get_opmode() & STATION_MODE) && wifi_station_get_auto_connect() != 0) {
 							station_reconnect_off();
 							wifi_station_connect();
 						}
 					}
+#endif
 				}
 			}
 			break;
