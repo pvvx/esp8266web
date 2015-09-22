@@ -3,6 +3,7 @@
 	<meta http-equiv="Content-type" content="text/html; charset=windows-1251">
 	<title>ESP8266 WiFi</title>
 	<link rel="stylesheet" href="/style.css">
+	<script src="/scripts.js"></script>
 </head><body>
 	~inc:menu.inc~
 	<div class="content">
@@ -142,13 +143,7 @@
 			</tr>
 			<tr>
 				<td class="label">Max connections:</td>
-				<td><select name='wifi_ap_mcns'>
-					<option value='0'>0</option>
-					<option value='1'>1</option>
-					<option value='2'>2</option>
-					<option value='3'>3</option>
-					<option value='4'>4</option>
-				</select></td>
+				<td><input title='1..8. Default: 4.' name='wifi_ap_mcns' maxlength='1' value='~wifi_ap_mcns~'></td>
 				<td class="label">Beacon (ms):</td>
 				<td><input title='100...60000' name='wifi_ap_bint' maxlength='5' value='~wifi_ap_bint~'></td>
 			</tr>
@@ -176,7 +171,6 @@ var cfg = {
 	wifi_ap_aum:"~wifi_ap_aum~",
 	wifi_phy:"~wifi_phy~",
 	wifi_mode:"~wifi_mode~",
-	wifi_ap_mcns:(~wifi_ap_mcns~ > 4) ? 4 : ~wifi_ap_mcns~,
 	wifi_sleep:"~wifi_sleep~",
 	wifi_st_aucn:"~wifi_aucn~",
 	wifi_st_sbss:"~wifi_st_sbss~",
@@ -186,7 +180,6 @@ var cfg = {
 	wifi_csta:(~wifi_csta~>5)?6:~wifi_csta~
 }
 setFormValues(document.forms[0], cfg);
-~inc:$js.inc~
 </script>
 </body>
 </html>

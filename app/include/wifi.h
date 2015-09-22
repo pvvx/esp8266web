@@ -36,6 +36,10 @@
 	#define DEF_WIFI_AUTH_MODE AUTH_OPEN // AUTH_WPA_PSK, AUTH_WPA2_PSK, AUTH_WPA_WPA2_PSK
 #endif
 
+//#ifndef DEF_ST_MAX_RECONNECT
+//	#define DEF_ST_MAX_RECONNECT 7 // следующая проба соединения ST произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
+//#endif
+
 #ifndef DEF_ST_RECONNECT_TIME
 	#define DEF_ST_RECONNECT_TIME 30 // следующая проба соединения ST произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
 #endif
@@ -119,7 +123,8 @@ struct wifi_config {	// структура конфигурации wifi
 		uint8 macaddr[6];
 	}ap;
 	struct {
-		int reconn_timeout; // если не удалось соединиться ST, тогда следующая проба соединения произойдет через reconn_timeout секунд. При reconn_timeout == 1 данный алго отключен.
+//		int max_reconn; // если не удалось соединиться ST n-раз, тогда включается SOFTAP_MODE
+		int reconn_timeout; // пауза в сек, если не удалось соединиться ST n-раз
 		struct ip_info ipinfo;
 		struct station_config config;
 	    uint8  auto_connect;

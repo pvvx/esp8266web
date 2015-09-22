@@ -106,19 +106,14 @@ void ICACHE_FLASH_ATTR print_event_reason(int reason)
 
 #define COUNT_RESCONN_ST 3
 
-/* Ждем следующий patch от китайцев (все SDK включая 1.3.0):
+/* Ждем следующий patch от китайцев (все SDK включая 1.4.0):
  * При выполнении wifi_station_disconnect() в событии EVENT_STAMODE_DISCONNECTED
  * часто AP отваливается навсегда. Требуется использовать обход данного глюка...
- * При выполнеии там wifi_set_opmode() ведет к Fatal exception (28)
+ * При выполнеии в wifi event wifi_set_opmode() ведет к Fatal exception (28) (SDK < 1.4.0)
  */
-#define DEF_SDK_ST_RECONNECT_BAG 1
+//#define DEF_SDK_ST_RECONNECT_BAG 1
 
 int st_reconn_count DATA_IRAM_ATTR;
-#define station_reconnect_off()
-
-#if 0 // на SDK 1.4.0  AP+ST reconnect вообще не работает
-#ifdef DEF_SDK_ST_RECONNECT_BAG
-
 int st_reconn_flg DATA_IRAM_ATTR;
 
 os_timer_t st_disconn_timer DATA_IRAM_ATTR;
@@ -137,21 +132,21 @@ void ICACHE_FLASH_ATTR station_connect_timer(void)
 	&& wifi_station_get_auto_connect() != 0) {
 		if(wifi_softap_get_station_num() == 0) { // Number count of stations which connected to ESP8266 soft-AP) {
 #if DEBUGSOO > 1
-			os_printf("New connect ST\n");
+			os_printf("New connect ST...\n");
 #endif
 			st_reconn_count = 0;
-			wifi_set_opmode_current(wifi_get_opmode() | STATION_MODE);
 			wifi_station_connect();
 		}
 		else {
 #if DEBUGSOO > 1
-			os_printf("Wait disconnect AP client...\n");
+			os_printf("ST wait disconnect AP client...\n");
 #endif
 			st_reconn_flg = 1;
 		}
 	}
 }
 
+#ifdef DEF_SDK_ST_RECONNECT_BAG
 
 /******************************************************************************
  * FunctionName : SDK_ST_RECONNECT_BAG
@@ -182,15 +177,13 @@ LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 // #warning "DEF_SDK_ST_RECONNECT_BAG"
 #endif
 
-#endif // if 0
-
 /******************************************************************************
  * FunctionName : wifi_handle_event_cb
  ******************************************************************************/
 void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 {
 #if DEBUGSOO > 1
-	os_printf("WiFi event %x\n", evt->event);
+	os_printf("WiFi event(%u): ", evt->event);
 #endif
 	switch (evt->event) {
 		case EVENT_SOFTAPMODE_PROBEREQRECVED:
@@ -209,9 +202,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.connected.ssid,
 					evt->event_info.connected.channel);
 #endif
-#if 0 // на SDK 1.4.0 вообще не работает
 			station_reconnect_off();
-#endif
 			break;
 		}
 		case EVENT_STAMODE_DISCONNECTED:
@@ -228,7 +219,6 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.disconnected.reason, st_reconn_count);
 #endif
 #endif // PRINT_EVENT_REASON_ENABLE
-#if 0 // на SDK 1.4.0 AP+ST reconnect вообще не работает
 			if(wificonfig.st.reconn_timeout != 1 && st_reconn_count >= COUNT_RESCONN_ST && (wifi_get_opmode() & STATION_MODE)) {
 #ifdef DEF_SDK_ST_RECONNECT_BAG
 						ets_set_idle_cb(stop_scan_st, NULL);
@@ -248,11 +238,10 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 								os_printf("Reconnect off\n");
 							}
 					#endif
-							wifi_set_opmode_current(2);
+//							wifi_set_opmode_current(2);
 						}
 #endif
 			}
-#endif // if 0
 			int i = wifi_softap_get_station_num(); // Number count of stations which connected to ESP8266 soft-AP
 			if(i == 0) tcp2uart_close();
 			break;
@@ -313,26 +302,28 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					MAC2STR(evt->event_info.sta_disconnected.mac),
 					evt->event_info.sta_disconnected.aid);
 #endif
-			if(i == 1) {
+			if(i == 0) {
 #ifdef USE_CAPTDNS
 				captdns_close();
 #endif
 				if(wifi_station_get_connect_status() != STATION_GOT_IP) {
 					tcp2uart_close();
-#if 0 // на SDK 1.4.0  AP+ST reconnect вообще не работает
 					if(st_reconn_flg != 0) {
 						if((wifi_get_opmode() & STATION_MODE) && wifi_station_get_auto_connect() != 0) {
 							station_reconnect_off();
+#if DEBUGSOO > 1
+							os_printf("New connect ST...\n");
+#endif
 							wifi_station_connect();
 						}
 					}
-#endif
 				}
 			}
 			break;
 		}
-/*		default:
-			break; */
+		default:
+			os_printf("?\n");
+			break;
 		}
 }
 

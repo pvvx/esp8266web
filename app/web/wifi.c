@@ -33,8 +33,6 @@ static const char wifi_ap_password[] ICACHE_RODATA_ATTR = WIFI_AP_PASSWORD;
 static const char wifi_st_name[] ICACHE_RODATA_ATTR = WIFI_ST_NAME;
 static const char wifi_st_password[] ICACHE_RODATA_ATTR = WIFI_ST_PASSWORD;
 
-#define station_reconnect_off() // на SDK 1.4.0  AP+ST reconnect вообще не работает
-
 /******************************************************************************
  * FunctionName : read_macaddr_from_otp
  ******************************************************************************/

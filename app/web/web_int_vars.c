@@ -321,8 +321,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           ifcmp("dncp") 		wificonfig.b.st_dhcp_enable = val;
           else ifcmp("aucn") 	wificonfig.st.auto_connect = val;
           else ifcmp("rect") 	{
-        	  if(val < 8192) wificonfig.st.reconn_timeout = val;
-        	  else wificonfig.st.reconn_timeout = 8192;
+        	  if(val > 8192) val = 8192;
+        	  wificonfig.st.reconn_timeout = val;
+        	  // wificonfig.st.max_reconn = val;
           }
           else ifcmp("ssid") {
         	  if(pvar[0]!='\0'){

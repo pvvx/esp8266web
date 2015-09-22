@@ -253,13 +253,13 @@ bool wifi_station_set_hostname(char *name);
 
 struct softap_config {
     uint8 ssid[32];
-    uint8 password[64];
-    uint8 ssid_len;	// Note: Recommend to set it according to your ssid
-    uint8 channel;	// Note: support 1 ~ 13
-    AUTH_MODE authmode;	// Note: Don't support AUTH_WEP in softAP mode.
-    uint8 ssid_hidden;	// Note: default 0
-    uint8 max_connection;	// Note: default 4, max 4
-    uint16 beacon_interval;	// Note: support 100 ~ 60000 ms, default 100
+    uint8 password[64];	// +32
+    uint8 ssid_len;		// +96 Note: Recommend to set it according to your ssid
+    uint8 channel;		// +97 Note: support 1 ~ 13
+    AUTH_MODE authmode;	// +100 Note: Don't support AUTH_WEP in softAP mode.
+    uint8 ssid_hidden;	// +104 Note: default 0
+    uint8 max_connection;	// +105 Note: default 4, max 4
+    uint16 beacon_interval;	// +106 Note: support 100 ~ 60000 ms, default 100
 };
 
 bool wifi_softap_get_config(struct softap_config *config);
