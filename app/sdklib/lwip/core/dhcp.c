@@ -66,6 +66,10 @@
  *
  */
 
+/* изменения и дополения:
+ pvvx , Vitaly (http://esp8266.ru/forum/threads/razrabotka-biblioteki-malogo-webservera-na-esp8266.56/page-43#post-10192)
+*/ 
+
 #include "lwip/opt.h"
 
 #if LWIP_DHCP /* don't build if not configured for use in lwipopts.h */

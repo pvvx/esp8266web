@@ -212,6 +212,8 @@ sys_const_44
 sys_const_45
 sys_const_46
 sys_const_47
+sys_const_49
+sys_const_54
 sys_const_64
 sys_const_65
 sys_const_66

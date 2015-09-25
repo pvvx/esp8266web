@@ -1,5 +1,5 @@
 # esp8266web
-Small web server on ESP8266 + TCP2UART (server/client) 
+Small WEB server on ESP8266 + TCP2UART (server/client) 
 ---
 
 HTTP-Web supports more than hundred variables -<br>
@@ -15,9 +15,9 @@ Supported 'Rapid Loader' and Flash 512 кbytes - 16 Mbytes.<br>
 Поддержка расширенной памяти IRAM в 48 килобайт,<br>
 Flash от 512 килобайт до 16 Мегабайт и ускоряющего загрузку SDK 'лоадера'.<br>
 
-From SDK 1.4.0 used only:<br> 
+From [Espressif SDK](http://bbs.espressif.com/) ver 1.4.0 used only:<br> 
 libpp.a, libwpa.a, libnet80211.a, parts libphy.a, user_interface.o<br>
-Из Espressif SDK ver 1.4.0 используются только описанные части.<br>
+Из [Espressif SDK](http://bbs.espressif.com/) ver 1.4.0 используются только описанные части.<br>
 Остальные части даны с исходными кодами.<br>
 
 Options programming Flash:<br> 

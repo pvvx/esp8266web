@@ -1,3 +1,7 @@
+/*
+ 	Базовый код дан Espressif
+ 	Именения и добавления: 	pvvx
+*/
 #include "user_config.h"
 #include "bios.h"
 #include "sdk/add_func.h"

@@ -19,6 +19,11 @@
 				<td class="left"><input type="submit" value="Set" class="button"></td>
 			</tr></form>
 			<tr><form method="post" action="">
+				<td class="label">gpio0_3_func [49]:</td>
+				<td><input title='default: 0. =1 GPIO0_FUN&=0xEFF, =2 GPIO3_FUN|=0x100' name='sys_const_49' maxlength='5' value='~sys_const_49~'></td>
+				<td class="left"><input type="submit" value="Set" class="button"></td>
+			</tr></form>
+			<tr><form method="post" action="">
 				<td class="label">sdio_configure [50]:</td>
 				<td><select id='sc50' name='sys_const_50' title='default: 0'>
 					<option value='0'>0: Auto by pin strapping</option>
@@ -39,7 +44,7 @@
 			</tr></form>
 			<tr><form method="post" action="">
 				<td class="label">bt_protocol [52]:</td>
-				<td><select id='sc52' name='sys_const_52' title='default: 0'>
+				<td><select id='sc52' name='sys_const_52' title='(gpio_13_14), default: 0 '>
 					<option value='0'>0: WiFi-BT are not enabled. Antenna is for WiFi</option>
 					<option value='1'>1: WiFi-BT are not enabled. Antenna is for BT</option>
 					<option value='2'>2: WiFi-BT 2-wire are enabled, (only use BT_ACTIVE), independent ant</option>
@@ -57,6 +62,11 @@
 					<option value='2'>2: T/R switch for External PA/LNA:  GPIO0 is high and U0RXD is low during Tx</option>
 					<option value='3'>3: T/R switch for External PA/LNA:  GPIO0 is low and U0RXD is high during Tx</option>
 				</select></td>
+				<td class="left"><input type="submit" value="Set" class="button"></td>
+			</tr></form>
+			<tr><form method="post" action="">
+				<td class="label">gpio1_2_func [54]:</td>
+				<td><input title='default: 2. =1 GPIO1_FUNC|=0x30, =2 GPIO2_FUN&=0xEFF' name='sys_const_54' maxlength='5' value='~sys_const_54~'></td>
 				<td class="left"><input type="submit" value="Set" class="button"></td>
 			</tr></form>
 			<tr><form method="post" action="">
