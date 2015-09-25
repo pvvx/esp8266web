@@ -1,16 +1,14 @@
 /*********************************************************************
  *
- *               WEB File System
- *
- *********************************************************************
  * FileName:        WEBFS.h
+ * Basis of MPFS2 (Microchip File System).
+ * WEBFS has its differences Based.
+ *
  ********************************************************************/
 #ifndef __WEBFS1_H
 #define __WEBFS1_H
 
 #include "user_config.h"
-
-#define WEBFS_USE_SPI_FLASH
 
 extern uint32 _irom0_text_end;
 
@@ -27,17 +25,13 @@ extern uint32 _irom0_text_end;
   #define MAX_WEBFS_OPENFILES  31
 #endif
 
-/****************************************************************************
-  Section:
-        Type Definitions
-  ***************************************************************************/
-        #define WEBFS_FLAG_ISZIPPED             0x0001  // Indicates a file is compressed with GZIP compression
-        #define WEBFS_FLAG_HASINDEX             0x0002  // Indicates a file has an associated index of dynamic variables
-        #define WEBFS_INVALID                    0xffffffff   // Indicates a position pointer is invalid
-        #define WEBFS_INVALID_FAT                0xffff       // Indicates an invalid FAT cache
-		typedef uint32 WEBFS_PTR;       	// WEBFS Pointers are currently uint32s
-		typedef uint8 WEBFS_HANDLE;     	// WEBFS Handles are currently stored as uint8s
-        #define WEBFS_INVALID_HANDLE     0xff                 // Indicates that a handle is not valid
+        #define WEBFS_FLAG_ISZIPPED	0x0001  // Indicates a file is compressed with GZIP compression
+        #define WEBFS_FLAG_HASINDEX	0x0002  // Indicates a file has an associated index of dynamic variables
+        #define WEBFS_INVALID		0xffffffff   // Indicates a position pointer is invalid
+        #define WEBFS_INVALID_FAT	0xffff       // Indicates an invalid FAT cache
+		typedef uint32 WEBFS_PTR;	// WEBFS Pointers are currently uint32s
+		typedef uint8 WEBFS_HANDLE;	// WEBFS Handles are currently stored as uint8s
+        #define WEBFS_INVALID_HANDLE	0xff	// Indicates that a handle is not valid
 
 
         // Stores each file handle's information
@@ -91,28 +85,13 @@ extern uint32 _irom0_text_end;
 #endif
         } WEBFS_FAT_RECORD ;
 
-/****************************************************************************
-  Section:
-        Function Definitions
-  ***************************************************************************/
 
 void WEBFSInit(void);
-
 WEBFS_HANDLE WEBFSOpen(uint8* cFile);
-//WEBFS_HANDLE WEBFSOpenID(uint16 hFatID);
 void WEBFSClose(WEBFS_HANDLE hWEBFS) ICACHE_FLASH_ATTR;
 
-//bool WEBFSGet(WEBFS_HANDLE hWEBFS, uint8* cData);
 uint16 WEBFSGetArray(WEBFS_HANDLE hWEBFS, uint8* cData, uint16 wLen);
-//bool WEBFSGetLong(WEBFS_HANDLE hWEBFS, uint32* ul);
-//bool WEBFSSeek(WEBFS_HANDLE hWEBFS, uint32 dwOffset, WEBFS_SEEK_MODE tMode);
 
-//WEBFS_HANDLE WEBFSFormat(void);
-//void WEBFSPutEnd(bool final);
-//void WEBFSPutArray(WEBFS_HANDLE hWEBFS, uint8* cData, uint16 wLen);
-
-//uint32 WEBFSGetTimestamp(WEBFS_HANDLE hWEBFS);
-//uint32 WEBFSGetMicrotime(WEBFS_HANDLE hWEBFS);
 uint16 WEBFSGetFlags(WEBFS_HANDLE hWEBFS);
 uint32 WEBFSGetSize(WEBFS_HANDLE hWEBFS);
 uint32 WEBFSGetBytesRem(WEBFS_HANDLE hWEBFS);
@@ -120,19 +99,15 @@ WEBFS_PTR WEBFSGetStartAddr(WEBFS_HANDLE hWEBFS);
 WEBFS_PTR WEBFSGetEndAddr(WEBFS_HANDLE hWEBFS);
 bool WEBFSGetFilename(WEBFS_HANDLE hWEBFS, uint8* cName, uint16 wLen);
 uint32 WEBFSGetPosition(WEBFS_HANDLE hWEBFS);
-//uint16 WEBFSGetID(WEBFS_HANDLE hWEBFS);
 uint32 WEBFS_max_size(void) ICACHE_FLASH_ATTR;
 uint32 WEBFS_curent_size(void) ICACHE_FLASH_ATTR;
 uint32 WEBFS_base_addr(void) ICACHE_FLASH_ATTR;
 
-// Alias of WEBFSGetPosition
-#define WEBFSTell(a)     WEBFSGetPosition(a)
-
 #ifdef USE_MAX_IRAM
-extern int isWEBFSLocked; // Allows the WEBFS to be locked altogether
+extern int isWEBFSLocked; // Lock WEBFS access during the upgrade
 extern uint32 numFiles;
 #else
-extern bool isWEBFSLocked; // Allows the WEBFS to be locked altogether
+extern bool isWEBFSLocked; // Lock WEBFS access during the upgrade
 extern uint16 numFiles;
 #endif
 

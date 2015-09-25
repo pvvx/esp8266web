@@ -11,7 +11,7 @@ TCP transfer speed > 1 Mbytes/sec (debug off).<br>
 UDP Wave server:  Sends 14-bit ADC samples at 1 Hz ..20 kHz.<br>
 
 Supported options 48 kbytes IRAM.<br>
-Supported 'Rapid Loader' and Flash 512 кbytes - 16 Mbytes.<br>
+Supported '[Rapid Loader](https://github.com/pvvx/Rapid_Loader/)' and Flash 512 кbytes - 16 Mbytes.<br>
 Поддержка расширенной памяти IRAM в 48 килобайт,<br>
 Flash от 512 килобайт до 16 Мегабайт и ускоряющего загрузку SDK 'лоадера'.<br>
 
@@ -31,7 +31,7 @@ FLASH_SIZE: Always set the size to 512 KB flash.<br>
 
 Make WEBFS CmdLine:<br>
 
-PVFS2.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib" ./WEBFiles ./webbin ./WEBFiles.bin<br>
+WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib" ./WEBFiles ./webbin ./WEBFiles.bin<br>
 
 Upload WEBFS:<br>
 
