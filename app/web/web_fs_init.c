@@ -36,6 +36,10 @@ void web_fini(const uint8 * fname)
 	}
 	TCP_SERV_CONN * ts_conn = &p->ts_conn;
 	WEB_SRV_CONN * web_conn = &p->web_conn;
+	web_conn->bffiles[0]=WEBFS_INVALID_HANDLE;
+	web_conn->bffiles[1]=WEBFS_INVALID_HANDLE;
+	web_conn->bffiles[2]=WEBFS_INVALID_HANDLE;
+	web_conn->bffiles[3]=WEBFS_INVALID_HANDLE;
 	ts_conn->linkd = (uint8 *)web_conn;
 	ts_conn->sizeo = FINI_BUF_SIZE;
 	ts_conn->pbufo = p->buf;
@@ -47,6 +51,13 @@ void web_fini(const uint8 * fname)
 #if DEBUGSOO > 1
 		os_printf("file not found!\n");
 #endif
+		return;
+	}
+	if(fatCache.flags & WEBFS_FLAG_ISZIPPED) {
+#if DEBUGSOO > 1
+		os_printf("\nError: file is ZIPped!\n");
+#endif
+		web_inc_fclose(web_conn);
 		return;
 	}
 	user_uart_wait_tx_fifo_empty(1,1000);
@@ -62,6 +73,9 @@ void web_fini(const uint8 * fname)
 			if(CheckSCB(SCB_RETRYCB)) break; // повторить ещё раз? да.
 		}
 		uint16 len = WEBFSGetArray(web_conn->webfile, pstr, FINI_BUF_SIZE);
+#if DEBUGSOO > 3
+		os_printf("ReadF[%u]=%u\n",web_conn->webfile, len);
+#endif
 		if(len) { // есть байты в файле
 			uint8 *pend = web_strnstr(pstr, CRLF, FINI_BUF_SIZE);
 			if(pend != NULL) {
@@ -75,6 +89,10 @@ void web_fini(const uint8 * fname)
 					WEBFSStubs[web_conn->webfile].bytesRem -= cmp+2;
 					if(cmp != 0) {
 						pstr[cmp] = '\0'; // закрыть string calback-а
+#if DEBUGSOO > 3
+						os_printf("String:%s\n", pstr);
+#endif
+
 						if(!os_memcmp((void*)pstr, "inc:", 4)) { // "inc:file_name"
 							if(!web_inc_fopen(ts_conn, &pstr[4])) {
 #if DEBUGSOO > 1
@@ -87,6 +105,9 @@ void web_fini(const uint8 * fname)
 				};
 			};
 		}
-		else return;
+		else if(web_inc_fclose(web_conn)) {
+			if(web_conn->web_disc_cb != NULL) web_conn->web_disc_cb(web_conn->web_disc_par);
+			return;
+		}
 	}
 }
