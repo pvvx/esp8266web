@@ -198,7 +198,7 @@ wifi_st_msk
 wifi_st_mac
 wifi_st_dncp
 wifi_st_rssi
-wifi_aucn
+wifi_st_aucn
 wifi_st_hostname
 wfs_addr
 wfs_files
@@ -352,7 +352,7 @@ wifi_st_ssid
 wifi_st_psw
 wifi_st_bssid
 inc:footer.inc
-wifi_aucn
+wifi_st_aucn
 wifi_scan
 inc:menu.inc
 cfg_web_port
@@ -432,7 +432,7 @@ wifi_ap_aum
 wifi_phy
 wifi_mode
 wifi_sleep
-wifi_aucn
+wifi_st_aucn
 wifi_st_sbss
 wifi_ap_hssid
 wifi_ap_dncp

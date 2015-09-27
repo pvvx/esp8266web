@@ -252,6 +252,7 @@
  * (requires the LWIP_TCP option)
  */
 #ifndef MEMP_NUM_TCP_PCB
+//#define MEMP_NUM_TCP_PCB				5
 #define MEMP_NUM_TCP_PCB                (*(volatile uint32*)0x600011FC)
 #endif
 

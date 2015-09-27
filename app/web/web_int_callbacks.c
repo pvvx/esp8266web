@@ -496,7 +496,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           else ifcmp("chl") tcp_puts("%d", wifi_get_channel());
           else ifcmp("sleep") tcp_puts("%d", wifi_get_sleep_type());
           else ifcmp("scan") web_wscan_xml(ts_conn);
-          else ifcmp("aucn") tcp_puts("%d", wifi_station_get_auto_connect());
+//          else ifcmp("aucn") tcp_puts("%d", wifi_station_get_auto_connect());
           else ifcmp("power") { rom_en_pwdet(1); tcp_puts("%d", rom_get_power_db()); }
           else ifcmp("noise") tcp_puts("%d", get_noisefloor_sat()); // noise_init(), rom_get_noisefloor(), ram_get_noisefloor(), ram_set_noise_floor(),noise_check_loop(), read_hw_noisefloor(), ram_start_noisefloor()
           else ifcmp("hwnoise") tcp_puts("%d", read_hw_noisefloor());
@@ -528,15 +528,20 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           } */
           else {
             uint8 if_index;
-            ifcmp("ap_") if_index = SOFTAP_IF;
-            else ifcmp("st_") if_index = STATION_IF;
+            ifcmp("ap_")	if_index = SOFTAP_IF;
+            else ifcmp("st_")	if_index = STATION_IF;
             else { tcp_put('?'); return; };
             cstr+=3;
             ifcmp("dncp") {
             	if (if_index == SOFTAP_IF) tcp_puts("%d", (dhcps_flag==0)? 0 : 1);
             	else tcp_puts("%d", (dhcpc_flag==0)? 0 : 1);
             	return;
-            };
+            }
+            else ifcmp("aucn") {
+            	if(if_index == STATION_IF) tcp_puts("%d", wifi_station_get_auto_connect());
+            	else tcp_put('?');
+            	return;
+            }
             uint8 macaddr[6];
 			wifi_get_macaddr(if_index, macaddr);
             uint8 opmode = wifi_get_opmode();

@@ -104,7 +104,7 @@
   <mac>~wifi_st_mac~</mac>
   <dncp>~wifi_st_dncp~</dncp>
   <rssi>~wifi_st_rssi~</rssi>
-  <autoconnect>~wifi_aucn~</autoconnect>
+  <autoconnect>~wifi_st_aucn~</autoconnect>
   <hostname>~wifi_st_hostname~</hostname>
  </st>
 </wifi>

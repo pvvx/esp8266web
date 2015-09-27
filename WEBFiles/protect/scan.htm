@@ -49,7 +49,7 @@ var AUTH = {
 3: "WPA2-PSK",
 4: "WPA-WPA2-PSK",
 5: "MAX"};
-var cfg = { wifi_st_aucn: "~wifi_aucn~" };
+var cfg = { wifi_st_aucn: "~wifi_st_aucn~" };
 setFormValues(document.forms[0], cfg);
 var startTime = new Date();
 newAJAXCommand('/web.cgi?wifi_scan=1');

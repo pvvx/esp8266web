@@ -325,7 +325,11 @@ void ICACHE_FLASH_ATTR tcpsrv_unrecved_win(TCP_SERV_CONN *ts_conn) {
  ******************************************************************************/
 static void ICACHE_FLASH_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) {
 	struct tcp_pcb *pcb = ts_conn->pcb;
-	if (pcb != NULL && ts_conn->flag.pcb_time_wait_free && pcb->state == TIME_WAIT) { // убить TIME_WAIT?
+	if (pcb != NULL
+			&& pcb->state == TIME_WAIT
+			&& ts_conn->flag.pcb_time_wait_free
+			&& syscfg.cfg.b.web_time_wait_delete
+			&& ts_conn->pcfg->flag.pcb_time_wait_free ) { // убить TIME_WAIT?
 		// http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html
 #if DEBUGSOO > 3
 		tcpsrv_print_remote_info(ts_conn);

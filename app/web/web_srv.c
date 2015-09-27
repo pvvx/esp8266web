@@ -1120,6 +1120,7 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
     tcp_strcpy_fd("\r\nServer: " WEB_NAME_VERSION "\r\nConnection: close\r\n");
     if(CheckSCB(SCB_REDIR)) {
     	tcp_puts_fd("Location: %s\r\n\r\n", CurHTTP->pFilename);
+    	ts_conn->flag.pcb_time_wait_free = 1; // закрыть соединение
     	SetSCB(SCB_DISCONNECT);
     }
     else {
@@ -1415,6 +1416,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 				}
 //				return 400;
 			}
+//			default:
 			case 2: // загрузка файла во flash
 			case 3: // загрузка WebFileSystem во flash (скорость записи W25Q128 ~175 килобайт в сек, полный диск на 15,5МБ пишется 90..100 сек )
 			{
@@ -1448,7 +1450,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 				}
 #endif
 				if(block_size) { // идут данные файла
-					tcpsrv_unrecved_win(ts_conn); // для ускорения, пока стрирается-пишется уже обновит окно
+//					tcpsrv_unrecved_win(ts_conn); // для ускорения, пока стрирается-пишется уже обновит окно (включено в web_rx_buf)
 					if(pupload->faddr >= FLASH_MIN_SIZE && pupload->status == 3) {
 						if((pupload->faddr & 0x0000FFFF)==0) {
 
@@ -1512,13 +1514,14 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 // web_rx_buf
 //
 //-----------------------------------------------------------------------------
+#define MAX_NO_DATA_BUF_SIZE (8192)
 LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 	ts_conn->flag.rx_buf = 1; // указать, что всегда в режиме докачивать
 //	CurHTTP->fileType = HTTP_UNKNOWN;
 //	ts_conn->pbufi, ts_conn->cntri;
-#if DEBUGSOO > 2
+#if DEBUGSOO > 3
 	os_printf("rx:%u[%u] ", web_conn->content_len, ts_conn->sizei);
 #endif
 	if(ts_conn->sizei == 0) return true; // докачивать
@@ -1528,8 +1531,8 @@ LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_co
 
 	}
 #endif
-	int ret = upload_boundary(ts_conn);
 	tcpsrv_unrecved_win(ts_conn);
+	int ret = upload_boundary(ts_conn);
 	if(ret > 1) {
 		CurHTTP->httpStatus = ret;
 		web_conn->content_len = 0;
@@ -1553,6 +1556,16 @@ LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_co
 		SetSCB(SCB_DISCONNECT);
 		return false; // неизвестный content или end
 	}
+	else {
+#if DEBUGSOO > 2
+		os_printf("no boundary ");
+#endif
+		if(ts_conn->sizei > MAX_NO_DATA_BUF_SIZE) {
+			CurHTTP->httpStatus = 418; // 418: Out of Coffee
+			SetSCB(SCB_DISCONNECT);
+			return false; // неизвестный content или end
+		}
+	};
 	if(web_conn->content_len > ts_conn->cntri) return true; // докачивать
 	CurHTTP->httpStatus = 400;
 	SetSCB(SCB_DISCONNECT);
@@ -1667,6 +1680,9 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
 						os_printf("trim:%u[%u] ", web_conn->content_len, CurHTTP.content_len);
 #endif
 						if(!web_trim_bufi(ts_conn, CurHTTP.pcontent, CurHTTP.content_len)) {
+#if DEBUGSOO > 1
+							os_printf("trim error!\n");
+#endif
 							CurHTTP.httpStatus = 500;
 						};
 					};
