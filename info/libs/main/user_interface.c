@@ -1108,5 +1108,83 @@ bool wifi_set_phy_mode(enum phy_mode mode)
 
 void system_phy_set_powerup_option(uint8 option)
 {
-	phy_set_powerup_option(option);
+	phy_set_powerup_option(option); // { 0x6000073C = option }
 }
+
+void ICACHE_FLASH_ATTR system_phy_set_rfoption(uint8 option)
+{
+	phy_afterwake_set_rfoption(option); // { 0x6000076C = option }
+}
+
+void ICACHE_FLASH_ATTR phy_afterwake_set_rfoption(uint8 option)
+{
+#if SDK ver1.4.0	
+	uint32 x = RTC_RAM_BASE[0x6C>>2] & 0xFF00FFFF;	// 0x6000106C
+	RTC_RAM_BASE[0x6C>>2] = x | (option << 16);
+#else	
+	uint32 x = (RTC_RAM_BASE[0x60>>2] & 0xFFFF) | (option << 16);
+	RTC_RAM_BASE[0x60>>2] = x; // 0x60001060
+	RTC_RAM_BASE[0x78>>2] |= x; // 0x60001078 
+#endif	
+}
+
+void ICACHE_FLASH_ATTR phy_set_powerup_option(int option)
+{
+	RTC_RAM_BASE[0x3C>>2] = option; // 0x6000103C 
+}	
+
+bool ICACHE_FLASH_ATTR system_deep_sleep_set_option(uint8 option)
+{
+#if SDK >= ver1.3.0	
+	switch(option) {
+		case 0:
+		case 1:
+		case 2:
+		case 4:
+		_deep_sleep_mode = option;
+		return true;
+	}
+	return false;
+#else	
+	uint32 x = (RTC_RAM_BASE[0x60>>2] & 0xFFFF) | (option << 16);
+	RTC_RAM_BASE[0x60>>2] = x; // 0x60001060
+	rtc_mem_check(false); // пересчитать OR
+	// return всегда fasle
+#endif	
+}
+
+bool ICACHE_FLASH_ATTR rtc_mem_check(bool flg)
+{
+	volatile uint32 * ptr = &RTC_RAM_BASE[0];
+	uint32 region_or_crc = 0;
+#if SDK >= ver1.3.0	
+	while(ptr != &RTC_RAM_BASE[0x68>>2]) region_or_crc += *ptr++; // SDK 1.4.0
+	region_or_crc ^= 0x7F;
+#else	
+	while(ptr != &RTC_RAM_BASE[0x78>>2]) region_or_crc |= *ptr++; // Old SDK
+#endif	
+	if(flg == false) {
+		*ptr = region_or_crc; // RTC_RAM_BASE[0x78>>2] = region_or_crc
+		return false;
+	}
+	return (*ptr != region_or_crc);
+}
+
+uint32 ICACHE_FLASH_ATTR rtc_mem_backup(uint32 *mem_start, uint32 *mem_end, uint32 off_ram_rtc)
+{
+	uint32 i = (((uint32)mem_end - (uint32)mem_start + 3) >> 2) + 1;
+	volatile uint32 * ptr_reg = &RTC_RAM_BASE[off_ram_rtc>>2];
+	uint32 ret = i << 2;
+	while(i--) *ptr_reg++ = *mem_start++;
+	return ret;
+}
+
+uint32 ICACHE_FLASH_ATTR rtc_mem_recovery(uint32 *mem_start, uint32 *mem_end, uint32 off_ram_rtc)
+{
+	uint32 i = (((uint32)mem_end - (uint32)mem_start + 3) >> 2) + 1;
+	volatile uint32 * ptr_reg = &RTC_RAM_BASE[off_ram_rtc>>2];
+	uint32 ret = i << 2;
+	while(i--) *mem_start++ = *ptr_reg++;
+	return ret;
+}
+
