@@ -807,6 +807,8 @@ LOCAL void ICACHE_FLASH_ATTR webserver_file_ext(HTTP_CONN *CurHTTP, uint8 *pfnam
 }
 /*----------------------------------------------------------------------*/
 #ifdef USE_CAPTDNS
+/* = flase, если включен redirect, и запрос от ip адреса из подсети AP,
+ * и Host name не равен aesp8266 или ip AP. */
 LOCAL bool ICACHE_FLASH_ATTR web_cdns_no_redir(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 {
 	if(syscfg.cfg.b.cdns_ena
@@ -819,7 +821,9 @@ LOCAL bool ICACHE_FLASH_ATTR web_cdns_no_redir(HTTP_CONN *CurHTTP, TCP_SERV_CONN
 #if DEBUGSOO > 1
 		os_printf("Host: '%s' ", ps);
 #endif
-		if(rom_xstrcmp(ps, HostNameLocal) == 0)  {
+		uint8 strip[4*4];
+		os_sprintf_fd(strip, IPSTR, IP2STR(&info.ap_ip));
+		if((rom_xstrcmp(ps, HostNameLocal) == 0) && (rom_xstrcmp(ps, strip) == 0))   {
 				ets_sprintf(CurHTTP->pFilename, httpHostNameLocal, HostNameLocal); // "http://esp8266/"
 				WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 				SetSCB(SCB_REDIR);

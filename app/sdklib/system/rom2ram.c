@@ -218,6 +218,7 @@ char * ICACHE_RAM_ATTR rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
 #endif
 }
 
+/* на выходе размер строки, без учета терминатора '\0' */
 unsigned int ICACHE_RAM_ATTR rom_xstrcpy(char * pd, const char * ps)
 {
 	union {
@@ -239,6 +240,7 @@ unsigned int ICACHE_RAM_ATTR rom_xstrcpy(char * pd, const char * ps)
 	}
 }
 
+/* = 1 если шаблон совпадает */
 int ICACHE_RAM_ATTR rom_xstrcmp(char * pd, const char * ps)
 {
 	union {

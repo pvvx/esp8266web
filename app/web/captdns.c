@@ -317,5 +317,4 @@ bool ICACHE_FLASH_ATTR captdns_init(void)
 	}
 	return true;
 }
-
 #endif // USE_CAPTDNS

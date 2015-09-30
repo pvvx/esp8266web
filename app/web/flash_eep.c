@@ -283,7 +283,7 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 				| SYS_CFG_SNTP_ENA
 #endif
 #ifdef USE_CAPTDNS
-				| SYS_CFG_CDNS_ENA
+//				| SYS_CFG_CDNS_ENA
 #endif
 				;
 #ifdef TCP2UART_PORT_DEF

@@ -370,6 +370,7 @@ cfg_web_twd
 cfg_pinclr
 cfg_netbios
 cfg_sntp
+cfg_cdns
 inc:menu.inc
 inc:footer.inc
 inc:menu.inc

@@ -285,12 +285,12 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
 #endif
 					if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
-#ifdef USE_CAPTDNS
-					if(syscfg.cfg.b.cdns_ena) {
-						captdns_init();
-					}
-#endif
 			}
+#ifdef USE_CAPTDNS
+			if(syscfg.cfg.b.cdns_ena) {
+					captdns_init();
+			}
+#endif
 			break;
 		}
 		case EVENT_SOFTAPMODE_STADISCONNECTED:
