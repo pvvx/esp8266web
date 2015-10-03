@@ -544,19 +544,21 @@ void ICACHE_FLASH_ATTR startup(void)
 	os_free(buf);
 	//
 #if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
-	int ri = RTC_MEM(0);
-	if(ri >= REASON_EXCEPTION_RST || ri < REASON_DEEP_SLEEP_AWAKE) { // >= 2 < 5
+	system_rtc_mem_read(0, &rst_if, sizeof(rst_if));
+//	os_printf("RTC_MEM(0) = %u\n", rst_if.reason);
+	if(rst_if.reason >= REASON_EXCEPTION_RST || rst_if.reason < REASON_DEEP_SLEEP_AWAKE) { // >= 2 < 5
 		// 2,3,4 REASON_EXCEPTION_RST, REASON_SOFT_WDT_RST, REASON_SOFT_RESTART
-		TestStaFreqCalValInput = RTC_RAM_BASE[30]>>16;
+		TestStaFreqCalValInput = RTC_RAM_BASE[0x78>>2]>>16; // *((volatile uint32 *)0x60001078) >> 16
 		chip_v6_set_chan_offset(1, TestStaFreqCalValInput);
 	}
 	else {
 		TestStaFreqCalValInput = 0;
-		RTC_RAM_BASE[30] &= 0xFFFF; // *((volatile uint32 *)0x60001078) &= &0xFFFF;
+		RTC_RAM_BASE[0x78>>2] &= 0xFFFF; // *((volatile uint32 *)0x60001078) &= &0xFFFF;
+		if(rst_if.reason > REASON_EXT_SYS_RST) rst_if.reason = REASON_DEFAULT_RST;
+		if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE && rtc_get_reset_reason() == 2) {
+				rst_if.reason = REASON_EXT_SYS_RST; // = 6
+		};
 	}
-/*	if(ri != REASON_DEEP_SLEEP_AWAKE && rtc_get_reset_reason() == 2) {
-		RTC_MEM(0) = REASON_EXT_SYS_RST; // = 6
-	}*/
 #endif
 
 #ifdef DEBUG_UART

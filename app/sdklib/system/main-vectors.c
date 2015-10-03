@@ -229,7 +229,7 @@ void __attribute__((section(".vectors.text"))) call_user_start(void)
 			"s32i.n	a3, a0, 0\n"
 "4:\n"
 			"memw\n"
-			"l32i.n a3, a0, 0\n"
+			"l32i.n a3, a0, 0\n"	// while(DPORT_BASE[0]&1);
 			"bbsi	a3, 0, 4b\n"
 
 			"l32r	a0, timer0_cb\n" // if(timer0_cb !=0) timer0_cb(timer0_arg)

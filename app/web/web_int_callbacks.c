@@ -409,9 +409,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           else ifcmp("vdd33") tcp_puts("%u", readvdd33()); // system_get_vdd33() phy_get_vdd33();
           else ifcmp("wdt") tcp_puts("%u", ets_wdt_get_mode());
           else ifcmp("res_event") tcp_puts("%u", rtc_get_reset_reason()); // 1 - power/ch_pd, 2 - reset, 3 - software, 4 - wdt ...
-          else ifcmp("rst") tcp_puts("%u", RTC_RAM_BASE[24] & 0xffff); // *((uint32 *)0x60001060 bit0..15: старт был по =1 reset, =0 ch_pd, bit16..31: deep_sleep_option
+          else ifcmp("rst") tcp_puts("%u", system_get_rst_info()->reason);
           else ifcmp("clkcpu") tcp_puts("%u", ets_get_cpu_frequency());
-          else ifcmp("sleep_old") tcp_puts("%u",(*((uint32 *)0x60001060))>>16 ); // если нет отдельного питания RTC и deep_sleep не устанавливался/применялся при текущем включения питания чипа, то значение неопределенно (там хлам).
+          else ifcmp("sleep_old") tcp_puts("%u", deep_sleep_option); // если нет отдельного питания RTC и deep_sleep не устанавливался/применялся при текущем включения питания чипа, то значение неопределенно (там хлам).
 //          else ifcmp("test") tcp_puts("%d", cal_rf_ana_gain() ); //
           else ifcmp("reset") web_conn->web_disc_cb = (web_func_disc_cb)_ResetVector;
           else ifcmp("restart") web_conn->web_disc_cb = (web_func_disc_cb)system_restart;

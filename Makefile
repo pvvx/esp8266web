@@ -4,7 +4,7 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM2 -b 460800
+ESPOPTION ?= -p COM6 -b 460800
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80
@@ -16,7 +16,8 @@ SPI_SIZE?=512
 ADDR_FW1 = 0x00000
 ADDR_FW2 = 0x06000
 # 
-USERFADDR = 0x3C000
+#USERFADDR = 0x3C000
+USERFADDR = $(shell printf '0x%X\n' $$(( ($$(stat --printf="%s" $(OUTBIN2)) + 0xFFF + $(ADDR_FW2)) & (0xFFFFE000) )) )
 USERFBIN = ./webbin/WEBFiles.bin
 #
 FIRMWAREDIR := bin
@@ -31,6 +32,8 @@ BLANKADDR := 0x7E000
 XTENSA_TOOLS_ROOT ?= c:/Espressif/xtensa-lx106-elf/bin
 
 #PATH := $(XTENSA_TOOLS_ROOT);$(PATH)
+
+GET_FILESIZE ?= 
 
 # base directory of the ESP8266 SDK package, absolute
 #SDK_BASE	?= c:/Espressif/ESP8266_SDK

@@ -136,6 +136,14 @@ void timer0_init(void *func, void *par);
 //void wifi_param_save_protect_with_check(uint16 startsector, int sectorsize, void *pdata, uint16 len);
 void wifi_param_save_protect_with_check(int startsector, int sectorsize, void *pdata, int len);
 
+#if DEF_SDK_VERSION >= 1300
+#define deep_sleep_option ((RTC_RAM_BASE[0x6C>>2] >> 16) & 0xFF)
+#else
+#define deep_sleep_option (RTC_RAM_BASE[0x60>>2] >> 16)
+#endif
+
+extern struct rst_info rst_if;
+
 #endif //_INCLUDE_ADD_FUNC_H_
 
 

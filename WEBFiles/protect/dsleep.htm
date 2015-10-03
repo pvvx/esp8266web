@@ -33,8 +33,8 @@
 		</table>
 		<p class="center">
 		Old sleep_mode = ~sys_sleep_old~<br>
-		Start event = ~sys_rst~ (1 - reset, 0 - ch_pd)<br>
-		Reset event = ~sys_res_event~ (1 - power, 2 - reset, 3 - software, 4 - wdt)<br>
+		Start event = ~sys_rst~ (0-power, 1-wdt, 2-exception, 3-soft wdt, 4-software, 5-deep-sleep, 6-external)<br>
+		Reset event = ~sys_res_event~ (1-power, 2-reset, 3-software, 4-wdt)<br>
 		</p>
 	</div>
 ~inc:footer.inc~

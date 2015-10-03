@@ -104,7 +104,14 @@ void ICACHE_FLASH_ATTR init_done_cb(void)
 	test_rtc_mem();
 #endif
 	web_fini(inifname);
-	New_WiFi_config(WIFI_MASK_ALL);
+	switch(system_get_rst_info()->reason) {
+	case REASON_SOFT_RESTART:
+	case REASON_DEEP_SLEEP_AWAKE:
+		break;
+	default:
+		New_WiFi_config(WIFI_MASK_ALL);
+		break;
+	}
 }
 
 /******************************************************************************
@@ -165,6 +172,7 @@ void ICACHE_FLASH_ATTR user_init(void) {
 #ifdef USE_WDRV
     init_wdrv();
 #endif
+	Set_WiFi(&wificonfig, Cmp_WiFi_chg(&wificonfig) & (WIFI_MASK_SLEEP|WIFI_MASK_STDHCP));
 	system_deep_sleep_set_option(0);
 	system_init_done_cb(init_done_cb);
 }
