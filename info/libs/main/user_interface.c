@@ -85,7 +85,12 @@ uint32 system_phy_set_max_tpw(uint32 tpw)
 
 uint32 system_get_time(void)
 {
-	return WdevTimOffSet + IOREG(0x3FF20C00);
+	return WdevTimOffSet + *((uint32*)0x3FF20C00);
+}
+
+uint32 system_relative_time(void)
+{
+	return *((uint32*)0x3FF20C00);
 }
 
 bool system_os_post(uint8 prio, os_signal_t sig, os_param_t par)
@@ -521,10 +526,7 @@ void system_timer_reinit(void)
 }
 
 
-uint32 system_relative_time(void)
-{
-	return *((uint32*)0x3FF20C00);
-}
+
 void system_print_meminfo(void)
 {
 	os_printf_plus("data  : 0x%x ~ 0x%x, len: %d\n", 0x3FFE8000, _data_end, _data_end - 0x3FFE8000);

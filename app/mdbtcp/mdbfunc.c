@@ -10,6 +10,7 @@
 #include "os_type.h"
 #include "osapi.h"
 #include "bios.h"
+#include "sdk/rom2ram.h"
 #include "modbusrtu.h"
 
 extern smdbtabaddr mdbtabaddr[]; // таблица переменных ModBus
@@ -27,6 +28,22 @@ void ICACHE_FLASH_ATTR Swapws(uint16 *bufw, uint32 lenw)
 
 uint32 mdbiosize DATA_IRAM_ATTR; // размер принятого и отправляемого сообщений ModBus
 
+uint32 ICACHE_FLASH_ATTR MdbWordR(uint8 * mdb, uint8 * buf, uint32 rwflg)
+{
+	if (rwflg & 0x10000) return MDBERRDATA; // Запись?
+	copy_s4d1(mdb,(void *) buf, rwflg << 1);
+	return MDBERRNO;
+}
+
+uint32 ICACHE_FLASH_ATTR MdbWordRW(uint8 * mdb, uint8 * buf, uint32 rwflg)
+{
+	if (rwflg & 0x10000) {	// Запись?
+		copy_s1d4((void *) buf, mdb, (rwflg & 0xFFFF) << 1);
+	}
+	copy_s4d1(mdb,(void *) buf, rwflg << 1);
+	return MDBERRNO;
+}
+/*
 uint32 ICACHE_FLASH_ATTR MdbWordRW(uint8 * mdb, uint8 * buf, uint32 rwflg) 
 {
 	if (rwflg & 0x10000) {	// Запись?
@@ -55,7 +72,7 @@ uint32 ICACHE_FLASH_ATTR MdbWordR(uint8 * mdb, uint8 * buf, uint32 rwflg)
 	}
 	return MDBERRNO;
 }
-
+*/
 void ICACHE_FLASH_ATTR SetMdbErr(smdbadu * mdbbuf, uint32 err) 
 {
 	if (mdbbuf->id != 0) {

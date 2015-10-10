@@ -4,7 +4,7 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM6 -b 460800
+ESPOPTION ?= -p COM2 -b 460800
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80

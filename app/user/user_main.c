@@ -36,7 +36,7 @@
 #include "driver/wdrv.h"
 #endif
 
-#ifdef USE_USE_MODBUS
+#ifdef USE_MODBUS
 #include "modbustcp.h"
 #endif
 
