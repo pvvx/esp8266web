@@ -1378,7 +1378,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 						break;
 					}
 					else if(rom_xstrcmp(pupload->name, sysconst_filename)) {
-						pupload->fsize = SIZE_USYS_CONST;
+						pupload->fsize = SIZE_SYS_CONST;
 						pupload->faddr = esp_init_data_default_addr;
 						pupload->status = 2; // = 2 загрузка файла во flash
 						break;
