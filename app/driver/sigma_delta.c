@@ -25,6 +25,7 @@ YOU CAN DO THE TEST LIKE THIS:
 #include "hw/esp8266.h"
 #include "hw/gpio_register.h"
 #include "bios/gpio.h"
+#include "web_iohw.h"
 
 /******************************************************************************
  * FunctionName : sigma_delta_setup
@@ -40,7 +41,7 @@ sigma_delta_setup(uint32 GPIO_NUM)
 	GPIO_SIGMA_DELTA = (GPIO_SIGMA_DELTA & (~SIGMA_DELTA_SETTING_MASK)) | SIGMA_DELTA_ENABLE;
 	//============================================================================
     //STEP 2: PIN FUNC CONFIG :SET PIN TO GPIO MODE AND ENABLE OUTPUT
-	SET_PIN_FUNC_IOPORT(GPIO_NUM);
+	set_gpiox_mux_func_ioport(GPIO_NUM);
 	gpio_output_set(0,0,1 << GPIO_NUM,0);
     //============================================================================
     //STEP 3: CONNECT SIGNAL TO GPIO PAD
@@ -68,7 +69,7 @@ void ICACHE_FLASH_ATTR
     //STEP 3: CONNECT GPIO TO PIN PAD
 	GPIO_PIN(GPIO_NUM) &= ~ GPIO_PIN_SOURCE;
     //============================================================================
-	SET_PIN_FUNC_DEF_SDK(GPIO_NUM);
+	set_gpiox_mux_func_default(GPIO_NUM);
 }
 /******************************************************************************
  * FunctionName : set_sigma_duty_312KHz

@@ -39,7 +39,8 @@
 	</div>
 ~inc:footer.inc~
 <script type="text/javascript">
-document.getElementById("ds_option").value = ~sys_sleep_old~;
+var dslp = ~sys_sleep_old~;
+document.getElementById("ds_option").value = (dslp>4)?0:dslp;
 function DeepSleep(){
 	var dstim = parseInt(document.getElementById('ds_time').value,10);
 	newAJAXCommand('/web.cgi?sys_sleep_option='+document.getElementById('ds_option').value.toString(10)+'&sys_sleep_us=0x' + dstim.toString(16), null, 0);

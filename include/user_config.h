@@ -3,7 +3,7 @@
 
 #include "sdk/sdk_config.h"
 
-#define SYS_VERSION "0.4.8"
+#define SYS_VERSION "0.4.9"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -21,7 +21,7 @@
 
 #define USE_TMP2NET_PORT 		0 // 65506 // =0 not use
 
-// #define USE_MODBUS // включить пример Modbus TCP
+#define USE_MODBUS // включить пример Modbus TCP
 
 #define USE_WDRV // включить пример Modbus TCP
 

@@ -27,6 +27,7 @@
 #include "sys_const_utils.h"
 #include "sdk/rom2ram.h"
 #include "sdk/app_main.h"
+#include "web_iohw.h"
 
 #ifdef USE_NETBIOS
 #include "netbios.h"
@@ -47,6 +48,10 @@ struct ping_option pingopt; // for test
 
 #ifdef USE_CAPTDNS
 #include "captdns.h"
+#endif
+
+#ifdef USE_MODBUS
+#include "modbustcp.h"
 #endif
 
 extern TCP_SERV_CONN * tcp2uart_conn;
@@ -92,6 +97,20 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
 	ifcmp("start") 		web_conn->udata_start = val;
 	else ifcmp("stop") 	web_conn->udata_stop = val;
+#ifdef USE_MODBUS
+	else ifcmp("mdb") {
+		cstr+=4;
+    	if((*cstr>='0')&&(*cstr<='9')) {
+    		uint32 x = ahextoul(cstr);
+        	if(x < 0x10000) {
+        		if(cstr[-1]=='w') {
+        			if(WrMdbData((uint8 *)&val, x, 1) != 0) ;
+        		}
+        		else if(cstr[-1]=='d') WrMdbData((uint8 *)&val, x, 2);
+        	}
+    	}
+	}
+#endif
 	else ifcmp("sys_") {
 		cstr+=4;
 		ifcmp("restart") {
@@ -425,15 +444,15 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	            	else if(val == 1) GPIO_ENABLE_W1TS = 1 << n;
 	            	else GPIO_ENABLE_W1TC =  1 << n;
 	            }
-	            else ifcmp("fun")	{ SET_PIN_FUNC(n,val); }
-	            else ifcmp("io") 	{ SET_PIN_FUNC_IOPORT(n); }
-	            else ifcmp("def") 	{ SET_PIN_FUNC_DEF_SDK(n); }
+	            else ifcmp("fun")	{ set_gpiox_mux_func(n,val); }
+	            else ifcmp("io") 	{ set_gpiox_mux_func_ioport(n); }
+	            else ifcmp("def") 	{ set_gpiox_mux_func_default(n); }
 	            else ifcmp("sgs") 	{ sigma_delta_setup(n); set_sigma_duty_312KHz(val); }
 	            else ifcmp("sgc") 	sigma_delta_close(n);
 	            else ifcmp("sgn") 	set_sigma_duty_312KHz(val);
 	            else ifcmp("od") 	reg_sct_bits(&GPIOx_PIN(n), BIT2, val);
-	            else ifcmp("pu") 	reg_sct_bits(&GPIOx_MUX(n), BIT7, val);
-	            else ifcmp("pd") 	reg_sct_bits(&GPIOx_MUX(n), BIT6, val);
+	            else ifcmp("pu") 	reg_sct_bits(get_addr_gpiox_mux(n), BIT7, val);
+	            else ifcmp("pd") 	reg_sct_bits(get_addr_gpiox_mux(n), BIT6, val);
     		}
     	}
     	else if(*cstr == '_') {

@@ -84,6 +84,7 @@ struct sys_bits_config {
 #define SYS_CFG_NETBIOS_ENA	0x0000010 // включить NetBios
 #define SYS_CFG_SNTP_ENA	0x0000020 // включить SNTP
 #define SYS_CFG_CDNS_ENA	0x0000040 // включить CAPDNS
+#define SYS_CFG_REOPEN		0x0000080 // открытие нового соединения ведет к закрытию старого соединения (сервер)
 
 struct SystemCfg { // структура сохранения системных настроек в Flash
 	union {

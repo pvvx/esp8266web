@@ -15,12 +15,15 @@
 #include "sdk/add_func.h"
 #include "driver/adc.h"
 #include "modbusrtu.h"
+#include "web_iohw.h"
 
 uint32 gpio_fun_pin_num DATA_IRAM_ATTR;
 uint32 arg_funcs DATA_IRAM_ATTR;
+uint32 ret_funcs DATA_IRAM_ATTR;
 
 uint32 MdbUserFunc(unsigned char * mdb, unsigned char * buf, uint32 rwflg)
 {
+	uint32 ret_funcs = 0;
 	if(rwflg&0x10000) { // Запись?
         unsigned int x = ((mdb[1])<<8)|(mdb[0]);
 		switch(x) {
@@ -34,6 +37,8 @@ uint32 MdbUserFunc(unsigned char * mdb, unsigned char * buf, uint32 rwflg)
 			return MDBERRDATA;
 		}
 	}
+	*mdb++ = ret_funcs;
+	*mdb = ret_funcs >> 8;
 	return MDBERRNO;
 }
 
@@ -69,11 +74,49 @@ uint32 MdbGpioFunc(unsigned char * mdb, unsigned char * buf, uint32 rwflg)
 {
     if(gpio_fun_pin_num > 15) return MDBERRDATA;
 	if(rwflg&0x10000) { // Запись?
-		SET_PIN_FUNC(gpio_fun_pin_num, mdb[0] );
+		set_gpiox_mux_func(gpio_fun_pin_num, mdb[0] );
 	}
 	uint32 x = GET_PIN_FUNC(gpio_fun_pin_num);
-	x = (x & 3) | ((x >> 2) & 4);
     *mdb++ = x; // *buf++;
+    *mdb = 0; // *buf++;
+	return MDBERRNO;
+}
+
+uint32 MdbGpioMux(unsigned char * mdb, unsigned char * buf, uint32 rwflg)
+{
+    if(gpio_fun_pin_num > 15) return MDBERRDATA;
+    volatile uint32 * ptr = get_addr_gpiox_mux(gpio_fun_pin_num);
+	if(rwflg&0x10000) { // Запись?
+		*ptr = ((mdb[1])<<8)|(mdb[0]);
+	}
+	uint32 x = *ptr;
+    *mdb++ = x; // *buf++;
+    *mdb = x >> 8; // *buf++;
+	return MDBERRNO;
+}
+
+uint32 MdbGpioPullUp(unsigned char * mdb, unsigned char * buf, uint32 rwflg)
+{
+    if(gpio_fun_pin_num > 15) return MDBERRDATA;
+    volatile uint32 * ptr = get_addr_gpiox_mux(gpio_fun_pin_num);
+	if(rwflg&0x10000) { // Запись?
+		if(mdb[0]) *ptr |= 1 << GPIO_MUX_PULLUP_BIT;
+		else *ptr &= ~(1 << GPIO_MUX_PULLUP_BIT);
+	}
+    *mdb++ = (*ptr >> GPIO_MUX_PULLUP_BIT) & 1; // *buf++;
+    *mdb = 0; // *buf++;
+	return MDBERRNO;
+}
+
+uint32 MdbGpioOd(unsigned char * mdb, unsigned char * buf, uint32 rwflg)
+{
+    if(gpio_fun_pin_num > 15) return MDBERRDATA;
+    volatile uint32 * ptr = get_addr_gpiox_mux(gpio_fun_pin_num);
+	if(rwflg&0x10000) { // Запись?
+		if(mdb[0]) *ptr |= 1 << GPIO_MUX_SLEEP_OE_BIT8;
+		else *ptr &= ~(1 << GPIO_MUX_SLEEP_OE_BIT8);
+	}
+    *mdb++ = (*ptr >> GPIO_MUX_SLEEP_OE_BIT8) & 1; // *buf++;
     *mdb = 0; // *buf++;
 	return MDBERRNO;
 }
@@ -100,14 +143,18 @@ const smdbtabaddr mdbtabaddr[]=
 	{101,101, (uint8 *)&GPIO_OUT, MdbWordRW},
 	{102,102, (uint8 *)&GPIO_OUT_W1TS, MdbWordRW},
 	{103,103, (uint8 *)&GPIO_OUT_W1TC, MdbWordRW},
-	{104,105, (uint8 *)&GPIO_ENABLE, MdbWordRW},
+	{104,104, (uint8 *)&GPIO_ENABLE, MdbWordRW},
 	{105,105, (uint8 *)&gpio_fun_pin_num, MdbWordRW},
 	{106,106, (uint8 *)&gpio_fun_pin_num, MdbGpioFunc},
-	{107,107, (uint8 *)NULL, MdbAdc},
-	{108,108, (uint8 *)NULL, MdbVcc},
-	{109,109, (uint8 *)&arg_funcs, MdbWordRW},
-	{110,110, (uint8 *)&arg_funcs, MdbUserFunc},
-	{111,0x7FFF, (uint8 *)&wificonfig, MdbWordRW},
+	{107,107, (uint8 *)&gpio_fun_pin_num, MdbGpioPullUp},
+	{108,108, (uint8 *)&gpio_fun_pin_num, MdbGpioOd},
+	{109,109, (uint8 *)&gpio_fun_pin_num, MdbGpioMux},
+	{110,110, (uint8 *)NULL, MdbAdc},
+	{111,111, (uint8 *)NULL, MdbVcc},
+	{112,112, (uint8 *)&arg_funcs, MdbWordRW},
+	{113,113, (uint8 *)&arg_funcs, MdbUserFunc},
+	{114,199, NULL, MdbOut55AA},
+	{200,0x7FFF, (uint8 *)&wificonfig, MdbWordRW},
 	{0xffff,0xffff,0,0}
 };
 

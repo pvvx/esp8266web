@@ -270,6 +270,7 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 	if(flash_read_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg)) != sizeof(syscfg)) {
 		syscfg.cfg.w = 0
 				| SYS_CFG_PIN_CLR_ENA
+				| SYS_CFG_REOPEN
 #ifdef 	USE_CPU_SPEED
 				| SYS_CFG_HI_SPEED
 #endif

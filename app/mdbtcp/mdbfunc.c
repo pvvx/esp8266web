@@ -37,8 +37,12 @@ uint32 ICACHE_FLASH_ATTR MdbWordR(uint8 * mdb, uint8 * buf, uint32 rwflg)
 
 uint32 ICACHE_FLASH_ATTR MdbWordRW(uint8 * mdb, uint8 * buf, uint32 rwflg)
 {
+#if DEBUGSOO > 5
+	os_printf("MdbWordRW(%p, %p, %u)\n", mdb, buf, rwflg);
+#endif
 	if (rwflg & 0x10000) {	// Запись?
-		copy_s1d4((void *) buf, mdb, (rwflg & 0xFFFF) << 1);
+		rwflg &= 0x7FFF;
+		copy_s1d4((void *) buf, mdb, rwflg << 1);
 	}
 	copy_s4d1(mdb,(void *) buf, rwflg << 1);
 	return MDBERRNO;
@@ -83,65 +87,72 @@ void ICACHE_FLASH_ATTR SetMdbErr(smdbadu * mdbbuf, uint32 err)
 		mdbiosize = 0;
 }
 
-uint32 ICACHE_FLASH_ATTR RdMdbData(smdbadu * mdbbuf, uint32 addr, uint32 len) 
+uint32 ICACHE_FLASH_ATTR RdMdbData(uint8 * wbuf, uint16 addr, uint32 len)
+{
+#if DEBUGSOO > 3
+		os_printf("mdbrd:%u[%u]\n", addr, len);
+#endif
+	smdbtabaddr * ptr = (smdbtabaddr *) &mdbtabaddr[0]; // указатель на первую структуру в таблице
+	do {
+		while (addr > ptr->addre) ptr++;
+		if (ptr->addrs == 0xFFFF) return MDBERRADDR; // не найден
+		if (addr < ptr->addrs)	return MDBERRADDR; // не найден
+		uint32 i = ptr->addre - addr + 1; // размерчик пересылки в этом блоке
+		if (len < i) i = len; // больше чем запрос? -> ограничить
+		uint8 * rbuf; // входной буфер (или адрес в блоке, если в таблице buf=null)
+        rbuf = &ptr->buf[(addr - ptr->addrs)<<1]; // расчитать указатель на данные
+		uint32 x;
+		if (ptr->func) {
+			if ((x = ptr->func(wbuf, rbuf, i)) != MDBERRNO) return x;
+		} else {	// Если NULL -> функция не вызывается
+			if (ptr->buf) { // данные передаются из блока приема?
+				if ((x = MdbWordRW(wbuf, rbuf, i)) != MDBERRNO)	return x;
+			}
+			else {
+				x = i;
+				uint8 * p = wbuf;
+				while(x--) {
+		           *p++ = 0;
+		      	   *p++ = 0;
+		      	}
+					os_memset(wbuf, 0, i << 1); // передать нули
+			}
+		};
+		len -= i; // вычесть кол-во данных этой пересылки
+		addr += i;  // шаг адреса
+		wbuf += i << 1; // шаг в блоке выходных данных ответа mdb
+		ptr++; // на следюший указатель в таблице
+	} while (len);
+	return MDBERRNO;
+}
+
+uint32 ICACHE_FLASH_ATTR ReadMdbData(smdbadu * mdbbuf, uint32 addr, uint32 len)
 {
 	if (mdbbuf->id != 0) {
 //          if(len > 125) return MDBERRDATA;
 		mdbiosize = (len << 1) + 3; // полный размер ADU
 		mdbbuf->out.cnt = (uint8) (len << 1); // размер блока данных в байтах
-		uint8 * wbuf;
-		wbuf = (uint8 *) mdbbuf->out.data; // указатель на данные ответа mdb (для записи)
-		smdbtabaddr * ptr;
-		ptr = (smdbtabaddr *) &mdbtabaddr[0]; // указатель на первую структуру в таблице
-		do {
-			while (addr > ptr->addre) ptr++;
-			if (ptr->addrs == 0xFFFF) return MDBERRADDR; // не найден
-			if (addr < ptr->addrs)	return MDBERRADDR; // не найден
-			uint32 i = ptr->addre - addr + 1; // размерчик пересылки в этом блоке
-			if (len < i) i = len; // больше чем запрос? -> ограничить
-			uint8 * rbuf; // входной буфер (или адрес в блоке, если в таблице buf=null)
-            rbuf = &ptr->buf[(addr - ptr->addrs)<<1]; // расчитать указатель на данные
-			uint32 x;
-			if (ptr->func) {
-				if ((x = ptr->func(wbuf, rbuf, i)) != MDBERRNO) return x;
-			} else {	// Если NULL -> функция не вызывается
-				if (ptr->buf) { // данные передаются из блока приема?
-					if ((x = MdbWordRW(wbuf, rbuf, i)) != MDBERRNO)	return x;
-				}
-				else {
-					x = i;
-					uint8 * p = wbuf;
-					while(x--) {
-			           *p++ = 0;
-			      	   *p++ = 0;
-			      	}
-
-					os_memset(wbuf, 0, i << 1); // передать нули
-				}
-			};
-			len -= i; // вычесть кол-во данных этой пересылки
-			addr += i;  // шаг адреса
-			wbuf += i << 1; // шаг в блоке выходных данных ответа mdb
-			ptr++; // на следюший указатель в таблице
-		} while (len);
+		uint32 err = RdMdbData((uint8 *)&mdbbuf->out.data, addr, len);
+		if(err != MDBERRNO) return err;
 		Swapws(&mdbbuf->out.data[0], mdbbuf->out.cnt >> 1);
 	} else
 		mdbiosize = 0;
 	return MDBERRNO;
 }
 
-uint16 ICACHE_FLASH_ATTR WrMdbData(uint8 * dbuf, uint16 addr, uint32 len) 
+uint32 ICACHE_FLASH_ATTR WrMdbData(uint8 * dbuf, uint16 addr, uint32 len)
 {
-	smdbtabaddr * ptr;
-	ptr = (smdbtabaddr *) &mdbtabaddr[0]; // указатель на первую структуру в таблице
+#if DEBUGSOO > 3
+		os_printf("mdbwr:%u[%u]\n", addr, len);
+#endif
+	smdbtabaddr * ptr = (smdbtabaddr *) &mdbtabaddr[0]; // указатель на первую структуру в таблице
 	do {
 		while (addr > ptr->addre) ptr++;
 		if (ptr->addrs == 0xFFFF) return MDBERRADDR; // не найден
 		if (addr < ptr->addrs) return MDBERRADDR; // не найден
 		uint32 i = ptr->addre - addr + 1; // размерчик пересылки в этом блоке
 		if (len < i) i = len; // больше чем запрос? -> ограничить
-		uint8 * wbuf; // адрес в буфере записи (или адрес в блоке, если в таблице buf=null)
-        wbuf = &ptr->buf[(addr - ptr->addrs) << 1]; // расчитать указатель на данные
+		uint8 * wbuf = &ptr->buf[(addr - ptr->addrs) << 1]; // расчитать указатель на данные
 		if (ptr->func) {
 			uint32 x;
 			if ((x = ptr->func(dbuf, wbuf, i | 0x10000)) != MDBERRNO)
@@ -170,7 +181,7 @@ uint32 ICACHE_FLASH_ATTR MdbFunc(smdbadu * mdbbuf, uint32 len)
 			SetMdbErr(mdbbuf, MDBERRADDR);
 			break;
 		}
-        if((i=RdMdbData(mdbbuf, mdbbuf->f3f4.addr, mdbbuf->f3f4.len))!=MDBERRNO)
+        if((i=ReadMdbData(mdbbuf, mdbbuf->f3f4.addr, mdbbuf->f3f4.len)) != MDBERRNO)
         {
            SetMdbErr(mdbbuf,i);
            break;
@@ -184,8 +195,7 @@ uint32 ICACHE_FLASH_ATTR MdbFunc(smdbadu * mdbbuf, uint32 len)
 		 SetMdbErr(mdbbuf,MDBERRADDR);
 		 break;
 		 };*/
-		if ((i = WrMdbData((uint8 *) &mdbbuf->f6.data, mdbbuf->f6.addr, 1))
-				!= MDBERRNO) {
+		if ((i = WrMdbData((uint8 *) &mdbbuf->f6.data, mdbbuf->f6.addr, 1))	!= MDBERRNO) {
 			SetMdbErr(mdbbuf, i);
 			break;
 		}
@@ -228,10 +238,8 @@ uint32 ICACHE_FLASH_ATTR MdbFunc(smdbadu * mdbbuf, uint32 len)
 			break;
 		}
 		Swapws(mdbbuf->f23.data, mdbbuf->f23.wlen);
-		if (((i = WrMdbData((uint8 *) mdbbuf->f23.data, mdbbuf->f23.waddr,
-				mdbbuf->f23.wlen)) != MDBERRNO)
-				|| ((i = RdMdbData(mdbbuf, mdbbuf->f23.raddr, mdbbuf->f23.rlen))
-						!= MDBERRNO)) {
+		if (((i = WrMdbData((uint8 *) mdbbuf->f23.data, mdbbuf->f23.waddr, 	mdbbuf->f23.wlen)) != MDBERRNO)
+		 || ((i = ReadMdbData(mdbbuf, mdbbuf->f23.raddr, mdbbuf->f23.rlen)) != MDBERRNO)) {
 			SetMdbErr(mdbbuf, i);
 			break;
 		}

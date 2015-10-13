@@ -22,12 +22,27 @@ volatile uint32 * ICACHE_FLASH_ATTR get_addr_gpiox_mux(uint8 pin_num)
 	return &GPIOx_MUX(pin_num & 0x0F);
 }
 //=============================================================================
+// get_gpiox_mux(pin_num)
+//-----------------------------------------------------------------------------
+uint32 ICACHE_FLASH_ATTR get_gpiox_mux(uint8 pin_num)
+{
+	return *(get_addr_gpiox_mux(pin_num));
+}
+//=============================================================================
 // set_gpiox_mux_func(pin_num, func)
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR set_gpiox_mux_func(uint8 pin_num, uint8 func)
 {
 	volatile uint32 *goio_mux = get_addr_gpiox_mux(pin_num); // volatile uint32 *goio_mux = &GPIOx_MUX(PIN_NUM)
-	*goio_mux = (*goio_mux & (~GPIO_MUX_FUN_MASK)) | (((func + 0x0C) & 0x013) << GPIO_MUX_FUN_BIT0);
+	*goio_mux = (*goio_mux & (~GPIO_MUX_FUN_MASK)) | ((((func & 7) + 0x0C) & 0x013) << GPIO_MUX_FUN_BIT0);
+}
+//=============================================================================
+// get_gpiox_mux_func(pin_num, func)
+//-----------------------------------------------------------------------------
+uint32 ICACHE_FLASH_ATTR get_gpiox_mux_func(uint8 pin_num)
+{
+	uint32 io_mux = get_gpiox_mux(pin_num); // volatile uint32 *goio_mux = &GPIOx_MUX(PIN_NUM)
+	return (((io_mux >> GPIO_MUX_FUN_BIT0) & 3) | ((io_mux >> (GPIO_MUX_FUN_BIT2 - 2)) & 4));
 }
 //=============================================================================
 // set_gpiox_mux_pull(pin_num, pull)
@@ -42,7 +57,14 @@ void ICACHE_FLASH_ATTR set_gpiox_mux_pull(uint8 pin_num, uint8 pull)
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR set_gpiox_mux_func_ioport(uint8 pin_num)
 {
-    set_gpiox_mux_func(pin_num, ((uint32)(_FUN_IO_PORT >> (pin_num << 1)) & 0x03));
+    set_gpiox_mux_func(pin_num, MUX_FUN_IO_PORT(pin_num)); // ((uint32)(_FUN_IO_PORT >> (pin_num << 1)) & 0x03));
+}
+//=============================================================================
+// set_gpiox_mux_func_ioport(pin_num)
+//-----------------------------------------------------------------------------
+void ICACHE_FLASH_ATTR set_gpiox_mux_func_default(uint8 pin_num)
+{
+    set_gpiox_mux_func(pin_num, MUX_FUN_DEF_SDK(pin_num));
 }
 //=============================================================================
 // select cpu frequency 80 or 160 MHz

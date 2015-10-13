@@ -22,6 +22,8 @@
 #include "driver/adc.h"
 #include "webfs.h"
 #include "tcp2uart.h"
+#include "web_iohw.h"
+
 #ifdef USE_NETBIOS
 #include "netbios.h"
 #endif
@@ -38,6 +40,11 @@
 #ifdef USE_CAPTDNS
 #include "captdns.h"
 #endif
+
+#ifdef USE_MODBUS
+#include "modbustcp.h"
+#endif
+
 
 extern TCP_SERV_CONN * tcp2uart_conn;
 /*extern uint32 adc_rand_noise;
@@ -377,7 +384,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
         	   return;
            }
         }
-#if DEBUGSOO > 2
+#if DEBUGSOO > 3
         os_printf("[%s]\n", cstr);
 #endif
         ifcmp("start") tcp_puts("0x%08x", web_conn->udata_start);
@@ -389,6 +396,30 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
             else tcp_put('?');
             web_conn->udata_start += 4;
         }
+#ifdef USE_MODBUS
+        else ifcmp("mdb") {
+        	cstr+=5;
+        	if((*cstr>='0')&&(*cstr<='9')) {
+        		uint32 addr = ahextoul(cstr);
+        		if((cstr[-1]=='u' || cstr[-1]=='d') && (addr < 0x10000)) {
+            		uint32 val = 0;
+        			if(cstr[-2]=='w') {
+        				if(RdMdbData((uint8 *)&val, addr, 1) != 0) tcp_put('?');
+        				else if (cstr[-1]=='u') tcp_puts("%u", val);
+           				else if (cstr[-1]=='s') tcp_puts("%d", val);
+        			}
+        			else if(cstr[-2]=='d') {
+        				if(RdMdbData((uint8 *)&val, addr, 2) != 0) tcp_put('?');
+        				else if (cstr[-1]=='u') tcp_puts("%u", val);
+           				else if (cstr[-1]=='s') tcp_puts("%d", val);
+        			}
+        			else tcp_put('?');
+        		}
+        		else tcp_put('?');
+        	}
+        	else tcp_put('?');
+        }
+#endif
         else ifcmp("sys_") {
           cstr+=4;
           ifcmp("cid") tcp_puts("%08x", system_get_chip_id());
@@ -712,7 +743,6 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
         	else ifcmp("max_size") tcp_puts("%u", WEBFS_max_size());
         	else tcp_put('?');
         }
-        else ifcmp("test_adc") web_test_adc(ts_conn);
         else ifcmp("gpio") {
             cstr+=4;
         	if((*cstr>='0')&&(*cstr<='9')) {
@@ -733,19 +763,11 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
         				if(GPIO_ENABLE & (1<<n)) tcp_put('1');
         				else tcp_put('0');
         			}
-        			else ifcmp("fun") {
-        				uint32 x = GET_PIN_FUNC(n);
-        				x = (x & 3) | ((x >> 2) & 4);
-        				tcp_puts("%u", x);
-        			}
-        			else ifcmp("pull") {
-        				uint32 x = GPIOx_MUX(n) >> 6;
-        				tcp_puts("%u", x & 3);
-        			}
+        			else ifcmp("fun") tcp_puts("%u", get_gpiox_mux_func(n));
+        			else ifcmp("pull") tcp_puts("%u", (get_gpiox_mux(n) >> GPIO_MUX_PULLDOWN_BIT) & 3);
     	            else ifcmp("opd") tcp_put((GPIOx_PIN(n) & (1 << 2))? '1' : '0');
-    	            else ifcmp("pu") tcp_put((GPIOx_MUX(n) & (1 << 7))? '1' : '0');
-    	            else ifcmp("pd") tcp_put((GPIOx_MUX(n) & (1 << 6))? '1' : '0');
-
+    	            else ifcmp("pu") tcp_put((get_gpiox_mux(n) & (1 << GPIO_MUX_PULLUP_BIT))? '1' : '0');
+    	            else ifcmp("pd") tcp_put((get_gpiox_mux(n) & (1 << GPIO_MUX_PULLDOWN_BIT))? '1' : '0');
         			else tcp_put('?');
         		}
         		else tcp_put('?');
@@ -781,6 +803,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 			else tcp_put('?');
 		}
 #endif
+        else ifcmp("test_adc") web_test_adc(ts_conn);
 		else tcp_put('?');
 }
 
