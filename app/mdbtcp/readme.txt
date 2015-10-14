@@ -20,3 +20,11 @@ TCP Port 502
 111		u16		VDD				Значение VDD c ADC
 112		u16		arg_ UserFunc	Аргумент к UserFunc
 113		u16		UserFunc		Номер UserFunc
+
+Для доступа из WEB к полям Modbus назначены такие переменные:
+~mdbwuNNN~ - чтение word unsigned, NNN - номер ячейки
+~mdbwsNNN~ - чтение word signed, NNN - номер ячейки
+~mdbduNNN~ - чтение dword unsigned, NNN - номер ячейки
+~mdbdsNNN~ - чтение dword signed, NNN - номер ячейки
+mdbwNNN=XXX - запись XXX word значения (dec или hex) в ячейку c номером NNN 
+mdbdNNN=XXX - запись XXX dword значения (dec или hex) в ячейку c номером NNN
