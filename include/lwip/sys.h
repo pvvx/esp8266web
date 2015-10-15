@@ -34,7 +34,6 @@
 
 #include "lwip/opt.h"
 
-//#include "hw/eagle_soc.h"
 #include "hw/esp8266.h"
 
 #ifdef __cplusplus

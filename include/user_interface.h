@@ -275,6 +275,7 @@ struct station_info {
 };
 
 struct dhcps_lease {
+//	bool enable; -> dhcps_lease_flag
 	struct ip_addr start_ip;
 	struct ip_addr end_ip;
 };
@@ -467,6 +468,7 @@ enum wps_cb_status {
 	WPS_CB_ST_SUCCESS = 0,
 	WPS_CB_ST_FAILED,
 	WPS_CB_ST_TIMEOUT,
+	WPS_CB_ST_WEP
 };
 
 bool wifi_wps_enable(WPS_TYPE_t wps_type);

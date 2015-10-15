@@ -87,6 +87,12 @@
 #include "netif/etharp.h"
 
 #include <string.h>
+// #include "sdk/add_func.h"
+extern void system_station_got_ip_set(ip_addr_t * ip_addr, ip_addr_t *sn_mask, ip_addr_t *gw_addr);
+
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
+#endif
 
 /** Default for DHCP_GLOBAL_XID is 0xABCD0000
  * This can be changed by defining DHCP_GLOBAL_XID and DHCP_GLOBAL_XID_HEADER, e.g.
@@ -311,7 +317,7 @@ dhcp_select(struct netif *netif)
     dhcp_option_byte(dhcp, DHCP_OPTION_DNS_SERVER);
 #if LWIP_DHCP_NTP
 	dhcp_option_byte(dhcp, DHCP_OPTION_NTP_SERVER);
-#endif
+#endif	
     dhcp_option_byte(dhcp, DHCP_OPTION_DOMAIN_NAME);
         dhcp_option_byte(dhcp, DHCP_OPTION_NB_TINS);
         dhcp_option_byte(dhcp, DHCP_OPTION_NB_TINT);
@@ -396,6 +402,15 @@ dhcp_fine_tmr()
   while (netif != NULL) {
     /* only act on DHCP configured interfaces */
     if (netif->dhcp != NULL) {
+      /*add DHCP retries processing by LiuHan*/
+      if (DHCP_MAXRTX != 0) {
+    	  if (netif->dhcp->tries >= DHCP_MAXRTX){
+			  os_printf("DHCP timeout\n");
+			  if (netif->dhcp_event != NULL)
+				  netif->dhcp_event();
+			  break;
+		  }
+      }
       /* timer is active (non zero), and is about to trigger now */      
       if (netif->dhcp->request_timeout > 1) {
         netif->dhcp->request_timeout--;
@@ -411,6 +426,7 @@ dhcp_fine_tmr()
     /* proceed to next network interface */
     netif = netif->next;
   }
+
 }
 
 /**
@@ -534,6 +550,7 @@ dhcp_handle_ack(struct netif *netif)
 #if LWIP_DNS
   u8_t n;
 #endif /* LWIP_DNS */
+
   /* clear options we might not get from the ACK */
   ip_addr_set_zero(&dhcp->offered_sn_mask);
   ip_addr_set_zero(&dhcp->offered_gw_addr);
@@ -609,6 +626,7 @@ dhcp_handle_ack(struct netif *netif)
 	}
 #endif /* LWIP_DHCP_NTP */
 }
+
 /** Set a statically allocated struct dhcp to work with.
  * Using this prevents dhcp_start to allocate it using mem_malloc.
  *
@@ -638,6 +656,7 @@ dhcp_set_struct(struct netif *netif, struct dhcp *dhcp)
 void ICACHE_FLASH_ATTR dhcp_cleanup(struct netif *netif)
 {
   LWIP_ASSERT("netif != NULL", netif != NULL);
+
   if (netif->dhcp != NULL) {
     mem_free(netif->dhcp);
     netif->dhcp = NULL;
@@ -700,6 +719,7 @@ dhcp_start(struct netif *netif)
     LWIP_ASSERT("pbuf p_out wasn't freed", dhcp->p_out == NULL);
     LWIP_ASSERT("reply wasn't freed", dhcp->msg_in == NULL );
   }
+    
   /* clear data structure */
   os_memset(dhcp, 0, sizeof(struct dhcp));
   /* dhcp_set_state(&dhcp, DHCP_OFF); */
@@ -927,13 +947,18 @@ dhcp_discover(struct netif *netif)
       }
     }
 #endif /* LWIP_NETIF_HOSTNAME */
-//    dhcp_option(dhcp, DHCP_OPTION_PARAMETER_REQUEST_LIST, 12/*num options*/);
+#if LWIP_DHCP_NTP
     dhcp_option(dhcp, DHCP_OPTION_PARAMETER_REQUEST_LIST, 13/*num options*/);
+#else
+	dhcp_option(dhcp, DHCP_OPTION_PARAMETER_REQUEST_LIST, 12/*num options*/);
+#endif	
     dhcp_option_byte(dhcp, DHCP_OPTION_SUBNET_MASK);
     dhcp_option_byte(dhcp, DHCP_OPTION_ROUTER);
     dhcp_option_byte(dhcp, DHCP_OPTION_BROADCAST);
     dhcp_option_byte(dhcp, DHCP_OPTION_DNS_SERVER);
-    dhcp_option_byte(dhcp, DHCP_OPTION_NTP_SERVER);
+#if LWIP_DHCP_NTP
+	dhcp_option_byte(dhcp, DHCP_OPTION_NTP_SERVER);	
+#endif	
     dhcp_option_byte(dhcp, DHCP_OPTION_DOMAIN_NAME);
             dhcp_option_byte(dhcp, DHCP_OPTION_NB_TINS);
             dhcp_option_byte(dhcp, DHCP_OPTION_NB_TINT);
@@ -975,8 +1000,6 @@ dhcp_discover(struct netif *netif)
  *
  * @param netif network interface to bind to the offered address
  */
-extern void system_station_got_ip_set(ip_addr_t * ip_addr, ip_addr_t *sn_mask, ip_addr_t *gw_addr);
-
 static void ICACHE_FLASH_ATTR
 dhcp_bind(struct netif *netif)
 {
@@ -1038,6 +1061,7 @@ dhcp_bind(struct netif *netif)
 
   ip_addr_copy(gw_addr, dhcp->offered_gw_addr);
   /* gateway address not given? */
+//  if (ip_addr_isany(&gw_addr)) {
   if (gw_addr.addr == IPADDR_ANY) {
     /* copy network address */
     ip_addr_get_network(&gw_addr, &dhcp->offered_ip_addr, &sn_mask);
@@ -1214,6 +1238,7 @@ dhcp_reboot(struct netif *netif)
   u16_t msecs;
   LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, ("dhcp_reboot()\n"));
   dhcp_set_state(dhcp, DHCP_REBOOTING);
+
   /* create and initialize the DHCP message header */
   result = dhcp_create_msg(netif, dhcp, DHCP_REQUEST);
   if (result == ERR_OK) {
@@ -1319,6 +1344,7 @@ dhcp_stop(struct netif *netif)
       dhcp->autoip_coop_state = DHCP_AUTOIP_COOP_STATE_OFF;
     }
 #endif /* LWIP_DHCP_AUTOIP_COOP */
+
     if (dhcp->pcb != NULL) {
       udp_remove(dhcp->pcb);
       dhcp->pcb = NULL;

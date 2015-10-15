@@ -49,19 +49,24 @@
 #include "lwip/mem.h"
 #include "lwip/igmp.h"
 #include "user_interface.h"
+#include "user_interface.h"
 #include "sdk/add_func.h"
 #include "netif/wlan_lwip_if.h"
-
 #define os_sprintf ets_sprintf
+
+
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
+#endif
 
 /** DNS server IP address */
 #ifndef DNS_MULTICAST_ADDRESS
-#define DNS_MULTICAST_ADDRESS	ipaddr_addr("224.0.0.251") /* resolver1.opendns.com */
+#define DNS_MULTICAST_ADDRESS        ipaddr_addr("224.0.0.251") /* resolver1.opendns.com */
 #endif
 
 /** DNS server IP address */
 #ifndef MDNS_LOCAL
-#define MDNS_LOCAL              "local" /* resolver1.opendns.com */
+#define MDNS_LOCAL                "local" /* resolver1.opendns.com */
 #endif
 
 /** DNS server port address */
@@ -200,7 +205,7 @@ static struct ip_addr host_addr;
 static uint8 register_flag = 0;
 static uint8 mdns_flag = 0;
 //#if (DNS_USES_STATIC_BUF == 1)
-//static u8_t mdns_payload[DNS_MSG_SIZE];
+// static u8_t mdns_payload[DNS_MSG_SIZE];
 //#endif /* (MDNS_USES_STATIC_BUF == 1) */
 /*
  *  Function to set the UDP pcb used to send the mDNS packages
@@ -361,8 +366,7 @@ mdns_answer(u16_t type, const char* name, u8_t id) {
 			ans.type = htons(DNS_RRTYPE_PTR);
 			ans.class = htons(DNS_RRCLASS_IN);
 			ans.ttl = htonl(MDNS_SERVICE_TIME);
-/*
-			os_strcpy(tmpBuf, name);
+/*			os_strcpy(tmpBuf, name);
 			os_strcat(tmpBuf, ".");
 			os_strcat(tmpBuf, PUCK_SERVICE); */
 			{
@@ -424,8 +428,7 @@ mdns_answer(u16_t type, const char* name, u8_t id) {
 			ans.type = htons(DNS_RRTYPE_SRV);
 			ans.class = htons(DNS_RRCLASS_FLUSH_IN);
 			ans.ttl = htonl(MDNS_SERVICE_TIME);
-/*
-			os_strcpy(tmpBuf, host_name);
+/*			os_strcpy(tmpBuf, host_name);
 			os_strcat(tmpBuf, ".");
 			os_strcat(tmpBuf, MDNS_LOCAL); */
 			{
@@ -532,9 +535,7 @@ mdns_answer(u16_t type, const char* name, u8_t id) {
 				p_sta = pbuf_alloc(PBUF_TRANSPORT,
 							SIZEOF_DNS_HDR + MDNS_MAX_NAME_LENGTH * 2 + SIZEOF_DNS_QUERY, PBUF_RAM);
 			  if (pbuf_copy (p_sta,p) != ERR_OK) {
-#if DEBUGSOO > 0
 				  os_printf("mdns_answer copying to new pbuf failed\n");
-#endif
 				  return -1;
 			  }
 			  netif_set_default(sta_netif);
@@ -562,7 +563,7 @@ mdns_answer(u16_t type, const char* name, u8_t id) {
  * @return ERR_OK if packet is sent; an err_t indicating the problem otherwise
  */
 static err_t ICACHE_FLASH_ATTR
-mdns_send_service(struct mdns_info *minfo, u8_t id) {
+mdns_send_service(struct mdns_info *info, u8_t id) {
 	err_t err;
 	struct mdns_hdr *hdr;
 	struct mdns_answer ans;
@@ -572,7 +573,7 @@ mdns_send_service(struct mdns_info *minfo, u8_t id) {
 	char *query, *nptr;
 	const char *pHostname;
 	char *device_info;
-	const char *name = minfo->host_name;
+	const char *name = info->host_name;
 	u8_t n;
 	u8_t i = 0;
 	u16_t length = 0;
@@ -672,8 +673,8 @@ mdns_send_service(struct mdns_info *minfo, u8_t id) {
 //		length = os_strlen(TXT_DATA) + MDNS_LENGTH_ADD + 1;
 		device_info = (char *)os_zalloc(50);
 		ets_sprintf(device_info,"vendor = %s","ESP8266");
-		for(i = 0; i < 10 &&(minfo->txt_data[i] != NULL);i++) {
-			length += os_strlen(minfo->txt_data[i]);
+		for(i = 0; i < 10 &&(info->txt_data[i] != NULL);i++) {
+			length += os_strlen(info->txt_data[i]);
 			length++;
 		}
 		length += os_strlen(device_info)+ 1 ;
@@ -696,8 +697,8 @@ mdns_send_service(struct mdns_info *minfo, u8_t id) {
 			*nptr = n;
 		} while (*pHostname != 0);
 		i = 0;
-		while(minfo->txt_data[i] != NULL && i < 10) {
-			pHostname = minfo->txt_data[i];
+		while(info->txt_data[i] != NULL && i < 10) {
+			pHostname = info->txt_data[i];
 			--pHostname;
 			/* convert hostname into suitable query format. */
 			do {
@@ -736,8 +737,7 @@ mdns_send_service(struct mdns_info *minfo, u8_t id) {
 		ans.type = htons(DNS_RRTYPE_SRV);
 		ans.class = htons(DNS_RRCLASS_FLUSH_IN);
 		ans.ttl = htonl(300);
-/*
-		os_strcpy(tmpBuf,service_name);
+/*		os_strcpy(tmpBuf,service_name);
 		os_strcat(tmpBuf, ".");
 		os_strcat(tmpBuf, MDNS_LOCAL); */
 		{
@@ -835,9 +835,7 @@ mdns_send_service(struct mdns_info *minfo, u8_t id) {
 				p_sta = pbuf_alloc(PBUF_TRANSPORT,
 							SIZEOF_DNS_HDR + MDNS_MAX_NAME_LENGTH * 2 + SIZEOF_DNS_QUERY, PBUF_RAM);
 			  if (pbuf_copy (p_sta,p) != ERR_OK) {
-#if DEBUGSOO > 0
 				  os_printf("mdns_send_service copying to new pbuf failed\n");
-#endif
 				  return -1;
 			  }
 			  netif_set_default(sta_netif);
@@ -851,9 +849,7 @@ mdns_send_service(struct mdns_info *minfo, u8_t id) {
 		/* free pbuf */
 		pbuf_free(p);
 	} else {
-#if DEBUGSOO > 0
 		os_printf("ERR_MEM \n");
-#endif
 		err = ERR_MEM;
 	}
 
@@ -1010,13 +1006,21 @@ mdns_get_servername(void) {
 
 void ICACHE_FLASH_ATTR
 mdns_server_unregister(void) {
+	struct ip_addr ap_host_addr;
+	struct ip_info ipconfig;
 	if(register_flag == 1){
 		if (igmp_leavegroup(&host_addr, &multicast_addr) != ERR_OK) {
-#if DEBUGSOO > 0
-			os_printf("udp_leave_multigrup failed!\n");
-#endif
+			os_printf("sta udp_leave_multigrup failed!\n");
 			return;
 		};
+		if(wifi_get_opmode() == 0x03 || wifi_get_opmode() == 0x02) {
+		   wifi_get_ip_info(SOFTAP_IF, &ipconfig);
+		   ap_host_addr.addr = ipconfig.ip.addr;
+		   if (igmp_leavegroup(&ap_host_addr, &multicast_addr) != ERR_OK) {
+				os_printf("ap udp_join_multigrup failed!\n");
+				return;
+			};
+		}
 		register_flag = 0;
 	}
 }
@@ -1025,25 +1029,21 @@ void ICACHE_FLASH_ATTR
 mdns_server_register(void) {
 
 	if (register_flag == 1) {
-#if DEBUGSOO > 0
 		os_printf("mdns server is already registered !\n");
-#endif
 		return;
 	} else if (igmp_joingroup(&host_addr, &multicast_addr) != ERR_OK) {
-#if DEBUGSOO > 0
 		os_printf("udp_join_multigrup failed!\n");
-#endif
 		return;
 	};
 	register_flag = 1;
 }
 
 void ICACHE_FLASH_ATTR
-mdns_reg(struct mdns_info *minfo) {
+mdns_reg(struct mdns_info *info) {
 
    static uint8 i = 0;
    if (i <= 3) {
-	   mdns_send_service(minfo,0);
+	   mdns_send_service(info,0);
 	   i++;
    } else {
 	   os_timer_disarm(&mdns_timer);
@@ -1055,33 +1055,31 @@ mdns_reg(struct mdns_info *minfo) {
  * (NEW IP).
  */
 void ICACHE_FLASH_ATTR
-mdns_init(struct mdns_info *minfo) {
+mdns_init(struct mdns_info *info) {
 	/* initialize default DNS server address */
 	multicast_addr.addr = DNS_MULTICAST_ADDRESS;
-	if (minfo->ipAddr == 0) {
-#if DEBUGSOO > 0
+	struct ip_addr ap_host_addr;
+	struct ip_info ipconfig;
+	if (info->ipAddr == 0) {
 		os_printf("mdns ip error!\n ");
-#endif
 		return;
 	}
-	host_addr.addr = minfo->ipAddr ;
+	host_addr.addr = info->ipAddr ;
 	LWIP_DEBUGF(DNS_DEBUG, ("dns_init: initializing\n"));
 	//get the datasheet from PUCK
-	mdns_set_hostname(minfo->host_name);
-	mdns_set_servername(minfo->server_name);
-	mdns_set_name(minfo->host_name);
+	mdns_set_hostname(info->host_name);
+	mdns_set_servername(info->server_name);
+	mdns_set_name(info->host_name);
 
 	// get the host name as instrumentName_serialNumber for MDNS
 	// set the name of the service, the same as host name
-#if DEBUGSOO > 0
 	os_printf("host_name = %s\n", host_name);
 	os_printf("server_name = %s\n", PUCK_SERVICE);
-#endif
-	if (minfo->server_port == 0)
+	if (info->server_port == 0)
 	{
 		PUCK_PORT = 80;
 	} else {
-		PUCK_PORT = minfo->server_port;
+		PUCK_PORT = info->server_port;
 	}
 
 	/* initialize mDNS */
@@ -1089,31 +1087,37 @@ mdns_init(struct mdns_info *minfo) {
 
 	if (mdns_pcb != NULL) {
 		/* join to the multicast address 224.0.0.251 */
-		if (igmp_joingroup(&host_addr, &multicast_addr) != ERR_OK) {
-#if DEBUGSOO > 0
-			os_printf("udp_join_multigrup failed!\n");
-#endif
-			return;
-		};
+		if(wifi_get_opmode() == 0x03 || wifi_get_opmode() == 0x01) {
+			if (igmp_joingroup(&host_addr, &multicast_addr) != ERR_OK) {
+				os_printf("sta udp_join_multigrup failed!\n");
+				return;
+			};
+		}
+		if(wifi_get_opmode() == 0x03 || wifi_get_opmode() == 0x02) {
+		   wifi_get_ip_info(SOFTAP_IF, &ipconfig);
+		   ap_host_addr.addr = ipconfig.ip.addr;
+		   if (igmp_joingroup(&ap_host_addr, &multicast_addr) != ERR_OK) {
+				os_printf("ap udp_join_multigrup failed!\n");
+				return;
+			};
+		}
 		register_flag = 1;
 		/* join to any IP address at the port 5353 */
 		if (udp_bind(mdns_pcb, IP_ADDR_ANY, DNS_MDNS_PORT) != ERR_OK) {
-#if DEBUGSOO > 0
 			os_printf("udp_bind failed!\n");
-#endif
 			return;
 		};
 
 		/*loopback function for the multicast(224.0.0.251) messages received at port 5353*/
 //		mdns_enable();
-		udp_recv(mdns_pcb, mdns_recv, minfo);
+		udp_recv(mdns_pcb, mdns_recv, info);
 		mdns_flag = 1;
 		/*
 		 * Register the name of the instrument
 		 */
 
 		os_timer_disarm(&mdns_timer);
-		os_timer_setfn(&mdns_timer, (os_timer_func_t *)mdns_reg, minfo);
+		os_timer_setfn(&mdns_timer, (os_timer_func_t *)mdns_reg,info);
 		os_timer_arm(&mdns_timer, 1000, 1);
 	}
 }

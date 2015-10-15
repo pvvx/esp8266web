@@ -239,7 +239,7 @@
  * on Feb 07, 2036, 06:28:16.
  */
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 PACK_STRUCT_BEGIN
 #define PACK_STRUCT_FLD_8 PACK_STRUCT_FIELD
@@ -258,7 +258,7 @@ struct sntp_msg {
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 /* function prototypes */
@@ -276,8 +276,9 @@ struct sntp_server {
   ip_addr_t addr;
 };
 static struct sntp_server sntp_servers[SNTP_MAX_SERVERS];
-
-//static u8_t sntp_set_servers_from_dhcp;
+#if SNTP_GET_SERVERS_FROM_DHCP
+static u8_t sntp_set_servers_from_dhcp;
+#endif
 #if SNTP_SUPPORT_MULTIPLE_SERVERS
 /** The currently used server (initialized to 0) */
 static u8_t sntp_current_server;
@@ -965,7 +966,7 @@ sntp_request(void *arg)
   {
     sntp_server_address = sntp_servers[sntp_current_server].addr;
 //    os_printf("sntp_server_address ip %d\n",sntp_server_address.addr);
-    err = (sntp_server_address.addr == IPADDR_ANY) ? ERR_ARG : ERR_OK;
+    err = (sntp_server_address.addr == IPADDR_ANY) ? ERR_ARG : ERR_OK; //   err = (ip_addr_isany(&sntp_server_address)) ? ERR_ARG : ERR_OK;
   }
 
   if (err == ERR_OK) {
@@ -1134,5 +1135,5 @@ sntp_getservername(u8_t idx)
 }
 #endif /* SNTP_SERVER_DNS */
 
-#endif // LWIP_SNTP
 #endif /* LWIP_UDP */
+#endif // LWIP_SNTP

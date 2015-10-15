@@ -95,6 +95,10 @@ Steve Reynolds
 
 #include "string.h"
 
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
+#endif
+
 /* 
  * IGMP constants
  */
@@ -706,19 +710,18 @@ igmp_start_timer(struct igmp_group *group, u8_t max_time)
   group->timer = (LWIP_RAND() % (max_time - 1)) + 1;
 }
 
-#if 0
 /**
  * Stop a timer for an igmp_group
  *
  * @param group the igmp_group for which to stop the timer
  */
+/*
 static void
 igmp_stop_timer(struct igmp_group *group)
 {
   group->timer = 0;
 }
-#endif
-
+*/
 /**
  * Delaying membership report for a group if necessary
  *

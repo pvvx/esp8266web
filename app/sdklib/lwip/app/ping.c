@@ -43,7 +43,9 @@
  */
 
 #include "lwip/opt.h"
+
 #ifdef USE_PING
+
 
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
 
@@ -63,6 +65,10 @@
 #include "lwip/sockets.h"
 #include "lwip/inet.h"
 #endif /* PING_USE_SOCKETS */
+
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
+#endif
 
 /* ping variables */
 static u16_t ping_seq_num = 0;
@@ -323,6 +329,6 @@ ping_regist_sent(struct ping_option *ping_opt, ping_sent_function ping_sent)
 	return true;
 }
 
-#endif // USE_PING
-
 #endif /* LWIP_RAW */
+
+#endif // USE_PING

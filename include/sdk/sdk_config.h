@@ -58,7 +58,7 @@
 //------------------------------------------------------------------------------
 /* LwIP Options */
 
-#ifndef LWIP_OPEN_SRC // (назначается в MakeFile -DPBUF_RSV_FOR_WLAN)
+#ifndef LWIP_OPEN_SRC // (назначается в MakeFile -DLWIP_OPEN_SRC)
 	#define LWIP_OPEN_SRC
 #endif
 

@@ -16,7 +16,7 @@
 
 #define MDNS_NAME_LENGTH     68 //68
 
-char* PUCK_SERVICE  LWIP_DATA_IRAM_ATTR; //  = NULL;
+char* PUCK_SERVICE    = NULL;
 //#define PUCK_SERVICE	"_Escpressif._tcp.local"
 #define DNS_SD_SERVICE       "_services._dns-sd._udp.local"
 #define SERVICE_DESCRIPTION  "PUCK PROTOCOL"

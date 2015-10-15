@@ -2,7 +2,6 @@
 #define LWIP_SNTP_H
 
 #include "lwip/opt.h"
-#if LWIP_SNTP
 #include "lwip/ip_addr.h"
 
 #ifdef __cplusplus
@@ -53,7 +52,5 @@ void sntp_servermode_dhcp(int set_servers_from_dhcp);
 #ifdef __cplusplus
 }
 #endif
-
-#endif // LWIP_SNTP
 
 #endif /* LWIP_SNTP_H */

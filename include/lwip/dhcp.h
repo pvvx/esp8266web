@@ -211,7 +211,9 @@ void dhcp_fine_tmr(void);
 #define DHCP_OPTION_DOMAIN_NAME 15
 #define DHCP_OPTION_PRD 31
 #define DHCP_OPTION_STATIC_ROUTER 33
-#define DHCP_OPTION_NTP_SERVER 42 /* RFC 2132 8.3 */
+// #if LWIP_DHCP_NTP
+#define DHCP_OPTION_NTP_SERVER 42 /* RFC 2132 8.3 */ 
+// #endif
 #define DHCP_OPTION_VSN 43
 #define DHCP_OPTION_NB_TINS 44
 #define DHCP_OPTION_NB_TINT 46

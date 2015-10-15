@@ -130,7 +130,7 @@ struct netif * ICACHE_FLASH_ATTR eagle_lwip_if_alloc(struct ieee80211_conn *conn
     }
     else {
 #if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
-    	myif->dhcpc_event = wifi_station_dhcpc_event;
+    	myif->dhcp_event = wifi_station_dhcpc_event; // +
 #endif
     	lwip_if_queues[0] = queue;
 	    ets_task(task_if0, LWIP_IF0_PRIO, (ETSEvent *)lwip_if_queues[0], QUEUE_LEN);

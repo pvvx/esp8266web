@@ -1,6 +1,9 @@
 #ifndef __ESPCONN_TCP_H__
 #define __ESPCONN_TCP_H__
 
+#include "lwipopts.h"
+#ifdef USE_ESPCONN
+
 #ifndef ESPCONN_TCP_DEBUG
 #define ESPCONN_TCP_DEBUG LWIP_DBG_OFF
 #endif
@@ -51,9 +54,7 @@ extern sint8 espconn_tcp_client(struct espconn* espconn);
 
 extern sint8 espconn_tcp_server(struct espconn *espconn);
 
-
-extern err_t espconn_tcp_write(void *arg);
-
+#endif // USE_ESPCONN
 
 #endif /* __CLIENT_TCP_H__ */
 

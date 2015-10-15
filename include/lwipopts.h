@@ -6,9 +6,9 @@
 
 /*
  * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
+ * All rights reserved. 
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -17,21 +17,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ *    derived from this software without specific prior written permission. 
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- *
+ * 
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
@@ -46,7 +46,6 @@
 #define LWIP_DATA_IRAM_ATTR
 #endif
 
-// #define USE_ESPCONN 1
 #define LWIP_SNTP 0
 
 /*
@@ -64,7 +63,7 @@
 #define SYS_LIGHTWEIGHT_PROT            0
 #endif
 
-/**
+/** 
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
  * use lwIP facilities.
  */
@@ -187,8 +186,8 @@
 /**
  * MEMP_USE_CUSTOM_POOLS==1: whether to include a user file lwippools.h
  * that defines additional pools beyond the "standard" ones required
- * by lwIP. If you set this to 1, you must have lwippools.h in your
- * inlude path somewhere.
+ * by lwIP. If you set this to 1, you must have lwippools.h in your 
+ * inlude path somewhere. 
  */
 #ifndef MEMP_USE_CUSTOM_POOLS
 #define MEMP_USE_CUSTOM_POOLS           0
@@ -252,7 +251,6 @@
  * (requires the LWIP_TCP option)
  */
 #ifndef MEMP_NUM_TCP_PCB
-//#define MEMP_NUM_TCP_PCB				5
 #define MEMP_NUM_TCP_PCB                (*(volatile uint32*)0x600011FC)
 #endif
 
@@ -337,7 +335,7 @@
 
 /**
  * MEMP_NUM_TCPIP_MSG_API: the number of struct tcpip_msg, which are used
- * for callback/timeout API communication.
+ * for callback/timeout API communication. 
  * (only needed if you use tcpip.c)
  */
 #ifndef MEMP_NUM_TCPIP_MSG_API
@@ -346,7 +344,7 @@
 
 /**
  * MEMP_NUM_TCPIP_MSG_INPKT: the number of struct tcpip_msg, which are used
- * for incoming packets.
+ * for incoming packets. 
  * (only needed if you use tcpip.c)
  */
 #ifndef MEMP_NUM_TCPIP_MSG_INPKT
@@ -411,7 +409,7 @@
 #endif
 
 /**
- * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
+ * PBUF_POOL_SIZE: the number of buffers in the pbuf pool. 
  */
 #ifndef PBUF_POOL_SIZE
 #define PBUF_POOL_SIZE                  10
@@ -670,6 +668,13 @@
 #define DHCP_DOES_ARP_CHECK             ((LWIP_DHCP) && (LWIP_ARP))
 #endif
 
+/**
+ * DHCP_MAXRTX: Maximum number of retries of current request.
+ */
+#ifndef DHCP_MAXRTX
+#define DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
+#endif
+
 /*
    ------------------------------------
    ---------- AUTOIP options ----------
@@ -716,7 +721,7 @@
 
 /**
  * SNMP_CONCURRENT_REQUESTS: Number of concurrent requests the module will
- * allow. At least one request buffer is required.
+ * allow. At least one request buffer is required. 
  */
 #ifndef SNMP_CONCURRENT_REQUESTS
 #define SNMP_CONCURRENT_REQUESTS        0
@@ -731,7 +736,7 @@
 #endif
 
 /**
- * SNMP_PRIVATE_MIB:
+ * SNMP_PRIVATE_MIB: 
  */
 #ifndef SNMP_PRIVATE_MIB
 #define SNMP_PRIVATE_MIB                0
@@ -777,7 +782,7 @@
    ----------------------------------
 */
 /**
- * LWIP_IGMP==1: Turn on IGMP module.
+ * LWIP_IGMP==1: Turn on IGMP module. 
  */
 #ifndef LWIP_IGMP
 #define LWIP_IGMP                       1
@@ -787,16 +792,17 @@
    ---------- MDNS options ----------
    ----------------------------------
 */
-/*
+/**
  * LWIP_MDNS==1: Turn on MDNS module.
  */
 #ifndef LWIP_MDNS
-#define LWIP_MDNS                      0
+#define LWIP_MDNS						0
 #endif
 /*
 	----------------------------------
 	------- DHCP NTP options ---------
 	----------------------------------
+	dhcp.c
 */
 #ifndef LWIP_DHCP_NTP
 #ifdef USE_OPEN_DHCPS
@@ -918,19 +924,17 @@
 #endif
 
 /**
- * TCP_WND: The size of a TCP window.  This must be at least
+ * TCP_WND: The size of a TCP window.  This must be at least 
  * (2 * TCP_MSS) for things to work well
  */
 #ifndef TCP_WND
-//#define TCP_WND                         (4 * TCP_MSS)
 #define TCP_WND                         (*(volatile uint32*)0x600011F0)
-#endif
+#endif 
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
  */
 #ifndef TCP_MAXRTX
-//#define TCP_MAXRTX                      3
 #define TCP_MAXRTX                      (*(volatile uint32*)0x600011E8)
 #endif
 
@@ -938,7 +942,6 @@
  * TCP_SYNMAXRTX: Maximum number of retransmissions of SYN segments.
  */
 #ifndef TCP_SYNMAXRTX
-//#define TCP_SYNMAXRTX                   6
 #define TCP_SYNMAXRTX                   (*(volatile uint32*)0x600011E4)
 #endif
 
@@ -959,11 +962,21 @@
 /**
  * TCP_QUEUE_OOSEQ==1: TCP will queue segments that arrive out of order.
  * Define to 0 if your device is low on memory.
+ * Queueing out-of-sequence packets:
+ * Strictly, queueing out-of-sequence packets is only necessary when packet
+ * loss is expected, since can prevents resending all packets
+ * (e.g. packets 2, 3, 4) when only one packet is lost (e.g. packet 2 is lost
+ * but 3 and 4 have been received correctly: with TCP_QUEUE_OOSEQ disabled,
+ * packets 3 and 4 would be discarded as they are out-of-sequence and would
+ * have to be resent in-sequence by the remote host once packet 2 got through).
+ * However, even in environments where packet loss isn't expected, it might
+ * still happen, so enabling this is recommended.
  */
 #ifndef TCP_QUEUE_OOSEQ
-#define TCP_QUEUE_OOSEQ                 0
+#define TCP_QUEUE_OOSEQ                 0  // pvvx: Espressif set = 1 -> + 2k
 #endif
 
+#if 1
 /**
  * TCP_MSS: TCP Maximum segment size. (default is 536, a conservative default,
  * you might want to increase this.)
@@ -973,6 +986,7 @@
  */
 #ifndef TCP_MSS
 #define TCP_MSS                         1460
+#endif
 #endif
 
 /**
@@ -989,7 +1003,7 @@
 
 
 /**
- * TCP_SND_BUF: TCP sender buffer space (bytes).
+ * TCP_SND_BUF: TCP sender buffer space (bytes). 
  */
 #ifndef TCP_SND_BUF
 #define TCP_SND_BUF                     2 * TCP_MSS
@@ -1080,7 +1094,7 @@
 #ifndef LWIP_EVENT_API
 #define LWIP_EVENT_API                  0
 #define LWIP_CALLBACK_API               1
-#else
+#else 
 #define LWIP_EVENT_API                  1
 #define LWIP_CALLBACK_API               0
 #endif
@@ -1778,28 +1792,28 @@
 #ifndef CHECKSUM_GEN_IP
 #define CHECKSUM_GEN_IP                 1
 #endif
-
+ 
 /**
  * CHECKSUM_GEN_UDP==1: Generate checksums in software for outgoing UDP packets.
  */
 #ifndef CHECKSUM_GEN_UDP
 #define CHECKSUM_GEN_UDP                1
 #endif
-
+ 
 /**
  * CHECKSUM_GEN_TCP==1: Generate checksums in software for outgoing TCP packets.
  */
 #ifndef CHECKSUM_GEN_TCP
 #define CHECKSUM_GEN_TCP                1
 #endif
-
+ 
 /**
  * CHECKSUM_CHECK_IP==1: Check checksums in software for incoming IP packets.
  */
 #ifndef CHECKSUM_CHECK_IP
 #define CHECKSUM_CHECK_IP               1
 #endif
-
+ 
 /**
  * CHECKSUM_CHECK_UDP==1: Check checksums in software for incoming UDP packets.
  */

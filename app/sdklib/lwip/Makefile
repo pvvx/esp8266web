@@ -15,13 +15,12 @@ ifndef PDIR
 UP_EXTRACT_DIR = ..
 GEN_LIBS = liblwip.a
 COMPONENTS_liblwip = api/liblwipapi.a	\
-					app/liblwipapp.a	\
-					core/liblwipcore.a	\
-					core/ipv4/liblwipipv4.a	\
-					netif/liblwipnetif.a
+						app/liblwipapp.a	\
+						core/liblwipcore.a	\
+						core/ipv4/liblwipipv4.a	\
+						netif/liblwipnetif.a
 endif
 
-#CCFLAGS += -Os
 
 #############################################################
 # Configuration i.e. compile options etc.
@@ -44,8 +43,8 @@ endif
 # Required for each makefile to inherit from the parent
 #
 
-#INCLUDES := $(INCLUDES) -I $(PDIR)include
-#INCLUDES += -I ./
+INCLUDES := $(INCLUDES) -I $(PDIR)include
+INCLUDES += -I ./
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile
 

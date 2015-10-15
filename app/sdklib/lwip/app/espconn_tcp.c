@@ -9,12 +9,28 @@
  *     2014/3/31, v1.0 create this file.
 *******************************************************************************/
 
-#include "lwip/app/espconn.h"
+#include "lwipopts.h"
+
 #ifdef USE_ESPCONN
+
+#include "lwip/netif.h"
+#include "lwip/inet.h"
+#include "netif/etharp.h"
+#include "lwip/tcp.h"
+#include "lwip/ip.h"
+#include "lwip/init.h"
 #include "lwip/tcp_impl.h"
 #include "lwip/memp.h"
 
+#include "ets_sys.h"
+#include "os_type.h"
+//#include "os.h"
+#include "lwip/mem.h"
 #include "lwip/app/espconn_tcp.h"
+
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
+#endif
 
 extern espconn_msg *plink_active;
 extern espconn_msg *pserver_list;
@@ -63,7 +79,7 @@ espconn_kill_oldest(void)
 	inactivity = 0;
 	inactive = NULL;
 	for (pcb = tcp_active_pcbs; pcb != NULL; pcb = pcb->next) {
-		if (pcb->state == FIN_WAIT_2){
+		if (pcb->state == FIN_WAIT_1 || pcb->state == FIN_WAIT_2){
 			if ((u32_t) (tcp_ticks - pcb->tmr) >= inactivity) {
 				inactivity = tcp_ticks - pcb->tmr;
 				inactive = pcb;
@@ -113,7 +129,7 @@ void ICACHE_FLASH_ATTR espconn_kill_oldest_pcb(void)
 					break;
 			}
 
-			if (cpcb->state == FIN_WAIT_2 || cpcb->state == LAST_ACK){
+			if (cpcb->state == FIN_WAIT_1 || cpcb->state == FIN_WAIT_2 || cpcb->state == LAST_ACK){
 				num_tcp_fin++;
 				if (num_tcp_fin == MEMP_NUM_TCP_PCB)
 					break;
@@ -123,6 +139,8 @@ void ICACHE_FLASH_ATTR espconn_kill_oldest_pcb(void)
 		if (num_tcp_fin == MEMP_NUM_TCP_PCB){
 			num_tcp_fin = 0;
 			espconn_kill_oldest();
+		} else if (cpcb == NULL){
+			num_tcp_fin = 0;
 		}
 	}
 }
@@ -138,7 +156,7 @@ void ICACHE_FLASH_ATTR espconn_kill_pcb(u16_t port)
 	struct tcp_pcb *cpcb = NULL;
 	uint8 i = 0;
 	struct tcp_pcb *inactive = NULL;
-//	struct tcp_pcb *prev = NULL;
+	struct tcp_pcb *prev = NULL;
 	u8_t pcb_remove;
 	/* Check if the address already is in use (on all lists) */
 	for (i = 1; i < 4; i++) {
@@ -173,8 +191,7 @@ struct tcp_pcb *ICACHE_FLASH_ATTR espconn_find_current_pcb(espconn_msg *pcurrent
 	uint16 local_port = pcurrent_msg->pcommon.local_port;
 	uint32 local_ip = pcurrent_msg->pcommon.local_ip;
 	uint16 remote_port = pcurrent_msg->pcommon.remote_port;
-	uint32 * ii = (uint32*)(&pcurrent_msg->pcommon.remote_ip[0]);
-	uint32 remote_ip = *ii;
+	uint32 remote_ip = *((uint32*)&pcurrent_msg->pcommon.remote_ip);
 	struct tcp_pcb *find_pcb = NULL;
 	if (pcurrent_msg ->preverse == NULL){/*Find the server's TCP block*/
 		if (local_ip == 0|| local_port == 0) return pcurrent_msg->pcommon.pcb;
@@ -274,14 +291,14 @@ static void ICACHE_FLASH_ATTR
 espconn_tcp_disconnect_successful(void *arg)
 {
 	espconn_msg *pdiscon_cb = arg;
-//	sint8 dis_err = 0;
+	sint8 dis_err = 0;
 	espconn_buf *pdis_buf = NULL;
 	espconn_buf *pdis_back = NULL;
 	espconn_kill_oldest_pcb();
 	if (pdiscon_cb != NULL) {
 		struct espconn *espconn = pdiscon_cb->preverse;
 
-//		dis_err = pdiscon_cb->pcommon.err;
+		dis_err = pdiscon_cb->pcommon.err;
 		if (pdiscon_cb->pespconn != NULL){
 			struct tcp_pcb *pcb = NULL;
 			if (espconn != NULL){/*Process the server's message block*/
@@ -424,7 +441,7 @@ espconn_tcp_sent(void *arg, uint8 *psent, uint16 length)
     struct tcp_pcb *pcb = NULL;
     err_t err = 0;
     u16_t len = 0;
-//    u8_t data_to_send = false;
+    u8_t data_to_send = false;
 
     espconn_printf("espconn_tcp_sent ptcp_sent %p psent %p length %d\n", ptcp_sent, psent, length);
 
@@ -788,8 +805,6 @@ espconn_client_err(void *arg, err_t err)
 					case CLOSED:
 						perr_cb->pcommon.err = ESPCONN_CONN;
 						break;
-					default:
-						break;
 				}
 			} else {
 				perr_cb->pcommon.err = err;
@@ -896,7 +911,18 @@ espconn_tcp_client(struct espconn *espconn)
     	pclient->pespconn = espconn;
     	pclient->pespconn->state = ESPCONN_WAIT;
     	pclient->pcommon.pcb = pcb;
-        tcp_bind(pcb, IP_ADDR_ANY, pclient->pespconn->proto.tcp->local_port);
+    	tcp_bind(pcb, IP_ADDR_ANY, pclient->pespconn->proto.tcp->local_port);
+#if 0
+    	pclient->pcommon.err = tcp_bind(pcb, IP_ADDR_ANY, pclient->pespconn->proto.tcp->local_port);
+    	if (pclient->pcommon.err != ERR_OK){
+    		/*remove the node from the client's active connection list*/
+    		espconn_list_delete(&plink_active, pclient);
+    		memp_free(MEMP_TCP_PCB, pcb);
+    		os_free(pclient);
+    		pclient = NULL;
+    		return ERR_USE;
+    	}
+#endif
         /*Establish the connection*/
         pclient->pcommon.err = tcp_connect(pcb, &ipaddr,
         		pclient->pespconn->proto.tcp->remote_port, espconn_client_connect);
@@ -1304,7 +1330,7 @@ espconn_tcp_server(struct espconn *espconn)
 *******************************************************************************/
 sint8 ICACHE_FLASH_ATTR espconn_tcp_delete(struct espconn *pdeletecon)
 {
-	err_t err = ERR_OK;
+	err_t err;
 	remot_info *pinfo = NULL;
 	espconn_msg *pdelete_msg = NULL;
 	struct tcp_pcb *pcb = NULL;

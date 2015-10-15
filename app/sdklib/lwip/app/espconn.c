@@ -8,13 +8,28 @@
  * Modification history:
  *     2014/3/31, v1.0 create this file.
 *******************************************************************************/
-#include "lwip/app/espconn.h"
+
+#include "lwipopts.h"
 #ifdef USE_ESPCONN
+#include "lwip/netif.h"
+#include "lwip/inet.h"
+#include "netif/etharp.h"
+#include "lwip/tcp.h"
+#include "lwip/ip.h"
+#include "lwip/init.h"
+#include "ets_sys.h"
+#include "os_type.h"
+//#include "os.h"
+#include "lwip/mem.h"
 
 #include "lwip/app/espconn_tcp.h"
 #include "lwip/app/espconn_udp.h"
-//#include "lwip/app/espconn.h"
+#include "lwip/app/espconn.h"
 #include "user_interface.h"
+
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
+#endif
 
 espconn_msg *plink_active = NULL;
 espconn_msg *pserver_list = NULL;
@@ -251,7 +266,7 @@ espconn_connect(struct espconn *espconn)
 	uint8 connect_status = 0;
 	sint8 value = ESPCONN_OK;
 	espconn_msg *plist = NULL;
-//	remot_info *pinfo = NULL;
+	remot_info *pinfo = NULL;
 
     if (espconn == NULL) {
         return ESPCONN_ARG;
@@ -376,6 +391,10 @@ espconn_sent(struct espconn *espconn, uint8 *psent, uint16 length)
 					if (espconn_copy_enabled(pnode)){
 						if (espconn_tcp_get_buf_count(pnode->pcommon.pbuf) >= pnode ->pcommon.pbuf_num)
 							return ESPCONN_MAXNUM;
+					} else {
+						struct tcp_pcb *pcb = pnode->pcommon.pcb;
+						if (pcb->snd_queuelen >= TCP_SND_QUEUELEN)
+							return ESPCONN_MAXNUM;
 					}
 
 					pbuf = (espconn_buf*) os_zalloc(sizeof(espconn_buf));
@@ -396,13 +415,13 @@ espconn_sent(struct espconn *espconn, uint8 *psent, uint16 length)
 					if (espconn_copy_disabled(pnode))
 						pnode->pcommon.write_flag = false;
 					error = espconn_tcp_write(pnode);
-					if (error != ESPCONN_OK){
-						/*send the application packet fail,
-						 * ensure that each allocated is deleted*/
-						espconn_pbuf_delete(&pnode->pcommon.pbuf, pbuf);
-						os_free(pbuf);
-						pbuf = NULL;
-					}
+//					if (error != ESPCONN_OK){
+//						/*send the application packet fail,
+//						 * ensure that each allocated is deleted*/
+//						espconn_pbuf_delete(&pnode->pcommon.pbuf, pbuf);
+//						os_free(pbuf);
+//						pbuf = NULL;
+//					}
 					return error;
 				} else
 					return ESPCONN_ARG;
@@ -417,6 +436,33 @@ espconn_sent(struct espconn *espconn, uint8 *psent, uint16 length)
 		}
     }
     return ESPCONN_ARG;
+}
+
+/******************************************************************************
+ * FunctionName : espconn_sendto
+ * Description  : send data for UDP
+ * Parameters   : espconn -- espconn to set for UDP
+ *                psent -- data to send
+ *                length -- length of data to send
+ * Returns      : error
+*******************************************************************************/
+sint16 ICACHE_FLASH_ATTR
+espconn_sendto(struct espconn *espconn, uint8 *psent, uint16 length)
+{
+	espconn_msg *pnode = NULL;
+	bool value = false;
+	err_t error = ESPCONN_OK;
+
+	if (espconn == NULL || psent == NULL || length == 0) {
+		return ESPCONN_ARG;
+	}
+
+	/*Find the node depend on the espconn message*/
+	value = espconn_find_connection(espconn, &pnode);
+	if (value && espconn->type == ESPCONN_UDP)
+		return espconn_udp_sendto(pnode, psent, length);
+	else
+		return ESPCONN_ARG;
 }
 
 /******************************************************************************
@@ -632,9 +678,8 @@ sint8 ICACHE_FLASH_ATTR espconn_tcp_set_buf_count(struct espconn *espconn, uint8
 		}
 	}
 
-//	if (plist == NULL)
+	if (plist == NULL)
 		return ESPCONN_ARG;
-
 }
 
 /******************************************************************************
@@ -1175,7 +1220,7 @@ espconn_port(void)
         port = system_get_time();
 
         if (port < 0) {
-            port = LWIP_RAND() - port;
+            port = os_random() - port;
         }
 
         port %= 0xc350;

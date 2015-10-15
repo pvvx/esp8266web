@@ -9,21 +9,14 @@
  *     2014/3/31, v1.0 create this file.
 *******************************************************************************/
 
-#include "lwip/app/espconn.h"
+#include "lwipopts.h"
+
 #ifdef USE_ESPCONN
 
-#if LWIP_MDNS
+#include "ets_sys.h"
+#include "os_type.h"
 
-extern void mdns_enable(void);
-extern void mdns_disable(void);
-extern void mdns_init(struct mdns_info *info);
-extern void mdns_close(void);
-extern char* mdns_get_hostname(void);
-extern void mdns_set_hostname(char *name);
-extern void mdns_set_servername(const char *name);
-extern char* mdns_get_servername(void);
-extern void mdns_server_unregister(void);
-extern void mdns_server_register(void) ;
+#include "lwip/mdns.h"
 
 /******************************************************************************
  * FunctionName : espconn_mdns_enable
@@ -145,5 +138,3 @@ espconn_mdns_init(struct mdns_info *info)
 }
 
 #endif // USE_ESPCONN
-
-#endif // LWIP_MDNS

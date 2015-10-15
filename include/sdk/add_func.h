@@ -48,7 +48,7 @@ uint32 system_get_userbin_addr(void);
 bool system_overclock(void); // if(system_get_cpu_freq()==80) { cpu_overclock = 1, system_update_cpu_freq(160) }
 //?system_param_error();
 uint32 system_phy_temperature_alert(void);   // phy_get_check_flag(0);
-//?system_pp_recycle_rx_pkt(); // ppRecycleRxPkt()-> lldesc_num2link() wDev_AppendRxBlocks() esf_buf_recycle()
+void system_pp_recycle_rx_pkt(void *eb); //?system_pp_recycle_rx_pkt(); // ppRecycleRxPkt()-> lldesc_num2link() wDev_AppendRxBlocks() esf_buf_recycle()
 //void system_print_meminfo(void); // user_interface.h
 uint32 system_relative_time(uint32 x); // (*((uint32*)0x3FF20C00))- x
 //void system_restart(void); // user_interface.h
@@ -59,7 +59,7 @@ bool system_restoreclock(void); // if(cpu_overclock) system_update_cpu_freq(80) 
 //bool system_rtc_mem_read(uint8 src_addr, void *des_addr, uint16 load_size); // user_interface.h
 //bool system_rtc_mem_write(uint8 des_addr, const void *src_addr, uint16 save_size); // user_interface.h
 //void system_set_os_print(uint8 onoff); // user_interface.h
-//?system_station_got_ip_set(a,b,c); // print"ip:%d.%d.%d.%d,mask:%d.%d.%d.%d,gw:%d.%", ets_timer_disarm(sta_con_timer)
+//void system_station_got_ip_set(ip_addr_t * ip_addr, ip_addr_t *sn_mask, ip_addr_t *gw_addr); //?system_station_got_ip_set(a,b,c); // print"ip:%d.%d.%d.%d,mask:%d.%d.%d.%d,gw:%d.%", ets_timer_disarm(sta_con_timer)
 //void system_timer_reinit(void); // user_interface.h // устанавливает делитель таймера на :16 вместо :256 и т.д.
 //void system_uart_swap(void); // user_interface.h
 //bool system_update_cpu_freq(uint32 cpu_freq); // ets_update_cpu_frequency + bit0 0x3FF00014 // user_interface.h

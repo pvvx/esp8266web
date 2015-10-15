@@ -9,6 +9,7 @@ TCP2UART: 300..3000000 Baud, Flow Control On/Off, Inverse On/Of all signals, ...
 HTTP-Web services to more than 10 simultaneous open connections.<br>
 TCP transfer speed > 1 Mbytes/sec (debug off).<br>
 UDP Wave server:  Sends 14-bit ADC samples at 1 Hz ..20 kHz.<br>
+Modbus TCP port 502: GPIOs, ADC, VDD.<br>
 
 Supported options 48 kbytes IRAM.<br>
 Supported '[Rapid Loader](https://github.com/pvvx/Rapid_Loader/)' and Flash 512 кbytes - 16 Mbytes.<br>
@@ -19,6 +20,7 @@ From [Espressif SDK](http://bbs.espressif.com/) ver 1.4.0 used only:<br>
 libpp.a, libwpa.a, libnet80211.a, parts libphy.a, user_interface.o<br>
 Из [Espressif SDK](http://bbs.espressif.com/) ver 1.4.0 используются только описанные части.<br>
 Остальные части даны с исходными кодами.<br>
+LwIP based on [Open source LWIP for ESP_IOT_SDK_V1.4.0](http://bbs.espressif.com/viewtopic.php?f=46&t=1221).<br> 
 
 Options programming Flash:<br> 
 

@@ -3,28 +3,8 @@
 
 #include "lwipopts.h"
 #ifdef USE_ESPCONN
-
-#include "ets_sys.h"
-#include "osapi.h"
-#include "os_type.h"
-#include "lwip/mem.h"
-#include "lwip/opt.h"
-#include "lwip/timers.h"
-#include "lwip/udp.h"
 #include "lwip/dns.h"
-#include "lwip/ip_addr.h"
-#include "lwip/pbuf.h"
-#include "lwip/tcp.h"
-
-#include "lwip/inet.h"
-//#include "lwip/err.h"
-//#include "lwip/pbuf.h"
-#include "lwip/igmp.h"
-//#include "lwip/netif.h"
-//#include "netif/etharp.h"
-//#include "lwip/ip.h"
-//#include "lwip/init.h"
-//#include "lwip/dns.h"
+#include "os_type.h"
 
 #if 0
 #define espconn_printf(fmt, args...) os_printf(fmt,## args)
@@ -52,6 +32,7 @@ typedef void (* espconn_reconnect_callback)(void *arg, sint8 err);
 #define ESPCONN_CONN       -11   /* Not connected.           */
 
 #define ESPCONN_ARG        -12   /* Illegal argument.        */
+#define ESPCONN_IF		   -14	 /* Low_level error			 */
 #define ESPCONN_ISCONN     -15   /* Already connected.       */
 
 #define ESPCONN_HANDSHAKE  -28   /* ssl handshake failed	 */
@@ -110,7 +91,7 @@ typedef struct _remot_info{
 	enum espconn_state state;
 	int remote_port;
 	uint8 remote_ip[4];
-} remot_info;
+}remot_info;
 
 /** A callback prototype to inform about events for a espconn */
 typedef void (* espconn_recv_callback)(void *arg, char *pdata, unsigned short len);
@@ -681,10 +662,6 @@ extern void espconn_mdns_enable(void);
  *  Returns     : none
 *******************************************************************************/
 extern void espconn_dns_setserver(u8_t numdns, ip_addr_t *dnsserver);
-
-
-extern void espconn_pbuf_delete(espconn_buf **phead, espconn_buf* pdelete);
-extern sint8 espconn_tcp_delete(struct espconn *pdeletecon);
 
 #endif // USE_ESPCONN
 

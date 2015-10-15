@@ -55,6 +55,13 @@
 
 #include <string.h>
 
+#include "sdk/rom2ram.h"
+#define system_get_data_of_array_8(a,b) get_align4_chr(&a[b])
+
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
+#endif
+
 #if TCP_DEBUG
 const char tcp_state_str_rodata[][12] ICACHE_RODATA_ATTR = {
   "CLOSED",      
@@ -762,7 +769,6 @@ tcp_connect(struct tcp_pcb *pcb, ip_addr_t *ipaddr, u16_t port,
  *
  * Automatically called from tcp_tmr().
  */
-extern char get_align4_chr(const char *ps);
 void
 tcp_slowtmr(void)
 {
@@ -803,7 +809,7 @@ tcp_slowtmr(void)
         /* If snd_wnd is zero, use persist timer to send 1 byte probes
          * instead of using the standard retransmission mechanism. */
         pcb->persist_cnt++;
-        if (pcb->persist_cnt >= get_align4_chr(&tcp_persist_backoff[pcb->persist_backoff-1])) {
+        if (pcb->persist_cnt >= system_get_data_of_array_8(tcp_persist_backoff, pcb->persist_backoff-1)) {
           pcb->persist_cnt = 0;
           if (pcb->persist_backoff < sizeof(tcp_persist_backoff)) {
             pcb->persist_backoff++;
@@ -824,7 +830,7 @@ tcp_slowtmr(void)
           /* Double retransmission time-out unless we are trying to
            * connect to somebody (i.e., we are in SYN_SENT). */
           if (pcb->state != SYN_SENT) {
-            pcb->rto = ((pcb->sa >> 3) + pcb->sv) << get_align4_chr(&tcp_backoff[pcb->nrtx]);
+            pcb->rto = ((pcb->sa >> 3) + pcb->sv) << system_get_data_of_array_8(tcp_backoff, pcb->nrtx);
 //			if (pcb->rto >= TCP_MAXRTO)
 //            	pcb->rto >>= 1;
           }

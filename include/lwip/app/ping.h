@@ -1,8 +1,5 @@
 #ifndef __PING_H__
 #define __PING_H__
-#include "lwip/opt.h"
-#ifdef USE_PING
-
 #include "lwip/ip_addr.h"
 #include "lwip/icmp.h"
 /**
@@ -84,7 +81,5 @@ struct ping_resp{
 bool ping_start(struct ping_option *ping_opt);
 bool ping_regist_recv(struct ping_option *ping_opt, ping_recv_function ping_recv);
 bool ping_regist_sent(struct ping_option *ping_opt, ping_sent_function ping_sent);
-
-#endif // USE_PING
 
 #endif /* __PING_H__ */

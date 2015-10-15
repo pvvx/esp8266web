@@ -130,6 +130,9 @@ typedef void (*netif_status_callback_fn)(struct netif *netif);
 typedef err_t (*netif_igmp_mac_filter_fn)(struct netif *netif,
        ip_addr_t *group, u8_t action);
 
+/*add DHCP event processing by LiuHan*/
+typedef void (*dhcp_event_fn)(void);
+
 /** Generic data structure used for all lwIP network interfaces.
  *  The following fields should be filled in by the initialization
  *  function for the device driver: hwaddr_len, hwaddr[], mtu, flags */
@@ -165,35 +168,33 @@ struct netif {
 #endif /* LWIP_NETIF_LINK_CALLBACK */
   /** This field can be set by the device driver and could point
    *  to state information for the device. ���������ֶΣ�����ָ��ײ��豸�����Ϣ*/
-  void *state;	// +28
+  void *state; // +28
 #if LWIP_DHCP
   /** the DHCP client state information for this netif */
-  struct dhcp *dhcp;	// +32
-  struct udp_pcb *dhcps_pcb;	// +36 dhcps
+  struct dhcp *dhcp; // +32
+  struct udp_pcb *dhcps_pcb; //+36	//dhcps
+  dhcp_event_fn dhcp_event; // +40
 #endif /* LWIP_DHCP */
 #if LWIP_AUTOIP
   /** the AutoIP client state information for this netif */
   struct autoip *autoip;
 #endif
-#if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
-  void * dhcpc_event; // +40 (SDK 1.4.0)
-#endif
 #if LWIP_NETIF_HOSTNAME
   /* the hostname for this netif, NULL is a valid value */
-  char*  hostname;	// + 40 // + 44 (SDK 1.4.0)
+  char*  hostname; // + 44
 #endif /* LWIP_NETIF_HOSTNAME */
   /** maximum transfer unit (in bytes) �ýӿ������������ݰ����ȣ�����1500*/
-  u16_t mtu;	// + 44 // + 48 (SDK 1.4.0)
+  u16_t mtu; // + 48
   /** number of bytes used in hwaddr�ýӿ������ַ���� */
-  u8_t hwaddr_len;	// +46 // + 50 (SDK 1.4.0)
+  u8_t hwaddr_len; // +50
   /** link level hardware address of this interface �ýӿ������ַ*/
-  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +47 [6] // + 51 (SDK 1.4.0)
+  u8_t hwaddr[NETIF_MAX_HWADDR_LEN]; // +51 [6]
   /** flags (see NETIF_FLAG_ above) �ýӿ�״̬�������ֶ�*/
-  u8_t flags;	// +53 // + 57 (SDK 1.4.0)
+  u8_t flags; // +57
   /** descriptive abbreviation �ýӿڵ�����*/
-  char name[2]; // +54 // // + 58 (SDK 1.4.0)
+  char name[2]; // +58
   /** number of this interface �ýӿڵı��*/
-  u8_t num; // +56 // + 60 (SDK 1.4.0)
+  u8_t num; // +60
 #if LWIP_SNMP
   /** link type (from "snmp_ifType" enum from snmp.h) */
   u8_t link_type;
@@ -214,7 +215,7 @@ struct netif {
 #if LWIP_IGMP
   /** This function could be called to add or delete a entry in the multicast
       filter table of the ethernet MAC.*/
-  netif_igmp_mac_filter_fn igmp_mac_filter; // +60 // + 64 (SDK 1.4.0)
+  netif_igmp_mac_filter_fn igmp_mac_filter; // +64
 #endif /* LWIP_IGMP */
 #if LWIP_NETIF_HWADDRHINT
   u8_t *addr_hint;
@@ -227,7 +228,7 @@ struct netif {
   u16_t loop_cnt_current;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
 #endif /* ENABLE_LOOPBACK */
-};
+}; // [68]
 
 #if LWIP_SNMP
 #define NETIF_INIT_SNMP(netif, type, speed) \
