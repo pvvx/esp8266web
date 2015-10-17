@@ -4,6 +4,7 @@
 *******************************************************************************/
 
 #include "user_config.h"
+#ifdef USE_WEB
 #include "bios.h"
 #include "sdk/add_func.h"
 #include "hw/esp8266.h"
@@ -20,13 +21,13 @@
 #include "tcp_srv_conn.h"
 #include "web_srv_int.h"
 #include "web_utils.h"
-#include "tcp2uart.h"
 #include "wifi.h"
 #include "flash_eep.h"
 #include "driver/sigma_delta.h"
 #include "sys_const_utils.h"
 #include "sdk/rom2ram.h"
 #include "sdk/app_main.h"
+#include "tcp2uart.h"
 #include "web_iohw.h"
 
 #ifdef USE_NETBIOS
@@ -54,7 +55,9 @@ struct ping_option pingopt; // for test
 #include "modbustcp.h"
 #endif
 
-extern TCP_SERV_CONN * tcp2uart_conn;
+#ifdef UDP_TEST_PORT
+#include "udp_test_port.h"
+#endif
 
 extern int rom_atoi(const char *);
 #define atoi rom_atoi
@@ -180,13 +183,27 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 					ts_conn->pcfg->flag.pcb_time_wait_free = 0;
 				}
 			}
+	   		else ifcmp("twrec") {
+	   			syscfg.web_twrec = val;
+   				ts_conn->pcfg->time_wait_rec = val;
+	   		}
+	   		else ifcmp("twcls") {
+	   			syscfg.web_twcls = val;
+   				ts_conn->pcfg->time_wait_cls = val;
+	   		}
 #if DEBUGSOO > 5
 			else os_printf(" - none!\n");
 #endif
 		}
 	    else ifcmp("tcp_") {
 	    	cstr+=4;
-	    	ifcmp("port") tcp2uart_start(val);
+	   		ifcmp("tcrec") {
+	   			if(val < 100) syscfg.tcp_client_twait = 100;
+	   			else if(val > 65000) syscfg.tcp_client_twait = 65000;
+	   			else syscfg.tcp_client_twait = val;
+	   		}
+#ifdef USE_TCP2UART
+	   		else ifcmp("port") tcp2uart_start(val);
 	   		else ifcmp("twrec") {
 	   			syscfg.tcp2uart_twrec = val;
 	   			if(tcp2uart_servcfg != NULL) {
@@ -198,11 +215,6 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	   			if(tcp2uart_servcfg != NULL) {
 	   				tcp2uart_servcfg->time_wait_cls = val;
 	   			}
-	   		}
-	   		else ifcmp("tcrec") {
-	   			if(val < 100) syscfg.tcp_client_twait = 100;
-	   			else if(val > 65000) syscfg.tcp_client_twait = 65000;
-	   			else syscfg.tcp_client_twait = val;
 	   		}
 			else ifcmp("url") {
 				if(new_tcp2uart_url(pvar))
@@ -216,11 +228,51 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	   				else tcp2uart_servcfg->flag.srv_reopen = 0;
 	   			}
         	}
+#endif
 	    }
+#ifdef UDP_TEST_PORT
 	    else ifcmp("udp_") {
 	    	cstr+=4;
-	    	ifcmp("port") 	syscfg.udp_port = val;
+	    	udp_test_port_init(val);
+	    	ifcmp("port") syscfg.udp_test_port = val;
 	    }
+#endif
+#ifdef USE_MODBUS
+	    else ifcmp("mdb_") {
+	    	cstr+=4;
+	    	ifcmp("port") mdb_tcp_init(val);
+	   		else ifcmp("twrec") {
+	   			syscfg.mdb_twrec = val;
+	   			if(mdb_tcp_servcfg != NULL) {
+	   				mdb_tcp_servcfg->time_wait_rec = val;
+	   			}
+	   		}
+	   		else ifcmp("twcls") {
+	   			syscfg.mdb_twcls = val;
+	   			if(mdb_tcp_servcfg != NULL) {
+	   				mdb_tcp_servcfg->time_wait_cls = val;
+	   			}
+	   		}
+        	else ifcmp("reop") {
+	   			if (val) syscfg.cfg.b.mdb_reopen = 1;
+	   			else syscfg.cfg.b.mdb_reopen = 0;
+	   			if(mdb_tcp_servcfg != NULL) {
+	   				if (val) mdb_tcp_servcfg->flag.srv_reopen = 1;
+	   				else mdb_tcp_servcfg->flag.srv_reopen = 0;
+	   			}
+        	}
+	    }
+#endif
+#ifdef USE_WDRV
+	    else ifcmp("wdrv_") {
+	    	cstr+=4;
+	    	ifcmp("port") {
+				wdrv_init(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
+				syscfg.wdrv_remote_port = val;
+				//if(syscfg.wdrv_remote_port != 0 && wdrv_host_port != 0 && wdrv_host_ip.addr != 0) wdrv_start(wdrv_sample_rate);
+	    	}
+	    }
+#endif
 		else ifcmp("overclk") 	syscfg.cfg.b.hi_speed_enable = (val)? 1 : 0;
 		else ifcmp("pinclr") 	syscfg.cfg.b.pin_clear_cfg_enable = (val)? 1 : 0;
 		else ifcmp("debug") {
@@ -308,7 +360,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
         		  }
         		  os_memcpy(wificonfig.ap.config.ssid, pvar, len);
         		  wificonfig.ap.config.ssid_len = len;
+#ifdef USE_NETBIOS
         		  netbios_set_name(wificonfig.ap.config.ssid);
+#endif
         	  }
           }
           else ifcmp("psw") {
@@ -487,6 +541,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 		os_printf("%p=call_func() ", web_conn->udata_stop);
 #endif
 	}
+#if 0
     else ifcmp("web_") {
     	cstr+=4;
     	ifcmp("port") {
@@ -503,6 +558,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     	else os_printf(" - none! ");
 #endif
     }
+#endif
+#if 0
+#ifdef	USE_TCP2UART
     else ifcmp("tcp_") {
     	cstr+=4;
    		ifcmp("twrec") {
@@ -516,20 +574,31 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
    			}
    		}
     }
+#endif
+#endif
 #ifdef USE_WDRV
 	else ifcmp("wdrv_") {
 		cstr+=5;
-		ifcmp("ip") {
-			wdrv_host_ip.addr = ipaddr_addr(pvar);
+		ifcmp("freq") {
+			if(val > 0 && val <= 20000)	wdrv_sample_rate = val;
+		}
+		else ifcmp("ip") {
+			val = ipaddr_addr(pvar);
+			if(val)	wdrv_host_ip.addr = val;
+			else wdrv_host_ip.addr = DEFAULT_WDRV_HOST_IP;
+		}
+		else ifcmp("port") {
+			if(val > 0 && val < 65536) wdrv_host_port = val;
 		}
 		else ifcmp("init") {
-			wdrv_init(val);
+			syscfg.wdrv_remote_port = val;
+			wdrv_init(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
 		}
 		else ifcmp("start") {
-			wdrv_start(val);
+			if(val > 0 && val <= 20000) wdrv_start(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, val);
 		}
 		else ifcmp("stop") {
-			wdrv_stop();
+			wdrv_stop(); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_STOP, 0);
 		}
 	}
 #endif // USE_WDRV
@@ -555,3 +624,4 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
 }
 
+#endif // USE_WEB

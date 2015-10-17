@@ -24,6 +24,8 @@
 #include "tcp_srv_conn.h"
 #include "sdk/libmain.h"
 
+struct udp_pcb *udp_test_pcb DATA_IRAM_ATTR;
+
 #define udpbufsize 1024
 
 extern int rom_atoi(const char *);
@@ -34,7 +36,6 @@ extern int rom_atoi(const char *);
 		static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\
 		udpbuflen += ets_sprintf((char *)&pudpbuf[udpbuflen], (char *)flash_str, ##__VA_ARGS__); \
 		} while(0)
-
 
 #define mMIN(a, b)  ((a<b)?a:b)
 
@@ -219,7 +220,7 @@ udp_test_port_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *a
       case 'T':
           udpbuflen = print_tcp_psc(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
           break;
-#ifdef USE_SRV_WEB_PORT
+#ifdef USE_WEB
       case 'S':
           udpbuflen = chow_tcp_connection_info(pudpbuf+udpbuflen, udpbufsize-udpbuflen);
           break;
@@ -277,33 +278,50 @@ udp_test_port_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *a
 }
 /******************************************************************************
  * FunctionName : udp_test_port_init
+ * if portn = 0 -> close
  * Returns      : none
 *******************************************************************************/
 void ICACHE_FLASH_ATTR udp_test_port_init(uint16 portn)
 {
-	  struct udp_pcb *pcb;
-#if DEBUGSOO > 0
-	   os_printf("\nUDP Test port %d init... ", portn);
+	if(udp_test_pcb != NULL) {
+		if(udp_test_pcb->local_port == portn) {
+#if DEBUGSOO > 2
+			os_printf("UDP Test port %d already init!\n", portn);
 #endif
-	   pcb = udp_new();
-	   if(pcb != NULL) {
-		   err_t err = udp_bind(pcb, IP_ADDR_ANY, portn);
-		   if(err != ERR_OK) {
-#if DEBUGSOO > 0
-			   os_printf("Error bind\n");
+			return;
+		}
+#if DEBUGSOO > 2
+		os_printf("UDP Test port closed\n");
 #endif
-			   udp_remove(pcb);
-			   return;
-		   };
-		   udp_recv(pcb, udp_test_port_recv, pcb);
-	   }
-	   else {
+		udp_remove(udp_test_pcb);
+		udp_test_pcb = NULL;
+	}
+	if(portn == 0) {
 #if DEBUGSOO > 0
-		   os_printf("Error mem\n");
+			os_printf("UDPT: close\n");
 #endif
-	   }
+		return;
+	}
+	udp_test_pcb = udp_new();
+	if(udp_test_pcb != NULL) {
+		err_t err = udp_bind(udp_test_pcb, IP_ADDR_ANY, portn);
+		if(err != ERR_OK) {
 #if DEBUGSOO > 0
-	   os_printf("Ok\n");
+			os_printf("UDPT: Error bind\n");
+#endif
+			udp_remove(udp_test_pcb);
+			return;
+		};
+		udp_recv(udp_test_pcb, udp_test_port_recv, udp_test_pcb);
+	}
+	else {
+#if DEBUGSOO > 0
+		os_printf("UDPT: Error mem\n");
+#endif
+		return;
+	}
+#if DEBUGSOO > 0
+	os_printf("UDPT: init port %d\n", portn);
 #endif
 }
 

@@ -13,13 +13,25 @@
 #include "wifi.h"
 #include "flash_eep.h"
 #include "tcp2uart.h"
+#include "web_srv.h"
 #ifdef USE_SNTP
 #include "sntp.h"
 #endif
 #ifdef USE_CAPTDNS
 #include "captdns.h"
 #endif
-#include "web_srv.h"
+#ifdef USE_WDRV
+#include "driver/wdrv.h"
+#endif
+#ifdef UDP_TEST_PORT
+#include "udp_test_port.h"
+#endif
+#ifdef USE_NETBIOS
+#include "netbios.h"
+#endif
+#ifdef USE_MODBUS
+#include "modbustcp.h"
+#endif
 
 #if 0
 #undef DEBUGSOO
@@ -177,6 +189,108 @@ LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 // #warning "DEF_SDK_ST_RECONNECT_BAG"
 #endif
 
+struct s_probe_requests {
+	uint8 mac[6];
+	sint8 rssi_min;
+	sint8 rssi_max;
+} __attribute__((packed));
+
+#define MAX_COUNT_BUF_PROBEREQS 32
+struct s_probe_requests buf_probe_requests[MAX_COUNT_BUF_PROBEREQS] DATA_IRAM_ATTR;
+uint32 probe_requests_count DATA_IRAM_ATTR;
+
+void ICACHE_FLASH_ATTR add_next_probe_requests(Event_SoftAPMode_ProbeReqRecved_t *pr)
+{
+	uint32 i;
+	uint32 e = probe_requests_count;
+	if(e > MAX_COUNT_BUF_PROBEREQS) e = MAX_COUNT_BUF_PROBEREQS;
+	uint32 * ptrs = (uint32 *) (&pr->mac);
+	for(i = 0; i < e; i++) {
+		uint32 * ptrd = (uint32 *) (&buf_probe_requests[i]);
+		if(ptrs[0] == ptrd[0] && (ptrs[1]<<16) == (ptrd[1]<<16)) {
+			sint8 min = ptrd[1]>>16;
+			sint8 max = ptrd[1]>>24;
+			if(min > pr->rssi) min = pr->rssi;
+			else if(max < pr->rssi) max = pr->rssi;
+			ptrd[1] = (ptrd[1] & 0xFFFF) | ((min<<16) & 0xFF0000) | ((max<<24) & 0xFF000000);
+			return;
+		}
+	}
+	uint32 * ptrd = (uint32 *) (&buf_probe_requests[probe_requests_count & (MAX_COUNT_BUF_PROBEREQS-1)]);
+	ptrd[0] = ptrs[0];
+	ptrd[1] = (ptrs[1] & 0xFFFF) | ((pr->rssi << 16) & 0xFF0000) | ((pr->rssi << 24) & 0xFF000000);
+	if(++probe_requests_count == 0) probe_requests_count |= 0x80000000;
+}
+
+static uint32 flg_close_all DATA_IRAM_ATTR;
+
+/******************************************************************************
+ * FunctionName : close_all_service
+ ******************************************************************************/
+static ICACHE_FLASH_ATTR void close_all_service(void)
+{
+#ifdef USE_NETBIOS
+	netbios_off();
+#endif
+#ifdef USE_TCP2UART
+	tcp2uart_close();
+#endif
+#ifdef USE_WEB
+	if(syscfg.web_port) webserver_close(syscfg.web_port); // webserver_init(0);
+#endif
+#ifdef USE_MODBUS
+	mdb_tcp_init(0); // mdb_tcp_close()
+#endif
+#ifdef UDP_TEST_PORT
+	udp_test_port_init(0);
+#endif
+#ifdef USE_WDRV
+	system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, 0);
+#endif
+	flg_close_all = false;
+	tcpsrv_close_all();
+}
+/******************************************************************************
+ * FunctionName : open_all_service
+ * if flg = 1 -> reopen
+ ******************************************************************************/
+static ICACHE_FLASH_ATTR void open_all_service(int flg)
+{
+#ifdef USE_TCP2UART
+	if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
+#endif
+#ifdef USE_SNTP
+	if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
+#endif
+	if(flg == 0 || flg_close_all == false) {
+#ifdef USE_WEB
+	    if(syscfg.web_port) {
+	    	TCP_SERV_CFG *p = tcpsrv_server_port2pcfg(syscfg.web_port);
+	    	if(p != NULL) {
+	    		if(p->port != syscfg.web_port) {
+	    			tcpsrv_close(p);
+	    			p = NULL;
+	    		}
+	    	}
+	    	if(p == NULL) {
+	    		webserver_init(syscfg.web_port);
+	    	}
+	    }
+#endif
+#ifdef USE_NETBIOS
+	    if(syscfg.cfg.b.netbios_ena) netbios_init();
+#endif
+#ifdef USE_MODBUS
+	    if(syscfg.mdb_remote_port) mdb_tcp_init(syscfg.mdb_remote_port);
+#endif
+#ifdef UDP_TEST_PORT
+	    if(syscfg.udp_test_port) udp_test_port_init(syscfg.udp_test_port);
+#endif
+#ifdef USE_WDRV
+	    if(wdrv_host_port) system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, wdrv_host_port);
+#endif
+	}
+}
 /******************************************************************************
  * FunctionName : wifi_handle_event_cb
  ******************************************************************************/
@@ -193,6 +307,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					MAC2STR(evt->event_info.ap_probereqrecved.mac),
 					evt->event_info.ap_probereqrecved.rssi);
 #endif
+			add_next_probe_requests(&evt->event_info.ap_probereqrecved);
 			break;
 		}
 		case EVENT_STAMODE_CONNECTED:
@@ -242,8 +357,9 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 						}
 #endif
 			}
-			int i = wifi_softap_get_station_num(); // Number count of stations which connected to ESP8266 soft-AP
-			if(i == 0) tcp2uart_close();
+			if(wifi_softap_get_station_num() == 0) { // Number count of stations which connected to ESP8266 soft-AP
+				close_all_service();
+			}
 			break;
 		}
 		case EVENT_STAMODE_AUTHMODE_CHANGE:
@@ -265,27 +381,23 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					IP2STR(&evt->event_info.got_ip.mask),
 					IP2STR(&evt->event_info.got_ip.gw));
 #endif
-#ifdef USE_SNTP
-			if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
-#endif
-			if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
+//			if(wifi_softap_get_station_num() == 0) // Number count of stations which connected to ESP8266 soft-AP
+				open_all_service((wifi_softap_get_station_num() == 0)? 0: 1);
 			break;
 		}
 		case EVENT_SOFTAPMODE_STACONNECTED:
 		{
 			int i = wifi_softap_get_station_num(); // Number count of stations which connected to ESP8266 soft-AP
+			int cs = wifi_station_get_connect_status();
 #if DEBUGSOO > 1
-			os_printf("Station[%u]: " MACSTR " join, AID = %d\n",
+			os_printf("Station[%u]: " MACSTR " join, AID = %d, %u\n",
 					i,
 					MAC2STR(evt->event_info.sta_connected.mac),
-					evt->event_info.sta_connected.aid);
+					evt->event_info.sta_connected.aid, cs);
 #endif
-			if(i == 1) {
-#ifdef USE_SNTP
-					if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
-#endif
-					if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
-			}
+
+			if(i == 1 && (!(cs == STATION_GOT_IP || cs == STATION_CONNECTING))) open_all_service(0);
+			else open_all_service(1);
 #ifdef USE_CAPTDNS
 			if(syscfg.cfg.b.cdns_ena) {
 					captdns_init();
@@ -296,18 +408,19 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 		case EVENT_SOFTAPMODE_STADISCONNECTED:
 		{
 			int i = wifi_softap_get_station_num(); // Number count of stations which connected to ESP8266 soft-AP
+			int cs = wifi_station_get_connect_status();
 #if DEBUGSOO > 1
-			os_printf("Station[%u]: " MACSTR " leave, AID = %d\n",
+			os_printf("Station[%u]: " MACSTR " leave, AID = %d, %u\n",
 					i,
 					MAC2STR(evt->event_info.sta_disconnected.mac),
-					evt->event_info.sta_disconnected.aid);
+					evt->event_info.sta_disconnected.aid, cs);
 #endif
 			if(i == 0) {
 #ifdef USE_CAPTDNS
 				captdns_close();
 #endif
-				if(wifi_station_get_connect_status() != STATION_GOT_IP) {
-					tcp2uart_close();
+				if(!(cs == STATION_CONNECTING || cs == STATION_GOT_IP)) {
+					close_all_service();
 					if(st_reconn_flg != 0) {
 						if((wifi_get_opmode() & STATION_MODE) && wifi_station_get_auto_connect() != 0) {
 							station_reconnect_off();
@@ -326,6 +439,4 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 			break;
 		}
 }
-
-
 

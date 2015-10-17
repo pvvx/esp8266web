@@ -4,6 +4,10 @@
 //===============================================================================
 #define _ModBusTcp_H_
 
+#define DEFAULT_MDB_PORT USE_MODBUS // 502
+
+extern TCP_SERV_CFG * mdb_tcp_servcfg;
+
 err_t mdb_tcp_init(uint16 portn) ICACHE_FLASH_ATTR;
 uint32 WrMdbData(uint8 * dbuf, uint16 addr, uint32 len) ICACHE_FLASH_ATTR;
 uint32 RdMdbData(uint8 * mdbbuf, uint32 addr, uint32 len) ICACHE_FLASH_ATTR;

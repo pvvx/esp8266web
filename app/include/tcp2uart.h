@@ -7,13 +7,16 @@
 #ifndef _TCP2UART_H_
 #define _TCP2UART_H_
 
+#include "user_config.h"
 #include "c_types.h"
 #include "hw/esp8266.h"
 #include "lwip/err.h"
 #include "os_type.h"
+#ifdef USE_TCP2UART
 #include "tcp_srv_conn.h"
+#endif
 
-#define TCP2UART_PORT_DEF 12345
+#define DEFAULT_TCP2UART_PORT USE_TCP2UART // 12345
 
 void uart_init(void) ICACHE_FLASH_ATTR;
 
@@ -28,6 +31,7 @@ void update_mux_txd1(void) ICACHE_FLASH_ATTR;
 void update_mux_uart0(void) ICACHE_FLASH_ATTR;
 void set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask) ICACHE_FLASH_ATTR;
 
+#ifdef USE_TCP2UART
 extern os_timer_t uart0_rx_buf_timer;
 extern os_timer_t uart0_tx_buf_timer;
 extern TCP_SERV_CONN * tcp2uart_conn;
@@ -49,4 +53,5 @@ void tcp2uart_int_rxtx_disable(void) ICACHE_FLASH_ATTR;
 
 #define MAX_WAIT_TX_BUF 50000ul // 50 ms
 
+#endif // USE_TCP2UART
 #endif /* _TCP2UART_H_ */

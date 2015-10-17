@@ -59,40 +59,12 @@ bool ICACHE_FLASH_ATTR write_sys_const(uint8 idx, uint8 data) {
 		return false;
 	uint32 faddr = esp_init_data_default_addr;
 	if (get_sys_const(idx) != data) {
-		uint8 * buf = rd_buf_sec_blk(faddr, SIZE_USYS_CONST);
+		uint8 * buf = rd_buf_sec_blk(faddr, SIZE_SAVE_SYS_CONST);
 		if(buf != NULL) {
 			buf[idx] = data;
-			return wr_buf_sec_blk(faddr, SIZE_USYS_CONST, buf);
+			return wr_buf_sec_blk(faddr, SIZE_SAVE_SYS_CONST, buf);
 		}
 	}
 	else return true;
 	return false;
 }
-
-uint32 ICACHE_FLASH_ATTR read_user_const(uint8 idx) {
-#ifdef USE_FIX_SDK_FLASH_SIZE	
-	return get_user_const(idx);
-#else
-	uint32 ret = ~0;
-	if (idx < MAX_IDX_USER_CONST)
-		spi_flash_read(esp_init_data_default_addr + SIZE_SAVE_SYS_CONST + (idx<<2), (uint32 *)&ret, 4);
-	return ret;
-#endif	
-}
-
-bool ICACHE_FLASH_ATTR write_user_const(uint8 idx, uint32 data) {
-	if (idx >= MAX_IDX_USER_CONST)
-		return false;
-	uint32 faddr = esp_init_data_default_addr;
-	if (get_user_const(idx<<2) != data) {
-		uint8 * buf = rd_buf_sec_blk(faddr, SIZE_USYS_CONST);
-		if(buf != NULL) {
-			uint32 *ptr = (uint32 *)((uint8 *)&buf[SIZE_SAVE_SYS_CONST]);
-			ptr[idx] = data;
-			return wr_buf_sec_blk(faddr, SIZE_USYS_CONST, buf);
-		}
-	}
-	else return true;
-	return false;
-}
-

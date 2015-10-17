@@ -311,7 +311,7 @@ bool ICACHE_FLASH_ATTR captdns_init(void)
 			return false;
 		}
 	#if DEBUGSOO > 1
-		os_printf("cdns: init, port %u\n", CAPTDNS_PORT);
+		os_printf("cdns: init port %u\n", CAPTDNS_PORT);
 	#endif
 		udp_recv(pcb_cdns, cdns_recv, pcb_cdns);
 	}

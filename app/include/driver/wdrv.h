@@ -8,6 +8,7 @@
 #ifndef _INCLUDE_WDRV_H_
 #define _INCLUDE_WDRV_H_
 
+#ifdef USE_WDRV
 
 #define WDRV_TASK_QUEUE_LEN 2
 #define WDRV_TASK_PRIO USER_TASK_PRIO_0
@@ -21,12 +22,15 @@
 #define DEFAULT_SAMPLE_RATE_HZ 1000 // min 0 max 200000
 #define DEFAULT_WDRV_HOST_IP IPADDR_BROADCAST;
 #define DEFAULT_WDRV_HOST_PORT 10201;
+#define DEFAULT_WDRV_REMOTE_PORT USE_WDRV; // 10201;
 
 void init_wdrv(void);
 
-extern uint32 wdrv_sample_rate;
-extern uint16 wdrv_host_port;
-extern ip_addr_t wdrv_host_ip;
+extern struct udp_pcb *pcb_wdrv; // = NULL -> wdrv закрыт
+extern uint32 wdrv_remote_port; // = 0 -> wdrv не работает
+extern uint32 wdrv_sample_rate; // по умолчанию = DEFAULT_SAMPLE_RATE_HZ
+extern uint16 wdrv_host_port; // по умолчанию = DEFAULT_WDRV_HOST_PORT
+extern ip_addr_t wdrv_host_ip; // по умолчанию = DEFAULT_WDRV_HOST_IP
 
 bool wdrv_start(uint32 sample_rate);
 bool wdrv_init(uint32 portn);
@@ -37,4 +41,5 @@ void wdrv_stop(void);
 // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_STOP, 0);
 
 
+#endif // USE_WDRV
 #endif /* _INCLUDE_WDRV_H_ */

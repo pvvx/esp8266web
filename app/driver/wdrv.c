@@ -50,10 +50,11 @@
 uint16 *out_wave_pbuf DATA_IRAM_ATTR;
 uint32 wdrv_buf_wr_idx DATA_IRAM_ATTR;
 ETSEvent wdrv_taskQueue[WDRV_TASK_QUEUE_LEN] DATA_IRAM_ATTR;
-struct udp_pcb *pcb_wdrv DATA_IRAM_ATTR;
+struct udp_pcb *pcb_wdrv DATA_IRAM_ATTR; // = NULL -> wdrv закрыт
 uint32 wdrv_sample_rate DATA_IRAM_ATTR;
-uint16 wdrv_host_port;
+uint32 wdrv_remote_port DATA_IRAM_ATTR; // = 0 -> wdrv не используется
 ip_addr_t wdrv_host_ip;
+uint16 wdrv_host_port; // = 0 -> wdrv не используется
 
 /*-----------------------------------------------------------------------------*/
 
@@ -98,7 +99,7 @@ void ICACHE_FLASH_ATTR wdrv_stop(void)
 		os_free(out_wave_pbuf);
 		out_wave_pbuf = NULL;
 #if DEBUGSOO > 1
-		os_printf("wdrv: stop()\n");
+		os_printf("WDRV: stop()\n");
 #endif
 		// отключить SAR
     	i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 0);
@@ -114,13 +115,12 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 {
 	if(pcb_wdrv != NULL) {
 		wdrv_stop();
-		if(sample_rate <= 20000)	{
-			if(sample_rate == 0) sample_rate = wdrv_sample_rate;
-			else wdrv_sample_rate = sample_rate;
+		if(sample_rate != 0 && sample_rate <= 20000)	{
+			wdrv_sample_rate = sample_rate;
 			out_wave_pbuf = os_malloc(WDRV_OUT_BUF_SIZE<<1);
 			if(out_wave_pbuf != NULL) {
 #if DEBUGSOO > 1
-				os_printf("wdrv: start(%u)\n", sample_rate);
+				os_printf("WDRV: start(%u)\n", sample_rate);
 #endif
 				wdrv_buf_wr_idx = 1<<31; // флаг для пропуска считывания SAR при первом прерывания
 				// включить SAR
@@ -141,7 +141,7 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 		}
 	}
 #if DEBUGSOO > 1
-	os_printf("wdrv: error start(%u)\n", sample_rate);
+	os_printf("WDRV: error start(%u)\n", sample_rate);
 #endif
 	return false;
 }
@@ -149,7 +149,7 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
 {
 #if DEBUGSOO > 1
-	os_printf("wdrv: txi(%u)\n", sample_idx>>10);
+	os_printf("WDRV: txi(%u)\n", sample_idx>>10);
 #endif
 	if(pcb_wdrv == NULL ||out_wave_pbuf == NULL) return;
 	void * pudpbuf;
@@ -157,7 +157,7 @@ void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
 		pudpbuf = &out_wave_pbuf[0];
 		if(sample_idx == WDRV_OUT_BUF_SIZE) {
 #if DEBUGSOO > 1
-			os_printf("wdrv: err tx\n");
+			os_printf("WDRV: err tx\n");
 #endif
 			return;
 		}
@@ -166,7 +166,7 @@ void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
 		pudpbuf = &out_wave_pbuf[WDRV_OUT_BUF_SIZE>>1];
 		if(sample_idx == (WDRV_OUT_BUF_SIZE>>1)) {
 #if DEBUGSOO > 1
-			os_printf("wdrv: err tx\n");
+			os_printf("WDRV: err tx\n");
 #endif
 			return;
 		}
@@ -183,10 +183,11 @@ void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
 }
 
 extern uint32 ahextoul(uint8 *s);
-static const char WDRV_ver_str[] ICACHE_RODATA_ATTR = "WDRV: 0.0.2";
+static const char WDRV_ver_str[] ICACHE_RODATA_ATTR = "WDRV: 0.0.3";
 static const char WDRV_error_str[] ICACHE_RODATA_ATTR = "WDRV: error";
 static const char WDRV_stop_str[] ICACHE_RODATA_ATTR = "WDRV: stop";
-static const char WDRV_start_str[] ICACHE_RODATA_ATTR = "WDRV: start, freg %u Hz";
+static const char WDRV_freq_str[] ICACHE_RODATA_ATTR = "WDRV: freq %u Hz";
+//static const char WDRV_start_str[] ICACHE_RODATA_ATTR = "WDRV: start";
 static const char WDRV_ip_str[] ICACHE_RODATA_ATTR = "WDRV: set ip " IPSTR ", port %u";
 #define mMIN(a, b)  ((a<b)?a:b)
 void ICACHE_FLASH_ATTR  wdrv_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
@@ -212,8 +213,9 @@ void ICACHE_FLASH_ATTR  wdrv_recv(void *arg, struct udp_pcb *upcb, struct pbuf *
     	case 'F':
     		if(length > 3 && usrdata[1]== '=') {
         		uint32 freq = ahextoul(&usrdata[2]);
-        		if(wdrv_start(freq)) {
-        			udpbuflen = ets_sprintf(pudpbuf, WDRV_start_str, freq);
+        		if(freq > 0 && freq <= 20000) {
+        			wdrv_sample_rate = freq;
+        			udpbuflen = ets_sprintf(pudpbuf, WDRV_freq_str, freq);
         		}
         		else {
         			udpbuflen = rom_xstrcpy(pudpbuf, WDRV_error_str);
@@ -230,6 +232,10 @@ void ICACHE_FLASH_ATTR  wdrv_recv(void *arg, struct udp_pcb *upcb, struct pbuf *
     		break;
     	case 'S':
     		wdrv_stop();
+    		udpbuflen = rom_xstrcpy(pudpbuf, WDRV_stop_str);
+    		break;
+    	case 'G':
+    		wdrv_start(wdrv_sample_rate);
     		udpbuflen = rom_xstrcpy(pudpbuf, WDRV_stop_str);
     		break;
     }
@@ -257,24 +263,25 @@ bool ICACHE_FLASH_ATTR wdrv_init(uint32 portn)
 		pcb_wdrv = udp_new();
 		if(pcb_wdrv == NULL || (udp_bind(pcb_wdrv, IP_ADDR_ANY, portn) != ERR_OK)) {
 #if DEBUGSOO > 0
-			os_printf("wdrv: error init port %u\n", portn);
+			os_printf("WDRV: error init port %u\n", portn);
 #endif
 			udp_disconnect(pcb_wdrv);
 			udp_remove(pcb_wdrv);
 			pcb_wdrv = NULL;
+			wdrv_remote_port = 0;
 			return false;
 		}
 #if DEBUGSOO > 1
-		os_printf("wdrv: init port %u\n", portn);
+		os_printf("WDRV: init port %u\n", portn);
 #endif
 		udp_recv(pcb_wdrv, wdrv_recv, pcb_wdrv);
 	}
 	else {
 #if DEBUGSOO > 1
-		os_printf("wdrv: close\n");
+		os_printf("WDRV: close\n");
 #endif
 	}
-	wdrv_host_port = portn;
+	wdrv_remote_port = portn;
 	return true;
 }
 
@@ -297,11 +304,10 @@ void ICACHE_FLASH_ATTR task_wdrv(os_event_t *e){
 
 void init_wdrv(void)
 {
-    system_os_task(task_wdrv, WDRV_TASK_PRIO, wdrv_taskQueue, WDRV_TASK_QUEUE_LEN);
+	system_os_task(task_wdrv, WDRV_TASK_PRIO, wdrv_taskQueue, WDRV_TASK_QUEUE_LEN);
     wdrv_host_ip.addr = DEFAULT_WDRV_HOST_IP;
-    wdrv_sample_rate = DEFAULT_SAMPLE_RATE_HZ;
     wdrv_host_port = DEFAULT_WDRV_HOST_PORT;
-    // wdrv_init(DEFAULT_WDRV_HOST_PORT);
+    wdrv_sample_rate = DEFAULT_SAMPLE_RATE_HZ;
 }
 
 #endif // USE_WDRV

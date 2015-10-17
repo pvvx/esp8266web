@@ -11,8 +11,5 @@
 
 uint8 read_sys_const(uint8 idx);
 bool write_sys_const(uint8 idx, uint8 data);
-uint32 read_user_const(uint8 idx);
-bool write_user_const(uint8 idx, uint32 data);
-
 
 #endif /* _INCLUDE_SYS_CONST_U_H_ */

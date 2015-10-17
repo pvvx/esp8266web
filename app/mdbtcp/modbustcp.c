@@ -70,6 +70,9 @@ void ICACHE_FLASH_ATTR mdb_tcp_close(void)
 {
 	if(mdb_tcp_servcfg != NULL) {
 		tcpsrv_close(mdb_tcp_servcfg);
+#if DEBUGSOO > 1
+			os_printf("MDB: close\n");
+#endif
 	}
 }
 //-------------------------------------------------------------------------------
@@ -83,16 +86,17 @@ err_t ICACHE_FLASH_ATTR mdb_tcp_init(uint16 portn) {
 		return  ERR_USE;
 	}
 	mdb_tcp_close();
-	if(portn == 0) return ERR_OK;
+	if(portn <= ID_CLIENTS_PORT) return ERR_OK;
 	TCP_SERV_CFG *p = tcpsrv_init(portn);
 	if (p != NULL) {
 		// изменим конфиг на наше усмотрение:
 //		p->flag.rx_buf = 1; // прием в буфер с его автосозданием. ????
 		p->flag.nagle_disabled = 1; // отмена nagle
+		if(syscfg.cfg.b.mdb_reopen) p->flag.srv_reopen = 1;
 		p->max_conn = 1; // одно соединение (порт UART не многопользовательский!)
-		p->time_wait_rec = syscfg.tcp2uart_twrec; // =0 -> вечное ожидание
-		p->time_wait_cls = syscfg.tcp2uart_twcls; // =0 -> вечное ожидание
-#if DEBUGSOO > 0
+		p->time_wait_rec = syscfg.mdb_twrec; // =0 -> вечное ожидание
+		p->time_wait_cls = syscfg.mdb_twcls; // =0 -> вечное ожидание
+#if DEBUGSOO > 3
 		os_printf("Max connection %d, time waits %d & %d, min heap size %d\n",
 				p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);
 #endif
@@ -107,8 +111,10 @@ err_t ICACHE_FLASH_ATTR mdb_tcp_init(uint16 portn) {
 			p = NULL;
 		}
 		else  {
-//			syscfg.mdb_tcp_port = portn;
-//			update_mux_uart0();
+			syscfg.mdb_remote_port = portn;
+#if DEBUGSOO > 1
+			os_printf("MDB: init port %u\n", portn);
+#endif
 		}
 	}
 	else err = ERR_USE;

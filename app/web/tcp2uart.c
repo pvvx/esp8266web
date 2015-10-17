@@ -8,6 +8,7 @@
  */
 
 #include "user_config.h"
+#ifdef USE_TCP2UART
 #include "bios.h"
 #include "sdk/add_func.h"
 #include "c_types.h"
@@ -253,7 +254,7 @@ void ICACHE_FLASH_ATTR tcp2uart_close(void)
 //	syscfg.tcp2uart_port = 0;
 	if(tcp2uart_servcfg != NULL) {
 		tcp2uart_int_rxtx_disable();
-		tcpsrv_close(tcp2uart_servcfg);
+		tcpsrv_close(tcp2uart_servcfg);	
 		tcp2uart_servcfg = NULL;
 		update_mux_uart0();
 	}
@@ -277,11 +278,11 @@ err_t ICACHE_FLASH_ATTR tcp2uart_server_init(uint16 portn) {
 		// изменим конфиг на наше усмотрение:
 		p->flag.rx_buf = 1; // прием в буфер с его автосозданием.
 		p->flag.nagle_disabled = 1; // отмена nagle
-		p->flag.srv_reopen = syscfg.cfg.b.tcp2uart_reopen;
+		if(syscfg.cfg.b.tcp2uart_reopen) p->flag.srv_reopen = 1;
 		p->max_conn = 1; // одно соединение (порт UART не многопользовательский!)
 		p->time_wait_rec = syscfg.tcp2uart_twrec; // =0 -> вечное ожидание
 		p->time_wait_cls = syscfg.tcp2uart_twcls; // =0 -> вечное ожидание
-#if DEBUGSOO > 0
+#if DEBUGSOO > 3
 		os_printf("Max connection %d, time waits %d & %d, min heap size %d\n",
 				p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);
 #endif
@@ -292,12 +293,15 @@ err_t ICACHE_FLASH_ATTR tcp2uart_server_init(uint16 portn) {
 		p->func_recv = term_recv;
 		err = tcpsrv_start(p);
 		if (err != ERR_OK) {
-			tcpsrv_close(p);
+			tcpsrv_close(p); 
 			p = NULL;
 		}
 		else  {
 			syscfg.tcp2uart_port = portn;
 			update_mux_uart0();
+#if DEBUGSOO > 1
+			os_printf("TCP2UART: init port %u\n", portn);
+#endif
 		}
 	}
 	else err = ERR_USE;
@@ -330,7 +334,7 @@ err_t ICACHE_FLASH_ATTR tcp2uart_client_init(uint32 ip, uint16 portn)
 		p->max_conn = 0; // =0 - вечная попытка соединения
 		p->time_wait_rec = syscfg.tcp2uart_twrec; // =0 -> вечное ожидание
 		p->time_wait_cls = syscfg.tcp2uart_twcls; // =0 -> вечное ожидание
-#if DEBUGSOO > 0
+#if DEBUGSOO > 3
 		os_printf("Max retry connection %d, time waits %d & %d, min heap size %d\n",
 				p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);
 #endif
@@ -341,12 +345,15 @@ err_t ICACHE_FLASH_ATTR tcp2uart_client_init(uint32 ip, uint16 portn)
 		p->func_recv = term_recv;
 		err = tcpsrv_client_start(p, ip, portn);
 		if (err != ERR_OK) {
-			tcpsrv_close(p);
+			tcpsrv_close(p); 
 			p = NULL;
 		}
 		else  {
 			syscfg.tcp2uart_port = portn;
 			update_mux_uart0();
+#if DEBUGSOO > 5
+			os_printf("TCP2UART: client init\n");
+#endif
 		}
 	}
 	tcp2uart_servcfg = p;
@@ -370,10 +377,12 @@ err_t ICACHE_FLASH_ATTR tcp2uart_start(uint16 newportn)
 			ipaddr_aton(tcp2uart_url, &ip);
 			if(ip.addr != 0x0100007f && ip.addr != 0) {
 #if DEBUGSOO > 1
-				os_printf("TCP2UART client ip:" IPSTR ", port: %u\n", IP2STR(&ip), newportn);
+				os_printf("TCP2UART: client ip:" IPSTR ", port: %u\n", IP2STR(&ip), newportn);
 #endif
 				return tcp2uart_client_init(ip.addr, newportn);
 			}
 		}
 		return tcp2uart_server_init(newportn);
 }
+
+#endif // USE_TCP2UART

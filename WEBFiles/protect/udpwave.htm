@@ -14,8 +14,11 @@
 <td class="label">UDP host IP:</td>
 <td><input name='wdrv_ip' maxlength='31' value='~wdrv_ip~'></td>
 </tr><tr>
-<td class="label">UDP Port:</td>
-<td><input title='1..65535, 0 - close' name='wdrv_init' maxlength='5' value='~wdrv_port~'></td>
+<td class="label">UDP host port:</td>
+<td><input title='1..65535' name='wdrv_port' maxlength='5' value='~wdrv_port~'></td>
+</tr><tr>
+<td class="label">UDP remote port:</td>
+<td><input title='1..65535, 0 - close' name='wdrv_init' maxlength='5' value='~cfg_wdrv_port~'></td>
 <td class="left"><input type="submit" value="Set" class="button"></td></form>
 </tr><tr><form method="post" action=""><td class="label">Sample Feq:</td>
 <td><input title='1..20 000 Hz' name='wdrv_start' maxlength='5' value='~wdrv_freq~'></td>
@@ -26,9 +29,10 @@
 <h2 class="title">UDP send:</h2>
 <table class="scan">
 <tr><td>'?'</td><td>WDRV: ver<td></tr>
-<tr><td>'F=fx'</td><td>WDRV: start, freg fx Hz<td></tr>
+<tr><td>'F=fx'</td><td>WDRV: freg fx Hz<td></tr>
 <tr><td>'A'</td><td>WDRV: set remote ip , remote port<td></tr>
-<tr><td>'S'</td><td>WDRV: stop<td></tr></p>
+<tr><td>'S'</td><td>WDRV: stop<td></tr>
+<tr><td>'G'</td><td>Start wave<td></tr></p>
 </table></div>
 ~inc:footer.inc~
 </body></script></html>

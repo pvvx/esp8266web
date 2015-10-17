@@ -12,8 +12,52 @@
 		<form method="post" action="">
 			<table class="form">
 				<tr>
-					<td class="label">HTTP WEB port:</td>
-					<td><input title='0 - disable' name='cfg_web_port' maxlength='5' value='~cfg_web_port~'></td>
+					<td class="label">WEB (HTTP) port:</td>
+					<td><input title='4..65535, 0 - close' name='cfg_web_port' maxlength='5' value='~cfg_web_port~'></td>
+				</tr>
+				<tr>
+					<td class="label">WEB recved timeout:</td>
+					<td><input title='1...65535 sec, 0 - not limited' name='cfg_web_twrec' maxlength='5' value='~cfg_web_twrec~'></td>
+				</tr>
+				<tr>
+					<td class="label">WEB close timeout:</td>
+					<td><input title='1...65535 sec, 0 - not limited' name='cfg_web_twcls' maxlength='5' value='~cfg_web_twcls~'></td>
+				</tr>
+				<tr>
+					<td class="label">Modbus TCP port:</td>
+					<td><input title='4..65535, 0 - close' name='cfg_mdb_port' maxlength='5' value='~cfg_mdb_port~'></td>
+				</tr>
+				<tr>
+					<td class="label">Modbus TCP recved timeout:</td>
+					<td><input title='1...65535 sec, 0 - not limited' name='cfg_mdb_twrec' maxlength='5' value='~cfg_mdb_twrec~'></td>
+				</tr>
+				<tr>
+					<td class="label">Modbus TCP close timeout:</td>
+					<td><input title='1...65535 sec, 0 - not limited' name='cfg_mdb_twcls' maxlength='5' value='~cfg_mdb_twcls~'></td>
+				</tr>
+				<tr>
+					<td class="label">Modbus TCP connect reopen:</td>
+					<td><input type="hidden" name='cfg_mdb_reop' value='0'><input type='checkbox' name='cfg_mdb_reop' value='1'></td>
+				</tr>
+				<tr>
+					<td class="label">UDP Test port:</td>
+					<td><input title='1..65535, 0 - close' name='cfg_udp_port' maxlength='5' value='~cfg_udp_port~'></td>
+				</tr>
+				<tr>
+					<td class="label">UDP Wave Sample Feq:</td>
+					<td><input title='1..20 000Hz' name='wdrv_freq' maxlength='5' value='~wdrv_freq~'></td>
+				</tr>
+				<tr>
+					<td class="label">UDP Wave host IP:</td>
+					<td><input title='255.255.255.255 - Broadcast' name='wdrv_ip' maxlength='31' value='~wdrv_ip~'></td>
+				</tr>
+				<tr>
+					<td class="label">UDP Wave host port:</td>
+					<td><input title='1..65535' name='wdrv_port' maxlength='5' value='~wdrv_port~'></td>
+				</tr>
+				<tr>
+					<td class="label">UDP Wave remote port:</td>
+					<td><input title='1..65535, 0 - close' name='cfg_wdrv_port' maxlength='5' value='~cfg_wdrv_port~'></td>
 				</tr>
 				<tr>
 					<td class="label">Debug UART BAUD:</td>
@@ -121,7 +165,8 @@ var cfg = {
 	cfg_pinclr:"~cfg_pinclr~",
 	cfg_netbios:"~cfg_netbios~",
 	cfg_sntp:"~cfg_sntp~",
-	cfg_cdns:"~cfg_cdns~"
+	cfg_cdns:"~cfg_cdns~",
+	cfg_mdb_reop:"~cfg_mdb_reop~"
 }
 setFormValues(document.forms[0], cfg);
 </script>

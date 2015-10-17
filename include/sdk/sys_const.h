@@ -10,10 +10,7 @@
 
 #define MAX_IDX_SYS_CONST 128
 #define SIZE_SYS_CONST 128
-#define MAX_IDX_USER_CONST 10
-#define SIZE_USER_CONST (MAX_IDX_USER_CONST*4)
 #define SIZE_SAVE_SYS_CONST 756 // размер сохранения блока системных констант в секторе с номером (max_flash - 4). SDK 1.4.0
-#define SIZE_USYS_CONST (SIZE_SAVE_SYS_CONST + SIZE_USER_CONST)
 
 #define esp_init_data_default_addr (flashchip->chip_size - 4 * SPI_FLASH_SEC_SIZE)
 
@@ -102,8 +99,6 @@
 #define	sys_const_force_freq_offset 113 // tx_param43: signed, unit is 8khz
 
 #define get_sys_const(a)  ((*((unsigned int *)((unsigned int)((a) + FLASH_BASE + FLASH_SYSCONST_ADR) & (~3))))>>(((unsigned int)a & 3) << 3))
-#define get_user_const(a) (*((unsigned int *)((unsigned int)((a) + FLASH_BASE + FLASH_SYSCONST_ADR + SIZE_SAVE_SYS_CONST) & (~3))))
-
 
 extern uint8 chip6_phy_init_ctrl[128]; // 
 extern uint8 phy_in_most_power; // system_phy_set_max_tpw()

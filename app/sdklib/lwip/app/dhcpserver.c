@@ -888,13 +888,13 @@ static void ICACHE_FLASH_ATTR handle_dhcp(void *arg,
 static void ICACHE_FLASH_ATTR wifi_softap_init_dhcps_lease(uint32 ip)
 {
 	uint32 softap_ip = ip & ((1 << 24) - 1); // 0x00FFFFFF;
-/*	if (dhcps_lease_flag == TRUE) { // проверка
-		if((softap_ip != dhcps_lease.start_ip.addr & ((1 << 24) - 1))
-		 ||(softap_ip != dhcps_lease.end_ip.addr & ((1 << 24) - 1))
-		 ||(dhcps_lease.end_ip.addr - dhcps_lease.start_ip.addr > (DHCPS_MAX_LEASE << 24))
-		 ||(ip >= dhcps_lease.start_ip.addr && ip <= dhcps_lease.start_ip.addr))
+	if (dhcps_lease_flag == TRUE) { // проверка
+		if(softap_ip != (dhcps_lease.start_ip.addr & ((1 << 24) - 1))
+		 ||softap_ip != (dhcps_lease.end_ip.addr & ((1 << 24) - 1))
+		 ||dhcps_lease.end_ip.addr - dhcps_lease.start_ip.addr > (DHCPS_MAX_LEASE << 24)
+		 ||(ip >= dhcps_lease.start_ip.addr && ip <= dhcps_lease.end_ip.addr)) // попадает в диапазон
 			dhcps_lease_flag = FALSE;
-	} */
+	}
 	if (dhcps_lease_flag == FALSE) { // dhcps_lease не задавалась -> автоматическая установка
 	    uint32 local_ip = ip & (255 << 24); // 0xFF000000;
 		if (local_ip >= (128 << 24))

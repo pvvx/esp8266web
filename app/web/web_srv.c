@@ -6,6 +6,7 @@
  * ver1.1 02/04/2015  SDK 1.0.0
 *******************************************************************************/
 #include "user_config.h"
+#ifdef USE_WEB
 #include "bios.h"
 #include "sdk/add_func.h"
 #include "ets_sys.h"
@@ -1825,7 +1826,7 @@ LOCAL void ICACHE_FLASH_ATTR webserver_disconnect(TCP_SERV_CONN *ts_conn)
 *******************************************************************************/
 err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 {
-	WEBFSInit(); // файловая система
+//	WEBFSInit(); // файловая система
 
 	err_t err = ERR_OK;
 
@@ -1834,17 +1835,27 @@ err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 		// изменим конфиг на наше усмотрение:
 		if(syscfg.cfg.b.web_time_wait_delete) p->flag.pcb_time_wait_free = 1; // пусть убивает, для теста и проксей
 		p->max_conn = 99; // сработает по heap_size
-#if DEBUGSOO > 0
+#if DEBUGSOO > 3
 		os_printf("Max connection %d, time waits %d & %d, min heap size %d\n",
 				p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);
 #endif
+		p->time_wait_rec = syscfg.web_twrec; // =0 -> вечное ожидание
+		p->time_wait_cls = syscfg.web_twcls; // =0 -> вечное ожидание
 		// слинкуем с желаемыми процедурами:
 	 	p->func_discon_cb = webserver_disconnect;
 //	 	p->func_listen = webserver_listen; // не требуется
 	 	p->func_sent_cb = webserver_sent_callback;
 		p->func_recv = webserver_received_data;
 		err = tcpsrv_start(p);
-		if (err != ERR_OK) tcpsrv_close(p);
+		if (err != ERR_OK) {
+			tcpsrv_close(p);
+			p = NULL;
+		}
+		else {
+#if DEBUGSOO > 1
+			os_printf("WEB: init port %u\n", portn);
+#endif
+		}
 	}
 	else err = ERR_MEM;
 	return err;
@@ -1858,7 +1869,12 @@ err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 *******************************************************************************/
 err_t ICACHE_FLASH_ATTR webserver_close(uint16 portn)
 {
-	return tcpsrv_close(tcpsrv_server_port2pcfg(portn));
+	err_t err = ERR_ARG;
+	if(portn != 0) err = tcpsrv_close(tcpsrv_server_port2pcfg(portn));
+#if DEBUGSOO > 1
+	if(err == ERR_OK) os_printf("WEB: close\n");
+#endif
+	return err;
 }
 /******************************************************************************
  * FunctionName : webserver_reinit
@@ -1870,7 +1886,9 @@ err_t ICACHE_FLASH_ATTR webserver_reinit(uint16 portn)
 {
 	err_t err = ERR_OK;
 //	if(portn == syscfg.web_port) return err;
-	if(portn) err = tcpsrv_close(tcpsrv_server_port2pcfg(portn)); // зарыть старый порт
+	if(portn) err = tcpsrv_close(tcpsrv_server_port2pcfg(portn)); // закрыть старый порт
 	if(syscfg.web_port) err = webserver_init(syscfg.web_port); // открыть новый
 	return err;
 }
+
+#endif // USE_WEB

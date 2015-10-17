@@ -538,7 +538,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #ifdef DEBUG_UART
 		os_printf("\nSave rx_gain_dc table (%u, %u)\n", buf[0xf8], phy_rx_gain_dc_flag );
 #endif
-		wifi_param_save_protect_with_check((flashchip->chip_size/flashchip->sector_size) - 4, flashchip->sector_size, buf, 756);
+		wifi_param_save_protect_with_check((flashchip->chip_size/flashchip->sector_size) - 4, flashchip->sector_size, buf, SIZE_SAVE_SYS_CONST);
 	}
 #endif
 	os_free(buf);

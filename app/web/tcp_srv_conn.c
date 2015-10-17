@@ -25,6 +25,12 @@
 
 TCP_SERV_CFG *phcfg DATA_IRAM_ATTR; // = NULL; // начальный указатель в памяти на структуры открытых сервачков
 
+#if DEBUGSOO > 0
+const uint8 txt_tcpsrv_NULL_pointer[] ICACHE_RODATA_ATTR = "tcpsrv: NULL pointer!\n";
+const uint8 txt_tcpsrv_already_initialized[] ICACHE_RODATA_ATTR = "tcpsrv: already initialized!\n";
+const uint8 txt_tcpsrv_out_of_mem[] ICACHE_RODATA_ATTR = "tcpsrv: out of mem!\n";
+#endif
+
 #define mMIN(a, b)  ((a<b)?a:b)
 // пред.описание...
 static void tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
@@ -844,17 +850,11 @@ TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_client_ip_port2conn(uint32 ip, uint16 po
 TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_init(uint16 portn) {
 	//	if (portn == 0)	portn = 80;
 	if (portn == 0)	return NULL;
-#if DEBUGSOO > 0
-	if(portn <= ID_CLIENTS_PORT) {
-		os_printf("\nTCP Client service init ");
-	}
-	else os_printf("\nTCP Server init on port %u - ", portn);
-#endif
 	TCP_SERV_CFG * p;
 	for (p = phcfg; p != NULL; p = p->next) {
 		if (p->port == portn) {
 #if DEBUGSOO > 0
-			os_printf("already initialized!\n");
+		os_printf_plus(txt_tcpsrv_already_initialized);
 #endif
 			return NULL;
 		}
@@ -862,7 +862,7 @@ TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_init(uint16 portn) {
 	p = (TCP_SERV_CFG *) os_zalloc(sizeof(TCP_SERV_CFG));
 	if (p == NULL) {
 #if DEBUGSOO > 0
-		os_printf("out of memory!\n");
+		os_printf_plus(txt_tcpsrv_out_of_mem);
 #endif
 		return NULL;
 	}
@@ -888,13 +888,6 @@ TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_init(uint16 portn) {
 	p->func_discon_cb = tcpsrv_disconnect_calback_default;
 	p->func_sent_cb = tcpsrv_sent_callback_default;
 	p->func_recv = tcpsrv_received_data_default;
-#if DEBUGSOO > 0
-	os_printf("Ok\n");
-#endif
-#if DEBUGSOO > 2
-	os_printf("struct size: %d %d\n", sizeof(TCP_SERV_CFG),
-			sizeof(TCP_SERV_CONN));
-#endif
 	return p;
 }
 /******************************************************************************
@@ -902,18 +895,15 @@ TCP_SERV_CFG * ICACHE_FLASH_ATTR tcpsrv_init(uint16 portn) {
  *******************************************************************************/
 err_t ICACHE_FLASH_ATTR tcpsrv_start(TCP_SERV_CFG *p) {
 	err_t err = ERR_OK;
-#if DEBUGSOO > 0
-	os_printf("TCP Server start - ");
-#endif
 	if (p == NULL) {
 #if DEBUGSOO > 0
-		os_printf("NULL pointer!\n");
+		os_printf_plus(txt_tcpsrv_NULL_pointer);
 #endif
 		return ERR_ARG;
 	}
 	if (p->pcb != NULL) {
 #if DEBUGSOO > 0
-		os_printf("already running!\n");
+		os_printf_plus(txt_tcpsrv_already_initialized);
 #endif
 		return ERR_USE;
 	}
@@ -938,9 +928,6 @@ err_t ICACHE_FLASH_ATTR tcpsrv_start(TCP_SERV_CFG *p) {
 				phcfg = p;
 				// initialize callback arg and accept callback
 				tcp_accept(p->pcb, tcpsrv_server_accept);
-#if DEBUGSOO > 0
-				os_printf("Ok\n");
-#endif
 				return err;
 			}
 		}
@@ -949,7 +936,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_start(TCP_SERV_CFG *p) {
 	} else
 		err = ERR_MEM;
 #if DEBUGSOO > 0
-	os_printf("failed!\n");
+		os_printf("tcpsrv: low heap size!\n");
 #endif
 	return err;
 }
@@ -981,7 +968,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, 
 			} else {
 #if DEBUGSOO > 0
 				tcpsrv_print_remote_info(ts_conn);
-				os_printf("tcp_connect - error %d\n", err);
+				os_printf("tcpsrv: connect error %d\n", err);
 #endif
 				os_free(ts_conn);
 				err = ERR_OK;
@@ -989,13 +976,13 @@ err_t ICACHE_FLASH_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, 
 		}
 		else {
 #if DEBUGSOO > 0
-			os_printf("srv[tcp_new] - out of mem!\n");
+			os_printf_plus(txt_tcpsrv_out_of_mem);
 #endif
 			err = ERR_MEM;
 		};
 	} else {
 #if DEBUGSOO > 0
-		os_printf("srv[new client] - low heap size!\n");
+		os_printf("tcpsrv: low heap size!\n");
 #endif
 		err = ERR_MEM;
 	};
@@ -1007,13 +994,10 @@ err_t ICACHE_FLASH_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, 
 err_t ICACHE_FLASH_ATTR tcpsrv_close(TCP_SERV_CFG *p) {
 	if (p == NULL) {
 #if DEBUGSOO > 0
-		os_printf("NULL pointer!\n");
+		os_printf_plus(txt_tcpsrv_NULL_pointer);
 #endif
 		return ERR_ARG;
 	};
-#if DEBUGSOO > 0
-	os_printf("\nTCP Service port %u closed - ", p->port);
-#endif
 	TCP_SERV_CFG **pwr = &phcfg;
 	TCP_SERV_CFG *pcmp = phcfg;
 	while (pcmp != NULL) {
@@ -1037,16 +1021,14 @@ err_t ICACHE_FLASH_ATTR tcpsrv_close(TCP_SERV_CFG *p) {
 			};
 			if(p->pcb != NULL) tcp_close(p->pcb);
 			os_free(p);
-#if DEBUGSOO > 0
-			os_printf("Ok\n");
-#endif
+			p = NULL;
 			return ERR_OK; // break;
 		}
 		pwr = &pcmp->next;
 		pcmp = pcmp->next;
 	};
-#if DEBUGSOO > 0
-	os_printf("no find!\n");
+#if DEBUGSOO > 2
+	os_printf("tcpsrv: srv_cfg no find!\n");
 #endif
 	return ERR_CONN;
 }
@@ -1055,7 +1037,8 @@ err_t ICACHE_FLASH_ATTR tcpsrv_close(TCP_SERV_CFG *p) {
  *******************************************************************************/
 err_t ICACHE_FLASH_ATTR tcpsrv_close_port(uint16 portn)
 {
-	return tcpsrv_close(tcpsrv_server_port2pcfg(portn));
+	if(portn) return tcpsrv_close(tcpsrv_server_port2pcfg(portn));
+	else return ERR_ARG;
 }
 /******************************************************************************
  tcpsrv_close_all

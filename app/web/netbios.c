@@ -407,7 +407,7 @@ void ICACHE_FLASH_ATTR netbios_init(void)
 	if(netbios_pcb() != NULL) return;
 
 #if DEBUGSOO > 0
-	os_printf("\nNetBIOS init, name '%s'\n", netbios_name);
+	os_printf("NetBIOS init, name '%s'\n", netbios_name);
 #endif
 
 	pcb = udp_new();

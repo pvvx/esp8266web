@@ -14,7 +14,24 @@
 #include "sdk/flash.h"
 #include "flash_eep.h"
 #include "hw/esp8266.h"
+//#ifdef USE_WEB
 #include "web_srv.h"
+//#endif
+#ifdef USE_TCP2UART
+#include "tcp2uart.h"
+#endif
+#ifdef USE_WDRV
+#include "driver/wdrv.h"
+#endif
+#ifdef UDP_TEST_PORT
+#include "udp_test_port.h"
+#endif
+#ifdef USE_NETBIOS
+#include "netbios.h"
+#endif
+#ifdef USE_MODBUS
+#include "modbustcp.h"
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -270,40 +287,56 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 	if(flash_read_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg)) != sizeof(syscfg)) {
 		syscfg.cfg.w = 0
 				| SYS_CFG_PIN_CLR_ENA
-				| SYS_CFG_REOPEN
-#ifdef 	USE_CPU_SPEED
+#ifdef USE_TCP2UART
+				| SYS_CFG_T2U_REOPEN
+#endif
+#ifdef USE_MODBUS
+				| SYS_CFG_MDB_REOPEN
+#endif
+#ifdef USE_CPU_SPEED
 				| SYS_CFG_HI_SPEED
 #endif
 #if DEBUGSOO > 0
 				| SYS_CFG_DEBUG_ENA
 #endif
 #ifdef USE_NETBIOS
+	#if USE_NETBIOS
 				| SYS_CFG_NETBIOS_ENA
+	#endif
 #endif
 #ifdef USE_SNTP
+	#if USE_SNTP
 				| SYS_CFG_SNTP_ENA
+	#endif
 #endif
 #ifdef USE_CAPTDNS
-//				| SYS_CFG_CDNS_ENA
+	#if USE_CAPTDNS
+				| SYS_CFG_CDNS_ENA
+	#endif
 #endif
 				;
-#ifdef TCP2UART_PORT_DEF
-		syscfg.tcp2uart_port = TCP2UART_PORT_DEF;
-#else
+#ifdef USE_TCP2UART
+		syscfg.tcp2uart_port = DEFAULT_TCP2UART_PORT;
 		syscfg.tcp2uart_port = 12345;
-#endif
 		syscfg.tcp2uart_twrec = 0;
 		syscfg.tcp2uart_twcls = 0;
+#endif
 		syscfg.tcp_client_twait = 5000;
-#ifdef USE_SRV_WEB_PORT
-		syscfg.web_port = USE_SRV_WEB_PORT;
-#else
-		syscfg.web_port = 80;
+#ifdef USE_WEB
+		syscfg.web_port = DEFAULT_WEB_PORT;
+		syscfg.web_twrec = 5;
+		syscfg.web_twcls = 5;
+#endif
+#ifdef USE_WDRV
+		syscfg.wdrv_remote_port = DEFAULT_WDRV_REMOTE_PORT; // (=0 - отключен)
 #endif
 #ifdef UDP_TEST_PORT
-		syscfg.udp_port = UDP_TEST_PORT;
-#else
-		syscfg.udp_port = 1025;
+		syscfg.udp_test_port = DEFAULT_UDP_TEST_PORT;	// (=0 - отключен)
+#endif
+#ifdef USE_MODBUS
+		syscfg.mdb_twrec = 10;
+		syscfg.mdb_twcls = 10;
+		syscfg.mdb_remote_port = DEFAULT_MDB_PORT;	// (=0 - отключен)
 #endif
 		return false;
 	};
@@ -361,6 +394,30 @@ bool ICACHE_FLASH_ATTR read_tcp2uart_url(void)
 	}
 	tcp2uart_url = NULL;
 	return false;
+}
+
+
+/*
+ *  Чтение пользовательских констант (0 < idx < 4)
+ */
+uint32 ICACHE_FLASH_ATTR read_user_const(uint8 idx) {
+#ifdef USE_FIX_SDK_FLASH_SIZE
+	uint32 ret = 0xFFFFFFFF;
+	if (idx < MAX_IDX_USER_CONST) {
+		if (flash_read_cfg(&ret, ID_CFG_KVDD + idx, 4) != 4) {
+			if(idx == 0) ret = 102400; // константа делителя для ReadVDD
+		}
+	}
+	return ret;
+#endif
+}
+/*
+ * Запись пользовательских констант (0 < idx < 4)
+ */
+bool ICACHE_FLASH_ATTR write_user_const(uint8 idx, uint32 data) {
+	if (idx >= MAX_IDX_USER_CONST)	return false;
+	uint32 ret = data;
+	return flash_save_cfg(&ret, ID_CFG_KVDD + idx, 4);
 }
 
 

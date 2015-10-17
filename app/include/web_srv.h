@@ -11,7 +11,7 @@
 #include "tcp_srv_conn.h"
 
 #define WEB_SVERSION "0.1.4"
-
+#define DEFAULT_WEB_PORT USE_WEB // 80
 
 /****************************************************************************
   Section:

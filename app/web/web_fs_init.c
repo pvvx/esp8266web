@@ -3,6 +3,7 @@
  * Description: The web server start configuration.
 *******************************************************************************/
 #include "user_config.h"
+#ifdef USE_WEB
 #include "bios.h"
 #include "sdk/add_func.h"
 #include "hw/esp8266.h"
@@ -111,3 +112,5 @@ void web_fini(const uint8 * fname)
 		}
 	}
 }
+
+#endif // USE_WEB

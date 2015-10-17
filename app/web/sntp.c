@@ -654,6 +654,9 @@ bool ICACHE_FLASH_ATTR sntp_inits(void)
 #else
 		sntp->sntp_server_addresses = (void *)sntp_server_addresses;
 #endif
+#if DEBUGSOO > 0
+		os_printf("SNTP: start\n");
+#endif
 	}
 	if(sntp->sntp_pcb == NULL) {
 		SNTP_RESET_RETRY_TIMEOUT();
@@ -673,9 +676,6 @@ bool ICACHE_FLASH_ATTR sntp_inits(void)
 			return false;
 		}
 	}
-#if DEBUGSOO > 0
-	os_printf("\nSNTP: start\n");
-#endif
 	return true;
 }
 
@@ -687,8 +687,8 @@ void ICACHE_FLASH_ATTR sntp_close(void)
 	if (sntp != NULL) {
 		os_timer_disarm(&sntp->ntp_timer);
 		if (sntp->sntp_pcb != NULL) {
-#if DEBUGSOO > 0
-			os_printf("\nSNTP: stop\n");
+#if DEBUGSOO > 1
+			os_printf("SNTP: stop\n");
 #endif
 			sys_untimeout(sntp_request, NULL);
 			udp_remove(sntp->sntp_pcb);

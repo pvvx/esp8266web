@@ -8,6 +8,7 @@
 #ifndef __FLASH_EEP_H_
 #define __FLASH_EEP_H_
 
+#include "user_config.h"
 //-----------------------------------------------------------------------------
 
 #define FMEMORY_SCFG_BASE_ADDR 0x79000 // 0x3B000, 0x3C000, 0x3D000 / 0x79000, 0x7A000, 0x7B000
@@ -16,12 +17,12 @@
 
 //-----------------------------------------------------------------------------
 
-#define ID_CFG_WIFI  0x6977
-#define ID_CFG_UART1 0x3175
-#define ID_CFG_UART0 0x3075
-#define ID_CFG_TREM  0x6574
-#define ID_CFG_SYS   0x7373
-#define ID_CFG_UURL  0x5552
+#define ID_CFG_WIFI  0x6977 // id для сохранения установок WiFi (wificonfig)
+#define ID_CFG_UART1 0x3175 // id для сохранения установок UART1
+#define ID_CFG_UART0 0x3075 // id для сохранения установок UART0
+#define ID_CFG_SYS   0x7373 // id для сохранения ситемной конфигурации (syscfg)
+#define ID_CFG_UURL  0x5552 // id для сохранения строки tcp2uart_url
+#define ID_CFG_KVDD  0x564B // id для сохранения калибровочных констант (делитель для VDD)
 
 //-----------------------------------------------------------------------------
 
@@ -74,29 +75,47 @@ struct sys_bits_config {
 	uint16 netbios_ena			: 1;	//4  0x0000010 =1 включить NetBios
 	uint16 sntp_ena				: 1;	//5  0x0000020 =1 включить SNTP
 	uint16 cdns_ena				: 1;	//6  0x0000040 =1 включить CAPDNS
-	uint16 tcp2uart_reopen		: 1;	//7  0x0000080 =1 открытие нового соединения ведет к закрытию старого соединения (сервер)
+	uint16 tcp2uart_reopen		: 1;	//7  0x0000080 =1 открытие нового соединения tcp2uart ведет к закрытию старого соединения (в режиме tcp2uart = сервер)
+	uint16 mdb_reopen			: 1;	//8  0x0000100 =1 открытие нового соединения modbus ведет к закрытию старого соединения (в режиме modbus = сервер)
 };
 
-#define SYS_CFG_HI_SPEED	0x0000001 // Set CPU 160 MHz ...
-#define SYS_CFG_PIN_CLR_ENA	0x0000002 // Проверять ножку RX на сброс конфигурации WiFi
-#define SYS_CFG_DEBUG_ENA 	0x0000004 // Вывод отладочной информации на GPIO2
-#define SYS_CFG_TWPCB_DEL 	0x0000008 // Закрывать соединение и убивать pcb c TIME_WAIT
-#define SYS_CFG_NETBIOS_ENA	0x0000010 // включить NetBios
-#define SYS_CFG_SNTP_ENA	0x0000020 // включить SNTP
-#define SYS_CFG_CDNS_ENA	0x0000040 // включить CAPDNS
-#define SYS_CFG_REOPEN		0x0000080 // открытие нового соединения ведет к закрытию старого соединения (сервер)
+#define SYS_CFG_HI_SPEED	0x0000001	// Set CPU 160 MHz ...
+#define SYS_CFG_PIN_CLR_ENA	0x0000002	// Проверять ножку RX на сброс конфигурации WiFi
+#define SYS_CFG_DEBUG_ENA 	0x0000004	// Вывод отладочной информации на GPIO2
+#define SYS_CFG_TWPCB_DEL 	0x0000008	// Закрывать соединение и убивать pcb c TIME_WAIT
+#define SYS_CFG_NETBIOS_ENA	0x0000010	// включить NetBios
+#define SYS_CFG_SNTP_ENA	0x0000020	// включить SNTP
+#define SYS_CFG_CDNS_ENA	0x0000040	// включить CAPDNS
+#define SYS_CFG_T2U_REOPEN	0x0000080	// открытие нового соединения tcp2uart ведет к закрытию старого соединения (сервер)
+#define SYS_CFG_MDB_REOPEN	0x0000100	// открытие нового соединения modbus ведет к закрытию старого соединения (сервер)
 
 struct SystemCfg { // структура сохранения системных настроек в Flash
 	union {
 		struct sys_bits_config b;
 		uint16 w;
 	}cfg;
-	uint16 tcp2uart_port;	// номер порта TCP-UART
+	uint16 tcp_client_twait;	// время (миллисек) до повтора соединения клиента
+#ifdef USE_TCP2UART
+	uint16 tcp2uart_port;	// номер порта TCP-UART (=0 - отключен)
 	uint16 tcp2uart_twrec;	// время (сек) стартового ожидания приема/передачи первого пакета, до авто-закрытия соединения
 	uint16 tcp2uart_twcls;	// время (сек) до авто-закрытия соединения после приема или передачи
-	uint16 tcp_client_twait;  // время (миллисек) до повтора соединения клиента
-	uint16 web_port;	// номер порта WEB
-	uint16 udp_port;	// номер порта UDP (sample-debug-test)
+#endif
+#ifdef USE_WEB
+	uint16 web_port;	// номер порта WEB (=0 - отключен)
+	uint16 web_twrec;	// время (сек) стартового ожидания приема/передачи первого пакета, до авто-закрытия соединения
+	uint16 web_twcls;	// время (сек) до авто-закрытия соединения после приема или передачи
+#endif
+#ifdef USE_WDRV
+	uint16 wdrv_remote_port;	// (=0 - отключен)
+#endif
+#ifdef UDP_TEST_PORT
+	uint16 udp_test_port;	// (=0 - отключен)
+#endif
+#ifdef USE_MODBUS
+	uint16 mdb_remote_port;	// (=0 - отключен)
+	uint16 mdb_twrec;	// время (сек) стартового ожидания приема/передачи первого пакета, до авто-закрытия соединения
+	uint16 mdb_twcls;	// время (сек) до авто-закрытия соединения после приема или передачи
+#endif
 } __attribute__((packed));
 
 
@@ -112,5 +131,10 @@ bool sys_write_cfg(void) ICACHE_FLASH_ATTR; // пишет из struct SystemCfg 
 bool sys_read_cfg(void) ICACHE_FLASH_ATTR; // читет в struct SystemCfg *scfg
 bool new_tcp2uart_url(uint8 *url) ICACHE_FLASH_ATTR;
 bool read_tcp2uart_url(void) ICACHE_FLASH_ATTR;
+
+#define MAX_IDX_USER_CONST 4
+
+uint32 read_user_const(uint8 idx); // чтение пользовательских констант (0 < idx < 4)
+bool write_user_const(uint8 idx, uint32 data); // запись пользовательских констант (0 < idx < 4)
 
 #endif /* __FLASH_EEP_H_ */
