@@ -251,7 +251,7 @@
  * (requires the LWIP_TCP option)
  */
 #ifndef MEMP_NUM_TCP_PCB
-#define MEMP_NUM_TCP_PCB                (*(volatile uint32*)0x600011FC)
+#define MEMP_NUM_TCP_PCB                (*(volatile uint32*)0x600011FC) // =5 (init.c)
 #endif
 
 /**
@@ -672,7 +672,7 @@
  * DHCP_MAXRTX: Maximum number of retries of current request.
  */
 #ifndef DHCP_MAXRTX
-#define DHCP_MAXRTX						(*(volatile uint32*)0x600011E0)
+#define DHCP_MAXRTX						(*(volatile uint32*)0x600011E0) // = 0 (dhcp.c, timers.c)
 #endif
 
 /*
@@ -928,21 +928,21 @@
  * (2 * TCP_MSS) for things to work well
  */
 #ifndef TCP_WND
-#define TCP_WND                         (*(volatile uint32*)0x600011F0)
+#define TCP_WND                         (*(volatile uint32*)0x600011F0) // = 4*TCP_MSS (init.c)
 #endif 
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
  */
 #ifndef TCP_MAXRTX
-#define TCP_MAXRTX                      (*(volatile uint32*)0x600011E8)
+#define TCP_MAXRTX                      (*(volatile uint32*)0x600011E8) // = 12 (init.c)
 #endif
 
 /**
  * TCP_SYNMAXRTX: Maximum number of retransmissions of SYN segments.
  */
 #ifndef TCP_SYNMAXRTX
-#define TCP_SYNMAXRTX                   (*(volatile uint32*)0x600011E4)
+#define TCP_SYNMAXRTX                   (*(volatile uint32*)0x600011E4) // = 6 (init.c)
 #endif
 
 /**

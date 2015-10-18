@@ -102,6 +102,27 @@ const WAV_HEADER ICACHE_RODATA_ATTR wav_header =
  0x00000000L};
 #define WAV_HEADER_SIZE sizeof(wav_header)
 
+//===============================================================================
+// web_test_adc()
+//-------------------------------------------------------------------------------
+uint64 get_mac_time(void)
+{
+	union {
+		volatile uint32 dw[2];
+		uint64 dd;
+	}ux;
+	volatile uint32 * ptr = (volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR;
+	ux.dw[0] = ptr[0];
+	ux.dw[1] = ptr[1];
+	if(ux.dw[1] != ptr[1]) {
+		ux.dw[0] = ptr[0];
+		ux.dw[1] = ptr[1];
+	}
+	return ux.dd;
+}
+//===============================================================================
+// web_test_adc()
+//-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR web_test_adc(TCP_SERV_CONN *ts_conn)
 {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *) ts_conn->linkd;
@@ -507,6 +528,14 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           }
           else ifcmp("time") tcp_puts("%u", system_get_time());
           else ifcmp("rtctime") tcp_puts("%u", system_get_rtc_time());
+          else ifcmp("mactime") {
+        	  union {
+        	  		uint32 dw[2];
+        	  		uint64 dd;
+        	  	}ux;
+        	  ux.dd = get_mac_time();
+        	  tcp_puts("0x%08x%08x", ux.dw[1], ux.dw[0]);
+          }
           else ifcmp("vdd33") tcp_puts("%u", readvdd33()); // system_get_vdd33() phy_get_vdd33();
           else ifcmp("wdt") tcp_puts("%u", ets_wdt_get_mode());
           else ifcmp("res_event") tcp_puts("%u", rtc_get_reset_reason()); // 1 - power/ch_pd, 2 - reset, 3 - software, 4 - wdt ...

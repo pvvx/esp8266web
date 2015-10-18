@@ -30,6 +30,7 @@
  <adc_vdd3v3_div>~sys_ucnst_0~</adc_vdd3v3_div>
  <time>~sys_time~</time>
  <rtctime>~sys_rtctime~</rtctime>
+ <mactime>~sys_mactime~</mactime>
  <sntp_time>~sntp_time~</sntp_time>
  <heap>~sys_heap~</heap>
  <wdtmode>~sys_wdt~</wdtmode>

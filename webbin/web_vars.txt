@@ -19,17 +19,6 @@ wifi_ap_ssid
 wifi_ap_psw
 tcp_remote
 web_remote
-sys_webver
-sys_sdkver
-sys_cid
-inc:footer.inc
-inc:vdd.inc
-inc:time.inc
-inc:menu.inc
-wifi_ap_ssid
-wifi_ap_psw
-tcp_remote
-web_remote
 mdb_remote
 sys_webver
 sys_sdkver
@@ -136,6 +125,7 @@ sys_vdd33
 sys_ucnst_0
 sys_time
 sys_rtctime
+sys_mactime
 sntp_time
 sys_heap
 sys_wdt

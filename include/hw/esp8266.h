@@ -164,6 +164,22 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 uart0 and uart1 intr combine together, when interrupt occur */
 #define REG_UART_INTS io2_regs_[8]
 
+/* PHY_TIMER32BIT: 3ff20c00
+ * Step: 1us * phy_get_mactime(), system_get_time() */
+/* REG?: 0x3ff20c20 */
+
+/* MAC_TIMER64BIT_COUNT: 0x3ff21048
+ * Step: 1us * wDev_MacTim1Arm() */
+#define MAC_TIMER64BIT_COUNT_ADDR 0x3ff21048
+//#define MAC_TIMER64BIT_COUNT_LW IOREG(0x3ff21048)
+//#define MAC_TIMER64BIT_COUNT_HI IOREG(0x3ff2104c)
+/* MAC_TIMER64BIT_ALARM: 0x3ff210cc
+ * Step: 1us * wDev_MacTim1Arm() */
+/* MAC_TIMER64BIT_INT_ENA?: 0x3FF210C8
+ * bit31: ena * wDev_MacTim1Arm() */
+/* 0x3FF21058 bit31 wDev_MacTim1SetFunc() */
+
+
 /* SPIx controller registers index */
 #define IDX_SPI_CMD			0
 #define IDX_SPI_ADDR		1
