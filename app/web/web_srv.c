@@ -38,12 +38,7 @@
 #define MIN_REQ_LEN  7  // Minimum length for a valid HTTP/0.9 request: "GET /\r\n" -> 7 bytes
 #define CRLF "\r\n"
 
-//#if (DEF_SDK_VERSION >= 1000) && (DEF_SDK_VERSION <= 1012)
-//#define max_len_buf_write_flash 1024 // размер буфера при записи flash. Увеличение/уменньшение размера (до сектора 4096) ускорения не дает (1..2%)
-//#else
-//#error "lmac.c 599 remove?"
 #define max_len_buf_write_flash 2048 // размер буфера при записи flash. Увеличение/уменньшение размера (до сектора 4096) ускорения не дает (1..2%)
-//#endif
 
 #define mMIN(a, b)  ((a<b)?a:b)
 #define mMAX(a, b)  ((a>b)?a:b)
@@ -301,10 +296,10 @@ LOCAL WEB_SRV_CONN * ICACHE_FLASH_ATTR ReNew_web_conn(TCP_SERV_CONN *ts_conn)
 	if(web_conn == NULL) {
 		web_conn = (WEB_SRV_CONN *)os_zalloc(sizeof(WEB_SRV_CONN));
 		if(web_conn != NULL) {
-			web_conn->bffiles[0] = 0xff;
-			web_conn->bffiles[1] = 0xff;
-			web_conn->bffiles[2] = 0xff;
-			web_conn->bffiles[3] = 0xff;
+			web_conn->bffiles[0] = WEBFS_INVALID_HANDLE;
+			web_conn->bffiles[1] = WEBFS_INVALID_HANDLE;
+			web_conn->bffiles[2] = WEBFS_INVALID_HANDLE;
+			web_conn->bffiles[3] = WEBFS_INVALID_HANDLE;
 		//  web_conn->webflag = 0; //zalloc
 		//  web_conn->func_web_cb = NULL; //zalloc
 			OpenSCB(); // сбросить флаги

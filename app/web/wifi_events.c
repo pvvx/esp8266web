@@ -11,6 +11,7 @@
 #include "osapi.h"
 #include "user_interface.h"
 #include "wifi.h"
+#include "wifi_events.h"
 #include "flash_eep.h"
 #include "tcp2uart.h"
 #include "web_srv.h"
@@ -33,10 +34,8 @@
 #include "modbustcp.h"
 #endif
 
-#if 0
-#undef DEBUGSOO
-#define DEBUGSOO 2
-#endif
+struct s_probe_requests buf_probe_requests[MAX_COUNT_BUF_PROBEREQS] DATA_IRAM_ATTR;
+uint32 probe_requests_count DATA_IRAM_ATTR;
 
 #if DEBUGSOO > 1
 #define PRINT_EVENT_REASON_ENABLE 
@@ -188,16 +187,6 @@ LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
 #else // DEF_SDK_ST_RECONNECT_BAG  ждем patch
 // #warning "DEF_SDK_ST_RECONNECT_BAG"
 #endif
-
-struct s_probe_requests {
-	uint8 mac[6];
-	sint8 rssi_min;
-	sint8 rssi_max;
-} __attribute__((packed));
-
-#define MAX_COUNT_BUF_PROBEREQS 32
-struct s_probe_requests buf_probe_requests[MAX_COUNT_BUF_PROBEREQS] DATA_IRAM_ATTR;
-uint32 probe_requests_count DATA_IRAM_ATTR;
 
 void ICACHE_FLASH_ATTR add_next_probe_requests(Event_SoftAPMode_ProbeReqRecved_t *pr)
 {

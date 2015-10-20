@@ -13,7 +13,6 @@
 #include "user_interface.h"
 #include "web_utils.h"
 
-
 #define mMIN(a, b)  ((a<b)?a:b)
 
 int ICACHE_FLASH_ATTR rom_atoi(const char *s)
@@ -461,19 +460,15 @@ size_t ICACHE_FLASH_ATTR base64encode(char* target, size_t target_len, const cha
   return len;
 }
 //=============================================================================
-
 void ICACHE_FLASH_ATTR print_hex_dump(uint8 *buf, uint32 len, uint8 k)
 {
 	if(!system_get_os_print()) return; // if(*((uint8 *)(0x3FFE8000)) == 0) return;
 	uint32 ss[2];
-	ss[0] = 0x78323025;
-	ss[1] = k;
+	ss[0] = 0x78323025; // "%02x"
+	ss[1] = k;	// ","...'\0'
 	uint8* ptr = buf;
-//	uint32 i = 0;
 	while(len--) {
 		if(len == 0) ss[1] = 0;
-//		else if((++i & 0x0F) == 0) ss[1] = 0x0d;
-//		else ss[1] = k;
 		ets_printf((uint8 *)&ss[0], *ptr++);
 	}
 }

@@ -18,8 +18,8 @@
  * this notice you can do whatever you want with this stuff. If we meet some day, 
  * and you think this stuff is worth it, you can buy me a beer in return. 
  * ----------------------------------------------------------------------------
+ * added, editing, update: pvvx
  */
-
 
 /*
 This is a 'captive portal' DNS server: it basically replies with a fixed IP (in this case:

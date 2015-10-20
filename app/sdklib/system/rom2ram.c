@@ -20,6 +20,7 @@
 extern uint32 _text_start[]; // start addr IRAM
 extern uint32 _lit4_start[]; // addr data buf IRAM
 
+/* Определение размера свободного буфера в IRAM и очистка BSS IRAM (сегмент DATA_IRAM_ATTR) */
 int ICACHE_FLASH_ATTR iram_buf_init(void)
 {
 	 uint32 * end = &_text_start[((((DPORT_BASE[9]>>3)&3)==3)? (0x08000 >> 2) : (0x0C000 >> 2))];
@@ -36,7 +37,7 @@ int ICACHE_FLASH_ATTR iram_buf_init(void)
 	 return eraminfo.size;
 }
 
-
+/* Копирует данные из области align(4) (flash, iram, registers) в область align(1) (ram) */
 int ICACHE_RAM_ATTR copy_s4d1(unsigned char * pd, void * ps, unsigned int len)
 {
 	union {
@@ -75,8 +76,7 @@ int ICACHE_RAM_ATTR copy_s4d1(unsigned char * pd, void * ps, unsigned int len)
 	}
 	return 0;
 }
-
-
+/* Копирует данные из области align(1) (ram) в область align(4) (flash, iram, registers) */
 int ICACHE_RAM_ATTR copy_s1d4(void * pd, unsigned char * ps, unsigned int len)
 {
 	union {
@@ -116,9 +116,8 @@ int ICACHE_RAM_ATTR copy_s1d4(void * pd, unsigned char * ps, unsigned int len)
 	}
 	return 0;
 }
-
 //extern void copy_s4d1(uint8 * pd, void * ps, uint32 len);
-
+/* Чтение буфера в IRAM */
 bool ICACHE_RAM_ATTR eRamRead(uint32 addr, uint8 *pd, uint32 len)
 {
 	if (addr + len > eraminfo.size) return false;
@@ -127,15 +126,14 @@ bool ICACHE_RAM_ATTR eRamRead(uint32 addr, uint8 *pd, uint32 len)
 }
 
 //extern void copy_s1d4(void * pd, uint8 * ps, uint32 len);
-
+/* Запись буфера в IRAM */
 bool ICACHE_RAM_ATTR eRamWrite(uint32 addr, uint8 *ps, uint32 len)
 {
 	if (addr + len > eraminfo.size) return false;
 	copy_s1d4((void *)((uint32)eraminfo.base + addr), ps, len);
 	return true;
 }
-
-
+/* strlen() для данных в сегментах flash и IRAM */
 unsigned int ICACHE_RAM_ATTR rom_strlen(const char * ps)
 {
 	union {
@@ -155,7 +153,7 @@ unsigned int ICACHE_RAM_ATTR rom_strlen(const char * ps)
 		} while(xlen);
 	}
 }
-
+/* strcpy() из сегментов flash и IRAM */
 char * ICACHE_RAM_ATTR rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
 {
 	if(pd_ == (0) || ps == (0) || maxlen == 0) return (0);
@@ -217,8 +215,8 @@ char * ICACHE_RAM_ATTR rom_strcpy(char * pd_, void * ps, unsigned int maxlen)
 	return pd_;
 #endif
 }
-
-/* на выходе размер строки, без учета терминатора '\0' */
+/* xstrcpy() из сегментов flash и IRAM с возвратом размера строки:
+   на выходе размер строки, без учета терминатора '\0' */
 unsigned int ICACHE_RAM_ATTR rom_xstrcpy(char * pd, const char * ps)
 {
 	union {
@@ -239,8 +237,8 @@ unsigned int ICACHE_RAM_ATTR rom_xstrcpy(char * pd, const char * ps)
 		} while(xlen);
 	}
 }
-
-/* = 1 если шаблон совпадает */
+/* сравнение строки в ram со строкой в сегменте flash и IRAM
+  = 1 если шаблон совпадает */
 int ICACHE_RAM_ATTR rom_xstrcmp(char * pd, const char * ps)
 {
 	union {

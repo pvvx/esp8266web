@@ -51,6 +51,7 @@
 #include "os_type.h"
 #include "osapi.h"
 #include "sdk/mem_manager.h"
+#include "sdk/rom2ram.h"
 #include "user_interface.h"
 
 #include "lwip/opt.h"
@@ -572,9 +573,9 @@ void ICACHE_FLASH_ATTR sntp_request(void *arg)
 	u8_t buf_sntp_server_addresses[DNS_MAX_NAME_LENGTH];
 
 #if SNTP_SUPPORT_MULTIPLE_SERVERS
-	copy_align4(buf_sntp_server_addresses, sntp->sntp_server_addresses[sntp->sntp_current_server], DNS_MAX_NAME_LENGTH);
+	rom_strcpy(buf_sntp_server_addresses, sntp->sntp_server_addresses[sntp->sntp_current_server], DNS_MAX_NAME_LENGTH-1);
 #else
-	copy_align4(buf_sntp_server_addresses, sntp->sntp_server_addresses, DNS_MAX_NAME_LENGTH>>2);
+	rom_strcpy(buf_sntp_server_addresses, sntp->sntp_server_addresses, DNS_MAX_NAME_LENGTH-1);
 #endif
 
 	LWIP_DEBUGF(SNTP_DEBUG_STATE, ("Sending request to %s.\n", buf_sntp_server_addresses));

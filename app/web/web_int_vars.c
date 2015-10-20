@@ -422,7 +422,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           else ifcmp("gw") 		wificonfig.st.ipinfo.gw.addr = ipaddr_addr(pvar);
           else ifcmp("msk") 	wificonfig.st.ipinfo.netmask.addr = ipaddr_addr(pvar);
           else ifcmp("mac") 	strtomac(pvar,wificonfig.st.macaddr);
-          else ifcmp("hostname") rom_strcpy(wificonfig.st.hostname, pvar, 31);
+          else ifcmp("hostname") rom_strcpy(wificonfig.st.hostname, pvar, sizeof(wificonfig.st.hostname)-1);
 #if DEBUGSOO > 5
           else os_printf(" - none!\n");
 #endif

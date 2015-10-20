@@ -105,7 +105,7 @@ const WAV_HEADER ICACHE_RODATA_ATTR wav_header =
 //===============================================================================
 // web_test_adc()
 //-------------------------------------------------------------------------------
-uint64 get_mac_time(void)
+uint64 ICACHE_FLASH_ATTR get_mac_time(void)
 {
 	union {
 		volatile uint32 dw[2];
@@ -241,12 +241,12 @@ void ICACHE_FLASH_ATTR web_ProbeRequest_xml(TCP_SERV_CONN *ts_conn)
     	}
     	web_conn->udata_start = 0;
     }
-	while(web_conn->msgbuflen + 76 <= web_conn->msgbufsize) {
+	while(web_conn->msgbuflen + 92 <= web_conn->msgbufsize) {
 	    if(web_conn->udata_start < cnt) {
 	    	struct s_probe_requests *p = (struct s_probe_requests *)&buf_probe_requests;
 	    	p += web_conn->udata_start;
 	    	ets_memcpy(&pr, p, sizeof(struct s_probe_requests));
-			tcp_puts_fd("<mac>" MACSTR "</mac><min>%d</min><max>%d</max>", MAC2STR(pr.mac), pr.rssi_min, pr.rssi_max);
+			tcp_puts_fd("<pr id=\"%u\"><mac>" MACSTR "</mac><min>%d</min><max>%d</max></pr>", web_conn->udata_start, MAC2STR(pr.mac), pr.rssi_min, pr.rssi_max);
 	   		web_conn->udata_start++;
 	    	if(web_conn->udata_start >= cnt) {
 	    		tcp_puts_fd("<total>%d</total>", cnt);

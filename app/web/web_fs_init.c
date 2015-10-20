@@ -37,10 +37,10 @@ void web_fini(const uint8 * fname)
 	}
 	TCP_SERV_CONN * ts_conn = &p->ts_conn;
 	WEB_SRV_CONN * web_conn = &p->web_conn;
-	web_conn->bffiles[0]=WEBFS_INVALID_HANDLE;
-	web_conn->bffiles[1]=WEBFS_INVALID_HANDLE;
-	web_conn->bffiles[2]=WEBFS_INVALID_HANDLE;
-	web_conn->bffiles[3]=WEBFS_INVALID_HANDLE;
+	web_conn->bffiles[0] = WEBFS_INVALID_HANDLE;
+	web_conn->bffiles[1] = WEBFS_INVALID_HANDLE;
+	web_conn->bffiles[2] = WEBFS_INVALID_HANDLE;
+	web_conn->bffiles[3] = WEBFS_INVALID_HANDLE;
 	ts_conn->linkd = (uint8 *)web_conn;
 	ts_conn->sizeo = FINI_BUF_SIZE;
 	ts_conn->pbufo = p->buf;

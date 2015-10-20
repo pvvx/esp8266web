@@ -919,7 +919,7 @@ tcp_output(struct tcp_pcb *pcb)
    *
    * If data is to be sent, we will just piggyback the ACK (see below).
    */
-  if (pcb->flags & TF_ACK_NOW &&
+  if ((pcb->flags & TF_ACK_NOW) &&
      (seg == NULL ||
       ntohl(seg->tcphdr->seqno) - pcb->lastack + seg->len > wnd)) {
      return tcp_send_empty_ack(pcb);//����ֻ��ACK�ı��Ķ�
@@ -1304,7 +1304,7 @@ tcp_rexmit_rto(struct tcp_pcb *pcb)
 /**
  * Requeue the first unacked segment for retransmission
  *
- * Called by tcp_receive() for fast retramsmit.
+ * Called by tcp_receive() for fast retransmit.
  *
  * @param pcb the tcp_pcb for which to retransmit the first unacked segment
  */
