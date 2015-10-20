@@ -6,6 +6,8 @@
  * License: ESPRESSIF MIT License
  *******************************************************************************/
 
+#include "user_config.h"
+#ifdef USE_GDBSTUB
 
 #include "gdbstub-cfg.h"
 
@@ -403,4 +405,4 @@ gdbstub_do_break_breakpoint_addr:
 	addi	a1, a1, 16
 	ret
 
-
+#endif
