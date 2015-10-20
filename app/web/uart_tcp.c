@@ -183,15 +183,15 @@ void ICACHE_FLASH_ATTR uart_init(void)
 		UART0_INT_ENA = 0;
 	    UART0_CONF0 = ux.cfg.dw;
 		    //set rx fifo trigger
-#ifdef USE_TCP2UART
 		UART0_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
+#ifdef USE_TCP2UART
 			| ((0x10 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
-			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
-			| ((0x01 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
-		;
 #else
-		UART1_CONF0 = 0x01707070;
+			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
 #endif
+			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
+			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
+		;
 		update_mux_uart0(); // включение/отключение RTS UART0 в зависимости от установок флага uart0_flow_ctrl_flg
 		uart_div_modify(UART0, UART_CLK_FREQ / ux.baud); // WRITE_PERI_REG(UART_CLKDIV(num), ux.baud) + clear rx and tx fifo, not ready =
 	    // clear all interrupt UART0
@@ -204,7 +204,11 @@ void ICACHE_FLASH_ATTR uart_init(void)
 		ux.cfg.dw &= UART1_REGCONFIG0MASK;
     	UART1_INT_ENA = 0;
 		UART1_CONF0 = ux.cfg.dw;
-	    UART1_CONF1 = 0x01707070;
+		UART1_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
+			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
+			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
+			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
+		;
 		update_mux_txd1();
 		uart_div_modify(UART1, UART_CLK_FREQ / ux.baud); // WRITE_PERI_REG(UART_CLKDIV(num), ux.baud) + clear rx and tx fifo, not ready =
 		// clear all interrupt

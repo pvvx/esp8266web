@@ -58,7 +58,7 @@ void pp_soft_wdt_feed_local()
 	rst_info.excvaddr = RSR(EXCVADDR);
 	rst_info.depc = RSR(DEPC);
 	if(wdt_flg == true) {
-		rst_info.reason = 3; // =3
+		rst_info.reason = REASON_SOFT_WDT_RST; // =3
 		system_rtc_mem_write(0, &rst_info, sizeof(rst_info));
 		ets_intr_lock();
 		Wait_SPI_Idle(flashchip);
@@ -66,7 +66,7 @@ void pp_soft_wdt_feed_local()
 		system_restart_local();
 	}
 	else {
-		rst_info.reason = 1; // =1
+		rst_info.reason = REASON_WDT_RST; // =1
 		system_rtc_mem_write(0, &rst_info, sizeof(rst_info));
 #if DEF_SDK_VERSION >= 1119
 		wDev_MacTim1Arm(soft_wdt_interval);
@@ -114,7 +114,7 @@ void ICACHE_FLASH_ATTR pp_soft_wdt_init(void)
 	ets_timer_setfn(SoftWdtTimer, (ETSTimerFunc *)pp_soft_wdt_feed, NULL);
 	ets_timer_arm_new(SoftWdtTimer, soft_wdt_interval, 0, 1);
 #elif DEF_SDK_VERSION >= 1119
-	wDev_MacTim1SetFunc(pp_soft_wdt_feed);
+	wDev_MacTim1SetFunc(pp_soft_wdt_feed_local);
 	wDev_MacTim1Arm(soft_wdt_interval);
 #endif
 }

@@ -18,6 +18,7 @@ GEN_IMAGES= eagle.app.v6.out
 GEN_BINS = eagle.app.v6.bin
 
 SUBDIRS =	\
+	gdbstub	\
 	sdklib	\
 	user	\
 	driver	\
@@ -36,6 +37,7 @@ DEPENDS_eagle.app.v6 = \
                 $(LDDIR)/eagle.rom.addr.v6.ld
 
 COMPONENTS_eagle.app.v6 = \
+	gdbstub/libgdbstub.a	\
 	driver/libdriver.a \
 	web/libweb.a	\
 	mdbtcp/libmdbtcp.a \

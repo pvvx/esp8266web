@@ -31,6 +31,8 @@ void update_mux_txd1(void) ICACHE_FLASH_ATTR;
 void update_mux_uart0(void) ICACHE_FLASH_ATTR;
 void set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask) ICACHE_FLASH_ATTR;
 
+#define RST_FIFO_CNT_SET 16 // при остатке в fifo места для 16 символов срабатывает RTS
+
 #ifdef USE_TCP2UART
 extern os_timer_t uart0_rx_buf_timer;
 extern os_timer_t uart0_tx_buf_timer;
@@ -48,8 +50,6 @@ err_t tcp2uart_start(uint16 newportn) ICACHE_FLASH_ATTR;
 void tcp2uart_close(void) ICACHE_FLASH_ATTR;
 
 void tcp2uart_int_rxtx_disable(void) ICACHE_FLASH_ATTR;
-
-#define RST_FIFO_CNT_SET 16 // при остатке в fifo места для 16 символов срабатывает RTS
 
 #define MAX_WAIT_TX_BUF 50000ul // 50 ms
 

@@ -82,6 +82,10 @@ void ICACHE_FLASH_ATTR user_init(void) {
 #endif
 	if(syscfg.cfg.b.pin_clear_cfg_enable) test_pin_clr_wifi_config();
 	set_cpu_clk(); // select cpu frequency 80 or 160 MHz
+#ifdef USE_GDBSTUB
+extern void gdbstub_init(void);
+	gdbstub_init();
+#endif
 #if DEBUGSOO > 0
 	if(eraminfo.size > 0) os_printf("Found free IRAM: base: %p, size: %d bytes\n", eraminfo.base,  eraminfo.size);
 	os_printf("System memory:\n");

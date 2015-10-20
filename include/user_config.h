@@ -12,6 +12,9 @@
 #define USE_TCP2UART 12345 // включить в трансялцию драйвер TCP2UART, номер порта по умолчанию (=0 - отключен)
 
 #if DEBUGSOO > 0
+#ifndef USE_TCP2UART
+//#define USE_GDBSTUB
+#endif
 #define UDP_TEST_PORT	1025 // включить в трансялцию контрольный порт UDP, (=0 - отключен)
 #endif
 
