@@ -13,7 +13,7 @@
 
 #if DEBUGSOO > 0
 #ifndef USE_TCP2UART
-//#define USE_GDBSTUB
+// #define USE_GDBSTUB // UDK пока не поддерживает GDB
 #endif
 #define UDP_TEST_PORT	1025 // включить в трансялцию контрольный порт UDP, (=0 - отключен)
 #endif

@@ -21,6 +21,8 @@ extern uint32 probe_requests_count;
 
 void wifi_handle_event_cb(System_Event_t *evt) ICACHE_FLASH_ATTR;
 
+extern int flg_open_all_service; // default = false
+
 extern int st_reconn_count;
 extern os_timer_t st_disconn_timer;
 void station_reconnect_off(void) ICACHE_FLASH_ATTR;

@@ -87,6 +87,7 @@ int wifi_station_start(void) ICACHE_FLASH_ATTR;
 
 #if DEF_SDK_VERSION >= 1200
 int wifi_softap_start(int) ICACHE_FLASH_ATTR;
+int wifi_softap_stop(int) ICACHE_FLASH_ATTR;
 #else
 int wifi_softap_start(void) ICACHE_FLASH_ATTR;
 #endif

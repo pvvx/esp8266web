@@ -36,16 +36,13 @@
 	#define DEF_WIFI_AUTH_MODE AUTH_OPEN // AUTH_WPA_PSK, AUTH_WPA2_PSK, AUTH_WPA_WPA2_PSK
 #endif
 
-//#ifndef DEF_ST_MAX_RECONNECT
-//	#define DEF_ST_MAX_RECONNECT 7 // следующая проба соединения ST произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
-//#endif
-
 #ifndef DEF_ST_RECONNECT_TIME
 	#define DEF_ST_RECONNECT_TIME 30 // следующая проба соединения ST произойдет через reconn_timeout секунд. При DEF_ST_RECONNECT_TIME == 1 данный алго отключен.
 #endif
 
 #define MAX_PHY_TPW 82 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
 #define DEF_MAX_PHY_TPW 82 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
+
 
 #ifndef DEBUGSOO
 	#define DEBUGSOO 1
@@ -165,6 +162,8 @@ void Set_default_wificfg(struct wifi_config *wcfg, uint32 wifi_set_mask) ICACHE_
 bool wifi_save_fcfg(uint32 rdmask) ICACHE_FLASH_ATTR;
 bool wifi_read_fcfg(void) ICACHE_FLASH_ATTR;
 void wifi_start_scan(void) ICACHE_FLASH_ATTR;
+void WiFi_go_to_sleep(enum sleep_type mode, uint32 time_us) ICACHE_FLASH_ATTR;
+void WiFi_up_from_sleep(void) ICACHE_FLASH_ATTR;
 
 void get_macaddr_from_otp(uint8 *mac) ICACHE_FLASH_ATTR;
 

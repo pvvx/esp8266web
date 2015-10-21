@@ -34,16 +34,23 @@
 #include "modbustcp.h"
 #endif
 
+/* Ждем следующий patch от китайцев (все SDK включая 1.4.0):
+ * При выполнении wifi_station_disconnect() в событии EVENT_STAMODE_DISCONNECTED
+ * часто AP отваливается навсегда. Требуется использовать обход данного глюка...
+ * В SDK < 1.4.0 при выполнеии в wifi event wifi_set_opmode() ведет к Fatal exception (28)
+ */
+#define DEF_SDK_ST_RECONNECT_BAG 1
+
 struct s_probe_requests buf_probe_requests[MAX_COUNT_BUF_PROBEREQS] DATA_IRAM_ATTR;
 uint32 probe_requests_count DATA_IRAM_ATTR;
 
-#if DEBUGSOO > 1
-#define PRINT_EVENT_REASON_ENABLE 
+#if DEBUGSOO > 2
+ #define PRINT_EVENT_REASON_ENABLE
 #endif
 
 #ifdef PRINT_EVENT_REASON_ENABLE
 
-static const uint8 txt_reason_undef[] ICACHE_RODATA_ATTR             		= "Unknown";	             
+static const uint8 txt_reason_undef[] ICACHE_RODATA_ATTR             		= "Unknown";	             // = 0,
 static const uint8 txt_reason_unspecified[] ICACHE_RODATA_ATTR             	= "Unspecified";             // = 1,
 static const uint8 txt_reason_auth_expire[] ICACHE_RODATA_ATTR             	= "Auth_expire";             // = 2,
 static const uint8 txt_reason_auth_leave[] ICACHE_RODATA_ATTR              	= "Auth_leave";              // = 3,
@@ -70,11 +77,15 @@ static const uint8 txt_reason_cipher_suite_rejected[] ICACHE_RODATA_ATTR   	= "C
                                                       
 static const uint8 txt_reason_beacon_timeout[] ICACHE_RODATA_ATTR          	= "Beacon_timeout";          // = 200,
 static const uint8 txt_reason_no_ap_found[] ICACHE_RODATA_ATTR             	= "No_ap_found";             // = 201,
+static const uint8 txt_reason_auth_fail[] ICACHE_RODATA_ATTR				= "Auth_fail";				 // = 202,
+static const uint8 txt_reason_assoc_fail[] ICACHE_RODATA_ATTR				= "Assoc_fail";				 // = 203,
+static const uint8 txt_reason_handshake_timeout[] ICACHE_RODATA_ATTR		= "Handshake_timeout";		 // = 204
+
 
 struct tab_event_reason {
 	const uint8 * txt;
 };
-const struct tab_event_reason tab_event_reason_1_24[] ICACHE_RODATA_ATTR = {
+const struct tab_event_reason tab_event_reason_1_24_200[] ICACHE_RODATA_ATTR = {
 	{txt_reason_unspecified},
 	{txt_reason_auth_expire},
 	{txt_reason_auth_leave},
@@ -97,7 +108,14 @@ const struct tab_event_reason tab_event_reason_1_24[] ICACHE_RODATA_ATTR = {
 	{txt_reason_unsupp_rsn_ie_version},
 	{txt_reason_invalid_rsn_ie_cap},
 	{txt_reason_802_1x_auth_failed},
-	{txt_reason_cipher_suite_rejected} };
+	{txt_reason_cipher_suite_rejected},
+// 200
+	{txt_reason_beacon_timeout},
+	{txt_reason_no_ap_found},
+	{txt_reason_auth_fail},
+	{txt_reason_assoc_fail},
+	{txt_reason_handshake_timeout}
+};
 
 /* static const * tab_event_reason_200_201 ICACHE_RODATA_ATTR = {
 	txt_reason_beacon_timeout, 
@@ -106,38 +124,39 @@ const struct tab_event_reason tab_event_reason_1_24[] ICACHE_RODATA_ATTR = {
 void ICACHE_FLASH_ATTR print_event_reason(int reason)
 {
     const uint8 * txt_reason = txt_reason_unspecified;
-	if (reason >= 1 && reason <= 24) txt_reason = tab_event_reason_1_24[reason].txt;
-	else if (reason == 200) txt_reason = txt_reason_beacon_timeout;
-	else if (reason == 201) txt_reason = txt_reason_no_ap_found;
+	if (reason >= 1 && reason <= 24) txt_reason = tab_event_reason_1_24_200[reason - 1].txt;
+	else if (reason >= 200 && reason <= 204) txt_reason = tab_event_reason_1_24_200[reason - 200 + 23].txt;
 	else txt_reason = txt_reason_undef;
 	os_printf_plus(txt_reason);
 }
 
 #endif // PRINT_EVENT_REASON_ENABLE
 
-#define COUNT_RESCONN_ST 3
+#define COUNT_RESCONN_ST 3 // кол-во непрерывных повторов попытки соединения ST модуля к внешней AP
 
-/* Ждем следующий patch от китайцев (все SDK включая 1.4.0):
- * При выполнении wifi_station_disconnect() в событии EVENT_STAMODE_DISCONNECTED
- * часто AP отваливается навсегда. Требуется использовать обход данного глюка...
- * При выполнеии в wifi event wifi_set_opmode() ведет к Fatal exception (28) (SDK < 1.4.0)
- */
-//#define DEF_SDK_ST_RECONNECT_BAG 1
-
+int flg_open_all_service DATA_IRAM_ATTR; // default = false
 int st_reconn_count DATA_IRAM_ATTR;
 int st_reconn_flg DATA_IRAM_ATTR;
+int flg_sleep DATA_IRAM_ATTR;
 
 os_timer_t st_disconn_timer DATA_IRAM_ATTR;
 
+/******************************************************************************
+ * FunctionName : station_reconnect_off
+ ******************************************************************************/
 void ICACHE_FLASH_ATTR station_reconnect_off(void)
 {
 	st_reconn_count = 0;
 	st_reconn_flg = 0;
 	ets_timer_disarm(&st_disconn_timer);
 }
-
+/******************************************************************************
+ * FunctionName : station_connect_timer
+ * Таймер включения новой попытки соединения ST модуля к внешней AP
+ ******************************************************************************/
 void ICACHE_FLASH_ATTR station_connect_timer(void)
 {
+	WiFi_up_from_sleep();
 	if(st_reconn_count != 0
 	&& (wifi_get_opmode() & STATION_MODE)
 	&& wifi_station_get_auto_connect() != 0) {
@@ -156,38 +175,10 @@ void ICACHE_FLASH_ATTR station_connect_timer(void)
 		}
 	}
 }
-
-#ifdef DEF_SDK_ST_RECONNECT_BAG
-
 /******************************************************************************
- * FunctionName : SDK_ST_RECONNECT_BAG
+ * FunctionName : add_next_probe_requests
+ * Запись нового probe_requests в буфер buf_probe_requests
  ******************************************************************************/
-LOCAL void ICACHE_FLASH_ATTR stop_scan_st(void)
-{
-	ets_set_idle_cb(NULL, NULL);
-	ets_intr_unlock();
-	int opmode = wifi_get_opmode();
-	if((opmode & STATION_MODE) && wifi_station_get_auto_connect() != 0)	{
-		wifi_station_disconnect();
-		if(wificonfig.st.reconn_timeout > 1) {
-#if DEBUGSOO > 1
-			os_printf("Set reconnect after %d sec\n", wificonfig.st.reconn_timeout);
-#endif
-			ets_timer_disarm(&st_disconn_timer);
-			os_timer_setfn(&st_disconn_timer, (os_timer_func_t *)station_connect_timer, NULL);
-			ets_timer_arm_new(&st_disconn_timer, wificonfig.st.reconn_timeout * 1000, 0, 1);
-		}
-#if DEBUGSOO > 1
-		else {
-			os_printf("Reconnect off\n");
-		}
-#endif
-	}
-}
-#else // DEF_SDK_ST_RECONNECT_BAG  ждем patch
-// #warning "DEF_SDK_ST_RECONNECT_BAG"
-#endif
-
 void ICACHE_FLASH_ATTR add_next_probe_requests(Event_SoftAPMode_ProbeReqRecved_t *pr)
 {
 	uint32 i;
@@ -210,34 +201,34 @@ void ICACHE_FLASH_ATTR add_next_probe_requests(Event_SoftAPMode_ProbeReqRecved_t
 	ptrd[1] = (ptrs[1] & 0xFFFF) | ((pr->rssi << 16) & 0xFF0000) | ((pr->rssi << 24) & 0xFF000000);
 	if(++probe_requests_count == 0) probe_requests_count |= 0x80000000;
 }
-
-static uint32 flg_close_all DATA_IRAM_ATTR;
-
 /******************************************************************************
  * FunctionName : close_all_service
+ * Отключение интерфейсов для снижения потребления и т.д.
  ******************************************************************************/
 static ICACHE_FLASH_ATTR void close_all_service(void)
 {
+	if(flg_open_all_service) {
+		flg_open_all_service = false;
 #ifdef USE_NETBIOS
-	netbios_off();
+		netbios_off();
 #endif
 #ifdef USE_TCP2UART
-	tcp2uart_close();
+		tcp2uart_close();
 #endif
 #ifdef USE_WEB
-	if(syscfg.web_port) webserver_close(syscfg.web_port); // webserver_init(0);
+		if(syscfg.web_port) webserver_close(syscfg.web_port); // webserver_init(0);
 #endif
 #ifdef USE_MODBUS
-	mdb_tcp_init(0); // mdb_tcp_close()
+		mdb_tcp_init(0); // mdb_tcp_close()
 #endif
 #ifdef UDP_TEST_PORT
-	udp_test_port_init(0);
+		udp_test_port_init(0);
 #endif
 #ifdef USE_WDRV
-	system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, 0);
+		system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, 0);
 #endif
-	flg_close_all = false;
-	tcpsrv_close_all();
+		tcpsrv_close_all();
+	}
 }
 /******************************************************************************
  * FunctionName : open_all_service
@@ -251,7 +242,7 @@ static ICACHE_FLASH_ATTR void open_all_service(int flg)
 #ifdef USE_SNTP
 	if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
 #endif
-	if(flg == 0 || flg_close_all == false) {
+	if(flg == 0 || flg_open_all_service == false) {
 #ifdef USE_WEB
 	    if(syscfg.web_port) {
 	    	TCP_SERV_CFG *p = tcpsrv_server_port2pcfg(syscfg.web_port);
@@ -279,6 +270,7 @@ static ICACHE_FLASH_ATTR void open_all_service(int flg)
 	    if(wdrv_host_port) system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, wdrv_host_port);
 #endif
 	}
+    flg_open_all_service = true;
 }
 /******************************************************************************
  * FunctionName : wifi_handle_event_cb
@@ -323,28 +315,40 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.disconnected.reason, st_reconn_count);
 #endif
 #endif // PRINT_EVENT_REASON_ENABLE
-			if(wificonfig.st.reconn_timeout != 1 && st_reconn_count >= COUNT_RESCONN_ST && (wifi_get_opmode() & STATION_MODE)) {
 #ifdef DEF_SDK_ST_RECONNECT_BAG
-						ets_set_idle_cb(stop_scan_st, NULL);
-#else
-						if((wifi_get_opmode() & STATION_MODE) && wifi_station_get_auto_connect() != 0)	{
-							wifi_station_disconnect();
-							if(wificonfig.st.reconn_timeout > 1) {
-					#if DEBUGSOO > 1
-								os_printf("Set reconnect after %d sec\n", wificonfig.st.reconn_timeout);
-					#endif
-								ets_timer_disarm(&st_disconn_timer);
-								os_timer_setfn(&st_disconn_timer, (os_timer_func_t *)station_connect_timer, NULL);
-								ets_timer_arm_new(&st_disconn_timer, wificonfig.st.reconn_timeout * 1000, 0, 1);
-							}
-					#if DEBUGSOO > 1
-							else {
-								os_printf("Reconnect off\n");
-							}
-					#endif
-//							wifi_set_opmode_current(2);
-						}
+			extern uint8 gScanStruct[];
 #endif
+			int opmode = wifi_get_opmode();
+			if(wificonfig.st.reconn_timeout != 1
+			 && st_reconn_count >= COUNT_RESCONN_ST
+			 && (opmode & STATION_MODE)
+#ifdef DEF_SDK_ST_RECONNECT_BAG
+			 &&	(evt->event_info.disconnected.reason != REASON_NO_AP_FOUND || gScanStruct[173] == 1)
+#if DEF_SDK_VERSION != 1400
+	#error "gScanStruct[173] !" // искать в scan_start() "f 0, scandone\n"
+#endif
+#endif
+			 ) {
+				if(wifi_station_get_auto_connect() != 0)	{
+					wifi_station_disconnect();
+					if(wificonfig.st.reconn_timeout > 1) {
+#if DEBUGSOO > 1
+						os_printf("Set reconnect after %d sec\n", wificonfig.st.reconn_timeout);
+#endif
+						ets_timer_disarm(&st_disconn_timer);
+						os_timer_setfn(&st_disconn_timer, (os_timer_func_t *)station_connect_timer, NULL);
+						ets_timer_arm_new(&st_disconn_timer, wificonfig.st.reconn_timeout * 1000, 0, 1);
+					}
+#if DEBUGSOO > 1
+					else {
+						os_printf("Reconnect off\n");
+					}
+#endif
+					if(opmode == STATION_MODE) {
+						if(wificonfig.b.sleep != LIGHT_SLEEP_T)	WiFi_go_to_sleep(MODEM_SLEEP_T, 0xFFFFFFFF);
+						else WiFi_go_to_sleep(LIGHT_SLEEP_T, wificonfig.st.reconn_timeout * 1000000);
+					}
+				}
 			}
 			if(wifi_softap_get_station_num() == 0) { // Number count of stations which connected to ESP8266 soft-AP
 				close_all_service();
@@ -370,7 +374,6 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					IP2STR(&evt->event_info.got_ip.mask),
 					IP2STR(&evt->event_info.got_ip.gw));
 #endif
-//			if(wifi_softap_get_station_num() == 0) // Number count of stations which connected to ESP8266 soft-AP
 				open_all_service((wifi_softap_get_station_num() == 0)? 0: 1);
 			break;
 		}
@@ -385,8 +388,7 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.sta_connected.aid, cs);
 #endif
 
-			if(i == 1 && (!(cs == STATION_GOT_IP || cs == STATION_CONNECTING))) open_all_service(0);
-			else open_all_service(1);
+			open_all_service((i == 1 && (!(cs == STATION_GOT_IP || cs == STATION_CONNECTING)))? 0 : 1);
 #ifdef USE_CAPTDNS
 			if(syscfg.cfg.b.cdns_ena) {
 					captdns_init();
@@ -431,4 +433,3 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 			break;
 		}
 }
-

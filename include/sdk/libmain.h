@@ -71,7 +71,8 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
 	uint8	st1ssid[32];	//+324
 	uint8	st1passw[64];	//+356
 	uint8	field_420[400];	//+420
-	uint32	field_820[4];	//+820
+	uint32	field_820[3];	//+820
+	uint8	field_832[4];	//+832  wifi_station_set_auto_connect
 	uint32  phy_mode;		//+836 // g_ic+1300 (+514h) // 3FFF0B78
 	uint8	field_840[36];	//+840
 	uint16	beacon;			//+876 // 0x3FFF289C g_ic+1400

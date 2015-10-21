@@ -17,7 +17,7 @@ ADDR_FW1 = 0x00000
 ADDR_FW2 = 0x07000
 # 
 #USERFADDR = 0x3C000
-USERFADDR = $(shell printf '0x%X\n' $$(( ($$(stat --printf="%s" $(OUTBIN2)) + 0xFFF + $(ADDR_FW2)) & (0xFFFFE000) )) )
+USERFADDR = $(shell printf '0x%X\n' $$(( ($$(stat --printf="%s" $(OUTBIN2)) + 0xFFF + $(ADDR_FW2)) & (0xFFFFF000) )) )
 USERFBIN = ./webbin/WEBFiles.bin
 #
 FIRMWAREDIR := bin

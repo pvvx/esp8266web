@@ -17,6 +17,7 @@
 #include "sdk/sys_const.h"
 #include "wifi_events.h"
 #include "lwip/netif.h"
+#include "web_iohw.h"
 #if DEF_SDK_VERSION == 1019
 #include "../main/include/libmain.h"
 #include "../main/include/app_main.h"
@@ -27,6 +28,8 @@
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 struct wifi_config wificonfig;
+
+int flg_wifi_sleep_enable DATA_IRAM_ATTR; // default = false
 
 static const char wifi_ap_name[] ICACHE_RODATA_ATTR = WIFI_AP_NAME;
 static const char wifi_ap_password[] ICACHE_RODATA_ATTR = WIFI_AP_PASSWORD;
@@ -55,12 +58,42 @@ void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 	}
 }
 #endif
+
+/******************************************************************************
+ * FunctionName : WiFi_go_to_sleep
+ * mode: LIGHT_SLEEP_T or MODEM_SLEEP_T
+ * time_us = 0xFFFFFFFF - вечный если LIGHT_SLEEP_T
+ ******************************************************************************/
+void ICACHE_FLASH_ATTR WiFi_go_to_sleep(enum sleep_type mode, uint32 time_us)
+{
+	wifi_set_opmode_current(NULL_MODE);
+	wifi_fpm_set_sleep_type(mode); //	wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
+	wifi_fpm_open();
+	wifi_fpm_do_sleep(time_us);
+	flg_wifi_sleep_enable = true;
+	Select_CLKx1(); // REG_CLR_BIT(0x3ff00014, BIT(0));
+	ets_update_cpu_frequency(80);
+}
+/******************************************************************************
+ * FunctionName : WiFi_up_from_sleep
+ ******************************************************************************/
+void ICACHE_FLASH_ATTR WiFi_up_from_sleep(void)
+{
+	if(flg_wifi_sleep_enable) {
+		flg_wifi_sleep_enable = false;
+		set_cpu_clk();
+		wifi_fpm_do_wakeup();
+		wifi_fpm_close();
+		wifi_set_opmode_current(wificonfig.b.mode);
+	}
+}
 /******************************************************************************
  * FunctionName : Cmp_wifi_chg
  ******************************************************************************/
 uint32 ICACHE_FLASH_ATTR Cmp_WiFi_chg(struct wifi_config *wcfg) {
 	uwifi_chg wchg;
 	wchg.ui = 0;
+	WiFi_up_from_sleep();
 	uint8 opmode = wifi_get_opmode();
 	if (opmode != wcfg->b.mode)	wchg.b.mode = 1;
 	if (wifi_get_phy_mode() != wcfg->b.phy)	wchg.b.phy = 1;
@@ -136,6 +169,7 @@ uint32 ICACHE_FLASH_ATTR Read_WiFi_config(struct wifi_config *wcfg,
 		uint32 wifi_set_mask) {
 	uwifi_chg werr; werr.ui = 0;
 	uwifi_chg wset;
+	WiFi_up_from_sleep();
 	uint8 opmode = wifi_get_opmode();
 	wset.ui = wifi_set_mask;
 	wifi_read_fcfg();
@@ -187,6 +221,7 @@ uint32 ICACHE_FLASH_ATTR Read_WiFi_config(struct wifi_config *wcfg,
 uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask) {
 	uwifi_chg wset; wset.ui = wifi_set_mask;
 	uwifi_chg werr; werr.ui = 0;
+	WiFi_up_from_sleep();
 	if ((wset.b.mode)
 			&& (!(wifi_set_opmode(wcfg->b.mode)))) werr.b.mode = 1;
 	uint8 opmode = wifi_get_opmode();

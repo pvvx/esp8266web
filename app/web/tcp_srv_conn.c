@@ -936,7 +936,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_start(TCP_SERV_CFG *p) {
 	} else
 		err = ERR_MEM;
 #if DEBUGSOO > 0
-		os_printf("tcpsrv: low heap size!\n");
+		os_printf("tcpsrv: not new tcp!\n");
 #endif
 	return err;
 }
