@@ -91,7 +91,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/user/include}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.std.952602252" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.858365605" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
@@ -110,7 +109,13 @@
 								<option id="gnu.c.compiler.option.dialect.flags.910163032" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-std=gnu90" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.915388226" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
-							<tool command="as" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.tool.gnu.cross.assembler.1771519366" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.tool.gnu.cross.assembler.1771519366" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+								<option id="gnu.both.asm.option.include.paths.1225443984" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+								</option>
+								<option id="gnu.both.asm.option.flags.1561512113" name="Assembler flags" superClass="gnu.both.asm.option.flags" value="-std=gnu90 -DICACHE_FLASH -DPBUF_RSV_FOR_WLAN -DLWIP_OPEN_SRC -DEBUF_LWIP -DUSE_OPEN_LWIP -DUSE_OPEN_DHCPS -DUSE_FIX_QSPI_FLASH=80  -Os -Wall -Werror -Wno-pointer-sign -mtarget-align -mlongcalls -mno-serialize-volatile -mtext-section-literals -fno-tree-ccp -foptimize-register-move -fno-inline-functions -Wl,-EL -nostdlib" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1121711309" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1151397103" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
@@ -233,7 +238,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="esp8266web.asm|app/web|app/mdbtcp|app/driver|MinEspSDKLib.asm|app/user|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="app/gdbstub|esp8266web.asm|app/web|app/mdbtcp|app/driver|MinEspSDKLib.asm|app/user|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
