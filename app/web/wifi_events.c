@@ -205,10 +205,12 @@ void ICACHE_FLASH_ATTR add_next_probe_requests(Event_SoftAPMode_ProbeReqRecved_t
  * FunctionName : close_all_service
  * Отключение интерфейсов для снижения потребления и т.д.
  ******************************************************************************/
-static ICACHE_FLASH_ATTR void close_all_service(void)
+void ICACHE_FLASH_ATTR close_all_service(void)
 {
+#if DEBUGSOO > 3
+	os_printf("Close all:\n");
+#endif
 	if(flg_open_all_service) {
-		flg_open_all_service = false;
 #ifdef USE_NETBIOS
 		netbios_off();
 #endif
@@ -228,14 +230,18 @@ static ICACHE_FLASH_ATTR void close_all_service(void)
 		system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, 0);
 #endif
 		tcpsrv_close_all();
+		flg_open_all_service = false;
 	}
 }
 /******************************************************************************
  * FunctionName : open_all_service
  * if flg = 1 -> reopen
  ******************************************************************************/
-static ICACHE_FLASH_ATTR void open_all_service(int flg)
+void ICACHE_FLASH_ATTR open_all_service(int flg)
 {
+#if DEBUGSOO > 3
+	os_printf("Open all (%u,%u):\n", flg, flg_open_all_service);
+#endif
 #ifdef USE_TCP2UART
 	if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
 #endif
@@ -267,7 +273,7 @@ static ICACHE_FLASH_ATTR void open_all_service(int flg)
 	    if(syscfg.udp_test_port) udp_test_port_init(syscfg.udp_test_port);
 #endif
 #ifdef USE_WDRV
-	    if(wdrv_host_port) system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, wdrv_host_port);
+	    if(syscfg.wdrv_remote_port) system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, syscfg.wdrv_remote_port);
 #endif
 	}
     flg_open_all_service = true;

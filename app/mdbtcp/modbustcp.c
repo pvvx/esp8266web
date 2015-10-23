@@ -83,7 +83,7 @@ err_t ICACHE_FLASH_ATTR mdb_tcp_init(uint16 portn) {
 	if(mdb_tcp_servcfg != NULL
 	&& (!(mdb_tcp_servcfg->flag.client))
 	&& mdb_tcp_servcfg->port == portn) {
-		return  ERR_USE;
+		return ERR_USE;
 	}
 	mdb_tcp_close();
 	if(portn <= ID_CLIENTS_PORT) return ERR_OK;
@@ -111,7 +111,6 @@ err_t ICACHE_FLASH_ATTR mdb_tcp_init(uint16 portn) {
 			p = NULL;
 		}
 		else  {
-			syscfg.mdb_remote_port = portn;
 #if DEBUGSOO > 1
 			os_printf("MDB: init port %u\n", portn);
 #endif

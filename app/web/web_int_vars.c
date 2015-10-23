@@ -29,6 +29,7 @@
 #include "sdk/app_main.h"
 #include "tcp2uart.h"
 #include "web_iohw.h"
+#include "wifi_events.h"
 
 #ifdef USE_NETBIOS
 #include "netbios.h"
@@ -81,6 +82,33 @@ void timer0_tst_isr(void *arg)
 //	uart0_write_char(((uint32)arg == 0)? '*' : '@');
 }
 #endif
+
+/******************************************************************************
+ * FunctionName : go_deep_sleep
+ * Description  : system_deep_sleep
+ * Parameters   : time_us
+ * Returns      : none
+*******************************************************************************/
+void ICACHE_FLASH_ATTR go_deep_sleep(uint32 time_us)
+{
+	close_all_service();
+/*
+	uart0_set_flow(0);
+	GPIO12_MUX  = 0x80;
+	GPIO13_MUX  = 0x80;
+	GPIO14_MUX  = 0x80;
+	GPIO15_MUX  = 0x80;
+	GPIO_STATUS = 0;
+	GPIO_OUT = 0;
+	UART0_CONF0 = UART0_REGCONFIG0DEF;
+	UART0_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
+		| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
+		| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
+		| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
+	;
+*/
+	system_deep_sleep(time_us);
+}
 /******************************************************************************
  * FunctionName : parse_url
  * Description  : parse the received data from the server
@@ -138,7 +166,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			cstr += 6;
 			ifcmp("option") 	system_deep_sleep_set_option(val);
 			else ifcmp("us") {
-				web_conn->web_disc_cb = (web_func_disc_cb)system_deep_sleep;
+				web_conn->web_disc_cb = (web_func_disc_cb)go_deep_sleep;
 				web_conn->web_disc_par = val;
 			}
 #if DEBUGSOO > 5
@@ -233,14 +261,18 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #ifdef UDP_TEST_PORT
 	    else ifcmp("udp_") {
 	    	cstr+=4;
-	    	udp_test_port_init(val);
-	    	ifcmp("port") syscfg.udp_test_port = val;
+	    	ifcmp("port") {
+		    	udp_test_port_init(val);
+	    		syscfg.udp_test_port = val;
+	    	}
 	    }
 #endif
 #ifdef USE_MODBUS
 	    else ifcmp("mdb_") {
 	    	cstr+=4;
-	    	ifcmp("port") mdb_tcp_init(val);
+	    	ifcmp("port") {
+	    		if(mdb_tcp_init(val) == ERR_OK)	syscfg.mdb_remote_port = val;
+	    	}
 	   		else ifcmp("twrec") {
 	   			syscfg.mdb_twrec = val;
 	   			if(mdb_tcp_servcfg != NULL) {
@@ -265,10 +297,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
 #ifdef USE_WDRV
 	    else ifcmp("wdrv_") {
-	    	cstr+=4;
+	    	cstr+=5;
 	    	ifcmp("port") {
-				wdrv_init(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
-				syscfg.wdrv_remote_port = val;
+				if(wdrv_init(val)) syscfg.wdrv_remote_port = val; // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
 				//if(syscfg.wdrv_remote_port != 0 && wdrv_host_port != 0 && wdrv_host_ip.addr != 0) wdrv_start(wdrv_sample_rate);
 	    	}
 	    }
@@ -591,8 +622,8 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			if(val > 0 && val < 65536) wdrv_host_port = val;
 		}
 		else ifcmp("init") {
-			syscfg.wdrv_remote_port = val;
-			wdrv_init(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
+			if(wdrv_init(val)) syscfg.wdrv_remote_port = val;
+			 // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
 		}
 		else ifcmp("start") {
 			if(val > 0 && val <= 20000) wdrv_start(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, val);

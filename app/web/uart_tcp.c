@@ -80,15 +80,14 @@ void ICACHE_FLASH_ATTR update_rts0(void)
 {
 //	if(UART0_CONF0 & UART_TX_FLOW_EN) {
 	if(uart0_flow_ctrl_flg) {
+		MEMW();
 #ifdef USE_TCP2UART
 		if(tcp2uart_conn != NULL) {
 #endif
-			MEMW();
 			UART0_CONF1 |= UART_RX_FLOW_EN;
 #ifdef USE_TCP2UART
 		}
 		else {
-			MEMW();
 			UART0_CONF1 &= ~UART_RX_FLOW_EN;
 		}
 #endif

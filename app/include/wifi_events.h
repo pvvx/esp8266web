@@ -27,5 +27,7 @@ extern int st_reconn_count;
 extern os_timer_t st_disconn_timer;
 void station_reconnect_off(void) ICACHE_FLASH_ATTR;
 
+void close_all_service(void) ICACHE_FLASH_ATTR;
+void open_all_service(int flg) ICACHE_FLASH_ATTR;
 
 #endif // _INCLUDE_WIFI_EVENTS_H_

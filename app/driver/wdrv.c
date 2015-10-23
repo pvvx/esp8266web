@@ -54,7 +54,7 @@ struct udp_pcb *pcb_wdrv DATA_IRAM_ATTR; // = NULL -> wdrv закрыт
 uint32 wdrv_sample_rate DATA_IRAM_ATTR;
 uint32 wdrv_remote_port DATA_IRAM_ATTR; // = 0 -> wdrv не используется
 ip_addr_t wdrv_host_ip;
-uint16 wdrv_host_port; // = 0 -> wdrv не используется
+uint16 wdrv_host_port;
 
 /*-----------------------------------------------------------------------------*/
 
@@ -253,6 +253,7 @@ void ICACHE_FLASH_ATTR  wdrv_recv(void *arg, struct udp_pcb *upcb, struct pbuf *
 
 bool ICACHE_FLASH_ATTR wdrv_init(uint32 portn)
 {
+	if(wdrv_remote_port == portn) return true;
 	wdrv_stop();
 	if(pcb_wdrv != NULL) {
 		udp_disconnect(pcb_wdrv);
