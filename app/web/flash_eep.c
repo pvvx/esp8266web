@@ -347,7 +347,6 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 // Сохранение системных настроек
 //-----------------------------------------------------------------------------
 bool ICACHE_FLASH_ATTR sys_write_cfg(void) {
-//	set_gpio_io_pin();
 	return flash_save_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg));
 }
 

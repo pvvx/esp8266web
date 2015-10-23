@@ -409,6 +409,7 @@ uart_0_rts_inv
 uart_0_bits
 uart_0_stop
 uart_0_even
+uart_0_swap
 cfg_tcp_reop
 inc:menu.inc
 wdrv_ip

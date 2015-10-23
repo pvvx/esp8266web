@@ -90,6 +90,13 @@
 				</td>
 			</tr>
 			<tr>
+				<td class="label">Swap TXD<>RTS, RXD<>CTS:</td>
+				<td>
+					<input type="hidden" name='uart_0_swap' value='0'>
+					<input title='TXD(GPIO15), RXD(GPIO13), RTS(GPIO1), CTS(GPIO3)' type='checkbox' name='uart_0_swap' value='1'>
+				</td>
+			</tr>
+			<tr>
 				<td class="label">Client/Server IP:</td>
 				<td><input title='Server: 127.0.0.1, Client: extern ip.' name='cfg_tcp_url' maxlength='63' value='~cfg_tcp_url~'></td>
 			</tr>
@@ -137,6 +144,7 @@ var cfg = {
 	uart_0_bits:"~uart_0_bits~",
 	uart_0_stop:"~uart_0_stop~",
 	uart_0_even:"~uart_0_even~",
+	uart_0_swap:"~uart_0_swap~",
 	cfg_tcp_reop: "~cfg_tcp_reop~"
 }
 setFormValues(document.forms[0], cfg);

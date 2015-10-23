@@ -86,13 +86,15 @@ void ICACHE_FLASH_ATTR set_cpu_clk(void)
 //  Пристартовый тест пина RX для сброса конфигурации
 //=============================================================================
 
-#define GPIO_TEST 3 // GPIO3 (RX)
+#define GPIO_TEST0 3 // GPIO3 (RX)
+#define GPIO_TEST1 13 // GPIO13 (RX)
 
 void GPIO_intr_handler(void * test_edge)
 {
 	uint32 gpio_status = GPIO_STATUS;
 	GPIO_STATUS_W1TC = gpio_status;
-	if(gpio_status & (1 << GPIO_TEST)) *((uint8 *)test_edge) = 1; // test_edge++;
+	uint32 mask = (PERI_IO_SWAP & PERI_IO_UART0_PIN_SWAP)? (1<<GPIO_TEST1) : (1<<GPIO_TEST0);
+	if(gpio_status & mask) *((uint8 *)test_edge) = 1; // test_edge++;
 //    gpio_pin_intr_state_set(GPIO_TEST, GPIO_PIN_INTR_ANYEDGE);
 }
 
@@ -101,16 +103,18 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 	struct UartxCfg ucfg;
 	uint32 x = 0;
 	uint8 test_edge = 0;
+	uint32 pin_num = (PERI_IO_SWAP & PERI_IO_UART0_PIN_SWAP)? GPIO_TEST1 : GPIO_TEST0;
+	uint32 pin_mask = 1<<pin_num;
 	if(flash_read_cfg(&ucfg, ID_CFG_UART0, sizeof(ucfg)) == sizeof(ucfg)) {
-		if(ucfg.cfg.b.rxd_inv) x = 1 << GPIO_TEST;
+		if(ucfg.cfg.b.rxd_inv) x = pin_mask;
 	}
-	gpio_output_set(0,0,0, 1 << GPIO_TEST); // GPIO OUTPUT DISABLE отключить вывод в порту GPIO3
-	set_gpiox_mux_func_ioport(GPIO_TEST); // установить RX (GPIO3) в режим порта i/o
-	if((GPIO_IN & (1 << GPIO_TEST)) == x) {
+	gpio_output_set(0,0,0, pin_mask); // GPIO OUTPUT DISABLE отключить вывод в порту GPIO3
+	set_gpiox_mux_func_ioport(pin_num); // установить RX (GPIO3) в режим порта i/o
+	if((GPIO_IN & pin_mask) == x) {
 		ets_isr_mask(1 << ETS_GPIO_INUM);
 		ets_isr_attach(ETS_GPIO_INUM, GPIO_intr_handler, (void *)&test_edge);
-        gpio_pin_intr_state_set(GPIO_TEST, GPIO_PIN_INTR_ANYEDGE);
-		GPIO_STATUS_W1TC = 1 << GPIO_TEST;
+        gpio_pin_intr_state_set(pin_num, GPIO_PIN_INTR_ANYEDGE);
+		GPIO_STATUS_W1TC = pin_mask;
 		ets_isr_unmask(1 << ETS_GPIO_INUM);
 		ets_delay_us(25000); //25 ms
 		ets_isr_mask(1 << ETS_GPIO_INUM);

@@ -249,11 +249,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 					tcp2uart_start(syscfg.tcp2uart_port);
 			}
         	else ifcmp("reop") {
-	   			if (val) syscfg.cfg.b.tcp2uart_reopen = 1;
-	   			else syscfg.cfg.b.tcp2uart_reopen = 0;
+	   			syscfg.cfg.b.tcp2uart_reopen = (val)? 1 : 0;
 	   			if(tcp2uart_servcfg != NULL) {
-	   				if (val) tcp2uart_servcfg->flag.srv_reopen = 1;
-	   				else tcp2uart_servcfg->flag.srv_reopen = 0;
+	   				tcp2uart_servcfg->flag.srv_reopen = (val)? 1 : 0;
 	   			}
         	}
 #endif
@@ -286,11 +284,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	   			}
 	   		}
         	else ifcmp("reop") {
-	   			if (val) syscfg.cfg.b.mdb_reopen = 1;
-	   			else syscfg.cfg.b.mdb_reopen = 0;
+	   			syscfg.cfg.b.mdb_reopen =  (val)? 1 : 0;
 	   			if(mdb_tcp_servcfg != NULL) {
-	   				if (val) mdb_tcp_servcfg->flag.srv_reopen = 1;
-	   				else mdb_tcp_servcfg->flag.srv_reopen = 0;
+	   				mdb_tcp_servcfg->flag.srv_reopen = (val)? 1 : 0;
 	   			}
         	}
 	    }
@@ -485,8 +481,15 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
             else ifcmp("stop") 		WRITE_PERI_REG(UART_CONF0(n), (READ_PERI_REG(UART_CONF0(n)) & (~(UART_STOP_BIT_NUM << UART_STOP_BIT_NUM_S))) | ((val & UART_STOP_BIT_NUM)<<UART_STOP_BIT_NUM_S));
             else ifcmp("loopback") 	WRITE_PERI_REG(UART_CONF0(n), (READ_PERI_REG(UART_CONF0(n)) & (~UART_LOOPBACK)) | ((val)? UART_LOOPBACK : 0));
             else ifcmp("flow") {
-            	if(n==0) uart0_set_flow((val!=0));
+            	if(n == 0) uart0_set_flow((val != 0));
             }
+        	else ifcmp("swap") {
+        		int mask = PERI_IO_UART0_PIN_SWAP;
+        		if(n != 0) mask = PERI_IO_UART1_PIN_SWAP;
+        		if(val) PERI_IO_SWAP |= mask;
+        		else  PERI_IO_SWAP &= ~mask;
+        		if(n == 0) update_mux_uart0();
+        	}
             else ifcmp("rts_inv") set_uartx_invx(n, val, UART_RTS_INV);
             else ifcmp("dtr_inv") set_uartx_invx(n, val, UART_DTR_INV);
             else ifcmp("cts_inv") set_uartx_invx(n, val, UART_CTS_INV);

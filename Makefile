@@ -16,7 +16,7 @@ SPI_SIZE?=512
 ADDR_FW1 = 0x00000
 ADDR_FW2 = 0x07000
 # 
-#USERFADDR = 0x3C000
+#USERFADDR = 0x3E000
 USERFADDR = $(shell printf '0x%X\n' $$(( ($$(stat --printf="%s" $(OUTBIN2)) + 0xFFF + $(ADDR_FW2)) & (0xFFFFF000) )) )
 USERFBIN = ./webbin/WEBFiles.bin
 #
@@ -32,9 +32,6 @@ BLANKADDR := 0x7E000
 XTENSA_TOOLS_ROOT ?= c:/Espressif/xtensa-lx106-elf/bin
 
 #PATH := $(XTENSA_TOOLS_ROOT);$(PATH)
-
-GET_FILESIZE ?= 
-
 # base directory of the ESP8266 SDK package, absolute
 #SDK_BASE	?= c:/Espressif/ESP8266_SDK
 

@@ -41,7 +41,7 @@ void ICACHE_FLASH_ATTR tcp2uart_int_rxtx_disable(void)
 	ets_intr_lock(); //	ETS_UART_INTR_DISABLE();
 	MEMW();
     UART0_CONF1 &= ~UART_RX_FLOW_EN; // update RST
-	UART0_INT_ENA &= ~(UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
+	UART0_INT_ENA = 0; // &= ~(UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA);
     //clear rx and tx fifo, not ready
     uint32 conf0 = UART0_CONF0;
     UART0_CONF0 = conf0 | UART_RXFIFO_RST | UART_TXFIFO_RST;

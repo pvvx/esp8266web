@@ -50,6 +50,7 @@ struct uartx_bits_config {
 	uint32 txd_inv		: 1;	//22 0x0400000
 	uint32 rts_inv		: 1;	//23 0x0800000
 	uint32 dtr_inv		: 1;	//24 0x1000000
+	uint32 swap			: 1;	//25 0x2000000 // swap uart0 pins (u0rxd <-> u0cts), (u0txd <-> u0rts)
 } __attribute__((packed));
 
 #define UART0_REGCONFIG0MASK	0x1F8C03F

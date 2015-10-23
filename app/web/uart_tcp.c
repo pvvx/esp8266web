@@ -56,7 +56,7 @@ void ICACHE_FLASH_ATTR uart0_set_flow(bool flow_en)
 	ets_intr_lock(); //	ETS_UART_INTR_DISABLE();
 	MEMW();
 	uint32 conf0 = UART0_CONF0 & (~(UART_TX_FLOW_EN | UART_SW_RTS | UART_SW_DTR));
-	uint32 conf1  = UART0_CONF1 & (~(UART_RX_FLOW_EN));
+	uint32 conf1 = UART0_CONF1 & (~(UART_RX_FLOW_EN));
 	if(flow_en) {
 		conf0 |= UART_TX_FLOW_EN;
 #ifdef USE_TCP2UART
@@ -109,20 +109,34 @@ void ICACHE_FLASH_ATTR update_mux_uart0(void)
 	else
 #endif
 	{
-		MUX_TX_UART0 = VAL_FUNC_U0TX; // GPIO1/TX0, output
-		MUX_RX_UART0 = VAL_FUNC_U0RX | ((UART0_CONF0 & UART_RXD_INV)? PULLDOWN : PULLUP);  // GPIO3/RX0, input
-		if(uart0_flow_ctrl_flg) { // включен flow
-	    	update_rts0();
-	    	MUX_RTS_UART0 = VAL_FUNC_U0RTS | PULLDIS; // GPIO15/RTS, output
-	    	MUX_CTS_UART0 = VAL_FUNC_U0CTS | ((UART0_CONF0 & UART_CTS_INV)? PULLDOWN : PULLUP); // GPIO13/CTS, input
+		if(PERI_IO_SWAP & PERI_IO_UART0_PIN_SWAP) { // swap uart0 pins (u0rxd <-> u0cts), (u0txd <-> u0rts) ?
+			MUX_RTS_UART0 = VAL_FUNC_U0RTS | PULLDIS; // GPIO15/TX0, output
+			MUX_CTS_UART0 = VAL_FUNC_U0CTS | ((UART0_CONF0 & UART_RXD_INV)? PULLDOWN : PULLUP); // GPIO13/RX0, input
+			if(uart0_flow_ctrl_flg) { // включен flow
+		    	update_rts0();
+		    	MUX_TX_UART0 = VAL_FUNC_U0TX | PULLDIS; // GPIO1/RTS, output
+		    	MUX_RX_UART0 = VAL_FUNC_U0RX | ((UART0_CONF0 & UART_CTS_INV)? PULLDOWN : PULLUP); // GPIO3/CTS, input
+			}
+			else {
+				MUX_TX_UART0 = VAL_MUX_TX_UART0_OFF;
+				MUX_RX_UART0 = VAL_MUX_RX_UART0_OFF;
+			}
 		}
 		else {
-			MUX_RTS_UART0 = VAL_MUX_RTS_UART0_OFF;
-			MUX_CTS_UART0 = VAL_MUX_CTS_UART0_OFF;
+			MUX_TX_UART0 = VAL_FUNC_U0TX; // GPIO1/TX0, output
+			MUX_RX_UART0 = VAL_FUNC_U0RX | ((UART0_CONF0 & UART_RXD_INV)? PULLDOWN : PULLUP);  // GPIO3/RX0, input
+			if(uart0_flow_ctrl_flg) { // включен flow
+		    	update_rts0();
+		    	MUX_RTS_UART0 = VAL_FUNC_U0RTS | PULLDIS; // GPIO15/RTS, output
+		    	MUX_CTS_UART0 = VAL_FUNC_U0CTS | ((UART0_CONF0 & UART_CTS_INV)? PULLDOWN : PULLUP); // GPIO13/CTS, input
+			}
+			else {
+				MUX_RTS_UART0 = VAL_MUX_RTS_UART0_OFF;
+				MUX_CTS_UART0 = VAL_MUX_CTS_UART0_OFF;
+			}
 		}
 	}
 }
-
 //=============================================================================
 // Обновить вывод TXD1
 // update_mux_txd1()
@@ -158,69 +172,6 @@ void ICACHE_FLASH_ATTR set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask)
 	}
     ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
 }
-/******************************************************************************
- * FunctionName : uart_init
- * Description  : user interface for init uart
- * Parameters   : defbaud - default baudrate
- * Returns      : NONE
-*******************************************************************************/
-void ICACHE_FLASH_ATTR uart_init(void)
-{
-	struct  UartxCfg ux;
-		//disable all UARTs interrupt
-#ifdef USE_TCP2UART
-		ets_isr_mask(1 << ETS_UART_INUM);
-		tcp2uart_int_rxtx_disable();
-#endif
-// UART0
-		if(flash_read_cfg(&ux, ID_CFG_UART0, sizeof(ux)) != sizeof(ux)) {
-			ux.baud = UART0_DEFBAUD;
-			ux.cfg.dw = UART0_REGCONFIG0DEF;
-		};
-		uart0_flow_ctrl_flg = ux.cfg.b.flow_en;
-		ux.cfg.dw &= UART0_REGCONFIG0MASK;
-		UART0_INT_ENA = 0;
-	    UART0_CONF0 = ux.cfg.dw;
-		    //set rx fifo trigger
-		UART0_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
-#ifdef USE_TCP2UART
-			| ((0x10 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
-#else
-			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
-#endif
-			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
-			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
-		;
-		update_mux_uart0(); // включение/отключение RTS UART0 в зависимости от установок флага uart0_flow_ctrl_flg
-		uart_div_modify(UART0, UART_CLK_FREQ / ux.baud); // WRITE_PERI_REG(UART_CLKDIV(num), ux.baud) + clear rx and tx fifo, not ready =
-	    // clear all interrupt UART0
-		UART0_INT_CLR &= ~0xffff;
-// UART1
-		if(flash_read_cfg(&ux, ID_CFG_UART1, sizeof(ux)) != sizeof(ux)) {
-			ux.baud = UART1_DEFBAUD;
-			ux.cfg.dw = UART1_REGCONFIG0DEF;
-		};
-		ux.cfg.dw &= UART1_REGCONFIG0MASK;
-    	UART1_INT_ENA = 0;
-		UART1_CONF0 = ux.cfg.dw;
-		UART1_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
-			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
-			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
-			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
-		;
-		update_mux_txd1();
-		uart_div_modify(UART1, UART_CLK_FREQ / ux.baud); // WRITE_PERI_REG(UART_CLKDIV(num), ux.baud) + clear rx and tx fifo, not ready =
-		// clear all interrupt
-		UART1_INT_CLR &= ~0xffff;
-
-		MEMW();
-
-	    os_install_putc1((void *)uart1_write_char); // install uart1 putc callback
-#ifdef USE_TCP2UART
-		ets_isr_attach(ETS_UART_INUM, uart_intr_handler, NULL);
-		ets_isr_unmask(1 << ETS_UART_INUM);
-#endif
-}
 //=============================================================================
 // uart_read_fcfg()
 // bit0 = 1 - Read UART0
@@ -232,21 +183,39 @@ void ICACHE_FLASH_ATTR uart_read_fcfg(uint8 set)
 	if(set&1) {
 		if(flash_read_cfg(&ux, ID_CFG_UART0, sizeof(ux)) != sizeof(ux)) {
 			ux.baud = UART0_DEFBAUD;
-			ux.cfg.dw = UART0_REGCONFIG0DEF; //8N1 + ?
+			ux.cfg.dw = UART0_REGCONFIG0DEF; //8N1
 		}
-		uart_div_modify(UART0, UART_CLK_FREQ / ux.baud);
+		uart0_flow_ctrl_flg = ux.cfg.b.flow_en;
 		UART0_CONF0 = ux.cfg.dw & UART0_REGCONFIG0MASK;
+		UART0_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
+#ifdef USE_TCP2UART
+			| ((0x10 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
+#else
+			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
+#endif
+			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
+			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
+		;
+		if(ux.cfg.b.swap) PERI_IO_SWAP |= PERI_IO_UART0_PIN_SWAP;
+		else PERI_IO_SWAP &= ~PERI_IO_UART0_PIN_SWAP;
 		update_mux_uart0();
-//		uart0_set_flow(ux.cfg.b.flow_en);
+		uart_div_modify(UART0, UART_CLK_FREQ / ux.baud);
 	}
 	if(set&2) {
 		if(flash_read_cfg(&ux, ID_CFG_UART1, sizeof(ux)) != sizeof(ux)) {
 			ux.baud = UART1_DEFBAUD;
 			ux.cfg.dw = UART1_REGCONFIG0DEF; //8N1
 		}
-		uart_div_modify(UART1, UART_CLK_FREQ / ux.baud);
 		UART1_CONF0 = ux.cfg.dw & UART1_REGCONFIG0MASK;
+		UART1_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
+			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
+			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
+			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
+		;
+//		if(ux.cfg.b.swap) PERI_IO_SWAP |= PERI_IO_UART1_PIN_SWAP;
+//		else PERI_IO_SWAP &= ~PERI_IO_UART1_PIN_SWAP;
 		update_mux_txd1();
+		uart_div_modify(UART1, UART_CLK_FREQ / ux.baud);
 	}
 }
 //=============================================================================
@@ -262,11 +231,13 @@ void ICACHE_FLASH_ATTR uart_save_fcfg(uint8 set)
 		ux.baud = UART_CLK_FREQ / (UART0_CLKDIV & UART_CLKDIV_CNT);
 		ux.cfg.dw = UART0_CONF0 & UART0_REGCONFIG0MASK;
 		if(uart0_flow_ctrl_flg) ux.cfg.b.flow_en = 1;
+		if(PERI_IO_SWAP & PERI_IO_UART0_PIN_SWAP) ux.cfg.b.swap = 1; // swap uart0 pins (u0rxd <-> u0cts), (u0txd <-> u0rts)
 		flash_save_cfg(&ux, ID_CFG_UART0, sizeof(ux));
 	}
 	if(set&2) {
 		ux.baud = UART_CLK_FREQ / (UART1_CLKDIV & UART_CLKDIV_CNT);
 		ux.cfg.dw = UART1_CONF0 & UART1_REGCONFIG0MASK;
+//		if(PERI_IO_SWAP & PERI_IO_UART1_PIN_SWAP) ux.cfg.b.swap = 1; // swap uart1 pins (u1rxd <-> u1cts), (u1txd <-> u1rts)
 		flash_save_cfg(&ux, ID_CFG_UART1, sizeof(ux));
 	}
 }
@@ -315,3 +286,35 @@ void uart_intr_handler(void *para)
     }
 }
 #endif // USE_TCP2UART
+/******************************************************************************
+ * FunctionName : uart_init
+ * Description  : user interface for init uart
+ * Parameters   : defbaud - default baudrate
+ * Returns      : NONE
+*******************************************************************************/
+void ICACHE_FLASH_ATTR uart_init(void)
+{
+		//disable all UARTs interrupt
+#ifdef USE_TCP2UART
+		ets_isr_mask(1 << ETS_UART_INUM);
+		tcp2uart_int_rxtx_disable();
+#endif
+// UART0
+		UART0_INT_ENA = 0;
+		uart_read_fcfg(1);
+	    // clear all interrupt UART0
+		UART0_INT_CLR &= ~0xffff;
+// UART1
+    	UART1_INT_ENA = 0;
+		uart_read_fcfg(2);
+		// clear all interrupt
+		UART1_INT_CLR &= ~0xffff;
+
+		MEMW();
+
+	    os_install_putc1((void *)uart1_write_char); // install uart1 putc callback
+#ifdef USE_TCP2UART
+		ets_isr_attach(ETS_UART_INUM, uart_intr_handler, NULL);
+		ets_isr_unmask(1 << ETS_UART_INUM);
+#endif
+}
