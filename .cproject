@@ -337,5 +337,8 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.1772762371;cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.1772762371.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.382943032;cdt.managedbuild.tool.gnu.cpp.compiler.input.1960630470">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178;cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.;cdt.managedbuild.tool.gnu.cross.c.compiler.674891053;cdt.managedbuild.tool.gnu.c.compiler.input.915388226">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>

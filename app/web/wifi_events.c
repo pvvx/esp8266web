@@ -34,13 +34,6 @@
 #include "modbustcp.h"
 #endif
 
-/* Ждем следующий patch от китайцев (все SDK включая 1.4.0):
- * При выполнении wifi_station_disconnect() в событии EVENT_STAMODE_DISCONNECTED
- * часто AP отваливается навсегда. Требуется использовать обход данного глюка...
- * В SDK < 1.4.0 при выполнеии в wifi event wifi_set_opmode() ведет к Fatal exception (28)
- */
-#define DEF_SDK_ST_RECONNECT_BAG 1
-
 struct s_probe_requests buf_probe_requests[MAX_COUNT_BUF_PROBEREQS] DATA_IRAM_ATTR;
 uint32 probe_requests_count DATA_IRAM_ATTR;
 
@@ -321,20 +314,10 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					evt->event_info.disconnected.reason, st_reconn_count);
 #endif
 #endif // PRINT_EVENT_REASON_ENABLE
-#ifdef DEF_SDK_ST_RECONNECT_BAG
-			extern uint8 gScanStruct[];
-#endif
 			int opmode = wifi_get_opmode();
 			if(wificonfig.st.reconn_timeout != 1
 			 && st_reconn_count >= COUNT_RESCONN_ST
-			 && (opmode & STATION_MODE)
-#ifdef DEF_SDK_ST_RECONNECT_BAG
-			 &&	(evt->event_info.disconnected.reason != REASON_NO_AP_FOUND || gScanStruct[173] == 1)
-#if DEF_SDK_VERSION != 1400
-	#error "gScanStruct[173] !" // искать в scan_start() "f 0, scandone\n"
-#endif
-#endif
-			 ) {
+			 && (opmode & STATION_MODE) ) {
 				if(wifi_station_get_auto_connect() != 0)	{
 					wifi_station_disconnect();
 					if(wificonfig.st.reconn_timeout > 1) {
