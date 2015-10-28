@@ -63,6 +63,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define RTC_BASE		rtc_		// 0x60000700
 #define IOMUX_BASE		iomux_		// 0x60000800
 #define WDT_BASE		wdt_		// 0x60000900
+#define SDIO_BASE		sdio_		// 0x60000A00
 #define SCL_BASE		scl_		// 0x60000B00
 #define SAR_BASE		sar_		// 0x60000D00
 #define I2S_BASE		i2s_		// 0x60000E00
