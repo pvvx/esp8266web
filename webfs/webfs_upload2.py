@@ -18,7 +18,7 @@ if __name__ == '__main__':
     espurl = 'http://192.168.4.1/fsupload'
     username = 'ESP8266'
     password = '0123456789'
-    filename = '../WEBFiles.bin'
+    filename = '../webbin/WEBFiles.bin'
 
     files = {'file': (filename, open(filename, 'rb'), 'application/octet-stream')}
 #    postdata = {'':''}

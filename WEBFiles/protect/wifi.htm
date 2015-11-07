@@ -76,7 +76,7 @@
 			</tr>
 			<tr>
 				<td class="label">Auth Mode:</td>
-				<td><select title="Don't support AUTH_WEP in softAP mode"  name='wifi_ap_aum'>
+				<td><select title="Don't support AUTH_WEP in softAP mode"  name='wifi_ap_auth'>
 					<option value='0'>OPEN</option>
 					<option value='1'>WEP</option>
 					<option value='2'>WPA_PSK</option>
@@ -116,13 +116,13 @@
 			<tr>
 				<td class="label">DHCP:</td>
 				<td>
-					<input type='hidden' name='wifi_ap_dncp' value='0'>
-					<input type='checkbox' name='wifi_ap_dncp' value='1'>
+					<input type='hidden' name='wifi_ap_dhcp' value='0'>
+					<input type='checkbox' name='wifi_ap_dhcp' value='1'>
 				</td>
 				<td class="label">DHCP:</td>
 				<td>
-					<input type='hidden' name='wifi_st_dncp' value='0'>
-					<input type='checkbox' title='Off: static ip, On: dhcp' name='wifi_st_dncp' value='1'>
+					<input type='hidden' name='wifi_st_dhcp' value='0'>
+					<input type='checkbox' title='Off: static ip, On: dhcp' name='wifi_st_dhcp' value='1'>
 				</td>
 			</tr>
 			<tr>
@@ -168,15 +168,15 @@ for (var i=1; i < 14; i++) {
 }
 var cfg = {
 	wifi_ap_chl:"~wifi_ap_chl~",
-	wifi_ap_aum:"~wifi_ap_aum~",
+	wifi_ap_auth:"~wifi_ap_auth~",
 	wifi_phy:"~wifi_phy~",
 	wifi_mode:"~wifi_mode~",
 	wifi_sleep:"~wifi_sleep~",
 	wifi_st_aucn:"~wifi_st_aucn~",
 	wifi_st_sbss:"~wifi_st_sbss~",
 	wifi_ap_hssid:"~wifi_ap_hssid~",
-	wifi_ap_dncp:"~wifi_ap_dncp~",
-	wifi_st_dncp:"~wifi_st_dncp~",
+	wifi_ap_dhcp:"~wifi_ap_dhcp~",
+	wifi_st_dhcp:"~wifi_st_dhcp~",
 	wifi_csta:(~wifi_csta~>5)?6:~wifi_csta~
 }
 setFormValues(document.forms[0], cfg);

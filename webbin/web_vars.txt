@@ -135,10 +135,12 @@ sys_sleep_old
 sys_ip
 sys_url
 sys_netbios
+sys_ucnst_1
+sys_ucnst_1
+sys_ucnst_1
 sys_test
 web_host
 web_remote
-tcp_connected
 tcp_host
 tcp_remote
 mdb_host
@@ -165,33 +167,28 @@ cfg_cdns
 wdrv_freq
 wdrv_ip
 wdrv_port
-wifi_csta
 wifi_mode
-wifi_id
 wifi_phy
 wifi_chl
-wifi_sleep
-wifi_noise
-wifi_hwnoise
-wifi_power
 wifi_maxpw
 wifi_vddpw
 wifi_rfopt
 wifi_ap_ssid
 wifi_ap_psw
 wifi_ap_chl
-wifi_ap_aum
+wifi_ap_auth
 wifi_ap_hssid
 wifi_ap_mcns
 wifi_ap_ip
 wifi_ap_gw
 wifi_ap_msk
 wifi_ap_mac
-wifi_ap_dncp
+wifi_ap_dhcp
 wifi_ap_sip
 wifi_ap_eip
 wifi_ap_bint
 wifi_maxpw
+wifi_st_sta
 wifi_st_ssid
 wifi_st_psw
 wifi_st_bssid
@@ -200,10 +197,11 @@ wifi_st_ip
 wifi_st_gw
 wifi_st_msk
 wifi_st_mac
-wifi_st_dncp
+wifi_st_dhcp
 wifi_st_rssi
 wifi_st_aucn
 wifi_st_hostname
+wifi_st_aps_id
 wfs_addr
 wfs_files
 wfs_size
@@ -220,6 +218,10 @@ inc:grfx1.inc
 inc:grfx2.inc
 sys_vdd33
 sys_ucnst_0
+<font class="font6">wifi_rdcfg</font><font
+  class="font0">
+<font class="font6">wifi_newcfg</font><font
+  class="font0">
 wifi_aps_xml
 start
 xml_ram
@@ -449,14 +451,14 @@ wifi_maxpw
 wifi_st_hostname
 inc:footer.inc
 wifi_ap_chl
-wifi_ap_aum
+wifi_ap_auth
 wifi_phy
 wifi_mode
 wifi_sleep
 wifi_st_aucn
 wifi_st_sbss
 wifi_ap_hssid
-wifi_ap_dncp
-wifi_st_dncp
+wifi_ap_dhcp
+wifi_st_dhcp
 wifi_csta
 wifi_csta

@@ -40,6 +40,9 @@
  <cur_ip>~sys_ip~</cur_ip>
  <cur_url>~sys_url~</cur_url>
  <netbios_name>~sys_netbios~</netbios_name>
+ <userconst1>~sys_ucnst_1~</userconst1>
+ <userconst2>~sys_ucnst_1~</userconst2>
+ <userconst3>~sys_ucnst_1~</userconst3>
  <test>~sys_test~</test>
 </sys>
 <web>
@@ -47,7 +50,6 @@
  <remote>~web_remote~</remote>
 </web>
 <tcp2uart>
- <connected>~tcp_connected~</connected>
  <host>~tcp_host~</host>
  <remote>~tcp_remote~</remote>
 </tcp2uart>
@@ -82,36 +84,31 @@
  <wave_host_port>~wdrv_port~</wave_host_port>
 </wdrv>
 <wifi>
- <connect_status>~wifi_csta~</connect_status>
  <mode>~wifi_mode~</mode>
- <id>~wifi_id~</id>
  <phy>~wifi_phy~</phy>
  <chl>~wifi_chl~</chl>
- <sleeptype>~wifi_sleep~</sleeptype>
- <noisefloor>~wifi_noise~</noisefloor>
- <hwnoisefloor>~wifi_hwnoise~</hwnoisefloor>
- <power>~wifi_power~</power>
  <phy_max_tpw>~wifi_maxpw~</phy_max_tpw>
- <phy_tpw_vdd33>~wifi_vddpw~</phy_tpw_vdd33>
+ <phy_vdd33_tpw>~wifi_vddpw~</phy_vdd33_tpw>
  <phy_afterwake_rfoption>~wifi_rfopt~</phy_afterwake_rfoption>
  <ap>
   <ssid>~wifi_ap_ssid~</ssid>
   <password>~wifi_ap_psw~</password>
   <channel>~wifi_ap_chl~</channel>
-  <auth_mode>~wifi_ap_aum~</auth_mode>
+  <auth_mode>~wifi_ap_auth~</auth_mode>
   <ssid_hidden>~wifi_ap_hssid~</ssid_hidden>
   <max_connection>~wifi_ap_mcns~</max_connection>
   <ip>~wifi_ap_ip~</ip>
   <gw>~wifi_ap_gw~</gw>
   <netmask>~wifi_ap_msk~</netmask>
   <mac>~wifi_ap_mac~</mac>
-  <dncp>~wifi_ap_dncp~</dncp>
-  <dncp_ip_start>~wifi_ap_sip~</dncp_ip_start>
-  <dncp_ip_stop>~wifi_ap_eip~</dncp_ip_stop>
+  <dhcp>~wifi_ap_dhcp~</dhcp>
+  <dhcp_ip_start>~wifi_ap_sip~</dhcp_ip_start>
+  <dhcp_ip_stop>~wifi_ap_eip~</dhcp_ip_stop>
   <beacon_interval>~wifi_ap_bint~</beacon_interval>
   <max_rf_tx_power>~wifi_maxpw~</max_rf_tx_power>
  </ap>
  <st>
+  <connect_status>~wifi_st_sta~</connect_status>
   <ssid>~wifi_st_ssid~</ssid>
   <password>~wifi_st_psw~</password>
   <bssid>~wifi_st_bssid~</bssid>
@@ -120,10 +117,11 @@
   <gw>~wifi_st_gw~</gw>
   <netmask>~wifi_st_msk~</netmask>
   <mac>~wifi_st_mac~</mac>
-  <dncp>~wifi_st_dncp~</dncp>
+  <dhcp>~wifi_st_dhcp~</dhcp>
   <rssi>~wifi_st_rssi~</rssi>
   <autoconnect>~wifi_st_aucn~</autoconnect>
   <hostname>~wifi_st_hostname~</hostname>
+  <aps_id>~wifi_st_aps_id~</aps_id>
  </st>
 </wifi>
 <webfs>

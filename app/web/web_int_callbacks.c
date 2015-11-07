@@ -64,6 +64,9 @@ extern uint8 phy_in_vdd33_offset;
 //#define ifcmp(a)   if(!os_memcmp((void*)cstr, a , sizeof(a)))
 #define ifcmp(a)  if(rom_xstrcmp(cstr, a))
 
+#define TEST_SEND_WAVE
+
+#ifdef TEST_SEND_WAVE
 //-------------------------------------------------------------------------------
 // Test adc
 // Читает adc в одиночный буфер (~2килобайта) на ~20ksps и сохраняет в виде WAV
@@ -101,25 +104,6 @@ const WAV_HEADER ICACHE_RODATA_ATTR wav_header =
  0x61746164L,
  0x00000000L};
 #define WAV_HEADER_SIZE sizeof(wav_header)
-
-//===============================================================================
-// web_test_adc()
-//-------------------------------------------------------------------------------
-uint64 ICACHE_FLASH_ATTR get_mac_time(void)
-{
-	union {
-		volatile uint32 dw[2];
-		uint64 dd;
-	}ux;
-	volatile uint32 * ptr = (volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR;
-	ux.dw[0] = ptr[0];
-	ux.dw[1] = ptr[1];
-	if(ux.dw[1] != ptr[1]) {
-		ux.dw[0] = ptr[0];
-		ux.dw[1] = ptr[1];
-	}
-	return ux.dd;
-}
 //===============================================================================
 // web_test_adc()
 //-------------------------------------------------------------------------------
@@ -138,6 +122,25 @@ void ICACHE_FLASH_ATTR web_test_adc(TCP_SERV_CONN *ts_conn)
     	web_conn->msgbuflen += len << 1;
     }
     SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
+}
+#endif // TEST_SEND_WAVE
+//===============================================================================
+// web_test_adc()
+//-------------------------------------------------------------------------------
+uint64 ICACHE_FLASH_ATTR get_mac_time(void)
+{
+	union {
+		volatile uint32 dw[2];
+		uint64 dd;
+	}ux;
+	volatile uint32 * ptr = (volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR;
+	ux.dw[0] = ptr[0];
+	ux.dw[1] = ptr[1];
+	if(ux.dw[1] != ptr[1]) {
+		ux.dw[0] = ptr[0];
+		ux.dw[1] = ptr[1];
+	}
+	return ux.dd;
 }
 //===============================================================================
 // WiFi Saved Aps XML
@@ -644,29 +647,30 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
         	  web_conn->web_disc_cb = (web_func_disc_cb)New_WiFi_config;
         	  web_conn->web_disc_par = WIFI_MASK_ALL;
           }
-          else ifcmp("csta") tcp_puts("%d", wifi_station_get_connect_status());
+//          else ifcmp("csta") tcp_puts("%d", wifi_station_get_connect_status());
           else ifcmp("mode") tcp_puts("%d", wifi_get_opmode());
-          else ifcmp("id") tcp_puts("%d", wifi_station_get_current_ap_id());
           else ifcmp("phy") tcp_puts("%d", wifi_get_phy_mode());
-          else ifcmp("chl") tcp_puts("%d", wifi_get_channel());
+//          else ifcmp("chl") tcp_puts("%d", wifi_get_channel());
           else ifcmp("sleep") tcp_puts("%d", wifi_get_sleep_type());
           else ifcmp("scan") web_wscan_xml(ts_conn);
-          else ifcmp("aps_xml") wifi_aps_xml(ts_conn);
           else ifcmp("prrq_xml") web_ProbeRequest_xml(ts_conn);
 //          else ifcmp("aucn") tcp_puts("%d", wifi_station_get_auto_connect());
-          else ifcmp("power") { rom_en_pwdet(1); tcp_puts("%d", rom_get_power_db()); }
-          else ifcmp("noise") tcp_puts("%d", get_noisefloor_sat()); // noise_init(), rom_get_noisefloor(), ram_get_noisefloor(), ram_set_noise_floor(),noise_check_loop(), read_hw_noisefloor(), ram_start_noisefloor()
-          else ifcmp("hwnoise") tcp_puts("%d", read_hw_noisefloor());
-          else ifcmp("fmsar") { // Test!
+//          else ifcmp("power") { rom_en_pwdet(1); tcp_puts("%d", rom_get_power_db()); }
+//          else ifcmp("noise") tcp_puts("%d", get_noisefloor_sat()); // noise_init(), rom_get_noisefloor(), ram_get_noisefloor(), ram_set_noise_floor(),noise_check_loop(), read_hw_noisefloor(), ram_start_noisefloor()
+//          else ifcmp("hwnoise") tcp_puts("%d", read_hw_noisefloor());
+/*          else ifcmp("fmsar") { // Test!
         	  rom_en_pwdet(1); // ?
         	  tcp_puts("%d", ram_get_fm_sar_dout(ahextoul(cstr+5)));
-          }
+          } */
           else ifcmp("rfopt") tcp_puts("%u",(RTC_RAM_BASE[24]>>16)&7); // system_phy_set_rfoption | phy_afterwake_set_rfoption(option); 0..4
           else ifcmp("vddpw") tcp_puts("%u", phy_in_vdd33_offset); // system_phy_set_tpw_via_vdd33(val); // = pphy_vdd33_set_tpw(vdd_x_1000); Adjust RF TX Power according to VDD33, unit: 1/1024V, range [1900, 3300]
           else ifcmp("maxpw") tcp_puts("%u", phy_in_most_power); // read_sys_const(34));// system_phy_set_max_tpw(val); // = phy_set_most_tpw(pow_db); unit: 0.25dBm, range [0, 82], 34th byte esp_init_data_default.bin
-/*
           else ifcmp("aps_") {
         	  cstr+=4;
+        	  ifcmp("xml") wifi_aps_xml(ts_conn);
+              else ifcmp("id") tcp_puts("%d", wifi_station_get_current_ap_id());
+              else tcp_put('?');
+/*
         	  struct station_config config[5];
         	  int x = wifi_station_get_ap_info(config);
               if(cstr[1] != '_' || cstr[0]<'0' || cstr[0]>'4' ) {
@@ -681,70 +685,75 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
        	      	  else ifcmp("bssid") tcp_puts(MACSTR, MAC2STR(config[i].bssid));
               	  else tcp_put('?');
        	      }
-          } */
+        	  else ifcmp("id") wifi_aps_xml(ts_conn); */
+          }
           else {
             uint8 if_index;
-            ifcmp("ap_")	if_index = SOFTAP_IF;
-            else ifcmp("st_")	if_index = STATION_IF;
+            ifcmp("ap_") if_index = SOFTAP_IF;
+            else ifcmp("st_") if_index = STATION_IF;
             else { tcp_put('?'); return; };
             cstr+=3;
-            ifcmp("dncp") {
-            	if (if_index == SOFTAP_IF) tcp_puts("%d", (dhcps_flag==0)? 0 : 1);
-            	else tcp_puts("%d", (dhcpc_flag==0)? 0 : 1);
-            	return;
-            }
-            else ifcmp("aucn") {
-            	if(if_index == STATION_IF) tcp_puts("%d", wifi_station_get_auto_connect());
-            	else tcp_put('?');
-            	return;
-            }
-            uint8 macaddr[6];
-			wifi_get_macaddr(if_index, macaddr);
-            uint8 opmode = wifi_get_opmode();
 			struct ip_info wifi_info;
-#ifndef USE_OPEN_DHCPS
-			struct dhcps_lease dhcps_lease = wificonfig.ap.ipdhcp;
-			wifi_softap_get_dhcps_lease(&dhcps_lease);
-#endif
             if(if_index == SOFTAP_IF) {
-              if (((opmode & SOFTAP_MODE) == 0) || (!wifi_get_ip_info(SOFTAP_IF, &wifi_info))) {
-            	  wifi_info = wificonfig.ap.ipinfo;
-#ifdef USE_OPEN_DHCPS
-            	  dhcps_lease = wificonfig.ap.ipdhcp;
+            	// SOFTAP
+            	ifcmp("dhcp") tcp_puts("%d", (dhcps_flag==0)? 0 : 1);
+				else ifcmp("mac") {
+					uint8 macaddr[6];
+					wifi_get_macaddr(if_index, macaddr);
+					tcp_puts(MACSTR, MAC2STR(macaddr));
+				}
+				else {
+					uint8 opmode = wifi_get_opmode();
+#ifndef USE_OPEN_DHCPS
+					struct dhcps_lease dhcps_lease = wificonfig.ap.ipdhcp;
+					wifi_softap_get_dhcps_lease(&dhcps_lease);
 #endif
-//            	  p_dhcps_lease->start_ip = htonl(wificonfig.ap.ipdhcp.start_ip);
-//            	  p_dhcps_lease->end_ip = htonl(wificonfig.ap.ipdhcp.end_ip);
-//            	  p_dhcps_lease->start_ip = wificonfig.ap.ipdhcp.start_ip;
-//            	  p_dhcps_lease->end_ip = wificonfig.ap.ipdhcp.end_ip;
-              }
-          	  ifcmp("sip") tcp_puts(IPSTR, IP2STR((struct ip_addr *)&dhcps_lease.start_ip));
-          	  else ifcmp("eip") tcp_puts(IPSTR, IP2STR((struct ip_addr *)&dhcps_lease.end_ip));
-          	  else ifcmp("ip") tcp_puts(IPSTR, IP2STR(&wifi_info.ip));
-              else ifcmp("gw") tcp_puts(IPSTR, IP2STR(&wifi_info.gw));
-              else ifcmp("mac") tcp_puts(MACSTR, MAC2STR(macaddr));
-              else ifcmp("msk") tcp_puts(IPSTR, IP2STR(&wifi_info.netmask));
-              else {
-                  struct softap_config wicfgap;
-                  if(((opmode & SOFTAP_MODE) == 0) || (!wifi_softap_get_config(&wicfgap)) ) wicfgap = wificonfig.ap.config;
-                  ifcmp("ssid") tcp_htmlstrcpy(wicfgap.ssid, sizeof(wicfgap.ssid));
-                  else ifcmp("psw") tcp_htmlstrcpy(wicfgap.password, sizeof(wicfgap.password));
-                  else ifcmp("chl") tcp_puts("%d", wicfgap.channel);
-                  else ifcmp("aum") tcp_puts("%d", wicfgap.authmode);
-                  else ifcmp("hssid") tcp_puts("%d", wicfgap.ssid_hidden);
-                  else ifcmp("mcns") tcp_puts("%d", wicfgap.max_connection);
-                  else ifcmp("bint") tcp_puts("%d", wicfgap.beacon_interval);
-                  else tcp_put('?');
-              };
+					if (((opmode & SOFTAP_MODE) == 0) || (!wifi_get_ip_info(SOFTAP_IF, &wifi_info))) {
+						wifi_info = wificonfig.ap.ipinfo;
+#ifdef USE_OPEN_DHCPS
+						dhcps_lease = wificonfig.ap.ipdhcp;
+#endif
+//						p_dhcps_lease->start_ip = htonl(wificonfig.ap.ipdhcp.start_ip);
+//						p_dhcps_lease->end_ip = htonl(wificonfig.ap.ipdhcp.end_ip);
+//						p_dhcps_lease->start_ip = wificonfig.ap.ipdhcp.start_ip;
+//						p_dhcps_lease->end_ip = wificonfig.ap.ipdhcp.end_ip;
+					}
+					ifcmp("sip") tcp_puts(IPSTR, IP2STR((struct ip_addr *)&dhcps_lease.start_ip));
+					else ifcmp("eip") tcp_puts(IPSTR, IP2STR((struct ip_addr *)&dhcps_lease.end_ip));
+					else ifcmp("ip") tcp_puts(IPSTR, IP2STR(&wifi_info.ip));
+					else ifcmp("gw") tcp_puts(IPSTR, IP2STR(&wifi_info.gw));
+					else ifcmp("msk") tcp_puts(IPSTR, IP2STR(&wifi_info.netmask));
+					else {
+						struct softap_config wicfgap;
+						if(((opmode & SOFTAP_MODE) == 0) || (!wifi_softap_get_config(&wicfgap)) ) wicfgap = wificonfig.ap.config;
+						ifcmp("ssid") tcp_htmlstrcpy(wicfgap.ssid, sizeof(wicfgap.ssid));
+						else ifcmp("psw") tcp_htmlstrcpy(wicfgap.password, sizeof(wicfgap.password));
+						else ifcmp("chl") tcp_puts("%d", wicfgap.channel);
+						else ifcmp("auth") tcp_puts("%d", wicfgap.authmode);
+						else ifcmp("hssid") tcp_puts("%d", wicfgap.ssid_hidden);
+						else ifcmp("mcns") tcp_puts("%d", wicfgap.max_connection);
+						else ifcmp("bint") tcp_puts("%d", wicfgap.beacon_interval);
+						else tcp_put('?');
+					};
+				};
             }
-            else {
-            	ifcmp("rssi") tcp_puts("%d", wifi_station_get_rssi());
-                else ifcmp("rect") tcp_puts("%u", wificonfig.st.reconn_timeout);
+            else { 
+            	// STATION
+    	        ifcmp("rssi") tcp_puts("%d", wifi_station_get_rssi());
+    	        else ifcmp("aucn") tcp_puts("%d", wifi_station_get_auto_connect());
+				else ifcmp("sta") tcp_puts("%d", wifi_station_get_connect_status());
+	            else ifcmp("rect") tcp_puts("%u", wificonfig.st.reconn_timeout);
                 else ifcmp("hostname") { if(hostname != NULL) tcp_puts(hostname); else tcp_puts("none"); }
+                else ifcmp("mac") {
+					uint8 macaddr[6];
+					wifi_get_macaddr(if_index, macaddr);
+                	tcp_puts(MACSTR, MAC2STR(macaddr));
+                }
             	else {
+					uint8 opmode = wifi_get_opmode();
                 	if (((opmode & STATION_MODE) == 0) || (!wifi_get_ip_info(STATION_IF, &wifi_info))) wifi_info = wificonfig.st.ipinfo;
                     ifcmp("ip") tcp_puts(IPSTR, IP2STR(&wifi_info.ip));
                     else ifcmp("gw") tcp_puts(IPSTR, IP2STR(&wifi_info.gw));
-                    else ifcmp("mac") tcp_puts(MACSTR, MAC2STR(macaddr));
                     else ifcmp("msk") tcp_puts(IPSTR, IP2STR(&wifi_info.netmask));
                     else {
                         struct station_config wicfgs;
@@ -769,7 +778,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
             if(cstr[0] != '0') uart_reg = uart1_;
             cstr += 2;
             ifcmp("baud") tcp_puts("%u", (uint32) UART_CLK_FREQ / (uart_reg[IDX_UART_CLKDIV] & UART_CLKDIV_CNT));
-            else ifcmp("reg")	tcp_puts("%08x", uart_reg[hextoul(cstr + 3)]);
+//            else ifcmp("reg")	tcp_puts("%08x", uart_reg[hextoul(cstr + 3)]);
             else ifcmp("parity") tcp_put((uart_reg[IDX_UART_CONF0] & UART_PARITY_EN)? '1':'0');
             else ifcmp("even") tcp_put((uart_reg[IDX_UART_CONF0] & UART_PARITY)? '1' : '0');
             else ifcmp("bits") tcp_puts("%u", (uart_reg[IDX_UART_CONF0] >> UART_BIT_NUM_S) & UART_BIT_NUM);
@@ -831,11 +840,14 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 #ifdef USE_TCP2UART
         else ifcmp("tcp_") {
         	cstr+=4;
+#if 0
         	ifcmp("connected") {
         		if(tcp2uart_conn == NULL) tcp_put('0');
         		else tcp_put('1');
         	}
-        	else ifcmp("remote") {
+        	else
+#endif
+        		ifcmp("remote") {
         		if(tcp2uart_conn != NULL) {
         			tcp_puts(IPSTR ":%d", IP2STR(&(tcp2uart_conn->remote_ip.dw)), tcp2uart_conn->remote_port);
         		}
@@ -875,8 +887,16 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 #ifdef USE_MODBUS
         else ifcmp("mdb_") {
         	cstr+=4;
-       		ifcmp("host") tcp_puts(IPSTR ":%d", IP2STR(&(ts_conn->pcb->local_ip.addr)), ts_conn->pcb->local_port);
-        	else ifcmp("remote") tcp_puts(IPSTR ":%d", IP2STR(&(ts_conn->remote_ip.dw)), ts_conn->remote_port);
+       		ifcmp("host") {
+       			if(mdb_tcp_servcfg!= NULL && mdb_tcp_servcfg->conn_links != NULL)
+       				tcp_puts(IPSTR ":%d", IP2STR(&(mdb_tcp_servcfg->conn_links->pcb->local_ip.addr)), mdb_tcp_servcfg->conn_links->pcb->local_port);
+       			else tcp_strcpy_fd("none");
+       		}
+        	else ifcmp("remote") {
+        		if(mdb_tcp_servcfg!= NULL && mdb_tcp_servcfg->conn_links != NULL)
+        			tcp_puts(IPSTR ":%d", IP2STR(&(mdb_tcp_servcfg->conn_links->remote_ip.dw)), mdb_tcp_servcfg->conn_links->remote_port);
+        		else tcp_strcpy_fd("closed");
+        	}
         	else tcp_put('?');
         }
 #endif
@@ -910,7 +930,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
         			}
         			else ifcmp("fun") tcp_puts("%u", get_gpiox_mux_func(n));
         			else ifcmp("pull") tcp_puts("%u", (get_gpiox_mux(n) >> GPIO_MUX_PULLDOWN_BIT) & 3);
-    	            else ifcmp("opd") tcp_put((GPIOx_PIN(n) & (1 << 2))? '1' : '0');
+    	            else ifcmp("opd") tcp_put((GPIOx_PIN(n) & GPIO_PIN_DRIVER)? '1' : '0');
     	            else ifcmp("pu") tcp_put((get_gpiox_mux(n) & (1 << GPIO_MUX_PULLUP_BIT))? '1' : '0');
     	            else ifcmp("pd") tcp_put((get_gpiox_mux(n) & (1 << GPIO_MUX_PULLDOWN_BIT))? '1' : '0');
         			else tcp_put('?');
@@ -948,7 +968,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 			else tcp_put('?');
 		}
 #endif
+#ifdef TEST_SEND_WAVE
         else ifcmp("test_adc") web_test_adc(ts_conn);
+#endif
 		else tcp_put('?');
 }
 

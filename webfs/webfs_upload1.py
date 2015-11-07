@@ -121,7 +121,7 @@ if __name__ == '__main__':
     espurl = 'http://192.168.4.1/fsupload'
     username = 'ESP8266'
     password = '0123456789'
-    filename = '../WEBFiles.bin'
+    filename = '../webbin/WEBFiles.bin'
     
     print('Start send %s to %s' % (filename, espurl))
     opener = urllib2.build_opener(MultipartPostHandler)

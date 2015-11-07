@@ -97,7 +97,7 @@ uint32 ICACHE_FLASH_ATTR Cmp_WiFi_chg(struct wifi_config *wcfg) {
 	uint8 opmode = wifi_get_opmode();
 	if (opmode != wcfg->b.mode)	wchg.b.mode = 1;
 	if (wifi_get_phy_mode() != wcfg->b.phy)	wchg.b.phy = 1;
-	if (wifi_get_channel() != wcfg->b.chl)	wchg.b.chl = 1;
+//	if (wifi_get_channel() != wcfg->b.chl)	wchg.b.chl = 1; // for sniffer
 	if (wcfg->b.sleep != wifi_get_sleep_type())	wchg.b.sleep = 1;
 	if ((opmode & STATION_MODE) | (wcfg->b.mode & STATION_MODE)) {
 		if (wcfg->st.auto_connect != wifi_station_get_auto_connect())
@@ -175,7 +175,7 @@ uint32 ICACHE_FLASH_ATTR Read_WiFi_config(struct wifi_config *wcfg,
 	wifi_read_fcfg();
 	if (wset.b.mode) wcfg->b.mode = opmode;
 	if (wset.b.phy) wcfg->b.phy = wifi_get_phy_mode();
-	if (wset.b.chl)	wcfg->b.chl = wifi_get_channel();
+//	if (wset.b.chl)	wcfg->b.chl = wifi_get_channel(); // for sniffer
 	if (wset.b.sleep) wcfg->b.sleep = wifi_get_sleep_type();
 	if (opmode & SOFTAP_MODE) {
 		if (wset.b.ap_dhcp)
@@ -227,8 +227,8 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 	uint8 opmode = wifi_get_opmode();
 	if ((wset.b.phy)
 			&& (!(wifi_set_phy_mode(wcfg->b.phy)))) werr.b.phy = 1;
-	if ((wset.b.chl)
-			&& (!(wifi_set_channel(wcfg->b.chl))))	werr.b.chl = 1;
+/*	if ((wset.b.chl)
+			&& (!(wifi_set_channel(wcfg->b.chl))))	werr.b.chl = 1; // for sniffer */
 	if (wset.b.sleep) {
 		if(!(wifi_set_sleep_type(wcfg->b.sleep))) werr.b.sleep = 1;
 #if DEF_SDK_VERSION <= 1019
@@ -349,20 +349,16 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	os_memset(wcfg, 0, sizeof(wificonfig));
 	uwifi_chg wset;
 	wset.ui = wifi_set_mask;
-	if (wset.b.mode)
-		wcfg->b.mode = WIFI_MODE;
-	if (wset.b.phy)
-		wcfg->b.phy = PHY_MODE;
-	if (wset.b.chl)
-		wcfg->b.chl = 1;
-	if (wset.b.sleep)
-		wcfg->b.sleep = DEF_WIFI_SLEEP;
+	if (wset.b.mode) wcfg->b.mode = WIFI_MODE;
+	if (wset.b.phy)	wcfg->b.phy = PHY_MODE;
+//	if (wset.b.chl)	wcfg->b.chl = 1; // for sniffer
+	if (wset.b.sleep) wcfg->b.sleep = DEF_WIFI_SLEEP;
 	if (wset.b.ap_config) {
 		wcfg->ap.config.ssid_len = rom_xstrcpy(wcfg->ap.config.ssid, wifi_ap_name);
 		rom_xstrcpy(wcfg->ap.config.password, wifi_ap_password);
 		wcfg->ap.config.authmode = DEF_WIFI_AUTH_MODE;
 		wcfg->ap.config.ssid_hidden = 0; // no
-		wcfg->ap.config.channel = wcfg->b.chl;
+		wcfg->ap.config.channel = 1; // wcfg->b.chl;
 		wcfg->ap.config.max_connection = 4; // default
 		wcfg->ap.config.beacon_interval = 100;
 	}
@@ -414,8 +410,8 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
  ******************************************************************************/
 #if DEBUGSOO > 1
 void ICACHE_FLASH_ATTR print_wifi_config(void) {
-	os_printf("WiFi mode:%u chl:%u phy:%u dhcp:%u/%u\n", wificonfig.b.mode,
-			wificonfig.b.chl, wificonfig.b.phy, wificonfig.b.ap_dhcp_enable,
+	os_printf("WiFi mode:%u phy:%u dhcp:%u/%u\n", wificonfig.b.mode,
+			wificonfig.b.phy, wificonfig.b.ap_dhcp_enable,
 			wificonfig.b.st_dhcp_enable);
 	os_printf("AP:%s[%u] hiden(%u) psw:[%s] au:%u chl:%u maxcon:%u beacon:%u\n",
 			wificonfig.ap.config.ssid, wificonfig.ap.config.ssid_len,

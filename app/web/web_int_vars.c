@@ -351,7 +351,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       }
       else ifcmp("mode")	wificonfig.b.mode = ((val&3)==0)? 3 : val;
       else ifcmp("phy")  	wificonfig.b.phy = val;
-      else ifcmp("chl") 	wificonfig.b.chl = val;
+//      else ifcmp("chl") 	wificonfig.b.chl = val; // for sniffer
       else ifcmp("sleep") 	wificonfig.b.sleep = val;
       else ifcmp("scan") {
 //    	  web_conn->web_disc_par = val;
@@ -374,7 +374,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       else ifcmp("aps_") {
     	  cstr+=4;
     	  ifcmp("cnt") wifi_station_ap_number_set(val);
-    	  else ifcmp("cur") wifi_station_ap_change(val);
+    	  else ifcmp("id") wifi_station_ap_change(val);
       }
       else ifcmp("ap_") {
     	  cstr+=3;
@@ -400,9 +400,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     		  os_memset(&wificonfig.ap.config.password, 0, sizeof(wificonfig.ap.config.password));
     		  os_memcpy(wificonfig.ap.config.password, pvar, len);
           }
-          else ifcmp("dncp")	wificonfig.b.ap_dhcp_enable = val;
+          else ifcmp("dhcp")	wificonfig.b.ap_dhcp_enable = val;
           else ifcmp("chl") 	wificonfig.ap.config.channel = val;
-          else ifcmp("aum") 	wificonfig.ap.config.authmode = val;
+          else ifcmp("auth") 	wificonfig.ap.config.authmode = val;
           else ifcmp("hssid") 	wificonfig.ap.config.ssid_hidden = val;
           else ifcmp("mcns") 	wificonfig.ap.config.max_connection = val;
     	  else ifcmp("bint") 	wificonfig.ap.config.beacon_interval = val;
@@ -418,7 +418,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       }
       else ifcmp("st_") {
     	  cstr+=3;
-          ifcmp("dncp") 		wificonfig.b.st_dhcp_enable = val;
+          ifcmp("dhcp") 		wificonfig.b.st_dhcp_enable = val;
           else ifcmp("aucn") 	wificonfig.st.auto_connect = val;
           else ifcmp("rect") 	{
         	  if(val > 8192) val = 8192;
@@ -522,8 +522,6 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	            	else if(val == 1) GPIO_OUT_W1TS = 1 << n;
 	            	else GPIO_OUT_W1TC = 1 << n;
 	            }
-	            else ifcmp("ena") { if(val) GPIO_ENABLE_W1TS = 1 << n; }
-	            else ifcmp("dis") { if(val) GPIO_ENABLE_W1TC = 1 << n; }
 	            else ifcmp("dir") {
 	            	if(val == 3) {
 	            		if(GPIO_ENABLE & (1<<n)) GPIO_ENABLE_W1TC = 1 << n;
@@ -532,15 +530,16 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	            	else if(val == 1) GPIO_ENABLE_W1TS = 1 << n;
 	            	else GPIO_ENABLE_W1TC =  1 << n;
 	            }
+    			else ifcmp("ena")	GPIO_ENABLE_W1TS = 1 << n;
+    			else ifcmp("dis")	GPIO_ENABLE_W1TC = 1 << n;
 	            else ifcmp("fun")	{ set_gpiox_mux_func(n,val); }
 	            else ifcmp("io") 	{ set_gpiox_mux_func_ioport(n); }
 	            else ifcmp("def") 	{ set_gpiox_mux_func_default(n); }
 	            else ifcmp("sgs") 	{ sigma_delta_setup(n); set_sigma_duty_312KHz(val); }
 	            else ifcmp("sgc") 	sigma_delta_close(n);
-	            else ifcmp("sgn") 	set_sigma_duty_312KHz(val);
-	            else ifcmp("od") 	reg_sct_bits(&GPIOx_PIN(n), BIT2, val);
-	            else ifcmp("pu") 	reg_sct_bits(get_addr_gpiox_mux(n), BIT7, val);
-	            else ifcmp("pd") 	reg_sct_bits(get_addr_gpiox_mux(n), BIT6, val);
+	            else ifcmp("od") 	reg_sct_bits(&GPIOx_PIN(n), GPIO_PIN_DRIVER, val);
+	            else ifcmp("pu") 	reg_sct_bits(get_addr_gpiox_mux(n), GPIO_MUX_PULLUP_BIT, val);
+	            else ifcmp("pd") 	reg_sct_bits(get_addr_gpiox_mux(n), GPIO_MUX_PULLDOWN_BIT, val);
     		}
     	}
     	else if(*cstr == '_') {
@@ -551,6 +550,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
             else ifcmp("ena") 	GPIO_ENABLE_W1TS = val;
             else ifcmp("dis") 	GPIO_ENABLE_W1TC = val;
             else ifcmp("dir") 	GPIO_ENABLE = val;
+            else ifcmp("sgn") 	set_sigma_duty_312KHz(val);
     	}
     }
     else ifcmp("hexdmp") {
@@ -568,6 +568,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     		};
     	}
     }
+#if 0
 	else ifcmp("call") {
 		call_func ptr = (call_func)(ahextoul(cstr+4)&0xfffffffc);
 		web_conn->udata_stop = ptr(val, web_conn->udata_start, web_conn->udata_stop);
@@ -575,6 +576,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 		os_printf("%p=call_func() ", web_conn->udata_stop);
 #endif
 	}
+#endif
 #if 0
     else ifcmp("web_") {
     	cstr+=4;
