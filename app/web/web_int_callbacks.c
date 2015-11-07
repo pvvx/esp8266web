@@ -739,7 +739,8 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
             }
             else { 
             	// STATION
-    	        ifcmp("rssi") tcp_puts("%d", wifi_station_get_rssi());
+            	ifcmp("dhcp") tcp_puts("%d", (dhcpc_flag==0)? 0 : 1);
+            	else ifcmp("rssi") tcp_puts("%d", wifi_station_get_rssi());
     	        else ifcmp("aucn") tcp_puts("%d", wifi_station_get_auto_connect());
 				else ifcmp("sta") tcp_puts("%d", wifi_station_get_connect_status());
 	            else ifcmp("rect") tcp_puts("%u", wificonfig.st.reconn_timeout);

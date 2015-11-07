@@ -169,7 +169,6 @@ wdrv_ip
 wdrv_port
 wifi_mode
 wifi_phy
-wifi_chl
 wifi_maxpw
 wifi_vddpw
 wifi_rfopt
@@ -201,11 +200,11 @@ wifi_st_dhcp
 wifi_st_rssi
 wifi_st_aucn
 wifi_st_hostname
-wifi_st_aps_id
 wfs_addr
 wfs_files
 wfs_size
 wfs_max_size
+wifi_aps_id
 wifi_aps_xml
 wifi_scan
 sys_url

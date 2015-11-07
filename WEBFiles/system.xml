@@ -86,7 +86,6 @@
 <wifi>
  <mode>~wifi_mode~</mode>
  <phy>~wifi_phy~</phy>
- <chl>~wifi_chl~</chl>
  <phy_max_tpw>~wifi_maxpw~</phy_max_tpw>
  <phy_vdd33_tpw>~wifi_vddpw~</phy_vdd33_tpw>
  <phy_afterwake_rfoption>~wifi_rfopt~</phy_afterwake_rfoption>
@@ -121,7 +120,6 @@
   <rssi>~wifi_st_rssi~</rssi>
   <autoconnect>~wifi_st_aucn~</autoconnect>
   <hostname>~wifi_st_hostname~</hostname>
-  <aps_id>~wifi_st_aps_id~</aps_id>
  </st>
 </wifi>
 <webfs>
@@ -131,6 +129,7 @@
   <max_size>~wfs_max_size~</max_size>
 </webfs>
 <wifi_aps>
+<aps_id>~wifi_aps_id~</aps_id>
 ~wifi_aps_xml~
 </wifi_aps>
 <wifi_scan>
