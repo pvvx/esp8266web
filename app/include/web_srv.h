@@ -30,6 +30,7 @@ typedef enum
         HTTP_GIF,         // File is GIF image (extension .gif)
         HTTP_PNG,         // File is PNG image (extension .png)
         HTTP_JPG,         // File is JPG image (extension .jpg)
+		HTTP_SVG,		  // File is SVG image (extension .svg)
         HTTP_JAVA,        // File is java (extension .js)
         HTTP_SWF,         // File is ShockWave-Flash (extension .swf)
         HTTP_WAV,         // File is audio (extension .wav)

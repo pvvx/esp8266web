@@ -82,6 +82,7 @@ static const char *httpFileExtensions[] = {
         "gif",          // HTTP_GIF
         "png",          // HTTP_PNG
         "jpg",          // HTTP_JPG
+		"svg",			// HTTP_SVG
         "js",           // HTTP_JAVA
         "swf",          // HTTP_SWF
         "wav",          // HTTP_WAV
@@ -102,6 +103,7 @@ static const char *httpContentTypes[] = {
     "image/gif",                // HTTP_GIF       "gif",
     "image/png",                // HTTP_PNG       "png",
     "image/jpeg",               // HTTP_JPG       "jpg",
+	"image/svg+xml",			// HTTP_SVG       "svg",
     "text/javascript",          // HTTP_JAVA      "js",
     "application/x-shockwave-flash", // HTTP_SWF  "swf",
     "audio/x-wave",             // HTTP_WAV       "wav",
