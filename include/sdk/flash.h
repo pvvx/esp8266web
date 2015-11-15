@@ -38,18 +38,20 @@ void spi_flash_set_read_func(user_spi_flash_read read);
 
 #endif
 
-#define USE_FIX_SDK_FLASH_SIZE  // включена "песочница" для SDK в 512 килобайт flash. Включить доступ к flash до 16Мбайт включительно
-
 #define MASK_ADDR_FLASH_ICACHE_DATA	0xfffff
 
 #define spi_flash_read_byte(faddr, dest) spi_flash_read(faddr, dest, 1);
 
 #ifdef USE_FIX_SDK_FLASH_SIZE
 
+#define flashchip_sector_size 4096
+
 #define open_16m() 			flashchip->chip_size = FLASH_MAX_SIZE
 #define close_16m() 		flashchip->chip_size = FLASH_MIN_SIZE
 
 #else
+
+#define flashchip_sector_size flashchip->sector_size
 
 #define open_16m()
 #define close_16m()

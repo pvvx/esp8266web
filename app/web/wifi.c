@@ -227,8 +227,8 @@ uint32 ICACHE_FLASH_ATTR Set_WiFi(struct wifi_config *wcfg, uint32 wifi_set_mask
 	uint8 opmode = wifi_get_opmode();
 	if ((wset.b.phy)
 			&& (!(wifi_set_phy_mode(wcfg->b.phy)))) werr.b.phy = 1;
-/*	if ((wset.b.chl)
-			&& (!(wifi_set_channel(wcfg->b.chl))))	werr.b.chl = 1; // for sniffer */
+//	if ((wset.b.chl)
+//			&& (!(wifi_set_channel(wcfg->b.chl))))	werr.b.chl = 1; // for sniffer
 	if (wset.b.sleep) {
 		if(!(wifi_set_sleep_type(wcfg->b.sleep))) werr.b.sleep = 1;
 #if DEF_SDK_VERSION <= 1019
@@ -351,7 +351,8 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	wset.ui = wifi_set_mask;
 	if (wset.b.mode) wcfg->b.mode = WIFI_MODE;
 	if (wset.b.phy)	wcfg->b.phy = PHY_MODE;
-//	if (wset.b.chl)	wcfg->b.chl = 1; // for sniffer
+//	if (wset.b.chl)
+		wcfg->b.chl = 1; // for sniffer
 	if (wset.b.sleep) wcfg->b.sleep = DEF_WIFI_SLEEP;
 	if (wset.b.ap_config) {
 		wcfg->ap.config.ssid_len = rom_xstrcpy(wcfg->ap.config.ssid, wifi_ap_name);
@@ -455,6 +456,7 @@ void ICACHE_FLASH_ATTR Setup_WiFi(void) {
 	total_scan_infos = 0;
 	wifi_read_fcfg();
 	if (wificonfig.b.mode == 0) Set_default_wificfg(&wificonfig, WIFI_MASK_ALL);
+	Set_WiFi(&wificonfig, Cmp_WiFi_chg(&wificonfig) & (WIFI_MASK_SLEEP|WIFI_MASK_STDHCP|WIFI_MASK_APIPDHCP));
 	wifi_set_event_handler_cb(wifi_handle_event_cb);
 	return;
 }

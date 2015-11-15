@@ -6,13 +6,20 @@
 #ifndef _INCLUDE_SYS_CONST_H_
 #define _INCLUDE_SYS_CONST_H_
 
+#include "sdk_config.h"
 #include "hw/esp8266.h"
 
 #define MAX_IDX_SYS_CONST 128
 #define SIZE_SYS_CONST 128
 #define SIZE_SAVE_SYS_CONST 756 // размер сохранения блока системных констант в секторе с номером (max_flash - 4). SDK 1.4.0
 
+#ifdef USE_FIX_SDK_FLASH_SIZE
+#define esp_init_data_default_sec (0x7C)
+#define esp_init_data_default_addr (0x7C000)
+#else
+#define esp_init_data_default_sec (flashchip->chip_size - 4)
 #define esp_init_data_default_addr (flashchip->chip_size - 4 * SPI_FLASH_SEC_SIZE)
+#endif
 
 #define	sys_const_spur_freq_cfg		26 // rx_param25: spur_freq=spur_freq_cfg/spur_freq_cfg_div
 #define	sys_const_spur_freq_cfg_div	27	// rx_param26

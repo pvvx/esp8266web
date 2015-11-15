@@ -387,7 +387,6 @@ uint32 ICACHE_FLASH_ATTR system_get_checksum(uint8 *ptr, uint32 len)
 void ICACHE_FLASH_ATTR read_wifi_config(void)
 {
 	struct ets_store_wifi_hdr hbuf;
-
 	spi_flash_read(flashchip->chip_size - 0x1000,(uint32 *)(&hbuf), sizeof(hbuf));
 	uint32 store_cfg_addr = flashchip->chip_size - 0x3000 + ((hbuf.bank)? 0x1000 : 0);
 	struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
@@ -511,18 +510,24 @@ void ICACHE_FLASH_ATTR startup(void)
 #if DEF_SDK_VERSION >= 1400
 	uint8 * buf = os_malloc(SIZE_SAVE_SYS_CONST);
 	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
+#if DEF_SDK_VERSION == 1410
+	if(buf[112] == 3) g_ic.c[471] = 1;
+	else g_ic.c[471] = 0;
+#endif
 	buf[0xf8] = 0;
 	phy_rx_gain_dc_table = &buf[0x100];
 	phy_rx_gain_dc_flag = 0;
 	//
 	// user_rf_pre_init(); // не использется, т.к. мождно вписать что угодно и тут :)
+	//	system_phy_set_powerup_option(0);
+	//	system_phy_set_rfoption(0);
 	//
 #elif DEF_SDK_VERSION >= 1300
 	uint8 *buf = (uint8 *)os_malloc(256); // esp_init_data_default.bin
-	spi_flash_read(flashchip->chip_size - 0x4000,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
+	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
 #else
 	uint8 *buf = (uint8 *)os_malloc(esp_init_data_default_size); // esp_init_data_default.bin
-	spi_flash_read(flashchip->chip_size - 0x4000,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
+	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
 #endif
 	//
 	if(buf[0] != 5) { // первый байт esp_init_data_default.bin не равен 5 ? - бардак!
@@ -538,7 +543,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #ifdef DEBUG_UART
 		os_printf("\nSave rx_gain_dc table (%u, %u)\n", buf[0xf8], phy_rx_gain_dc_flag );
 #endif
-		wifi_param_save_protect_with_check((flashchip->chip_size/flashchip->sector_size) - 4, flashchip->sector_size, buf, SIZE_SAVE_SYS_CONST);
+		wifi_param_save_protect_with_check(esp_init_data_default_sec, flashchip_sector_size, buf, SIZE_SAVE_SYS_CONST);
 	}
 #endif
 	os_free(buf);

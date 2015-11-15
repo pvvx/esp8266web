@@ -54,7 +54,7 @@
 					<option value='0'>auto</option>
 				</select></td>
 				<td class="label">Status:</td>
-				<td><select name='wifi_csta'>
+				<td><select name='wifi_st_sta'>
 					<option value='0'>IDLE</option>
 					<option value='1'>CONNECTING</option>
 					<option value='2'>WRONG_PASSWORD</option>
@@ -177,7 +177,7 @@ var cfg = {
 	wifi_ap_hssid:"~wifi_ap_hssid~",
 	wifi_ap_dhcp:"~wifi_ap_dhcp~",
 	wifi_st_dhcp:"~wifi_st_dhcp~",
-	wifi_csta:(~wifi_csta~>5)?6:~wifi_csta~
+	wifi_csta:(~wifi_st_sta~>5)?6:~wifi_st_sta~
 }
 setFormValues(document.forms[0], cfg);
 </script>

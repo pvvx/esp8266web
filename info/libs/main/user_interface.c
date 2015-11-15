@@ -1142,7 +1142,7 @@ void ICACHE_FLASH_ATTR phy_afterwake_set_rfoption(uint8 option)
 
 void ICACHE_FLASH_ATTR phy_set_powerup_option(int option)
 {
-	RTC_RAM_BASE[0x3C>>2] = option; // 0x6000103C 
+	RTC_BASE[0x3C>>2] = option; // 0x6000073C
 }	
 
 bool ICACHE_FLASH_ATTR system_deep_sleep_set_option(uint8 option)

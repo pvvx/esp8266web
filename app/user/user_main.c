@@ -99,7 +99,6 @@ extern void gdbstub_init(void);
 #ifdef USE_WDRV
     init_wdrv();
 #endif
-	Set_WiFi(&wificonfig, Cmp_WiFi_chg(&wificonfig) & (WIFI_MASK_SLEEP|WIFI_MASK_STDHCP|WIFI_MASK_APIPDHCP));
 	WEBFSInit(); // файловая система
 	system_deep_sleep_set_option(0);
 	system_init_done_cb(init_done_cb);

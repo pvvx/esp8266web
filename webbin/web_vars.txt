@@ -217,10 +217,6 @@ inc:grfx1.inc
 inc:grfx2.inc
 sys_vdd33
 sys_ucnst_0
-<font class="font6">wifi_rdcfg</font><font
-  class="font0">
-<font class="font6">wifi_newcfg</font><font
-  class="font0">
 wifi_aps_xml
 start
 xml_ram
@@ -459,5 +455,5 @@ wifi_st_sbss
 wifi_ap_hssid
 wifi_ap_dhcp
 wifi_st_dhcp
-wifi_csta
-wifi_csta
+wifi_st_sta
+wifi_st_sta
