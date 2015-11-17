@@ -3,7 +3,7 @@
 
 #include "sdk/sdk_config.h"
 
-#define SYS_VERSION "0.5.2"
+#define SYS_VERSION "0.5.3"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
