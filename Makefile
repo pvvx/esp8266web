@@ -89,6 +89,7 @@ CCFLAGS += \
 	-fno-tree-ccp	\
 	-foptimize-register-move	\
 	-fno-inline-functions	\
+	-Wl,--wrap=os_printf_plus	\
 	-Wl,-EL	\
 	-nostdlib
 

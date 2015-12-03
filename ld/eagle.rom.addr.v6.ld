@@ -136,7 +136,7 @@ PROVIDE ( ets_isr_unmask = 0x40000fa8 );
 PROVIDE ( ets_memcmp = 0x400018d4 );
 PROVIDE ( ets_memcpy = 0x400018b4 );
 PROVIDE ( ets_memmove = 0x400018c4 );
-PROVIDE ( ets_memset = 0x400018a4 );
+PROVIDE ( ets_memset = 0x400018a4 ); 
 PROVIDE ( ets_post = 0x40000e24 );
 PROVIDE ( ets_printf = 0x400024cc );
 PROVIDE ( ets_putc = 0x40002be8 );
@@ -346,6 +346,10 @@ PROVIDE ( xthal_set_intclear = 0x4000dd60 );
 PROVIDE ( xthal_spill_registers_into_stack_nw = 0x4000e320 );
 PROVIDE ( xthal_window_spill = 0x4000e324 );
 PROVIDE ( xthal_window_spill_nw = 0x4000e320 );
+
+PROVIDE ( Td0 = 0x3fffd100 );
+PROVIDE ( Td4s = 0x3fffd500);
+PROVIDE ( rcons = 0x3fffd0f0);
 
 PROVIDE ( Te0 = 0x3fffccf0 );
 PROVIDE ( UartDev = 0x3fffde10 );

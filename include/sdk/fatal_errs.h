@@ -21,6 +21,6 @@
 #define RST_EVENT_MAX 32
 
 
-void fatal_error(uint32_t errn, void *addr, void *txt);
+void fatal_error(uint32 errn, void *addr, void *txt);
 
 #endif // _INCLUDE_FATAL_ERRS_H_

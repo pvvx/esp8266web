@@ -177,7 +177,10 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
   size struct s_wifi_store: 1156
   1156 + 500 = 1656 байт
 */
-#if DEF_SDK_VERSION >= 1400 // SDK >= 1.4.0
+#if DEF_SDK_VERSION >= 1500 // SDK >= 1.4.0
+#define wifi_config_size 0x484 // 1156 bytes
+#define g_ic_size (wifi_config_size + 504) // 1660 bytes
+#elif DEF_SDK_VERSION >= 1400 // SDK >= 1.4.0
 #define wifi_config_size 0x484 // 1156 bytes
 #define g_ic_size (wifi_config_size + 500) // 1656 bytes
 #elif DEF_SDK_VERSION >= 1300 // SDK >= 1.3.0
@@ -227,7 +230,9 @@ struct	s_g_ic{
 	uint32	field_1BC;		//+01BC g_ic+444
 	uint32	field_1C0;		//+01C0 g_ic+448
 	uint32	field_1C4;		//+01C4 g_ic+452
-#if DEF_SDK_VERSION >= 1400 // SDK >= 1.4.0
+#if DEF_SDK_VERSION >= 1500 // SDK >= 1.4.0
+	uint32	field_1C8[12];	//+01C8 g_ic+456 504-456
+#elif DEF_SDK_VERSION >= 1400 // SDK >= 1.4.0
 	uint32	field_1C8[11];	//+01C8 g_ic+456 500-456
 #elif DEF_SDK_VERSION >= 1300 // SDK >= 1.3.0
 	uint8	field_1C8[8];	//+01C8 g_ic+456 464-456

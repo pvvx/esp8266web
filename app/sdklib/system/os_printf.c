@@ -18,8 +18,8 @@ extern bool system_get_os_print(void);
 // int os_printf_plus(const char *format, ...)
 // Использует буфер в области RAM-BIOS
 //-----------------------------------------------------------------------------
-//int __wrap_os_printf_plus(const char *format, ...)
-int ICACHE_FLASH_ATTR rom_printf(const char *format, ...)
+int ICACHE_FLASH_ATTR __wrap_os_printf_plus(const char *format, ...)
+//int ICACHE_FLASH_ATTR rom_printf(const char *format, ...)
 {
 	int i = 0;
 	if(system_get_os_print()) {

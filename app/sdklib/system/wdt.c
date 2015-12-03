@@ -76,9 +76,9 @@ void ICACHE_FLASH_ATTR wdt_init(void)
 
 #endif
 
-void store_exception_error(uint32_t errn)
+void store_exception_error(uint32 errn)
 {
-		uint32_t *ptr = (uint32_t *)(RTC_MEM_BASE);
+		uint32 *ptr = (uint32 *)(RTC_MEM_BASE);
 			*ptr++ = errn;
 			*ptr++ = RSR(EXCCAUSE);
 			*ptr++ = RSR(EPC1);
@@ -91,18 +91,12 @@ void store_exception_error(uint32_t errn)
 		}
 }
 
-
-void default_exception_handler(void)
+void fatal_error(uint32 errn, void *addr, void *txt)
 {
-	store_exception_error(RST_EVENT_EXP);
-}
-
-void fatal_error(uint32_t errn, void *addr, void *txt)
-{
-		uint32_t *ptr = (uint32_t *)(RTC_MEM_BASE);
+		uint32 *ptr = (uint32 *)(RTC_MEM_BASE);
 			*ptr++ = errn;
-			*ptr++ = (uint32_t)addr;
-			*ptr++ = (uint32_t)txt;
+			*ptr++ = (uint32)addr;
+			*ptr++ = (uint32)txt;
 		_ResetVector();
 }
 
@@ -155,6 +149,47 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 	}
 	// rst_inf->reason = 0;
 }
+
+#ifdef DEBUG_EXCEPTION
+
+void default_exception_handler(struct exception_frame *ef, uint32 cause)
+{
+	(void)cause;
+	uint32 * a1;
+	asm volatile ("mov %0, a1": "=a"(a1));
+	a1 += 12;
+	store_exception_error(0);
+	struct rst_info * rst_inf = (struct rst_info *)&RTC_MEM(0);
+	rst_inf->reason = RST_EVENT_EXP;
+	ets_intr_unlock();
+	ets_printf((const char *)aFatalException, rst_inf->exccause);
+	ets_printf((const char *)aEpc10x08xEpc20, rst_inf->epc1, rst_inf->epc2, rst_inf->epc3, rst_inf->excvaddr, rst_inf->depc);
+	ets_printf((const char *)" a0=%p a1=%p", ef->a0, a1);
+	int i = 2;
+	uint32 * ptr = &ef->a2;
+	while(i < 16) {
+		os_printf_plus((const char *)" a%u=%p", i++, *ptr++);
+		if((i&3)==0) os_printf_plus("\n");
+	}
+	i = 0;
+	uint32 ss[2];
+	ss[0] = 0x30257830; // "0x%08x"
+	while(i < 128) {
+		i++;
+		if((i&7)==0) ss[1] = 0x0a7838;
+		else ss[1] = 0x207838;
+		os_printf_plus((uint8 *)&ss[0], *a1++);
+	}
+	ets_delay_us(1000000);
+	_ResetVector();
+}
+#else
+void default_exception_handler(void)
+{
+	store_exception_error(RST_EVENT_EXP);
+}
+#endif
+
 
 // SDK 1.1.0 + libmain_patch_01.a
 /* struct rst_info *system_get_rst_info(void){

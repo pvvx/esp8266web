@@ -1,6 +1,10 @@
 /*
  * ESP8266 I2S registers
  */
+#ifndef I2S_REGISTERS_H_
+#define I2S_REGISTERS_H_
+
+#define	I2SBASEFREQ	(12000000L)
 
 #define DR_REG_I2S_BASE (0x60000e00)
 
@@ -112,3 +116,5 @@
 #define I2S_RX_CHAN_MOD_S 3
 #define I2S_TX_CHAN_MOD 0x00000007
 #define I2S_TX_CHAN_MOD_S 0
+
+#endif // I2S_REGISTERS_H_

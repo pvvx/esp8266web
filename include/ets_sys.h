@@ -3,7 +3,7 @@
  * Define user specified Event signals and Task priorities here
  *
  */
-
+	
 #ifndef _ETS_SYS_H
 #define _ETS_SYS_H
 
@@ -35,17 +35,27 @@ typedef struct _ETSTIMER_ {
 } ETSTimer;
 
 /* interrupt related */
-#define ETS_SPI_INUM	    2
+#define ETS_SLC_INUM        1
+#define ETS_SPI_INUM        2
 #define ETS_GPIO_INUM       4
 #define ETS_UART_INUM       5
 #define ETS_UART1_INUM      5
-#define ETS_FRC_TIMER0_INUM 9  /* use edge*/
+#define ETS_CCOMPARE0_INUM  6
+#define ETS_SOFT_INUM       7
+#define ETS_WDT_INUM        8
+#define ETS_FRC_TIMER1_INUM 9  /* use edge*/
 
 #define ETS_INTR_LOCK() \
     ets_intr_lock()
 
 #define ETS_INTR_UNLOCK() \
     ets_intr_unlock()
+
+#define ETS_CCOMPARE0_INTR_ATTACH(func, arg) \
+    ets_isr_attach(ETS_CCOMPARE0_INUM, (func), (void *)(arg))
+
+#define ETS_SLC_INTR_ATTACH(func, arg) \
+    ets_isr_attach(ETS_SLC_INUM, (func), (void *)(arg))
 
 #define ETS_FRC_TIMER1_INTR_ATTACH(func, arg) \
     ets_isr_attach(ETS_FRC_TIMER1_INUM, (func), (void *)(arg))
@@ -85,5 +95,17 @@ typedef struct _ETSTIMER_ {
 
 #define ETS_GPIO_INTR_DISABLE() \
     ETS_INTR_DISABLE(ETS_GPIO_INUM)
+
+#define ETS_CCOMPARE0_ENABLE() \
+	ETS_INTR_ENABLE(ETS_CCOMPARE0_INUM)
+
+#define ETS_CCOMPARE0_DISABLE() \
+	ETS_INTR_DISABLE(ETS_CCOMPARE0_INUM)
+
+#define ETS_SLC_INTR_ENABLE() \
+	ETS_INTR_ENABLE(ETS_SLC_INUM)
+
+#define ETS_SLC_INTR_DISABLE() \
+	ETS_INTR_DISABLE(ETS_SLC_INUM)
 
 #endif /* _ETS_SYS_H */

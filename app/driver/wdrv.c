@@ -82,7 +82,7 @@ void timer0_isr(void)
 				if(z > 0) x = ((z * 279) >> 8) + x;
 				sar_dout += x;
 			}
-			out_wave_pbuf[wdrv_buf_wr_idx++] = sar_dout; // 14 бит 0..16384
+			out_wave_pbuf[wdrv_buf_wr_idx++] = sar_dout; 
 			if(wdrv_buf_wr_idx == (WDRV_OUT_BUF_SIZE >>1) || wdrv_buf_wr_idx == WDRV_OUT_BUF_SIZE) {
 				system_os_post(WDRV_TASK_PRIO, WDRV_SIG_DATA, wdrv_buf_wr_idx);
 			}
