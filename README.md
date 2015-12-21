@@ -7,9 +7,13 @@ All I/O, Wifi, system, ... variables.<br>
 GET/POST, cookie, load/upload data/Flash, multipart/form-data,...<br>
 TCP2UART: 300..3000000 Baud, Flow Control On/Off, Inverse On/Of all signals, ...<br>
 HTTP-Web services to more than 10 simultaneous open connections.<br>
-TCP transfer speed > 1 Mbytes/sec (debug off).<br>
-UDP Wave server:  Sends 14-bit ADC samples at 1 Hz ..20 kHz.<br>
-Modbus TCP port 502: GPIOs, ADC, VDD.<br>
+
+TCP/HTTP transfer speed:<br>
+ > 1 Mbytes/sec (debug off).<br>
+UDP Wave server:<br>
+ Sends 14-bit ADC samples at 1 Hz .. 48 kHz (max 192 kHz 12 bits).<br>
+Modbus TCP port 502:<br>
+ GPIOs, ADC, VDD.<br>
 
 Supported options 48 kbytes IRAM.<br>
 Supported '[Rapid Loader](https://github.com/pvvx/Rapid_Loader/)' and Flash 512 кbytes - 16 Mbytes.<br>

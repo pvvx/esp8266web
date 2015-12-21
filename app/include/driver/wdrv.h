@@ -24,6 +24,9 @@
 #define DEFAULT_WDRV_HOST_PORT 10201;
 #define DEFAULT_WDRV_REMOTE_PORT USE_WDRV; // 10201;
 
+#define MAX_SAMPLE_RATE 192000
+#define SAR_SAMPLE_RATE 386000
+
 void init_wdrv(void);
 
 extern struct udp_pcb *pcb_wdrv; // = NULL -> wdrv закрыт

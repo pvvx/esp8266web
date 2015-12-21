@@ -491,6 +491,9 @@ typedef enum {
 #define IO_RTC_3				rtc_[3]
 //0x60000710
 #define IO_RTC_4				rtc_[4] // rtc_enter_sleep() = 0;
+// IO_RTC_4 = 0 - отключение WiFi
+//bit31 =1 источник тактирования для I2S, ... = PLL (80MHz)
+//bit25,26 =1 источник тактирования для SAR ... = PLL (80MHz)
 //0x60000714
 #define IO_RTC_5				rtc_[5]	// bitrtc_get_reset_reason()
 //0x60000718
@@ -746,6 +749,28 @@ bit13 =1 SDIO dataoutput is at positive edges (SDIO V2.0)
 #define SLC_HOST_INTR_ENA	scl_[45]
 /* SLC_HOST_CONF_W5:0x60000BB8 */
 #define SLC_HOST_CONF_W5	scl_[46]
+
+/* SAR_?:0x60000D50 */
+#define SAR_CFG sar_[20]
+// Бит 1: запуск нового замера SAR
+// Бит 2..4: кол-во значений в SAR_DATA 0..7 -> 1..8
+// Бит 24..26: готовность r_state = 0
+/* SAR_?:0x60000D5С */
+#define SAR_CFG1 sar_[23]
+// Бит 21: ?
+/* SAR_?:0x60000D60 */
+#define SAR_CFG2 sar_[24]
+// Бит 1: ?
+/* SAR_DATA : 0x60000D80 */
+#define SAR_DATA sar_[32]
+#define SAR_W0 	 sar_[32]
+#define SAR_W1 	 sar_[33]
+#define SAR_W2 	 sar_[34]
+#define SAR_W3 	 sar_[35]
+#define SAR_W4 	 sar_[36]
+#define SAR_W5 	 sar_[37]
+#define SAR_W6 	 sar_[38]
+#define SAR_W7 	 sar_[39]
 
 /* USER RTC RAM:	0x60001100 */
 #define RTC_MEM(IDX)	rtc_mem_[IDX]

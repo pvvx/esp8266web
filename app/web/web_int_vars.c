@@ -616,7 +616,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	else ifcmp("wdrv_") {
 		cstr+=5;
 		ifcmp("freq") {
-			if(val > 0 && val <= 20000)	wdrv_sample_rate = val;
+			if(val > 0 && val <= MAX_SAMPLE_RATE)	wdrv_sample_rate = val;
 		}
 		else ifcmp("ip") {
 			val = ipaddr_addr(pvar);
@@ -631,7 +631,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			 // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
 		}
 		else ifcmp("start") {
-			if(val > 0 && val <= 20000) wdrv_start(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, val);
+			if(val > 0 && val <= MAX_SAMPLE_RATE) wdrv_start(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, val);
 		}
 		else ifcmp("stop") {
 			wdrv_stop(); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_STOP, 0);
