@@ -107,7 +107,7 @@ void ICACHE_FLASH_ATTR wdrv_stop(void)
 		// отключить SAR
     	i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 0);
     	while((SAR_CFG >> 24) & 0x07);
-    	SAR_CFG = (SAR_CFG & (~(7<<2))) | (8 << 2);
+    	SAR_CFG = (SAR_CFG & (~(7<<2))) | (7 << 2);
     	SAR_CFG1 &= 1 << 21;
     	uint32 x = SAR_CFG2 & (~1);
     	SAR_CFG2 = x;
