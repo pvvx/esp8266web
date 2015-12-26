@@ -755,6 +755,10 @@ bit13 =1 SDIO dataoutput is at positive edges (SDIO V2.0)
 // Бит 1: запуск нового замера SAR
 // Бит 2..4: кол-во значений в SAR_DATA 0..7 -> 1..8
 // Бит 24..26: готовность r_state = 0
+/* SAR_?:0x60000D54 */
+#define SAR_TIM1 sar_[21]
+/* SAR_?:0x60000D58 */
+#define SAR_TIM2 sar_[22]
 /* SAR_?:0x60000D5С */
 #define SAR_CFG1 sar_[23]
 // Бит 21: ?

@@ -94,6 +94,8 @@ void timer0_isr(void)
 	}
 }
 
+extern uint8 tout_dis_txpwr_track;
+
 void ICACHE_FLASH_ATTR wdrv_stop(void)
 {
 	ets_isr_mask(BIT(ETS_FRC_TIMER0_INUM));
@@ -112,8 +114,11 @@ void ICACHE_FLASH_ATTR wdrv_stop(void)
     	uint32 x = SAR_CFG2 & (~1);
     	SAR_CFG2 = x;
     	SAR_CFG2 = x | 1;
+		tout_dis_txpwr_track = 0;
 	}
 }
+
+#define adc_clk_div 8 // ~3019/(8*8-1,36) = 46 кНz
 
 bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 {
@@ -126,14 +131,19 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 #if DEBUGSOO > 1
 				os_printf("WDRV: start(%u)\n", sample_rate);
 #endif
+				tout_dis_txpwr_track = 1;
 				wdrv_buf_wr_idx = 1<<31; // флаг для пропуска считывания SAR при первом прерывания
-				// включить SAR
-				i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 1); //select test mux
-				SAR_CFG1 |= 1 << 21;
-				while((SAR_CFG >> 24) & 0x07);
 				wdrv_bufn = SAR_SAMPLE_RATE / sample_rate;
 				if(wdrv_bufn > 8) wdrv_bufn = 8;
-				SAR_CFG = (SAR_CFG & (~(7<<2))) | ((wdrv_bufn-1) << 2);
+				SAR_CFG = (SAR_CFG & 0xFFFF00E3) | ((wdrv_bufn-1) << 2) | ((adc_clk_div & 0xFF) << 8);
+//				SAR_BASE[20] = (SAR_BASE[20] & 0xFFFF00FF) | ((adc_clk_div & 0xFF) << 8);
+				SAR_TIM1 = (SAR_TIM1 & 0xFF000000) | (adc_clk_div * 5 + ((adc_clk_div - 1) << 16) + ((adc_clk_div - 1) << 8) - 1);
+				SAR_TIM2 = (SAR_TIM2 & 0xFF000000) | (adc_clk_div * 11 + ((adc_clk_div * 3 - 1) << 8) + ((adc_clk_div * 10 - 1) << 16) - 1);
+				// включить SAR
+				i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 1); //select test mux // rom_i2c_writeReg_Mask(108,2,0,5,5,1);
+				SAR_CFG1 |= 1 << 21;
+				while((SAR_CFG >> 24) & 0x07);
+
 				// включить TIMER0
 				TIMER0_CTRL =   TM_DIVDED_BY_16
 				              | TM_AUTO_RELOAD_CNT
@@ -155,7 +165,7 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 
 void ICACHE_FLASH_ATTR wdrv_tx(uint32 sample_idx)
 {
-#if DEBUGSOO > 1
+#if DEBUGSOO > 2
 	os_printf("WDRV: txi(%u)\n", sample_idx>>10);
 #endif
 	if(pcb_wdrv == NULL ||out_wave_pbuf == NULL) return;

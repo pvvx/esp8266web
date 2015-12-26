@@ -43,6 +43,7 @@ void ICACHE_FLASH_ATTR mread_sar_dout(uint16 * buf)
 	volatile uint32 * sar_regs = &SAR_BASE[32]; // 8 шт. с адреса 0x60000D80
 	int i;
 	for(i = 0; i < 8; i++) {
+		// коррекция значений SAR под утечки и т.д.
 		int x = ~(*sar_regs++);
 		int z = (x & 0xFF) - 21;
 		x &= 0x700;
@@ -98,10 +99,13 @@ uint16 ICACHE_FLASH_ATTR adc_read(void)
 }
 */
 
+extern uint8 tout_dis_txpwr_track;
+
 void ICACHE_FLASH_ATTR read_adcs(uint16 *ptr, uint16 len)
 {
     if(len != 0 && ptr != NULL) {
     	uint16 sar_dout, sardata[8];
+    	tout_dis_txpwr_track = 1;
 #if (0) // в web этой инициализации из system_read_adc() (= test_tout(0)) / не требуется // при test_tout(1) - в SDK выводится отладка сумм SAR
 		uint32 store_reg710 = READ_PERI_REG(0x60000710);
 		uint32 store_reg58e = READ_PERI_REG(0x600005e8);
@@ -149,9 +153,67 @@ void ICACHE_FLASH_ATTR read_adcs(uint16 *ptr, uint16 len)
 		}
 		else	pm_wakeup_init(4,0);
 #endif
+		tout_dis_txpwr_track = 0;
     }
 }
 
+/*
+ * uint16 *adc_addr: ADC sample output address
+ * uint16 adc_num: ADC sample count, range [1, 65535]?
+ * uint8 adc_clk_div: ADC sample collection clock=80M/adc_clk_div, range[2, 32]? Тут ошибка у китайцев?
+ * Example(Continue to collect 100 ADC samples):
+ * uint16 adc_out[100];
+ * phy_adc_read_fast(&adc_out[0], 100, 8);
+ */
+/*
+void phy_adc_read_fast(uint16 *adc_addr, uint16 adc_num, uint8 adc_clk_div)
+{
+	tout_dis_txpwr_track = 1;
+	if(adc_clk_div < 2) adc_clk_div = 2;
+	uint32 save_20 = SAR_BASE[20];
+	uint32 save_21 = SAR_BASE[21];
+	uint32 save_22 = SAR_BASE[22];
+	SAR_BASE[20] = (SAR_BASE[20] & 0xFFFF00FF) | ((adc_clk_div & 0xFF) << 8);
+	SAR_BASE[21] = (SAR_BASE[21] & 0xFF000000) | (adc_clk_div * 5 + ((adc_clk_div - 1) << 16) + ((adc_clk_div - 1) << 8) - 1);
+	SAR_BASE[22] = (SAR_BASE[22] & 0xFF000000) | (adc_clk_div * 11 + ((adc_clk_div * 3 - 1) << 8) + ((adc_clk_div * 10 - 1) << 16) - 1);
+	SAR_BASE[20] &= 0x63; // Зачем грузили ((adc_clk_div & 0xFF) << 8) ?
+	rom_i2c_writeReg_Mask(108,2,0,5,5,1);
+	SAR_BASE[23] |= 1 << 21;
+	while((SAR_BASE[20] >> 24) & 0x07);	// while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
+	while(adc_num--) {
+		SAR_BASE[20] &= 0x7D;
+		SAR_BASE[20] |= 0x02;
+		ets_delay_us(1);
+		while((SAR_BASE[20] >> 24) & 0x07);	// while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
+
+		uint32 x = SAR_BASE[32];
+		x ^= 0x7F;
+		uint32 z = x & 0x7FF;
+		x &= 0xFF;
+		z &= 0xF00;
+		x -= 21;
+		if((signed int) x > 0) {
+			x = (x * 279) >> 8;
+			if(x > 0xff) x = 0xff;
+			z += x;
+		}
+//		z &= 0xffff;
+		z++;
+		z >>= 1;
+		if(chip6_phy_init_ctrl[108] == 0xff) z = 0xFFFF;
+		*adc_addr++ = z;
+	}
+	rom_i2c_writeReg_Mask(108,2,0,5,5,0);
 
 
+	SAR_BASE[20] = save_20;
+	SAR_BASE[21] = save_21;
+	SAR_BASE[22] = save_22;
+	while((SAR_BASE[20] >> 24) & 0x07);	// while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
+	SAR_BASE[23] &= ~(1 << 21);
+	SAR_BASE[24] &= 0x7E;
+	SAR_BASE[24] |= 1;
+	tout_dis_txpwr_track = 0;
+}
+*/
 
