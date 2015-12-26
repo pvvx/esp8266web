@@ -63,7 +63,7 @@ uint32 MdbAdc(unsigned char * mdb, unsigned char * buf, uint32 rwflg)
 	}
 	uint32 x = 0;
 	while(rwflg--) {
-		read_adcs((uint16 *)&x, 1);
+		read_adcs((uint16 *)&x, 1, 0x0808);
 		*mdb++ = x; // *buf++;
 		*mdb = x >> 8; // *buf++;
 	}

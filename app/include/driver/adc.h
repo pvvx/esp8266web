@@ -5,9 +5,16 @@
  *      Author: PV`
  */
 
-#ifndef APP_INCLUDE_DRIVER_ADC_H_
-#define APP_INCLUDE_DRIVER_ADC_H_
+#ifndef _INCLUDE_DRIVER_ADC_H_
+#define _INCLUDE_DRIVER_ADC_H_
 
-void read_adcs(uint16 *ptr, uint16 len)ICACHE_FLASH_ATTR;
+extern uint32 wdrv_bufn;
 
-#endif /* APP_INCLUDE_DRIVER_ADC_H_ */
+/* Инициализация SAR */
+void sar_init(uint32 clk_div, uint32 win_cnt) ICACHE_FLASH_ATTR;
+/* Отключить SAR */
+void sar_off(void) ICACHE_FLASH_ATTR;
+/* Чтение SAR */
+void read_adcs(uint16 *ptr, uint16 len, uint32 cfg) ICACHE_FLASH_ATTR;
+
+#endif /* _INCLUDE_DRIVER_ADC_H_ */

@@ -1,5 +1,5 @@
 /*
- * adc.c Тест на определение скорости работы АЦП
+ * sar_adc.c Тест на определение скорости работы АЦП
  *
  *  Created on: 12/02/2015
  *      Author: PV`
@@ -10,210 +10,67 @@
 #include "osapi.h"
 #include "hw/esp8266.h"
 
-#define i2c_bbpll							0x67 // 103
-#define i2c_bbpll_en_audio_clock_out		4
-#define i2c_bbpll_en_audio_clock_out_msb	7
-#define i2c_bbpll_en_audio_clock_out_lsb	7
-#define i2c_bbpll_hostid					4
 
-#define i2c_saradc							0x6C // 108
-#define i2c_saradc_hostid					2
-#define i2c_saradc_en_test					0
-#define i2c_saradc_en_test_msb				5
-#define i2c_saradc_en_test_lsb				5
-
-//extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb, int indata);
-//extern int rom_i2c_readReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb);
-//extern void read_sar_dout(uint16 * buf);
-
-#define i2c_writeReg_Mask(block, host_id, reg_add, Msb, Lsb, indata) \
-    rom_i2c_writeReg_Mask(block, host_id, reg_add, Msb, Lsb, indata)
-
-#define i2c_readReg_Mask(block, host_id, reg_add, Msb, Lsb) \
-    rom_i2c_readReg_Mask(block, host_id, reg_add, Msb, Lsb)
-
-#define i2c_writeReg_Mask_def(block, reg_add, indata) \
-    i2c_writeReg_Mask(block, block##_hostid, reg_add, reg_add##_msb, reg_add##_lsb, indata)
-
-#define i2c_readReg_Mask_def(block, reg_add) \
-    i2c_readReg_Mask(block, block##_hostid, reg_add, reg_add##_msb, reg_add##_lsb)
-
-void ICACHE_FLASH_ATTR mread_sar_dout(uint16 * buf)
-{
-	volatile uint32 * sar_regs = &SAR_BASE[32]; // 8 шт. с адреса 0x60000D80
-	int i;
-	for(i = 0; i < 8; i++) {
-		// коррекция значений SAR под утечки и т.д.
-		int x = ~(*sar_regs++);
-		int z = (x & 0xFF) - 21;
-		x &= 0x700;
-		if(z > 0) x = ((z * 279) >> 8) + x;
-		buf[i] = x;
-	}
-}
-/*
-#ifdef ADC_DEBUG
-#define ADC_DBG os_printf
-#else
-#define ADC_DBG
-#endif
-
-uint16 ICACHE_FLASH_ATTR adc_read(void)
-{
-    uint8 i;
-    uint16 sar_dout, tout, sardata[8];
-
-    i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 1); //select test mux
-
-    //PWDET_CAL_EN=0, PKDET_CAL_EN=0
-    SET_PERI_REG_MASK(0x60000D5C, 0x200000);
-
-    while (GET_PERI_REG_BITS(0x60000D50, 26, 24) > 0); //wait r_state == 0
-
-    CLEAR_PERI_REG_MASK(0x60000D50, 0x02);    //force_en=0
-    SET_PERI_REG_MASK(0x60000D50, 0x02);    //force_en=1
-
-    os_delay_us(2);
-
-    sar_dout = 0;
-    while (GET_PERI_REG_BITS(0x60000D50, 26, 24) > 0); //wait r_state == 0
-
-    read_sar_dout(sardata);
-
-    for (i = 0; i < 8; i++) {
-        sar_dout += sardata[i];
-        ADC_DBG("%d, ", sardata[i]);
-    }
-
-    tout = (sar_dout + 8) >> 4;   // tout is 10 bits fraction
-
-    i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 0); //select test mux
-
-    while (GET_PERI_REG_BITS(0x60000D50, 26, 24) > 0); // wait r_state == 0
-
-    CLEAR_PERI_REG_MASK(0x60000D5C, 0x200000);
-    SET_PERI_REG_MASK(0x60000D60, 0x1);    //force_en=1
-    CLEAR_PERI_REG_MASK(0x60000D60, 0x1);    //force_en=1
-
-    return tout;      //tout is 10 bits fraction
-}
-*/
-
+uint32 wdrv_bufn DATA_IRAM_ATTR;
 extern uint8 tout_dis_txpwr_track;
 
-void ICACHE_FLASH_ATTR read_adcs(uint16 *ptr, uint16 len)
+/* Инициализация SAR */
+void ICACHE_FLASH_ATTR sar_init(uint32 clk_div, uint32 win_cnt)
+{
+	tout_dis_txpwr_track = 1;
+	if(win_cnt > 8 || win_cnt == 0) win_cnt = 8;
+	wdrv_bufn = win_cnt;
+	if(clk_div > 23 || clk_div < 2) clk_div = 8;
+	SAR_CFG = (SAR_CFG & 0xFFFF00E3) | ((wdrv_bufn-1) << 2) | (clk_div << 8);
+	SAR_TIM1 = (SAR_TIM1 & 0xFF000000) | (clk_div * 5 + ((clk_div - 1) << 16) + ((clk_div - 1) << 8) - 1);
+	SAR_TIM2 = (SAR_TIM2 & 0xFF000000) | (clk_div * 11 + ((clk_div * 3 - 1) << 8) + ((clk_div * 10 - 1) << 16) - 1);
+	// включить SAR
+	rom_i2c_writeReg_Mask(108,2,0,5,5,1);
+	SAR_CFG1 |= 1 << 21;
+	while((SAR_CFG >> 24) & 0x07); // wait r_state == 0
+}
+
+/* Отключить SAR */
+void ICACHE_FLASH_ATTR sar_off(void)
+{
+	rom_i2c_writeReg_Mask(108,2,0,5,5,0);
+    while((SAR_CFG >> 24) & 0x07); // wait r_state == 0
+    SAR_CFG = 0x00908bc; // (SAR_CFG & (~(7<<2))) | (7 << 2) | (8 << 8);
+	SAR_TIM1 = 0x0070727; // sar_clk_div 8 // ~3019/(8*8-1,36) = 46 кНz
+	SAR_TIM2 = 0x04f1757; // sar_clk_div 8 // ~3019/(8*8-1,36) = 46 кНz
+    SAR_CFG1 &= ~(1 << 21);
+    uint32 x = SAR_CFG2 & (~1);
+    SAR_CFG2 = x;
+    SAR_CFG2 = x | 1;
+	tout_dis_txpwr_track = 0;
+}
+
+void ICACHE_FLASH_ATTR read_adcs(uint16 *ptr, uint16 len, uint32 cfg)
 {
     if(len != 0 && ptr != NULL) {
-    	uint16 sar_dout, sardata[8];
-    	tout_dis_txpwr_track = 1;
-#if (0) // в web этой инициализации из system_read_adc() (= test_tout(0)) / не требуется // при test_tout(1) - в SDK выводится отладка сумм SAR
-		uint32 store_reg710 = READ_PERI_REG(0x60000710);
-		uint32 store_reg58e = READ_PERI_REG(0x600005e8);
-		uint32 store018 = READ_PERI_REG(0x3FF00018);
-    	if((store_reg710 & 0xfe000000) != 0xfe000000) {
-    		SET_PERI_REG_MASK(0x3FF00018,0x038f0000);
-    		SET_PERI_REG_MASK(0x60000710,0xfe000000);
-    		rom_i2c_writeReg_Mask(98,1,3,7,4,15);
-    		rom_sar_init();
-    		ets_delay_us(2);
-    		SET_PERI_REG_MASK(0x600005e8,0x01800000);
-    		ets_delay_us(2);
-    	}
-    	else pm_set_sleep_mode(4);
-#endif
-//    	i2c_writeReg_Mask(108,2,1,1,0,1);
-    	i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 1); //select test mux
-    	SAR_BASE[23] |= 1 << 21; //    	SET_PERI_REG_MASK(0x60000D5C, 1<<21); // 0x200000
-   		while((SAR_BASE[20] >> 24) & 0x07); // while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
+    	int i;
+    	sar_init(cfg>>8, cfg & 15);
     	while(len--) {
-    		uint32 x = SAR_BASE[20] & (~(1 << 1));
-    		SAR_BASE[20] = x; // CLEAR_PERI_REG_MASK(0x60000D50,2);
-    		SAR_BASE[20] = x | (1 << 1); // SET_PERI_REG_MASK(0x60000D50,2);
-//        	ets_delay_us(2);
-       		sar_dout = 0;
+    		// запуск нового замера SAR
+    		uint32 x = SAR_CFG & (~(1 << 1));
+    		SAR_CFG = x;
+    		SAR_CFG = x | (1 << 1);
+			uint16 sar_dout = 0;
+    		volatile uint32 * sar_regs = &SAR_DATA; // считать 8 шт. значений SAR с адреса 0x60000D80
        		while((SAR_BASE[20] >> 24) & 0x07); // while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
-       		mread_sar_dout(sardata);
-        	int i;
-        	for(i = 0; i < 8; i++) sar_dout += sardata[i];
+			for(i = 0; i < wdrv_bufn; i++) {
+				// коррекция значений SAR под утечки и т.д.
+				int x = ~(*sar_regs++);
+				int z = (x & 0xFF) - 21;
+				x &= 0x700;
+				if(z > 0) x = ((z * 279) >> 8) + x;
+				sar_dout += x;
+			}
         	*ptr++ = sar_dout;
     	};
-    	// I assume this code re-enables interrupts
-    	i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 0);
-    	while((SAR_BASE[20] >> 24) & 0x07);	// while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
-    	SAR_BASE[23] &= 1 << 21; // CLEAR_PERI_REG_MASK(0x60000D5C,1<<21); // 0x200000
-    	uint32 x = SAR_BASE[24] & (~1); //	CLEAR_PERI_REG_MASK(0x60000D60,1);
-    	SAR_BASE[24] = x;
-    	SAR_BASE[24] = x | 1;	// SET_PERI_REG_MASK(0x60000D60,1);
-#if (0) // в web этой деинициализации не требуется
-		if((store_reg710 & 0xfe000000) != 0xfe000000) {
-			WRITE_PERI_REG(0x600005e8,((READ_PERI_REG(0x600005e8) & 0xfe7fffff) | 0x00800000));
-			rom_i2c_writeReg_Mask(98,1,3,7,4,0);
-			WRITE_PERI_REG(0x60000710, store_reg710);
-			WRITE_PERI_REG(0x3FF00018, store018);
-		}
-		else	pm_wakeup_init(4,0);
-#endif
-		tout_dis_txpwr_track = 0;
+    	sar_off();
     }
 }
 
-/*
- * uint16 *adc_addr: ADC sample output address
- * uint16 adc_num: ADC sample count, range [1, 65535]?
- * uint8 adc_clk_div: ADC sample collection clock=80M/adc_clk_div, range[2, 32]? Тут ошибка у китайцев?
- * Example(Continue to collect 100 ADC samples):
- * uint16 adc_out[100];
- * phy_adc_read_fast(&adc_out[0], 100, 8);
- */
-/*
-void phy_adc_read_fast(uint16 *adc_addr, uint16 adc_num, uint8 adc_clk_div)
-{
-	tout_dis_txpwr_track = 1;
-	if(adc_clk_div < 2) adc_clk_div = 2;
-	uint32 save_20 = SAR_BASE[20];
-	uint32 save_21 = SAR_BASE[21];
-	uint32 save_22 = SAR_BASE[22];
-	SAR_BASE[20] = (SAR_BASE[20] & 0xFFFF00FF) | ((adc_clk_div & 0xFF) << 8);
-	SAR_BASE[21] = (SAR_BASE[21] & 0xFF000000) | (adc_clk_div * 5 + ((adc_clk_div - 1) << 16) + ((adc_clk_div - 1) << 8) - 1);
-	SAR_BASE[22] = (SAR_BASE[22] & 0xFF000000) | (adc_clk_div * 11 + ((adc_clk_div * 3 - 1) << 8) + ((adc_clk_div * 10 - 1) << 16) - 1);
-	SAR_BASE[20] &= 0x63; // Зачем грузили ((adc_clk_div & 0xFF) << 8) ?
-	rom_i2c_writeReg_Mask(108,2,0,5,5,1);
-	SAR_BASE[23] |= 1 << 21;
-	while((SAR_BASE[20] >> 24) & 0x07);	// while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
-	while(adc_num--) {
-		SAR_BASE[20] &= 0x7D;
-		SAR_BASE[20] |= 0x02;
-		ets_delay_us(1);
-		while((SAR_BASE[20] >> 24) & 0x07);	// while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
 
-		uint32 x = SAR_BASE[32];
-		x ^= 0x7F;
-		uint32 z = x & 0x7FF;
-		x &= 0xFF;
-		z &= 0xF00;
-		x -= 21;
-		if((signed int) x > 0) {
-			x = (x * 279) >> 8;
-			if(x > 0xff) x = 0xff;
-			z += x;
-		}
-//		z &= 0xffff;
-		z++;
-		z >>= 1;
-		if(chip6_phy_init_ctrl[108] == 0xff) z = 0xFFFF;
-		*adc_addr++ = z;
-	}
-	rom_i2c_writeReg_Mask(108,2,0,5,5,0);
-
-
-	SAR_BASE[20] = save_20;
-	SAR_BASE[21] = save_21;
-	SAR_BASE[22] = save_22;
-	while((SAR_BASE[20] >> 24) & 0x07);	// while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
-	SAR_BASE[23] &= ~(1 << 21);
-	SAR_BASE[24] &= 0x7E;
-	SAR_BASE[24] |= 1;
-	tout_dis_txpwr_track = 0;
-}
-*/
 

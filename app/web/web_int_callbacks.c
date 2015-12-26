@@ -118,7 +118,7 @@ void ICACHE_FLASH_ATTR web_test_adc(TCP_SERV_CONN *ts_conn)
     	ptr->dsize = len;
     	web_conn->msgbuflen += WAV_HEADER_SIZE;
     	len >>= 1;
-    	read_adcs((uint16 *)(web_conn->msgbuf + web_conn->msgbuflen), len);
+    	read_adcs((uint16 *)(web_conn->msgbuf + web_conn->msgbuflen), len, 0x0808);
     	web_conn->msgbuflen += len << 1;
     }
     SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
@@ -525,9 +525,8 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
           else ifcmp("heap") tcp_puts("%u", system_get_free_heap_size());
           else ifcmp("adc") {
         	  uint16 x[4];
-        	  read_adcs(x, 4);
+        	  read_adcs(x, 4, 0x00808);
         	  tcp_puts("%u", x[0]+x[1]+x[2]+x[3]); // 16 бит ADC :)
-//        	  tcp_puts("%u", system_adc_read());
           }
           else ifcmp("time") tcp_puts("%u", system_get_time());
           else ifcmp("rtctime") tcp_puts("%u", system_get_rtc_time());

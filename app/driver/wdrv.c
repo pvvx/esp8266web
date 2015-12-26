@@ -14,36 +14,8 @@
 #include "sdk/mem_manager.h"
 #include "sdk/rom2ram.h"
 #include "driver/wdrv.h"
+#include "driver/adc.h"
 
-
-#define i2c_bbpll							0x67 // 103
-#define i2c_bbpll_en_audio_clock_out		4
-#define i2c_bbpll_en_audio_clock_out_msb	7
-#define i2c_bbpll_en_audio_clock_out_lsb	7
-#define i2c_bbpll_hostid					4
-
-#define i2c_saradc							0x6C // 108
-#define i2c_saradc_hostid					2
-#define i2c_saradc_en_test					0
-#define i2c_saradc_en_test_msb				5
-#define i2c_saradc_en_test_lsb				5
-
-//extern int rom_i2c_writeReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb, int indata);
-//extern int rom_i2c_readReg_Mask(int block, int host_id, int reg_add, int Msb, int Lsb);
-//extern void read_sar_dout(uint16 * buf);
-//i2c_writeReg_Mask_def(i2c_bbpll, i2c_bbpll_en_audio_clock_out, 1); //Enable clock to i2s subsystem
-
-#define i2c_writeReg_Mask(block, host_id, reg_add, Msb, Lsb, indata) \
-    rom_i2c_writeReg_Mask(block, host_id, reg_add, Msb, Lsb, indata)
-
-#define i2c_readReg_Mask(block, host_id, reg_add, Msb, Lsb) \
-    rom_i2c_readReg_Mask(block, host_id, reg_add, Msb, Lsb)
-
-#define i2c_writeReg_Mask_def(block, reg_add, indata) \
-    i2c_writeReg_Mask(block, block##_hostid, reg_add, reg_add##_msb, reg_add##_lsb, indata)
-
-#define i2c_readReg_Mask_def(block, reg_add) \
-    i2c_readReg_Mask(block, block##_hostid, reg_add, reg_add##_msb, reg_add##_lsb)
 
 /*-----------------------------------------------------------------------------*/
 
@@ -55,7 +27,6 @@ uint32 wdrv_sample_rate DATA_IRAM_ATTR;
 uint32 wdrv_remote_port DATA_IRAM_ATTR; // = 0 -> wdrv не используется
 ip_addr_t wdrv_host_ip;
 uint16 wdrv_host_port;
-uint32 wdrv_bufn DATA_IRAM_ATTR;
 
 /*-----------------------------------------------------------------------------*/
 
@@ -64,16 +35,14 @@ void timer0_isr(void)
 	TIMER0_INT = 0;
 	if(out_wave_pbuf != NULL) {
 		uint16 sardata[8];
-	//	while((SAR_BASE[20] >> 24) & 0x07); // wait r_state == 0
 		volatile uint32 * sar_regs = &SAR_DATA; // считать 8 шт. значений SAR с адреса 0x60000D80
 		int i;
 		for(i = 0; i < wdrv_bufn; i++) sardata[i] = ~(*sar_regs++);
 		// запуск нового замера SAR
-//		if(((SAR_CFG >> 24) & 0x07)) {
-			uint32 x = SAR_CFG & (~(1 << 1));
-			SAR_CFG = x;
-			SAR_CFG = x | (1 << 1);
-//		}
+		uint32 x = SAR_CFG & (~(1 << 1));
+		SAR_CFG = x;
+		SAR_CFG = x | (1 << 1);
+		// запись буфера
 		if((wdrv_buf_wr_idx >> 31) == 0) {
 			// если второе и последующее прерывание, данные в SAR готовы
 			uint16 sar_dout = 0;
@@ -94,8 +63,6 @@ void timer0_isr(void)
 	}
 }
 
-extern uint8 tout_dis_txpwr_track;
-
 void ICACHE_FLASH_ATTR wdrv_stop(void)
 {
 	ets_isr_mask(BIT(ETS_FRC_TIMER0_INUM));
@@ -106,19 +73,9 @@ void ICACHE_FLASH_ATTR wdrv_stop(void)
 #if DEBUGSOO > 1
 		os_printf("WDRV: stop()\n");
 #endif
-		// отключить SAR
-    	i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 0);
-    	while((SAR_CFG >> 24) & 0x07);
-    	SAR_CFG = (SAR_CFG & (~(7<<2))) | (7 << 2);
-    	SAR_CFG1 &= 1 << 21;
-    	uint32 x = SAR_CFG2 & (~1);
-    	SAR_CFG2 = x;
-    	SAR_CFG2 = x | 1;
-		tout_dis_txpwr_track = 0;
+		sar_off(); // отключить SAR
 	}
 }
-
-#define adc_clk_div 8 // ~3019/(8*8-1,36) = 46 кНz
 
 bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 {
@@ -131,19 +88,8 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 #if DEBUGSOO > 1
 				os_printf("WDRV: start(%u)\n", sample_rate);
 #endif
-				tout_dis_txpwr_track = 1;
 				wdrv_buf_wr_idx = 1<<31; // флаг для пропуска считывания SAR при первом прерывания
-				wdrv_bufn = SAR_SAMPLE_RATE / sample_rate;
-				if(wdrv_bufn > 8) wdrv_bufn = 8;
-				SAR_CFG = (SAR_CFG & 0xFFFF00E3) | ((wdrv_bufn-1) << 2) | ((adc_clk_div & 0xFF) << 8);
-//				SAR_BASE[20] = (SAR_BASE[20] & 0xFFFF00FF) | ((adc_clk_div & 0xFF) << 8);
-				SAR_TIM1 = (SAR_TIM1 & 0xFF000000) | (adc_clk_div * 5 + ((adc_clk_div - 1) << 16) + ((adc_clk_div - 1) << 8) - 1);
-				SAR_TIM2 = (SAR_TIM2 & 0xFF000000) | (adc_clk_div * 11 + ((adc_clk_div * 3 - 1) << 8) + ((adc_clk_div * 10 - 1) << 16) - 1);
-				// включить SAR
-				i2c_writeReg_Mask_def(i2c_saradc, i2c_saradc_en_test, 1); //select test mux // rom_i2c_writeReg_Mask(108,2,0,5,5,1);
-				SAR_CFG1 |= 1 << 21;
-				while((SAR_CFG >> 24) & 0x07);
-
+				sar_init(8, SAR_SAMPLE_RATE / sample_rate);
 				// включить TIMER0
 				TIMER0_CTRL =   TM_DIVDED_BY_16
 				              | TM_AUTO_RELOAD_CNT
