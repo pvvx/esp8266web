@@ -2,7 +2,7 @@
  * wdrv.c
  *
  *  Created on: 02 июля 2015 г.
- *      Author: PVV
+ *      Author: PV`
  */
 #include "user_interface.h"
 #ifdef USE_WDRV

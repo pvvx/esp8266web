@@ -368,6 +368,8 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 	}
 	wifi_config->field_880 = 0;
 	wifi_config->field_884 = 0;
+	g_ic.c[257] = 0; // ?
+
 	if(wifi_config->field_316 > 6) wifi_config->field_316 = 1;
 	if(wifi_config->field_169 > 2) wifi_config->field_169 = 0; // +169
 	wifi_config->phy_mode &= 3;
@@ -382,7 +384,7 @@ void ICACHE_FLASH_ATTR read_wifi_config(void)
 	uint32 store_cfg_addr = flashchip->chip_size - 0x3000 + ((hbuf.bank)? 0x1000 : 0);
 	struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
 	spi_flash_read(store_cfg_addr,(uint32 *)wifi_config, wifi_config_size);
-	if(hbuf.flag != 0x55AA55AA || system_get_checksum((uint8 *)wifi_config, hbuf.xx[(hbuf.bank)? 1 : 0]) != hbuf.chk[(hbuf.bank)? 1 : 0]) {
+	if (hbuf.flag != 0x55AA55AA || system_get_checksum((uint8 *)wifi_config, hbuf.xx[(hbuf.bank)? 1 : 0]) != hbuf.chk[(hbuf.bank)? 1 : 0]) {
 #ifdef DEBUG_UART
 		os_printf("\nError wifi_config! Clear.\n");
 #endif
@@ -471,6 +473,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	default_hostname = true; // используется default_hostname
 #endif	
 	//
+	// IO_RTC_4 = 0xfe000000;
 	sleep_reset_analog_rtcreg_8266();
 	// создать два MAC адреса для AP и SP
 	read_macaddr_from_otp(info.st_mac);
@@ -501,18 +504,18 @@ void ICACHE_FLASH_ATTR startup(void)
 #if DEF_SDK_VERSION >= 1400
 	uint8 * buf = os_malloc(SIZE_SAVE_SYS_CONST);
 	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
-#if DEF_SDK_VERSION == 1410
+#if DEF_SDK_VERSION >= 1410
 	if(buf[112] == 3) g_ic.c[471] = 1;
 	else g_ic.c[471] = 0;
 #endif
 	buf[0xf8] = 0;
 	phy_rx_gain_dc_table = &buf[0x100];
 	phy_rx_gain_dc_flag = 0;
-	//
+	// **
 	// user_rf_pre_init(); // не использется, т.к. мождно вписать что угодно и тут :)
-	//	system_phy_set_powerup_option(0);
+    //	system_phy_set_powerup_option(0);
 	//	system_phy_set_rfoption(0);
-	//
+	// **
 #elif DEF_SDK_VERSION >= 1300
 	uint8 *buf = (uint8 *)os_malloc(256); // esp_init_data_default.bin
 	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
@@ -542,7 +545,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
 	system_rtc_mem_read(0, &rst_if, sizeof(rst_if));
 //	os_printf("RTC_MEM(0) = %u\n", rst_if.reason);
-	if(rst_if.reason >= REASON_EXCEPTION_RST && rst_if.reason < REASON_DEEP_SLEEP_AWAKE) { // >= 2 < 5
+	if (rst_if.reason >= REASON_EXCEPTION_RST && rst_if.reason < REASON_DEEP_SLEEP_AWAKE) { // >= 2 < 5
 		// 2,3,4 REASON_EXCEPTION_RST, REASON_SOFT_WDT_RST, REASON_SOFT_RESTART
 		TestStaFreqCalValInput = RTC_RAM_BASE[0x78>>2]>>16; // *((volatile uint32 *)0x60001078) >> 16
 		chip_v6_set_chan_offset(1, TestStaFreqCalValInput);
@@ -570,7 +573,9 @@ void ICACHE_FLASH_ATTR startup(void)
 #else
 	wdt_init();
 #endif
-//	uart_wait_tx_fifo_empty();
+#ifdef DEBUG_UART
+	uart_wait_tx_fifo_empty();
+#endif
 	user_init();
 	user_init_flag = true;
 #if DEF_SDK_VERSION >= 1200

@@ -177,7 +177,7 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
   size struct s_wifi_store: 1156
   1156 + 500 = 1656 байт
 */
-#if DEF_SDK_VERSION >= 1500 // SDK >= 1.4.0
+#if DEF_SDK_VERSION >= 1500 // SDK >= 1.5.0
 #define wifi_config_size 0x484 // 1156 bytes
 #define g_ic_size (wifi_config_size + 504) // 1660 bytes
 #elif DEF_SDK_VERSION >= 1400 // SDK >= 1.4.0

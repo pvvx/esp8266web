@@ -376,7 +376,6 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 					MAC2STR(evt->event_info.sta_connected.mac),
 					evt->event_info.sta_connected.aid, cs);
 #endif
-
 			open_all_service((i == 1 && (!(cs == STATION_GOT_IP || cs == STATION_CONNECTING)))? 0 : 1);
 #ifdef USE_CAPTDNS
 			if(syscfg.cfg.b.cdns_ena) {

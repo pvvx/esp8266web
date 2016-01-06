@@ -74,7 +74,7 @@ static err_t ICACHE_FLASH_ATTR init_fn(struct netif *myif)
 {
     myif->hwaddr_len = 6; // +46 //+50 SDK 1.4.0
     myif->mtu = DEFAULT_MTU; //+44 1500 //+48 SDK 1.4.0
-    myif->flags = NETIF_FLAG_IGMP | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_BROADCAST; // +53 = 0x0B2 // +57 SDK 1.4.0
+    myif->flags = NETIF_FLAG_IGMP | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_BROADCAST; // = 0x0B2  +53 // +57 SDK 1.4.0
     return 0;
 }
 

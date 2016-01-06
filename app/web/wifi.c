@@ -498,7 +498,7 @@ bool ICACHE_FLASH_ATTR wifi_read_fcfg(void)
 uint32 total_scan_infos DATA_IRAM_ATTR;
 struct bss_scan_info buf_scan_infos[max_scan_bss] DATA_IRAM_ATTR;
 
-#if	(DEF_SDK_VERSION >= 1200 && DEF_SDK_VERSION < 1500)
+#if	(DEF_SDK_VERSION >= 1200 && DEF_SDK_VERSION <= 1500)
 LOCAL void ICACHE_FLASH_ATTR quit_scan(void)
 {
 	ets_set_idle_cb(NULL, NULL);
@@ -549,14 +549,13 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 #endif
 	}
 	if(wifi_get_opmode() != wificonfig.b.mode) {
-#if	(DEF_SDK_VERSION >= 1200 && DEF_SDK_VERSION < 1500)
+#if	(DEF_SDK_VERSION >= 1200 && DEF_SDK_VERSION <= 1500)
 		ets_set_idle_cb(quit_scan, NULL);
 #else
 // #warning "Bag Fatal exception (28) over wifi_set_opmode() fixed?"
 		New_WiFi_config(WIFI_MASK_MODE | WIFI_MASK_STACN); // проверить что надо восстановить и восстановить в правильной последовательности
 #endif
 	}
-
 }
 /******************************************************************************
  * FunctionName : wifi_start_scan

@@ -121,12 +121,11 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 			os_printf("WDT (%d):\n", rst_inf->exccause);
 			os_printf_plus((const char *)aEpc10x08xEpc20, rst_inf->epc1, rst_inf->epc2, rst_inf->epc3, rst_inf->excvaddr, rst_inf->depc);
 			break; */
+		case RST_EVENT_SOFT_WDT:
+			os_printf("SoftWdt\n");
 		case RST_EVENT_EXP:
 			os_printf_plus((const char *)aFatalException, rst_inf->exccause);
 			os_printf_plus((const char *)aEpc10x08xEpc20, rst_inf->epc1, rst_inf->epc2, rst_inf->epc3, rst_inf->excvaddr, rst_inf->depc);
-			break;
-		case RST_EVENT_SOFT_WDT:
-			os_printf("SoftWdt\n");
 			break;
 		case RST_EVENT_SOFT_RESET:
 			os_printf("SoftReset\n");
