@@ -9,9 +9,11 @@ TCP2UART: 300..3000000 Baud, Flow Control On/Off, Inverse On/Of all signals, ...
 HTTP-Web services to more than 10 simultaneous open connections.<br>
 
 TCP/HTTP transfer speed:<br>
- > 1 Mbytes/sec (debug off).<br>
-UDP Wave server:<br>
- Sends 14-bit ADC samples at 1 Hz .. 48 kHz (max 192 kHz 12 bits).<br>
+~1 Mbytes/sec (debug off).<br>
+
+UDP Wave server (Integrated SAR ADC):<br>
+Sends 14-bit  samples at 1 Hz .. 48 kHz ([max 192 kHz 12 bits](https://github.com/pvvx/esp8266web/blob/master/ESP-ADC-192kHz.gif)).<br>
+
 Modbus TCP port 502:<br>
  GPIOs, ADC, VDD.<br>
 
