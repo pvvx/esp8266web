@@ -10,7 +10,7 @@
 
 #ifdef USE_WDRV
 
-#define WDRV_TASK_QUEUE_LEN 2
+#define WDRV_TASK_QUEUE_LEN 3
 #define WDRV_TASK_PRIO USER_TASK_PRIO_0
 #define WDRV_SIG_DATA 1
 #define WDRV_SIG_INIT 2
@@ -25,7 +25,7 @@
 #define DEFAULT_WDRV_REMOTE_PORT USE_WDRV; // 10201;
 
 #define MAX_SAMPLE_RATE 192000
-#define SAR_SAMPLE_RATE 386000
+#define SAR_SAMPLE_RATE 375000 //3000000/8
 
 void init_wdrv(void);
 

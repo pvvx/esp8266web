@@ -6,7 +6,6 @@
 #include "ets_sys.h"
 #include "osapi.h"
 #include "hw/esp8266.h"
-
 /*
  * uint16 *adc_addr: ADC sample output address
  * uint16 adc_num: ADC sample count, range [1, 65535]?
@@ -15,6 +14,7 @@
  * uint16 adc_out[100];
  * phy_adc_read_fast(&adc_out[0], 100, 8);
  */
+extern uint8 tout_dis_txpwr_track;
 
 void phy_adc_read_fast(uint16 *adc_addr, uint16 adc_num, uint8 adc_clk_div)
 {
@@ -46,7 +46,6 @@ void phy_adc_read_fast(uint16 *adc_addr, uint16 adc_num, uint8 adc_clk_div)
 			if(x > 0xff) x = 0xff;
 			z += x;
 		}
-//		z &= 0xffff;
 		z++;
 		z >>= 1;
 		if(chip6_phy_init_ctrl[108] == 0xff) z = 0xFFFF;

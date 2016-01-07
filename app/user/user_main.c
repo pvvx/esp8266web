@@ -48,7 +48,6 @@ static const uint8 inifname[] ICACHE_RODATA_ATTR = "protect/init.ini";
 void ICACHE_FLASH_ATTR init_done_cb(void)
 {
     os_printf("\nSDK Init - Ok\nCurrent 'heap' size: %d bytes\n", system_get_free_heap_size());
-    os_printf("\nReset = %u\n", system_get_rst_info()->reason);
 #ifdef USE_WEB
 	web_fini(inifname);
 #endif

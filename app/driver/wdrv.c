@@ -15,7 +15,9 @@
 #include "sdk/rom2ram.h"
 #include "driver/wdrv.h"
 #include "driver/adc.h"
-
+#ifdef USE_TIMER0
+	#include "sdk/add_func.h"
+#endif
 
 /*-----------------------------------------------------------------------------*/
 
@@ -28,21 +30,26 @@ uint32 wdrv_remote_port DATA_IRAM_ATTR; // = 0 -> wdrv не использует
 ip_addr_t wdrv_host_ip;
 uint16 wdrv_host_port;
 
-/*-----------------------------------------------------------------------------*/
-
+/*-----------------------------------------------------------------------------
+ Для использования NMI прерывания от аппаратного таймера раскомментировать
+ в include\sdk\sdk_config.h :
+ //#define USE_TIMER0
+ //#define TIMER0_USE_NMI_VECTOR
+ Предел при NMI примерно до 50 кГц из-за прервания обработки WiFi...
+ ------------------------------------------------------------------------------*/
 void timer0_isr(void)
 {
-	TIMER0_INT = 0;
 	if(out_wave_pbuf != NULL) {
 		uint16 sardata[8];
-		volatile uint32 * sar_regs = &SAR_DATA; // считать 8 шт. значений SAR с адреса 0x60000D80
+		volatile uint32 * sar_regs = &SAR_DATA; // указатель для считывания до 8 шт. накопленных
+												// значений SAR из аппаратного буфера в 0x60000D80
 		int i;
-		for(i = 0; i < wdrv_bufn; i++) sardata[i] = ~(*sar_regs++);
+		for(i = 0; i < wdrv_bufn; i++) sardata[i] = ~(*sar_regs++); // скопировать накопленные значения
 		// запуск нового замера SAR
 		uint32 x = SAR_CFG & (~(1 << 1));
 		SAR_CFG = x;
 		SAR_CFG = x | (1 << 1);
-		// запись буфера
+		// запись значениями SAR в один из двух половин буфера в памяти
 		if((wdrv_buf_wr_idx >> 31) == 0) {
 			// если второе и последующее прерывание, данные в SAR готовы
 			uint16 sar_dout = 0;
@@ -56,17 +63,26 @@ void timer0_isr(void)
 			}
 			out_wave_pbuf[wdrv_buf_wr_idx++] = sar_dout; 
 			if(wdrv_buf_wr_idx == (WDRV_OUT_BUF_SIZE >>1) || wdrv_buf_wr_idx == WDRV_OUT_BUF_SIZE) {
-				system_os_post(WDRV_TASK_PRIO, WDRV_SIG_DATA, wdrv_buf_wr_idx);
+				// одна из половин буфера заполнена - данные готовы на передачу
+//				system_os_post(WDRV_TASK_PRIO, WDRV_SIG_DATA, wdrv_buf_wr_idx);
+				ets_post((WDRV_TASK_PRIO + 22) & 0xFF, WDRV_SIG_DATA, wdrv_buf_wr_idx);
 			}
 		}
 		if(wdrv_buf_wr_idx >= WDRV_OUT_BUF_SIZE) wdrv_buf_wr_idx = 0;
 	}
+#ifndef USE_TIMER0
+	TIMER0_INT = 0;
+#endif
 }
 
 void ICACHE_FLASH_ATTR wdrv_stop(void)
 {
+#ifdef USE_TIMER0
+	timer0_stop();	
+#else
 	ets_isr_mask(BIT(ETS_FRC_TIMER0_INUM));
 	INTC_EDGE_EN &= ~BIT(1);
+#endif
 	if(out_wave_pbuf != NULL) {
 		os_free(out_wave_pbuf);
 		out_wave_pbuf = NULL;
@@ -91,6 +107,15 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 				wdrv_buf_wr_idx = 1<<31; // флаг для пропуска считывания SAR при первом прерывания
 				sar_init(8, SAR_SAMPLE_RATE / sample_rate);
 				// включить TIMER0
+#ifdef USE_TIMER0
+#ifdef TIMER0_USE_NMI_VECTOR
+				timer0_init(timer0_isr, 0, true);
+#else
+				timer0_init(timer0_isr, NULL);
+#endif				
+				timer0_start(8, true);
+				TIMER0_LOAD = ((APB_CLK_FREQ>>4)+(sample_rate>>1))/sample_rate;
+#else
 				TIMER0_CTRL =   TM_DIVDED_BY_16
 				              | TM_AUTO_RELOAD_CNT
 				              | TM_ENABLE_TIMER
@@ -98,7 +123,8 @@ bool ICACHE_FLASH_ATTR wdrv_start(uint32 sample_rate)
 				TIMER0_LOAD = ((APB_CLK_FREQ>>4)+(sample_rate>>1))/sample_rate;
 				ets_isr_attach(ETS_FRC_TIMER0_INUM, timer0_isr, out_wave_pbuf);
 				INTC_EDGE_EN |= BIT(1);
-				ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM));
+				ets_isr_unmask(BIT(ETS_FRC_TIMER0_INUM)); 
+#endif				
 				return true;
 			}
 		}

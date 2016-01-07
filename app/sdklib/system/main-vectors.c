@@ -72,13 +72,12 @@ void _timer0_isr(void * arg)
 		if((TIMER0_CTRL & TM_AUTO_RELOAD_CNT) == 0) {
 			INTC_EDGE_EN &= ~BIT(1);
 		}
-		TIMER0_INT &= (~1);
 	}
 	else {
 		INTC_EDGE_EN &= ~BIT(1);
 		TIMER0_CTRL = 0;
-		TIMER0_INT &= (~1);
 	}
+	TIMER0_INT &= (~1);
 }
 
 void ICACHE_FLASH_ATTR timer0_stop(void)
