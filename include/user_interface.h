@@ -66,7 +66,8 @@ enum {
     USER_TASK_PRIO_0 = 0,
     USER_TASK_PRIO_1,
     USER_TASK_PRIO_2,
-    USER_TASK_PRIO_MAX
+    USER_TASK_PRIO_MAX,
+	SDK_TASK_PRIO = 22
 };
 
 bool system_os_task(os_task_t task, uint8 prio, os_event_t *queue, uint8 qlen);

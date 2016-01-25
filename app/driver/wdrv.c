@@ -65,7 +65,7 @@ void timer0_isr(void)
 			if(wdrv_buf_wr_idx == (WDRV_OUT_BUF_SIZE >>1) || wdrv_buf_wr_idx == WDRV_OUT_BUF_SIZE) {
 				// одна из половин буфера заполнена - данные готовы на передачу
 //				system_os_post(WDRV_TASK_PRIO, WDRV_SIG_DATA, wdrv_buf_wr_idx);
-				ets_post((WDRV_TASK_PRIO + 22) & 0xFF, WDRV_SIG_DATA, wdrv_buf_wr_idx);
+				ets_post(WDRV_TASK_PRIO + SDK_TASK_PRIO, WDRV_SIG_DATA, wdrv_buf_wr_idx);
 			}
 		}
 		if(wdrv_buf_wr_idx >= WDRV_OUT_BUF_SIZE) wdrv_buf_wr_idx = 0;
