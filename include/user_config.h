@@ -31,6 +31,10 @@
 #define USE_CAPTDNS	0	// включить в трансялцию NDS отвечающий на всё запросы клиента при соединении к AP модуля
 						// указанием на данный WebHttp (http://aesp8266/), если =0 - по умолчанию выключен
 
+#define USE_GPIOs_intr // включение примера с счетчиками срабатывания прерываний на GPOIs (использует ~sys_ucnst_1~ и ~sys_ucnst_2~ для сохранения в flash)
+						// смотреть переменные ~count1~, ~count2~, ~sys_ucnst_1~, ~sys_ucnst_2~  и их запись...
+						// файлы: \app\web\gpios_intr.c \app\include\gpios_intr.h
+
 #endif // _user_config_h_
 
 

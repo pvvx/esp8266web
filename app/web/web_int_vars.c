@@ -31,6 +31,10 @@
 #include "web_iohw.h"
 #include "wifi_events.h"
 
+#ifdef USE_GPIOs_intr
+#include "gpios_intr.h"
+#endif
+
 #ifdef USE_NETBIOS
 #include "netbios.h"
 #endif
@@ -655,6 +659,18 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 		timer0_start(val, 1);
 	}
 #endif // USE_TIMER0
+#ifdef USE_GPIOs_intr
+		else ifcmp("count") {
+	 	 	 if(cstr[5]=='1') {
+ 	 	 		 GPIO_INT_Count1 = val;
+// 	 	 		 system_os_post(GPIOs_intr_TASK_PRIO, GPIOs_intr_SIG_SAVE, 1);
+	 	 	 }
+	 	 	 else if(cstr[5]=='2') {
+	 	 		 GPIO_INT_Count2 = val;
+//	 	 		 system_os_post(GPIOs_intr_TASK_PRIO, GPIOs_intr_SIG_SAVE, 2); // обновить, сохранение если меняли?
+ 	 	 	 }
+		}
+#endif
 #if DEBUGSOO > 5
     else os_printf(" - none! ");
 #endif

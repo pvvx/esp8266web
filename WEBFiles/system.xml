@@ -41,8 +41,8 @@
  <cur_url>~sys_url~</cur_url>
  <netbios_name>~sys_netbios~</netbios_name>
  <userconst1>~sys_ucnst_1~</userconst1>
- <userconst2>~sys_ucnst_1~</userconst2>
- <userconst3>~sys_ucnst_1~</userconst3>
+ <userconst2>~sys_ucnst_2~</userconst2>
+ <userconst3>~sys_ucnst_3~</userconst3>
  <test>~sys_test~</test>
 </sys>
 <web>

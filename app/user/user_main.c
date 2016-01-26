@@ -59,6 +59,10 @@ void ICACHE_FLASH_ATTR init_done_cb(void)
 		New_WiFi_config(WIFI_MASK_ALL);
 		break;
 	}
+#ifdef USE_GPIOs_intr
+extern void init_GPIOs_intr(void);
+	init_GPIOs_intr();
+#endif
 }
 
 /******************************************************************************

@@ -971,6 +971,12 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn)
 #ifdef TEST_SEND_WAVE
         else ifcmp("test_adc") web_test_adc(ts_conn);
 #endif
+#ifdef USE_GPIOs_intr
+		else ifcmp("count") {
+ extern uint32 GPIO_INT_Count1, GPIO_INT_Count2;
+			tcp_puts("%u", (cstr[5]=='2')? GPIO_INT_Count2 : GPIO_INT_Count1);
+		}
+#endif
 		else tcp_put('?');
 }
 
