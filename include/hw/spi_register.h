@@ -8,6 +8,7 @@
 #define REG_SPI_BASE(i)			(0x60000200 - i*0x100)
 
 #define SPI_CMD(i)				(REG_SPI_BASE(i) + 0x0) // 00000000/00000000
+#define SPI_USR							(BIT(18))
 #define SPI_READ						(BIT(31))
 #define SPI_WREN						(BIT(30))
 #define SPI_WRDI						(BIT(29))
@@ -40,7 +41,7 @@
 #define SPI_RESANDRES					(BIT(15))
 #define SPI_DOUT_MODE					(BIT(14))
 #define SPI_FASTRD_MODE					(BIT(13))
-#define SPI_PRESCALER					0x00001FFF
+#define SPI_PRESCALER					0x0000FFFF
 #define SPI_PRESCALER_S					0
 // bit0..12: 80MHz = 0x1000, 40MHz = 0x0101, 26MHz = 0x0202, 20MHz = 0x0313
 #define SPI_CTRL_F_MASK		(~0x1FFF)
@@ -131,8 +132,8 @@
 #define SPI_AHB_ENDIAN_MODE_S			8
 #define SPI_CK_OUT_EDGE					(BIT(7))
 #define SPI_CK_I_EDGE					(BIT(6))
-#define SPI_CS_SETUP					(BIT(5)) // + такты перед CLK после CS
-#define SPI_CS_HOLD						(BIT(4)) // + такты перед СS после CLK
+#define SPI_CS_SETUP					(BIT(5)) // +1 такт перед CS
+#define SPI_CS_HOLD						(BIT(4))
 #define SPI_AHB_USR_COMMAND				(BIT(3))
 #define SPI_FLASH_MODE					(BIT(2))
 #define SPI_AHB_USR_COMMAND_4BYTE		(BIT(1))

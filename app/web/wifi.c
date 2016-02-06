@@ -364,13 +364,27 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 		wcfg->ap.config.beacon_interval = 100;
 	}
 	if (wset.b.ap_ipinfo) {
+/*
 		IP4_ADDR(&wcfg->ap.ipinfo.ip, 192, 168, 4, 1);
 		IP4_ADDR(&wcfg->ap.ipinfo.gw, 192, 168, 4, 1);
 		IP4_ADDR(&wcfg->ap.ipinfo.netmask, 255, 255, 255, 0);
+*/
+		wcfg->ap.ipinfo.ip.addr = WEB_DEFAULT_SOFTAP_IP;
+		wcfg->ap.ipinfo.gw.addr = WEB_DEFAULT_SOFTAP_GW;
+		wcfg->ap.ipinfo.netmask.addr = WEB_DEFAULT_SOFTAP_MASK;
 	}
 	if (wset.b.ap_ipdhcp) {
+/*
 		IP4_ADDR(&wcfg->ap.ipdhcp.start_ip, 192, 168, 4, 2);
 		IP4_ADDR(&wcfg->ap.ipdhcp.end_ip, 192, 168, 4, 10);
+*/
+#if (WEB_DEFAULT_SOFTAP_IP < 0x80000000)
+		wcfg->ap.ipdhcp.start_ip.addr = WEB_DEFAULT_SOFTAP_IP + 0x01000000;
+		wcfg->ap.ipdhcp.end_ip.addr = WEB_DEFAULT_SOFTAP_IP + 0x09000000;
+#else
+		wcfg->ap.ipdhcp.start_ip.addr = (WEB_DEFAULT_SOFTAP_IP & 0x00FFFFFF) + 0x02000000;
+		wcfg->ap.ipdhcp.end_ip.addr = (WEB_DEFAULT_SOFTAP_IP & 0x00FFFFFF) + 0x0A000000;
+#endif
 	}
 	// if(mode & SOFTAP_MODE) {
 	if (wset.b.ap_dhcp)
@@ -394,9 +408,14 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 		read_macaddr_from_otp(wcfg->st.macaddr);
 	}
 	if (wset.b.st_ipinfo) {
-		IP4_ADDR(&wcfg->st.ipinfo.ip, 192, 168, 1, 50);
+/*
+  		IP4_ADDR(&wcfg->st.ipinfo.ip, 192, 168, 1, 50);
 		IP4_ADDR(&wcfg->st.ipinfo.gw, 192, 168, 1, 1);
 		IP4_ADDR(&wcfg->st.ipinfo.netmask, 255, 255, 255, 0);
+ */
+		wcfg->st.ipinfo.ip.addr = WEB_DEFAULT_STATION_IP;
+		wcfg->st.ipinfo.gw.addr = WEB_DEFAULT_STATION_GW;
+		wcfg->st.ipinfo.netmask.addr = WEB_DEFAULT_STATION_MASK;
 	}
 	wcfg->st.reconn_timeout = DEF_ST_RECONNECT_TIME;
 	if (wset.b.maxtpw) wcfg->phy_max_tpw = DEF_MAX_PHY_TPW;

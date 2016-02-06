@@ -64,7 +64,7 @@ enum srvconn_state {
 
 #define ID_CLIENTS_PORT 3 // до 3-х clients
 #define tcpsrv_init_client1() tcpsrv_init(1) // tcp2uart_client
-#define tcpsrv_init_client2() tcpsrv_init(2)
+#define tcpsrv_init_client2() tcpsrv_init(2) // mdb_tcp_client
 #define tcpsrv_init_client3() tcpsrv_init(3)
 
 #define TCP_CLIENT_NEXT_CONNECT_MS		syscfg.tcp_client_twait // 5000 // через 5 сек
@@ -88,8 +88,8 @@ typedef struct t_tcpsrv_conn_flags  {
 	// далее идут биты не относящиеся к работе tcp_srv_conn
 	uint16 user_flg1:			1; //0800 для нужд процедур уровнем выше (использован в tcp2uart.c)
 	uint16 user_flg2:			1; //1000 для нужд процедур уровнем выше (пока свободен)
-	uint16 user_option1:		1; //2000 для нужд процедур обработки переменных (использован для hexdump в web_int_callbacks.c)
-	uint16 user_option2:		1; //4000 для нужд процедур обработки переменных (пока свободен)
+	uint16 user_option1:		1; //2000 для нужд процедур обработки переменных (использован для hexdump, xml_mdb в web_int_callbacks.c)
+	uint16 user_option2:		1; //4000 для нужд процедур обработки переменных (использован для xml_mdb в web_int_callbacks.c)
 } __attribute__((packed)) tcpsrv_conn_flags;
 
 typedef struct t_TCP_SERV_CONN {

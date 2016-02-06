@@ -78,7 +78,7 @@
 #define SPI_MISO_DELAY_NUM_S			18
 #define SPI_MISO_DELAY_MODE				0x00000003
 #define SPI_MISO_DELAY_MODE_S			16
-#define SPI_CK_OUT_HIGH_MODE			0x0000000F
+#define SPI_CK_OUT_HIGH_MODE			0x0000000F	// делитель CLK
 #define SPI_CK_OUT_HIGH_MODE_S			12
 #define SPI_CK_OUT_LOW_MODE				0x0000000F
 #define SPI_CK_OUT_LOW_MODE_S			8
@@ -150,6 +150,14 @@
 #define SPI_WR_STATUS(i)			(REG_SPI_BASE(i) + 0x28) //00000000/00000000
 
 #define SPI_PIN(i)					(REG_SPI_BASE(i) + 0x2C) //0000001e/0000001e
+#define SPI_PIN_CS_0_					(BIT(31))	// CS = "0"
+#define SPI_PIN_CS_0					(BIT(30))	// CS = "0"
+#define SPI_PIN_CLK_INV					(BIT(29))	// инверсия сигнала CLK
+#define SPI_PIN_CLK_CS					(BIT(19))	// CS = "0", CLK = "1"
+#define SPI_PIN_MOSI_MISO				(BIT(16))	// сигнал MISO выводится на MOSI
+#define SPI_PIN_CS_CLK					(BIT(11))	// сигнал на CS = CLK
+#define SPI_PIN_CS_INV 					(BIT(6))	// инверсия сигнала CS
+#define SPI_PIN_CLK_0 					(BIT(5))	// Выход CLK = "0"
 #define SPI_CS2_DIS						(BIT(2))
 #define SPI_CS1_DIS						(BIT(1))
 #define SPI_CS0_DIS						(BIT(0))

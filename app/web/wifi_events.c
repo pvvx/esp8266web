@@ -210,11 +210,11 @@ void ICACHE_FLASH_ATTR close_all_service(void)
 #ifdef USE_TCP2UART
 		tcp2uart_close();
 #endif
+#ifdef USE_MODBUS
+		mdb_tcp_close(); // mdb_tcp_init(0);
+#endif
 #ifdef USE_WEB
 		if(syscfg.web_port) webserver_close(syscfg.web_port); // webserver_init(0);
-#endif
-#ifdef USE_MODBUS
-		mdb_tcp_init(0); // mdb_tcp_close()
 #endif
 #ifdef UDP_TEST_PORT
 		udp_test_port_init(0);
@@ -238,6 +238,9 @@ void ICACHE_FLASH_ATTR open_all_service(int flg)
 #ifdef USE_TCP2UART
 	if(tcp2uart_servcfg == NULL) tcp2uart_start(syscfg.tcp2uart_port);
 #endif
+#ifdef USE_MODBUS
+	if(mdb_tcp_servcfg == NULL) mdb_tcp_start(syscfg.mdb_port);
+#endif
 #ifdef USE_SNTP
 	if(syscfg.cfg.b.sntp_ena && get_sntp_time() == 0) sntp_inits();
 #endif
@@ -258,9 +261,6 @@ void ICACHE_FLASH_ATTR open_all_service(int flg)
 #endif
 #ifdef USE_NETBIOS
 	    if(syscfg.cfg.b.netbios_ena) netbios_init();
-#endif
-#ifdef USE_MODBUS
-	    if(syscfg.mdb_remote_port) mdb_tcp_init(syscfg.mdb_remote_port);
 #endif
 #ifdef UDP_TEST_PORT
 	    if(syscfg.udp_test_port) udp_test_port_init(syscfg.udp_test_port);

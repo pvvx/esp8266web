@@ -125,6 +125,46 @@ table.scan a:hover{
 color:#21e;
 background:#d6d9da;
 }
+table.mdbtab{
+border-collapse:separate;
+border-spacing: 0;
+border:#aaa 2px solid;
+text-align:center;
+font-size:12px;
+width:100%;
+margin:0 0 10px 0;
+background:#fff;
+border-radius:5px;
+}
+table.mdbtab th{
+color:#247;
+border:#aaa 1px solid;
+font-size:12px;
+padding:2px 2px;
+background:#fec;
+}
+table.mdbtab td{
+border:#aaa 1px solid;
+padding:2px 2px;
+}
+table.mdbtab td.s:hover{
+background:#eef;
+}
+table.mdbtab a:link{
+display:block;
+font-weight:bold;
+text-decoration:none;
+color:#444;
+border-radius:5px;
+}
+table.mdbtab a:visited{
+color:#444;
+}
+table.mdbtab a.active,
+table.mdbtab a:hover{
+color:#21e;
+background:#d6d9da;
+}
 .content{
 background:#f1f1ed;
 border-radius:5px;

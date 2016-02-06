@@ -4,9 +4,10 @@ Small WEB server on ESP8266 + TCP2UART (server/client)
 
 HTTP-Web supports more than hundred variables -<br>
 All I/O, Wifi, system, ... variables.<br>
-GET/POST, cookie, load/upload data/Flash, multipart/form-data,...<br>
+GET/POST/websocket, cookie, load/upload data/Flash, multipart/form-data,...<br>
 TCP2UART: 300..3000000 Baud, Flow Control On/Off, Inverse On/Of all signals, ...<br>
 HTTP-Web services to more than 10 simultaneous open connections.<br>
+Websocket open uri: '/web.cgi'<br>
 
 TCP/HTTP transfer speed:<br>
 ~1 Mbytes/sec (debug off).<br>
@@ -39,7 +40,7 @@ FLASH_SIZE: Always set the size to 512 KB flash.<br>
 
 Make WEBFS CmdLine:<br>
 
-WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib" ./WEBFiles ./webbin ./WEBFiles.bin<br>
+WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "mdbini.bin, *.inc, *.ini, snmp.bib" .\WEBFiles .\webbin WEBFiles.bin<br>
 
 Upload WEBFS:<br>
 

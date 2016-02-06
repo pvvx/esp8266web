@@ -3,6 +3,7 @@
 // ModBus.h  11.2010 pvvx
 //===============================================================================
 #define _ModBus_H_
+
 /*************************************
 !!! Старший байт передается первым !!!
 Чтение данных:
@@ -37,79 +38,116 @@ http://ru.wikipedia.org/wiki/Modbus
 // RS232/RS485 - 256 байт, для сетей TCP - 260 байт.
 // RS232 / RS485 ADU = 253 bytes + Server address (1 byte) + CRC (2 bytes) = 256 bytes.
 // TCP MODBUS ADU = 253 bytes + MBAP (7 bytes) = 260 bytes.
+#define MDB_TCP_ADU_SIZE_MAX 253 // Максимальный размер пакета RTU в TCP
+#define MDB_ADU_F3F4_DATA_MAX 125 // Максимальное кол-во переменных в запросе/ответе в команде 3 или 4 для RS-485 и TCP
+#define MDB_ADU_F6_DATA_MAX 1 // Максимальное кол-во переменных в запросе/ответе в команде 6 для RS-485 и TCP
+#define MDB_ADU_F16_DATA_MAX 123 // Максимальное кол-во переменных в запросе/ответе в команде 16 для RS-485 и TCP
+
+#define MDB_TCP_PID 0 // Protocol Identifier
 
 typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial line
 {
-   uint16  ui[128];
-   uint8 uc[256];
-   uint8 id; /* Адрес подчинённого устройства, к которому адресован запрос.
- RS-485: Ведомые устройства отвечают только на запросы, поступившие в их адрес.
- Ответ также начинается с адреса отвечающего ведомого устройства, который может
- изменяться от 1 до 247. Адрес 0 используется для широковещательной передачи,
- его распознаёт каждое устройство, адреса в диапазоне 248...255 - зарезервированы;
- TCP/IP: обычно игнорируется, если соединение установлено с конкретным устройством.
- Может использоваться, если соединение установлено с бриджом, который выводит нас,
- например, в сеть RS485.*/
-   struct __attribute__ ((packed)) // (RX/TX) Общая форма  simple Protocol Data Unit (PDU)
-   {
-       uint8 id;
-       uint8 fun; // Функция
-       uint16 data[125]; //(256-4)/2=126
-       uint16 crc;  // Контрольная сумма (!) для TCP/IP не используется
-   }fx;
-   struct __attribute__ ((packed)) // (RX) Read Holding Registers 03 / (RX) Read Input Register 04
-   {
-       uint8 id;
-       uint8 fun; // Функция
-       uint16 addr; // Адрес регистра
-       uint16 len; // кол-во
-   }f3f4;
-   struct __attribute__ ((packed)) // (RX) Write Single Register 06 /  (TX) Response data
-   {
-       uint8 id;
-       uint8 fun; // Функция
-       uint16 addr; // Адрес регистра
-       uint16 data; // Данные
-   }f6;
-   struct __attribute__ ((packed)) // (RX) Write Multiple Registers 16
-   {
-       uint8 id;
-       uint8 fun; // Функция
-       uint16 addr; // Адрес регистра
-       uint16 len; // кол-во
-       uint8 cnt; // Byte Count
-       uint16 data[123]; //(256-8)/2=124
-   }f16;
-   struct __attribute__ ((packed)) // (RX) Read/Write Multiple Registers 23
-   {
-       uint8 id;
-       uint8 fun; // Функция
-       uint16 raddr; // Адрес регистра
-       uint16 rlen; // кол-во
-       uint16 waddr; // Адрес регистра
-       uint16 wlen; // кол-во
-       uint8 cnt; // Byte Count
-       uint16 data[121]; //(256-13)/2=121.5
-   }f23;
+	uint16 ui[128];
+	uint8 uc[256];
+	uint8 id; /* Адрес подчинённого устройства, к которому адресован запрос.
+	 RS-485: Ведомые устройства отвечают только на запросы, поступившие в их адрес.
+	 Ответ также начинается с адреса отвечающего ведомого устройства, который может
+	 изменяться от 1 до 247. Адрес 0 используется для широковещательной передачи,
+	 его распознаёт каждое устройство, адреса в диапазоне 248...255 - зарезервированы;
+	 TCP/IP: обычно игнорируется, если соединение установлено с конкретным устройством.
+	 Может использоваться, если соединение установлено с бриджом, который выводит нас,
+	 например, в сеть RS485.*/
+	struct __attribute__ ((packed)) // (RX/TX) Общая форма / User functions  simple Protocol Data Unit (PDU)
+	{
+		struct	__attribute__ ((packed))
+		{
+			uint8 id;
+			uint8 fun; // Функция
+		} hd;
+		uint16 data[126]; //(256-2-2)/2=126
+//		uint16 crc;  // Контрольная сумма (!) для TCP/IP не используется
+	} fx;
+	struct __attribute__ ((packed)) // (RX) Read Holding Registers 03 / (RX) Read Input Register 04
+	{
+		struct	__attribute__ ((packed))
+		{
+			uint8 id;
+			uint8 fun; // Функция
+			uint16 addr; // Адрес регистра
+			uint16 len; // кол-во
+		} hd;
+	} f3f4;
+	struct __attribute__ ((packed)) // (RX) Write Single Register 06 /  (TX) Response data
+	{
+		struct	__attribute__ ((packed))
+		{
+			uint8 id;
+			uint8 fun; // Функция
+			uint16 addr; // Адрес регистра
+		} hd;
+		uint16 data; // Данные
+	} f6;
+	struct	__attribute__ ((packed)) // (RX) Write Multiple Registers 16
+	{
+		struct	__attribute__ ((packed))
+		{
+			uint8 id;
+			uint8 fun; // Функция
+			uint16 addr; // Адрес регистра
+			uint16 len; // кол-во
+			uint8 cnt; // Byte Count
+		} hd;
+		uint16 data[MDB_ADU_F16_DATA_MAX]; //(256-2-7)/2=123.5
+	} f16;
+	struct __attribute__ ((packed)) // (RX) Read/Write Multiple Registers 23
+	{
+		struct	__attribute__ ((packed))
+		{
+			uint8 id;
+			uint8 fun; // Функция
+			uint16 raddr; // Адрес регистра
+			uint16 rlen; // кол-во
+			uint16 waddr; // Адрес регистра
+			uint16 wlen; // кол-во
+			uint8 cnt; // Byte Count
+		} hd;
+		uint16 data[121]; //(256-2-11)/2=121.5
+	} f23;
 /*   struct __attribute__ ((packed)) // (RX) Diagnostics (Serial Line only) 08
-   {
-       uint8 fun; // Функция
-       uint16 subf; // Субфункция
-       uint16 data;
-   }f08; */
-   struct __attribute__ ((packed)) // (TX) Response 03,04,16,23
-   {
-       uint8 id;
-       uint8 fun; // Функция
-       uint8 cnt; // Byte Count
-       uint16 data[125];  //(256-5)/2=125.5
-   }out;
-   struct __attribute__ ((packed)) // (TX) Response error
-   {
-       uint8 id;
-       uint8 err; // Error code (fun | 0x80)
-       uint8 exc; // Exception code (01 or 02 or 03 or 04)
-   }err;
+	 {
+		struct	__attribute__ ((packed))
+		{
+			uint8 fun; // Функция
+			uint16 subf; // Субфункция
+		} hd;
+		uint16 data;
+	 }f08; */
+	struct __attribute__ ((packed)) // (TX) Response 01,02,03,04
+	{
+		struct	__attribute__ ((packed))
+		{
+			uint8 id;
+			uint8 fun; // Функция
+			uint8 cnt; // Byte Count
+		} hd;
+		uint16 data[MDB_ADU_F3F4_DATA_MAX];  //(256-2-3)/2=125.5
+	} o3o4;
+	struct __attribute__ ((packed)) // (TX) Response 05,06,15,16
+	{
+		struct	__attribute__ ((packed))
+		{
+			uint8 id;
+			uint8 fun; // Функция
+			uint16 addr; // Адрес регистра
+			uint16 len; // кол-во
+		} hd;
+	} o6o16;
+	struct __attribute__ ((packed)) // (TX) Response error
+	{
+			uint8 id;
+			uint8 err; // Error code (fun | 0x80)
+			uint8 exc; // Exception code (01 or 02 or 03 or 04)
+	} err;
 }smdbadu;
 
 typedef struct __attribute__ ((packed)) // MBAP header (MODBUS Application Protocol header)
@@ -141,5 +179,6 @@ uint32 MdbWordRW(uint8 * mdb, uint8 * buf, uint32 rwflg); // WORD Read/Write
 uint32 MdbWordR(uint8 * mdb, uint8 * buf, uint32 rwflg); // WORD Read Only
 //
 uint32 MdbFunc(smdbadu * mdbbuf, uint32 len); // Обработка сообщения ModBus (без CRC)
+uint32 SetMdbErr(smdbadu * mdbbuf, uint32 err);
 
 #endif //_ModBus_H_

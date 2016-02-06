@@ -36,20 +36,24 @@
 #include "driver/wdrv.h"
 #endif
 
-#ifdef USE_MODBUS
-#include "modbustcp.h"
+//#ifdef USE_MODBUS
+//#include "modbustcp.h"
+#ifdef USE_RS485DRV
+#include "driver/rs485drv.h"
+#include "mdbtab.h"
 #endif
+//#endif
 
 #ifdef USE_WEB
 extern void web_fini(const uint8 * fname);
-static const uint8 inifname[] ICACHE_RODATA_ATTR = "protect/init.ini";
+static const uint8 sysinifname[] ICACHE_RODATA_ATTR = "protect/init.ini";
 #endif
 
 void ICACHE_FLASH_ATTR init_done_cb(void)
 {
     os_printf("\nSDK Init - Ok\nCurrent 'heap' size: %d bytes\n", system_get_free_heap_size());
 #ifdef USE_WEB
-	web_fini(inifname);
+	web_fini(sysinifname);
 #endif
 	switch(system_get_rst_info()->reason) {
 	case REASON_SOFT_RESTART:
@@ -59,9 +63,9 @@ void ICACHE_FLASH_ATTR init_done_cb(void)
 		New_WiFi_config(WIFI_MASK_ALL);
 		break;
 	}
-#ifdef USE_GPIOs_intr
-extern void init_GPIOs_intr(void);
-	init_GPIOs_intr();
+#ifdef USE_RS485DRV
+	rs485_drv_start();
+	init_mdbtab();
 #endif
 }
 
@@ -74,12 +78,14 @@ extern void init_GPIOs_intr(void);
 void ICACHE_FLASH_ATTR user_init(void) {
 	sys_read_cfg();
 	if(!syscfg.cfg.b.debug_print_enable) system_set_os_print(0);
-	uart_init();
 	GPIO0_MUX = VAL_MUX_GPIO0_SDK_DEF;
 	GPIO4_MUX = VAL_MUX_GPIO4_SDK_DEF;
 	GPIO5_MUX = VAL_MUX_GPIO5_SDK_DEF;
 	GPIO12_MUX = VAL_MUX_GPIO12_SDK_DEF;
+	GPIO13_MUX = VAL_MUX_GPIO13_SDK_DEF;
 	GPIO14_MUX = VAL_MUX_GPIO14_SDK_DEF;
+	GPIO15_MUX = VAL_MUX_GPIO15_SDK_DEF;
+	uart_init();
 	system_timer_reinit();
 #if (DEBUGSOO > 0 && defined(USE_WEB))
 	os_printf("\nSimple WEB version: " WEB_SVERSION "\nOpenLoaderSDK v1.2\n");
@@ -104,6 +110,7 @@ extern void gdbstub_init(void);
     init_wdrv();
 #endif
 	WEBFSInit(); // файловая система
+
 	system_deep_sleep_set_option(0);
 	system_init_done_cb(init_done_cb);
 }

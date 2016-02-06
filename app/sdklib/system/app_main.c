@@ -479,8 +479,8 @@ void ICACHE_FLASH_ATTR startup(void)
 	read_macaddr_from_otp(info.st_mac);
 	wifi_softap_cacl_mac(info.ap_mac, info.st_mac);
 	// начальный IP, mask, gw для AP
-	info.ap_gw = info.ap_ip = 0x104A8C0; // ip 192.168.4.1
-	info.ap_mask = 0x00FFFFFF; // 255.255.255.0
+	info.ap_gw = info.ap_ip = DEFAULT_SOFTAP_IP; // 0x104A8C0; ip 192.168.4.1
+	info.ap_mask = DEFAULT_SOFTAP_MASK; // 0x00FFFFFF; 255.255.255.0
 	ets_timer_init();
 	lwip_init();
 //	espconn_init(); // данный баг не используется

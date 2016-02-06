@@ -27,7 +27,7 @@
 #include "sdk/rom2ram.h"
 
 #ifdef WEBSOCKET_ENA
-#include "websocket.h"
+#include "web_websocket.h"
 #endif
 
 #ifdef USE_CAPTDNS
@@ -53,7 +53,6 @@ LOCAL void web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn) ICACHE_
 LOCAL void webserver_send_fdata(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
 LOCAL void web_int_disconnect(TCP_SERV_CONN *ts_conn)  ICACHE_FLASH_ATTR;
 LOCAL bool webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
-LOCAL bool web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint16 data_len) ICACHE_FLASH_ATTR;
 LOCAL void webserver_file_ext(HTTP_CONN *CurHTTP, uint8 *pfname) ICACHE_FLASH_ATTR;
 
 const char http_default_file[] ICACHE_RODATA_ATTR = "index.htm";
@@ -66,6 +65,8 @@ const char *HTTPHost ="Host:";
 #define sizeHTTPHost 5
 #endif
 #define ProtectedFilesName		"protect"
+
+#define MAX_NO_DATA_BUF_SIZE (8192) // if(ts_conn->sizei > MAX_NO_DATA_BUF_SIZE) CurHTTP->httpStatus = 418; // 418: Out of Coffee
 
 /****************************************************************************
   Section:
@@ -219,21 +220,14 @@ static const HTTP_RESPONSE ICACHE_RODATA_ATTR HTTPResponse[] ICACHE_RODATA_ATTR 
 				HTTPresponse_500_content }
 		// любая внутренняя ошибка сервера, которая не входит в рамки остальных ошибок класса.
 };
-/*
-#ifdef WEBSOCKET_ENA
-		"HTTP/1.1 101 Switching Protocols\r\n
-        Upgrade: websocket\r\n
-        Connection: Upgrade\r\n
-        Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n\r\n"
-#endif
-*/
-
 const char HTTPfsupload[] ICACHE_RODATA_ATTR = "<html><body style='margin:100px'><form method='post' action='/fsupload' enctype='multipart/form-data'><b>File Upload</b><p><input type='file' name='file' size=40> <input type='submit' value='Upload'></form></body></html>";
-const char HTTPdefault[] ICACHE_RODATA_ATTR = "<html><h3>ESP8266 Built-in Web server <sup><i>&copy</i></sup></h3></html>";
-
 #define sizeHTTPfsupload 220
+const char HTTPdefault[] ICACHE_RODATA_ATTR = "<html><h3>ESP8266 Built-in Web server <sup><i>&copy</i></sup></h3></html>";
 #define sizeHTTPdefault 73
+const char HTTPfserror[] ICACHE_RODATA_ATTR = "<html><h3>Web-disk error. Upload the WEBFiles.bin!</h3></html>";
+#define sizeHTTPfserror 62
 
+const char HTTPAccessControlAllowOrigin[] ICACHE_RODATA_ATTR = "Access-Control-Allow-Origin: *\r\n";
 //        const uint8 *HTTPCacheControl = "Cache-Control:";
 const char *HTTPContentLength = "Content-Length:";
 #define sizeHTTPContentLength 15
@@ -254,16 +248,6 @@ const char *HTTPAuthorization = "Authorization:";
 const char *HTTPCookie = "Cookie:";
 #define sizeHTTPCookie 7
 
-#ifdef WEBSOCKET_ENA
-const uint8 *HTTPUpgrade = "Upgrade:";
-#define sizeHTTPUpgrade 8
-const uint8 *HTTPwebsocket = "websocket";
-#define sizeHTTPwebsocket 9
-const uint8 *HTTPSecWebSocketKey = "Sec-WebSocket-Key:";
-#define sizeHTTPSecWebSocketKey 18
-//		const uint8 *HTTPSecWebSocketProtocol = "Sec-WebSocket-Protocol:";
-//		#define sizeHTTPSecWebSocketProtocol 23
-#endif
 /******************************************************************************
  * FunctionName : Close_web_conn
  * Description  : Free  ts_conn
@@ -348,46 +332,7 @@ LOCAL bool ICACHE_FLASH_ATTR CheckAuthorization(uint8* base64str)
 	return false;
 }
 //=============================================================================
-#ifdef WEBSOCKET_ENA
-// 1) взять строковое значение из заголовка Sec-WebSocket-Key и объединить со
-//	строкой 258EAFA5-E914-47DA-95CA-C5AB0DC85B11
-// 2) вычислить бинарный хеш SHA-1 (бинарная строка из 20 символов) от полученной
-//	в первом пункте строки
-// 3) закодировать хеш в Base64
-//=============================================================================
-const uint8 WebSocketAddKey[] ICACHE_RODATA_ATTR = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-#define sizeWebSocketAddKey 36
-#define sizeWebSocketKey 24
-#define sizeWebSocketAcKey 28
-bool ICACHE_FLASH_ATTR WebSocketAcceptKey(uint8* dkey, uint8* skey)
-{
-	uint8 keybuf[sizeWebSocketAddKey];
-	SHA1_CTX cha;
-	int len = 0;
-	{
-		uint8 *pcmp = skey;
-		while(*pcmp >= '+' && len < sizeWebSocketKey) {
-			pcmp++;
-			len++;
-		};
-		if(len != sizeWebSocketKey) return false;
-		ets_memcpy(keybuf, WebSocketAddKey, sizeWebSocketAddKey);
-	};
-	SHA1Init(&cha);
-	SHA1Update(&cha, skey, len);
-	SHA1Update(&cha, keybuf, sizeWebSocketAddKey);
-	SHA1Final(keybuf, &cha);
-	len = base64encode(dkey, 31, keybuf, SHA1_HASH_LEN);
-#if DEBUGSOO > 2
-	os_printf("\ncha:'");
-	print_hex_dump(keybuf, SHA1_HASH_LEN, '\0');
-	os_printf("'\n");
-	os_printf("key[%u]:'%s'\n", len, dkey);
-#endif
-   	return true;
-}
-//=============================================================================
-#endif
+
 //=============================================================================
 LOCAL void ICACHE_FLASH_ATTR
 web_parse_cookie(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
@@ -682,12 +627,11 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 #if DEBUGSOO > 3
            	else os_printf("cookie not crlf! ");
 #endif
-
         };
     };
 #ifdef WEBSOCKET_ENA
-    if(CheckSCB(SCB_GET)) {
-        if(CurHTTP->head_len > sizeHTTPUpgrade +  sizeHTTPwebsocket + 2 + sizeHTTPSecWebSocketKey + sizeWebSocketKey + 2) { // + "\r\n"
+    if(CheckSCB(SCB_GET) && web_conn->bffiles[0] == WEBFS_WEBCGI_HANDLE) {
+    	if(CurHTTP->head_len > sizeHTTPUpgrade +  sizeHTTPwebsocket + 2 + sizeHTTPSecWebSocketKey + sizeWebSocketKey + 2) { // + "\r\n"
         	pstr = head_find_ctr(CurHTTP, HTTPUpgrade, sizeHTTPUpgrade, sizeHTTPwebsocket);
         	if(CurHTTP->httpStatus != 200) return false;
         	if(pstr != NULL) {
@@ -846,8 +790,8 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 	if(CurHTTP->pFilename[0] == '/') {
 		if(CurHTTP->pFilename[1] == '\0') {
 			if(isWEBFSLocked) {
-				web_inc_fp(web_conn, WEBFS_NODISK_HANDLE);
-				web_conn->content_len = sizeHTTPdefault;
+				web_inc_fp(web_conn, WEBFS_NODISK_HANDLE); // желательно дописать ответ, что нет диска.
+				web_conn->content_len = sizeHTTPfserror;
 				CurHTTP->fileType = HTTP_HTML;
 #if DEBUGSOO > 1
 				os_printf("of%d[%s] ", web_conn->webfile, CurHTTP->pFilename);
@@ -912,10 +856,9 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 	uint32 pdata = 0;
-	uint8 pbuf[mMAX(sizeHTTPdefault,sizeHTTPfsupload)];
+	uint8 pbuf[mMAX(mMAX(sizeHTTPdefault,sizeHTTPfserror), sizeHTTPfsupload)];
 	uint16 size = 0;
 	switch(web_conn->webfile) {
-	case WEBFS_NODISK_HANDLE:
 	case WEBFS_WEBCGI_HANDLE:
 		pdata = (uint32)((void *)HTTPdefault);
 		size = sizeHTTPdefault;
@@ -923,6 +866,10 @@ LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 	case WEBFS_UPLOAD_HANDLE:
 		pdata = (uint32)((void *)HTTPfsupload);
 		size = sizeHTTPfsupload;
+		break;
+	case WEBFS_NODISK_HANDLE:
+		pdata = (uint32)((void *)HTTPfserror);
+		size = sizeHTTPfserror;
 		break;
 	}
 	if(pdata != 0 && size != 0) {
@@ -974,7 +921,6 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 		tcpsrv_int_sent_data(ts_conn, (uint8 *)ts_conn, 0);
 		return;
 	}
-
 	if((web_conn->webfile > WEBFS_MAX_HANDLE)&&(!CheckSCB(SCB_RETRYCB)))  {
 		web_send_fnohanle(ts_conn);
 		return;
@@ -1034,7 +980,7 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 										tcp_strcpy_fd("file not found!");
 									};
 								}
-								else web_int_callback(ts_conn);
+								else web_int_callback(ts_conn, pstr);
 							}
 							else { // Дубль маркера.
 								web_conn->msgbuflen++; // передать только маркер ('~')
@@ -1113,74 +1059,86 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
     if(CheckSCB(SCB_REDIR)) {
     	CurHTTP->httpStatus = 302; // редирект
     }
-	while(!(CurResp->flag & HTTP_RESP_FLG_END)) {
-      if(CurResp->status == CurHTTP->httpStatus) break;
-      CurResp++;
-    };
-    tcp_puts_fd("HTTP/1.1 %u ", CurResp->status);
-    tcp_strcpy(CurResp->headers);
-    tcp_strcpy_fd("\r\nServer: " WEB_NAME_VERSION "\r\nConnection: close\r\n");
-    if(CheckSCB(SCB_REDIR)) {
-    	tcp_puts_fd("Location: %s\r\n\r\n", CurHTTP->pFilename);
-    	ts_conn->flag.pcb_time_wait_free = 1; // закрыть соединение
-    	SetSCB(SCB_DISCONNECT);
+#ifdef WEBSOCKET_ENA
+    if(CheckSCB(SCB_WEBSOC) && CurHTTP->httpStatus == 200) {
+#if DEBUGSOO > 1
+    	CurHTTP->httpStatus = 101;
+#endif
+    	tcp_puts(WebSocketHTTPOkKey, CurHTTP->pFilename);
     }
     else {
-        if(CurResp->status != 200) {
-        	web_inc_fclose(web_conn);
-        	ClrSCB(SCB_FCALBACK | SCB_FGZIP | SCB_CHUNKED | SCB_RXDATA | SCB_FCLOSE);
-            if(CurResp->flag & HTTP_RESP_FLG_FINDFILE) {
-              os_sprintf_fd(CurHTTP->pFilename, "/%u.htm", CurResp->status);
-              webserver_open_file(CurHTTP, ts_conn);
-        //      CurHTTP->httpStatus = CurResp->status; // вернуть статус!
-            };
+#endif
+    	while(!(CurResp->flag & HTTP_RESP_FLG_END)) {
+          if(CurResp->status == CurHTTP->httpStatus) break;
+          CurResp++;
+        };
+        tcp_puts_fd("HTTP/1.1 %u ", CurResp->status);
+        tcp_strcpy(CurResp->headers);
+        tcp_strcpy_fd("\r\nServer: " WEB_NAME_VERSION "\r\nConnection: close\r\n");
+        if(CheckSCB(SCB_REDIR)) {
+        	tcp_puts_fd("Location: %s\r\n\r\n", CurHTTP->pFilename);
+        	ts_conn->flag.pcb_time_wait_free = 1; // закрыть соединение
+        	SetSCB(SCB_DISCONNECT);
         }
-        if((!CheckSCB(SCB_FOPEN)) && (CurResp->default_content != NULL) ) {
-            tcp_puts_fd("%s %u\r\n%s %s\r\n\r\n", HTTPContentLength, rom_strlen(CurResp->default_content),
-              HTTPContentType, httpContentTypes[HTTP_TXT]);
-            tcp_strcpy(CurResp->default_content);
-            SetSCB(SCB_DISCONNECT);
-        }
-        else if(CheckSCB(SCB_FOPEN)) {
-        	if(web_conn->content_len) {
-            	// Указать, что данные могут пользовать все (очень актуально для XML)
-        		tcp_strcpy_fd("Access-Control-Allow-Origin: *\r\n");
-                if(CurHTTP->fileType != HTTP_UNKNOWN) {
-                	if(web_conn->bffiles[0] == WEBFS_WEBCGI_HANDLE && CheckSCB(SCB_FCALBACK)) CurHTTP->fileType = HTTP_TXT;
-                	tcp_puts_fd("Content-Type: %s\r\n", httpContentTypes[CurHTTP->fileType]);
+        else {
+            if(CurResp->status != 200) {
+            	web_inc_fclose(web_conn);
+            	ClrSCB(SCB_FCALBACK | SCB_FGZIP | SCB_CHUNKED | SCB_RXDATA | SCB_FCLOSE);
+                if(CurResp->flag & HTTP_RESP_FLG_FINDFILE) {
+                  os_sprintf_fd(CurHTTP->pFilename, "/%u.htm", CurResp->status);
+                  webserver_open_file(CurHTTP, ts_conn);
+            //      CurHTTP->httpStatus = CurResp->status; // вернуть статус!
                 };
-                // Output the cache-control + ContentLength
-                if(CheckSCB(SCB_FCALBACK)) { // длина неизветсна
-                	// file is callback index
-                	tcp_strcpy_fd("Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\n");
-                	if(CurHTTP->httpver >= 0x11) SetSCB(SCB_CHUNKED);
-                }
-                else { // длина изветсна
-                	tcp_puts_fd("%s %d\r\n", HTTPContentLength, web_conn->content_len);
-                	if(CurResp->status == 200 && (!isWEBFSLocked) && web_conn->bffiles[0] != WEBFS_WEBCGI_HANDLE) {
-                		// lifetime (sec) of static responses as string 60*60*24*14=1209600"
-                    	tcp_puts_fd("Cache-Control: smax-age=%d\r\n", FILE_CACHE_MAX_AGE_SEC);
-                	}
-                	else {
-                		tcp_strcpy_fd("Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\n");
-                	}
-                };
-                if(CheckSCB(SCB_FGZIP)) {
-                	// Output the gzip encoding header if needed
-                	tcp_strcpy_fd("Content-Encoding: gzip\r\n");
-                }
-                else if(CheckSCB(SCB_CHUNKED)) {
-                	tcp_strcpy_fd("Transfer-Encoding: chunked\r\n");
-                }
-                if(!CheckSCB(SCB_CHUNKED)) tcp_strcpy_fd(CRLF);
             }
-            else {
-            	tcp_puts_fd("%s 0\r\n\r\n", HTTPContentLength);
-            	SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+            if((!CheckSCB(SCB_FOPEN)) && (CurResp->default_content != NULL) ) {
+                tcp_puts_fd("%s %u\r\n%s %s\r\n\r\n", HTTPContentLength, rom_strlen(CurResp->default_content),
+                  HTTPContentType, httpContentTypes[HTTP_TXT]);
+                tcp_strcpy(CurResp->default_content);
+                SetSCB(SCB_DISCONNECT);
             }
-        }
-        else SetSCB(SCB_DISCONNECT);
+            else if(CheckSCB(SCB_FOPEN)) {
+            	if(web_conn->content_len) {
+                	// Указать, что данные могут пользовать все (очень актуально для XML, ...)
+            		tcp_strcpy_fd("Access-Control-Allow-Origin: *\r\n");
+                    if(CurHTTP->fileType != HTTP_UNKNOWN) {
+                    	if(web_conn->bffiles[0] == WEBFS_WEBCGI_HANDLE && CheckSCB(SCB_FCALBACK)) CurHTTP->fileType = HTTP_TXT;
+                    	tcp_puts_fd("Content-Type: %s\r\n", httpContentTypes[CurHTTP->fileType]);
+                    };
+                    // Output the cache-control + ContentLength
+                    if(CheckSCB(SCB_FCALBACK)) { // длина неизветсна
+                    	// file is callback index
+                    	tcp_strcpy_fd("Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\n");
+                    	if(CurHTTP->httpver >= 0x11) SetSCB(SCB_CHUNKED);
+                    }
+                    else { // длина изветсна
+                    	tcp_puts_fd("%s %d\r\n", HTTPContentLength, web_conn->content_len);
+                    	if(CurResp->status == 200 && (!isWEBFSLocked) && web_conn->bffiles[0] != WEBFS_WEBCGI_HANDLE) {
+                    		// lifetime (sec) of static responses as string 60*60*24*14=1209600"
+                        	tcp_puts_fd("Cache-Control: smax-age=%d\r\n", FILE_CACHE_MAX_AGE_SEC);
+                    	}
+                    	else {
+                    		tcp_strcpy_fd("Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\n");
+                    	}
+                    };
+                    if(CheckSCB(SCB_FGZIP)) {
+                    	// Output the gzip encoding header if needed
+                    	tcp_strcpy_fd("Content-Encoding: gzip\r\n");
+                    }
+                    else if(CheckSCB(SCB_CHUNKED)) {
+                    	tcp_strcpy_fd("Transfer-Encoding: chunked\r\n");
+                    }
+                    if(!CheckSCB(SCB_CHUNKED)) tcp_strcpy_fd(CRLF);
+                }
+                else {
+                	tcp_puts_fd("%s 0\r\n\r\n", HTTPContentLength);
+                	SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+                }
+            }
+            else SetSCB(SCB_DISCONNECT);
+        } // CheckSCB(SCB_REDIR)
+#ifdef WEBSOCKET_ENA
     }
+#endif
 #if DEBUGSOO > 3
     os_printf("#%04x (%d) %d ", web_conn->webflag, web_conn->msgbuflen, CurHTTP->httpStatus);
 #elif DEBUGSOO > 1
@@ -1516,7 +1474,6 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 // web_rx_buf
 //
 //-----------------------------------------------------------------------------
-#define MAX_NO_DATA_BUF_SIZE (8192)
 LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
@@ -1527,12 +1484,6 @@ LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_co
 	os_printf("rx:%u[%u] ", web_conn->content_len, ts_conn->sizei);
 #endif
 	if(ts_conn->sizei == 0) return true; // докачивать
-#ifdef WEBSOCKET_ENA
-	if(CheckSCB(SCB_WEBSOC)) {
-	 // прием ...
-
-	}
-#endif
 	tcpsrv_unrecved_win(ts_conn);
 	int ret = upload_boundary(ts_conn);
 	if(ret > 1) {
@@ -1577,7 +1528,7 @@ LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_co
 //-----------------------------------------------------------------------------
 //--- web_trim_bufi -----------------------------------------------------------
 //-----------------------------------------------------------------------------
-LOCAL bool ICACHE_FLASH_ATTR web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint16 data_len)
+bool ICACHE_FLASH_ATTR web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint16 data_len)
 {
     if(pdata != NULL && data_len != 0 && ts_conn->sizei > data_len) {
         	os_memcpy(ts_conn->pbufi, pdata, data_len); // переместим кусок в начало буфера
@@ -1600,7 +1551,7 @@ LOCAL bool ICACHE_FLASH_ATTR web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata,
  * web_feee_bufi
  *  освободить приемный буфер
 *******************************************************************************/
-LOCAL bool ICACHE_FLASH_ATTR web_feee_bufi(TCP_SERV_CONN *ts_conn)
+bool ICACHE_FLASH_ATTR web_feee_bufi(TCP_SERV_CONN *ts_conn)
 {
 	if(ts_conn->pbufi != NULL) {
 		os_free(ts_conn->pbufi);
@@ -1628,6 +1579,7 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
     tcpsrv_print_remote_info(ts_conn);
     os_printf("read: %d ", ts_conn->sizei);
 #endif
+    HTTP_CONN CurHTTP;     // Current HTTP connection state
     WEB_SRV_CONN *web_conn = ReNew_web_conn(ts_conn);
     if(web_conn == NULL) {
 #if DEBUGSOO > 1
@@ -1637,10 +1589,10 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
     }
     if(CheckSCB(SCB_CLOSED | SCB_DISCONNECT | SCB_FCLOSE )) // обрабатывать нечего
     	return ERR_OK;
-
-    web_conn->udata_start = 0;
-    web_conn->udata_stop = 0;
-    HTTP_CONN CurHTTP;     // Current HTTP connection state
+    if(!CheckSCB(SCB_WEBSOC)) {
+    	web_conn->udata_start = 0;
+    	web_conn->udata_stop = 0;
+    }
     os_memset(&CurHTTP, 0, sizeof(CurHTTP));
     CurHTTP.httpStatus = 200; // OK
     CurHTTP.fileType = HTTP_UNKNOWN;
@@ -1699,40 +1651,65 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_received_data(TCP_SERV_CONN *ts_conn)
 #if DEBUGSOO > 3
    	os_printf("tst_rx: %u, %u, %u ", CurHTTP.httpStatus, (CheckSCB(SCB_RXDATA) != 0), web_conn->content_len );
 #endif
+   	// проверка на прием данных (content)
     if(CurHTTP.httpStatus == 200 && CheckSCB(SCB_RXDATA) && (web_conn->content_len) && web_rx_buf(&CurHTTP,ts_conn)) {
 #if DEBUGSOO > 1
     	os_printf("...\n");
 #endif
     	return ERR_OK; // докачивать content
     };
-    ts_conn->flag.rx_null = 1; // всё - больше не принимаем!
-	ts_conn->flag.rx_buf = 0; // не докачивать буфер
-	if(web_feee_bufi(ts_conn)) tcpsrv_unrecved_win(ts_conn); // уничтожим буфер
-
-    if(tcp_sndbuf(ts_conn->pcb) >= HTTP_SEND_SIZE) {
-
 #ifdef WEBSOCKET_ENA
-			if(CheckSCB(SCB_WEBSOC)) {
-				// вывод ответа websoc и переключение tcp callback у tcpsrv
-				websoc_headers(&CurHTTP, ts_conn);
+	if(CheckSCB(SCB_WEBSOC) && CurHTTP.httpStatus == 200 && (!CheckSCB(SCB_REDIR))) {
+		if(!CheckSCB(SCB_WSDATA)) {
+			// создание и вывод заголовка ответа websock
+			ClrSCB(SCB_RXDATA);
+			Close_web_conn(ts_conn); // закрыть все файлы
+			web_print_headers(&CurHTTP, ts_conn);
+			if(CheckSCB(SCB_DISCONNECT)) {
+			    ts_conn->flag.rx_null = 1; // всё - больше не принимаем!
+				ts_conn->flag.rx_buf = 0; // не докачивать буфер
+				if(web_feee_bufi(ts_conn)) tcpsrv_unrecved_win(ts_conn); // уничтожим буфер
 			}
-			else
-#else
-			{
-				// создание и вывод заголовка ответа.
-				web_print_headers(&CurHTTP, ts_conn);
-			}
-#endif
+			else {
+				SetSCB(SCB_WSDATA);
+				ts_conn->flag.rx_buf = 1; // указать, что всегда в режиме докачивать
+				tcpsrv_unrecved_win(ts_conn);
+				tcp_output(ts_conn->pcb);
 
-        // начало предачи файла, если есть
-        if((!CheckSCB(SCB_CLOSED | SCB_DISCONNECT | SCB_FCLOSE))&&CheckSCB(SCB_FOPEN)) webserver_send_fdata(ts_conn);
-    }
-    else {
+				if(web_feee_bufi(ts_conn)) tcpsrv_unrecved_win(ts_conn); // уничтожим буфер
+/*
+				if(ts_conn->pbufi != NULL && ts_conn->sizei != 0) { // что-то ещё есть в буфере?
 #if DEBUGSOO > 1
-    	os_printf("sndbuf=%u! ", tcp_sndbuf(ts_conn->pcb));
+					os_printf("ws_rx[%u]? ", ts_conn->sizei);
 #endif
-    	SetSCB(SCB_FCLOSE | SCB_DISCONNECT);
-    };
+					websock_rx_data(ts_conn);
+				}
+*/
+			}
+		}
+		else {
+			websock_rx_data(ts_conn);
+		}
+	}
+	else
+#endif
+	{
+	    ts_conn->flag.rx_null = 1; // всё - больше не принимаем!
+		ts_conn->flag.rx_buf = 0; // не докачивать буфер
+		if(web_feee_bufi(ts_conn)) tcpsrv_unrecved_win(ts_conn); // уничтожим буфер
+	    if(tcp_sndbuf(ts_conn->pcb) >= HTTP_SEND_SIZE) { // возможна втавка ответа?
+			// создание и вывод заголовка ответа.
+			web_print_headers(&CurHTTP, ts_conn);
+	        // начало предачи файла, если есть
+	        if((!CheckSCB(SCB_CLOSED | SCB_DISCONNECT | SCB_FCLOSE))&&CheckSCB(SCB_FOPEN)) webserver_send_fdata(ts_conn);
+	    }
+	    else {
+#if DEBUGSOO > 1
+	    	os_printf("sndbuf=%u! ", tcp_sndbuf(ts_conn->pcb));
+#endif
+	    	SetSCB(SCB_FCLOSE | SCB_DISCONNECT);
+	    };
+	}
     if(CheckSCB(SCB_FCLOSE))  {
         tcp_output(ts_conn->pcb);
     	Close_web_conn(ts_conn);
@@ -1774,7 +1751,15 @@ LOCAL err_t ICACHE_FLASH_ATTR webserver_sent_callback(TCP_SERV_CONN *ts_conn)
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 	if(web_conn == NULL) return ERR_ARG;
     if(CheckSCB(SCB_CLOSED) == 0) { // No SCB_CLOSED
-        if((!CheckSCB(SCB_CLOSED | SCB_DISCONNECT | SCB_FCLOSE))&&CheckSCB(SCB_FOPEN)) webserver_send_fdata(ts_conn);
+    	if(!CheckSCB(SCB_DISCONNECT)) {
+#ifdef WEBSOCKET_ENA
+        	if(CheckSCB(SCB_WSDATA)) {
+        		websock_rx_data(ts_conn);
+        	}
+        	else
+#endif
+        		if((!CheckSCB(SCB_FCLOSE))&&CheckSCB(SCB_FOPEN)) webserver_send_fdata(ts_conn);
+    	}
         if(CheckSCB(SCB_FCLOSE))  {
         	Close_web_conn(ts_conn);
         	SetSCB(SCB_DISCONNECT);

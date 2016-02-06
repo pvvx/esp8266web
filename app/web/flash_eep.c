@@ -278,12 +278,14 @@ sint16 ICACHE_FLASH_ATTR flash_read_cfg(void *ptr, uint16 id, uint16 maxsize)
 //-- Сохранение системных настроек -------------------------------------------
 //=============================================================================
 struct SystemCfg syscfg;
-uint8 * tcp2uart_url;
+#if defined(USE_TCP2UART) || defined(USE_MODBUS)
+uint8 * tcp_client_url;
+#endif
 //-----------------------------------------------------------------------------
 // Чтение системных настроек
 //-----------------------------------------------------------------------------
 bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
-	read_tcp2uart_url();
+	read_tcp_client_url();
 	if(flash_read_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg)) != sizeof(syscfg)) {
 		syscfg.cfg.w = 0
 				| SYS_CFG_PIN_CLR_ENA
@@ -336,7 +338,8 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 #ifdef USE_MODBUS
 		syscfg.mdb_twrec = 10;
 		syscfg.mdb_twcls = 10;
-		syscfg.mdb_remote_port = DEFAULT_MDB_PORT;	// (=0 - отключен)
+		syscfg.mdb_port = DEFAULT_MDB_PORT;	// (=0 - отключен)
+		syscfg.mdb_id = DEFAULT_MDB_ID;
 #endif
 		return false;
 	};
@@ -351,47 +354,47 @@ bool ICACHE_FLASH_ATTR sys_write_cfg(void) {
 }
 
 //-------------------------------------------------------------------------------
-// new_tcp2uart_url()
+// new_tcp_client_url()
 //-------------------------------------------------------------------------------
 
-bool ICACHE_FLASH_ATTR new_tcp2uart_url(uint8 *url)
+bool ICACHE_FLASH_ATTR new_tcp_client_url(uint8 *url)
 {
-	if(tcp2uart_url != NULL) {
-		if (os_strcmp(tcp2uart_url, url) == 0) {
+	if(tcp_client_url != NULL) {
+		if (os_strcmp(tcp_client_url, url) == 0) {
 			return false;
 		}
-		os_free(tcp2uart_url);
+		os_free(tcp_client_url);
 	}
 	uint32 len = os_strlen(url);
 	if(len < VarNameSize || len != 0) {
-		tcp2uart_url = os_zalloc(len+1);
-		if(tcp2uart_url == NULL) return false;
-		os_memcpy(tcp2uart_url, url, len);
-		if(flash_save_cfg(tcp2uart_url, ID_CFG_UURL, len)) return true;
-		os_free(tcp2uart_url);
+		tcp_client_url = os_zalloc(len+1);
+		if(tcp_client_url == NULL) return false;
+		os_memcpy(tcp_client_url, url, len);
+		if(flash_save_cfg(tcp_client_url, ID_CFG_UURL, len)) return true;
+		os_free(tcp_client_url);
 	}
-	tcp2uart_url = NULL;
+	tcp_client_url = NULL;
 	return false;
 }
 //-------------------------------------------------------------------------------
-// read_tcp2uart_url()
+// read_tcp_client_url()
 //-------------------------------------------------------------------------------
-bool ICACHE_FLASH_ATTR read_tcp2uart_url(void)
+bool ICACHE_FLASH_ATTR read_tcp_client_url(void)
 {
 	uint8 url[VarNameSize] = {0};
 	uint32 len = flash_read_cfg(&url, ID_CFG_UURL, VarNameSize);
 	if(len != 0) {
-		if(tcp2uart_url != NULL) os_free(tcp2uart_url);
+		if(tcp_client_url != NULL) os_free(tcp_client_url);
 		uint32 len = os_strlen(url);
 		if(len < VarNameSize || len != 0) {
-			tcp2uart_url = os_zalloc(len+1);
-			if(tcp2uart_url == NULL) return false;
-			os_memcpy(tcp2uart_url, url, len);
-			if(flash_save_cfg(tcp2uart_url, ID_CFG_UURL, len)) return true;
-			os_free(tcp2uart_url);
+			tcp_client_url = os_zalloc(len+1);
+			if(tcp_client_url == NULL) return false;
+			os_memcpy(tcp_client_url, url, len);
+			if(flash_save_cfg(tcp_client_url, ID_CFG_UURL, len)) return true;
+			os_free(tcp_client_url);
 		}
 	}
-	tcp2uart_url = NULL;
+	tcp_client_url = NULL;
 	return false;
 }
 

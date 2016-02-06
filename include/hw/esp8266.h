@@ -69,7 +69,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define I2S_BASE		i2s_		// 0x60000E00
 #define UART1_BASE		uart1_		// 0x60000F00
 #define RTC_RAM_BASE	rtc_ram_	// 0x60001000	// Size: 1024 bytes
-#define RTC_MEM_BASE	rtc_mem_	// 0x60001100
+#define RTC_MEM_BASE	rtc_mem_	// 0x60001100   // Size: 768 bytes, 192 dword registers, user data последние 512 байт
 
 /* io4 section */
 #define IO4_BASE		io4_regs_	// 0x60009800	// Size: 1536 bytes
@@ -593,8 +593,8 @@ typedef enum {
 #define GPIO_MUX_FUN_MASK			((1<<GPIO_MUX_FUN_BIT0)|(1<<GPIO_MUX_FUN_BIT1)|(1<<GPIO_MUX_FUN_BIT2))
 
 #define VAL_MUX_GPIO0_SDK_DEF	(1<<GPIO_MUX_PULLUP_BIT)	// GPIO0, input
-#define VAL_MUX_GPIO1_SDK_DEF	0		// UART0, TX0, Outnput
-#define VAL_MUX_GPIO2_SDK_DEF	0		// UART1, TX1, Outnput
+#define VAL_MUX_GPIO1_SDK_DEF	0		// UART0, TX0, Output
+#define VAL_MUX_GPIO2_SDK_DEF	0		// UART1, TX1, Output
 #define VAL_MUX_GPIO3_SDK_DEF	(1<<GPIO_MUX_PULLUP_BIT)	// UART0, RX0, Input
 #define VAL_MUX_GPIO4_SDK_DEF	(1<<GPIO_MUX_PULLUP_BIT)	// GPIO4, input
 #define VAL_MUX_GPIO5_SDK_DEF	(1<<GPIO_MUX_PULLUP_BIT)	// GPIO5, input
@@ -610,8 +610,8 @@ typedef enum {
 #define VAL_MUX_GPIO15_SDK_DEF	((1<<GPIO_MUX_FUN_BIT0) | (1<<GPIO_MUX_FUN_BIT1) | (1<<GPIO_MUX_PULLUP_BIT))	// GPIO15, input
 
 #define VAL_MUX_GPIO0_IOPORT	(1<<GPIO_MUX_PULLUP_BIT)	// GPIO0, input
-#define VAL_MUX_GPIO1_IOPORT	((1<<GPIO_MUX_FUN_BIT0) | (1<<GPIO_MUX_FUN_BIT1) | (1<<GPIO_MUX_PULLUP_BIT))	// UART0, TX0, Outnput
-#define VAL_MUX_GPIO2_IOPORT	(1<<GPIO_MUX_PULLUP_BIT)	// UART1, TX1, Outnput
+#define VAL_MUX_GPIO1_IOPORT	((1<<GPIO_MUX_FUN_BIT0) | (1<<GPIO_MUX_FUN_BIT1) | (1<<GPIO_MUX_PULLUP_BIT))	// UART0, TX0, Output
+#define VAL_MUX_GPIO2_IOPORT	(1<<GPIO_MUX_PULLUP_BIT)	// UART1, TX1, Output
 #define VAL_MUX_GPIO3_IOPORT	((1<<GPIO_MUX_FUN_BIT0) | (1<<GPIO_MUX_FUN_BIT1) | (1<<GPIO_MUX_PULLUP_BIT))	// UART0, RX0, Input
 #define VAL_MUX_GPIO4_IOPORT	(1<<GPIO_MUX_PULLUP_BIT)	// GPIO4, input
 #define VAL_MUX_GPIO5_IOPORT	(1<<GPIO_MUX_PULLUP_BIT)	// GPIO5, input

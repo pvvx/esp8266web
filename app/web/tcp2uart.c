@@ -373,8 +373,8 @@ err_t ICACHE_FLASH_ATTR tcp2uart_start(uint16 newportn)
 			update_mux_uart0();
 			return ERR_OK;
 		}
-		if(tcp2uart_url != NULL) {
-			ipaddr_aton(tcp2uart_url, &ip);
+		if(tcp_client_url != NULL) {
+			ipaddr_aton(tcp_client_url, &ip);
 			if(ip.addr != 0x0100007f && ip.addr != 0) {
 #if DEBUGSOO > 1
 				os_printf("TCP2UART: client ip:" IPSTR ", port: %u\n", IP2STR(&ip), newportn);

@@ -177,22 +177,65 @@ uint8 * ICACHE_FLASH_ATTR cmpcpystr(uint8 *pbuf, uint8 *pstr, uint8 a, uint8 b, 
             }while(1);
 }
 /******************************************************************************
- * FunctionName : strtoip (192.168.4.1 = 0x01040A8C0)
+ * FunctionName : str_array
+ * Набирает из строки s массив слов в buf в кол-ве до max_buf
+ * возврат - кол-во переменных в строке
+ * Разделитель переменных в строке ','
+ * Если нет переменной, то пропускает изменение в buf
+ * Примеры:
+ * Строка "1,2,3,4" -> buf = 0x01 0x02 0x03 0x04
+ * Строка "1,,3," -> buf = 0x01 (не изменено) 0x03 (не изменено)
 *******************************************************************************/
-/* uint32 ICACHE_FLASH_ATTR strtoip(uint8 *s)
+uint32 ICACHE_FLASH_ATTR str_array(uint8 *s, uint32 *buf, uint32 max_buf)
 {
-	uint32 val = 0;
-	uint8 pbuf[4];
-	s = cmpcpystr(pbuf, s, '\0', '.', 4);
-	val = atoi(pbuf)&0xFF;
-	s = cmpcpystr(pbuf, s, '.', '.', 4);
-	val += (atoi(pbuf)&0xFF) << 8;
-	s = cmpcpystr(pbuf, s, '.', '.', 4);
-	val += (atoi(pbuf)&0xFF) << 16;
-	s = cmpcpystr(pbuf, s, '.', ' ', 4);
-	val += (atoi(pbuf)&0xFF) << 24;
-	return val;
-} */
+	uint32 ret = 0;
+	uint8 *sval = NULL;
+	while(max_buf > ret) {
+		if(sval == NULL) {
+			if (*s == '-' && s[1] >= '0' && s[1] <= '9') {
+				sval = s;
+				s++;
+			}
+			else if (*s >= '0' && *s <= '9') sval = s;
+		}
+		if(*s == ',' || *s <= ')') {
+			if(sval != NULL) {
+				*buf = ahextoul(sval);
+				sval = NULL;
+			}
+			buf++;
+			ret++;
+			if(*s < ')') return ret;
+		}
+		s++;
+	}
+	return ret;
+}
+uint32 ICACHE_FLASH_ATTR str_array_w(uint8 *s, uint16 *buf, uint32 max_buf)
+{
+	uint32 ret = 0;
+	uint8 *sval = NULL;
+	while(max_buf > ret) {
+		if(sval == NULL) {
+			if (*s == '-' && s[1] >= '0' && s[1] <= '9') {
+				sval = s;
+				s++;
+			}
+			else if (*s >= '0' && *s <= '9') sval = s;
+		}
+		if(*s == ',' || *s <= ')') {
+			if(sval != NULL) {
+				*buf = ahextoul(sval);
+				sval = NULL;
+			}
+			buf++;
+			ret++;
+			if(*s < ')') return ret;
+		}
+		s++;
+	}
+	return ret;
+}
 /******************************************************************************
  * FunctionName : strtmac
 *******************************************************************************/

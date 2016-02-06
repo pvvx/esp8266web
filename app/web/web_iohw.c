@@ -100,15 +100,15 @@ void GPIO_intr_handler(void * test_edge)
 
 void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 {
-	struct UartxCfg ucfg;
 	uint32 x = 0;
 	uint8 test_edge = 0;
 	uint32 pin_num = (PERI_IO_SWAP & PERI_IO_UART0_PIN_SWAP)? GPIO_TEST1 : GPIO_TEST0;
 	uint32 pin_mask = 1<<pin_num;
-	if(flash_read_cfg(&ucfg, ID_CFG_UART0, sizeof(ucfg)) == sizeof(ucfg)) {
-		if(ucfg.cfg.b.rxd_inv) x = pin_mask;
-	}
-	gpio_output_set(0,0,0, pin_mask); // GPIO OUTPUT DISABLE отключить вывод в порту GPIO3
+	if(UART1_CONF0 & UART_RXD_INV) x = pin_mask;
+	gpio_output_set(0,0,0, pin_mask);
+	uint32 old_ioe = GPIO_ENABLE; // запомнить вход или выход
+	GPIO_ENABLE_W1TC = pin_mask; // GPIO OUTPUT DISABLE отключить вывод в порту GPIO3
+	uint32 old_mux = get_gpiox_mux(pin_num); // запомнить функцию
 	set_gpiox_mux_func_ioport(pin_num); // установить RX (GPIO3) в режим порта i/o
 	if((GPIO_IN & pin_mask) == x) {
 		ets_isr_mask(1 << ETS_GPIO_INUM);
@@ -127,9 +127,28 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 	//    	flash_save_cfg(&x, ID_CFG_SYS, 0);
 	    }
 	}
-	set_uartx_invx(UART0, ucfg.cfg.b.rxd_inv, UART_RXD_INV); // установить RX (GPIO3) в режим RX UART, если требуется
+	if(old_ioe & pin_mask) GPIO_ENABLE_W1TS = pin_mask; // восстановить если был выход
+	*get_addr_gpiox_mux(pin_num) = old_mux; // восстановить mux
 }
 
+//===============================================================================
+// get_mac_time()
+//-------------------------------------------------------------------------------
+uint64 ICACHE_FLASH_ATTR get_mac_time(void)
+{
+	union {
+		volatile uint32 dw[2];
+		uint64 dd;
+	}ux;
+	volatile uint32 * ptr = (volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR;
+	ux.dw[0] = ptr[0];
+	ux.dw[1] = ptr[1];
+	if(ux.dw[1] != ptr[1]) {
+		ux.dw[0] = ptr[0];
+		ux.dw[1] = ptr[1];
+	}
+	return ux.dd;
+}
 
 
 

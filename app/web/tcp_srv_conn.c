@@ -293,7 +293,8 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 		len = ts_conn->sizei - ts_conn->cntri;
 		os_memcpy(ts_conn->pbufi, &ts_conn->pbufi[ts_conn->cntri], len );
 		ts_conn->sizei = len;
-		ts_conn->pbufi = (uint8 *)mem_realloc(ts_conn->pbufi, len);	//mem_trim(ts_conn->pbufi, len);
+		ts_conn->pbufi = (uint8 *)mem_realloc(ts_conn->pbufi, len + 1);	//mem_trim(ts_conn->pbufi, len);
+		ts_conn->pbufi[len + 1] = 0;
 	}
 	ts_conn->cntri = 0;
 	ts_conn->flag.busy_bufi = 0; // обработка bufi окончена

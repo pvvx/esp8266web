@@ -21,7 +21,7 @@
 #define ID_CFG_UART1 0x3175 // id для сохранения установок UART1
 #define ID_CFG_UART0 0x3075 // id для сохранения установок UART0
 #define ID_CFG_SYS   0x7373 // id для сохранения ситемной конфигурации (syscfg)
-#define ID_CFG_UURL  0x5552 // id для сохранения строки tcp2uart_url
+#define ID_CFG_UURL  0x5552 // id для сохранения строки tcp_client_url
 #define ID_CFG_KVDD  0x564B // id для сохранения калибровочных констант (делитель для VDD)
 
 //-----------------------------------------------------------------------------
@@ -113,9 +113,10 @@ struct SystemCfg { // структура сохранения системных
 	uint16 udp_test_port;	// (=0 - отключен)
 #endif
 #ifdef USE_MODBUS
-	uint16 mdb_remote_port;	// (=0 - отключен)
+	uint16 mdb_port;	// =0 - отключен
 	uint16 mdb_twrec;	// время (сек) стартового ожидания приема/передачи первого пакета, до авто-закрытия соединения
 	uint16 mdb_twcls;	// время (сек) до авто-закрытия соединения после приема или передачи
+	uint8  mdb_id;	// номер устройства ESP8266 по шине modbus
 #endif
 } __attribute__((packed));
 
@@ -126,12 +127,14 @@ sint16 flash_read_cfg(void *ptr, uint16 id, uint16 maxsize) ICACHE_FLASH_ATTR; /
 bool flash_save_cfg(void *ptr, uint16 id, uint16 size) ICACHE_FLASH_ATTR;
 
 extern struct SystemCfg syscfg;
-extern uint8 * tcp2uart_url;
+#if defined(USE_TCP2UART) || defined(USE_MODBUS)
+extern uint8 * tcp_client_url;
+#endif
 
 bool sys_write_cfg(void) ICACHE_FLASH_ATTR; // пишет из struct SystemCfg *scfg
 bool sys_read_cfg(void) ICACHE_FLASH_ATTR; // читет в struct SystemCfg *scfg
-bool new_tcp2uart_url(uint8 *url) ICACHE_FLASH_ATTR;
-bool read_tcp2uart_url(void) ICACHE_FLASH_ATTR;
+bool new_tcp_client_url(uint8 *url) ICACHE_FLASH_ATTR;
+bool read_tcp_client_url(void) ICACHE_FLASH_ATTR;
 
 #define MAX_IDX_USER_CONST 4
 

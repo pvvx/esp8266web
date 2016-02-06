@@ -70,6 +70,7 @@ enum {
 	SDK_TASK_PRIO = 22
 };
 
+
 bool system_os_task(os_task_t task, uint8 prio, os_event_t *queue, uint8 qlen);
 bool system_os_post(uint8 prio, os_signal_t sig, os_param_t par);
 

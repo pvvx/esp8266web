@@ -193,8 +193,8 @@ void ets_isr_attach(uint32_t, void*, void*);
 void ets_isr_mask(uint32_t);
 void ets_isr_unmask(uint32_t);
 
-void ets_intr_lock();
-void ets_intr_unlock();
+void ets_intr_lock(void);
+void ets_intr_unlock(void);
 
 #ifndef _ETS_SYS_H
 /* timer related */

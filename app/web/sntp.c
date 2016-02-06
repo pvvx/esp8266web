@@ -342,7 +342,7 @@ static void ICACHE_FLASH_ATTR sntp_process(u32_t *receive_timestamp) {
  */
 static void ICACHE_FLASH_ATTR sntp_initialize_request(struct sntp_msg *req)
 {
-	memset(req, 0, SNTP_MSG_LEN);
+	os_memset(req, 0, SNTP_MSG_LEN);
 	req->li_vn_mode = SNTP_LI_NO_WARNING | SNTP_VERSION | SNTP_MODE_CLIENT;
 
 #if SNTP_CHECK_RESPONSE >= 2

@@ -12,6 +12,9 @@
 #include "sdk/flash.h"
 #include "flash_eep.h"
 #include "tcp2uart.h"
+#ifdef USE_RS485DRV
+#include "driver/rs485drv.h"
+#endif
 //=============================================================================
 extern void uart1_write_char(char c);
 extern void uart0_write_char(char c);
@@ -47,6 +50,7 @@ extern void uart0_write_char(char c);
 #ifdef USE_TCP2UART
 void uart_intr_handler(void *para);
 #endif
+#ifndef USE_RS485DRV
 //=============================================================================
 // uart0_set_flow()
 //-----------------------------------------------------------------------------
@@ -137,6 +141,7 @@ void ICACHE_FLASH_ATTR update_mux_uart0(void)
 		}
 	}
 }
+#endif
 //=============================================================================
 // Обновить вывод TXD1
 // update_mux_txd1()
@@ -166,10 +171,12 @@ void ICACHE_FLASH_ATTR set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask)
 		UART1_CONF0 = (UART1_CONF0 & (~ bit_mask)) | invx;
 		if(bit_mask & UART_TXD_INV) update_mux_txd1();
 	}
+#ifndef USE_RS485DRV
 	else {
 		UART0_CONF0 = (UART0_CONF0 & (~ bit_mask)) | invx;
 		update_mux_uart0();
 	}
+#endif
     ets_intr_unlock(); // ETS_UART_INTR_ENABLE();
 }
 //=============================================================================
@@ -180,6 +187,41 @@ void ICACHE_FLASH_ATTR set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask)
 void ICACHE_FLASH_ATTR uart_read_fcfg(uint8 set)
 {
 	struct  UartxCfg ux;
+	if(set&2) {
+		if(flash_read_cfg(&ux, ID_CFG_UART1, sizeof(ux)) != sizeof(ux)) {
+			ux.baud = UART1_DEFBAUD;
+			ux.cfg.dw = UART1_REGCONFIG0DEF; //8N1
+		}
+		UART1_CONF0 = ux.cfg.dw & UART1_REGCONFIG0MASK;
+		UART1_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
+			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
+			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
+			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
+		;
+//		if(ux.cfg.b.swap) PERI_IO_SWAP |= PERI_IO_UART1_PIN_SWAP;
+//		else PERI_IO_SWAP &= ~PERI_IO_UART1_PIN_SWAP;
+		update_mux_txd1();
+		uart_div_modify(UART1, UART_CLK_FREQ / ux.baud);
+	}
+#ifdef USE_RS485DRV
+	if(set&1) {
+		if(flash_read_cfg(&rs485cfg, ID_CFG_UART0, sizeof(rs485cfg)) != sizeof(rs485cfg)) {
+			rs485cfg.baud = RS485_DEF_BAUD;
+			rs485cfg.flg.ui = RS485_DEF_FLG;
+			rs485cfg.timeout = RS485_DEF_TWAIT;
+		}
+		rs485_drv_set_pins();
+		rs485_drv_set_baud();
+/*
+		srs485cfg rcfg;
+		if(flash_read_cfg(&rcfg, ID_CFG_UART0, sizeof(rcfg)) != sizeof(rcfg)) {
+			rcfg.baud = RS485_DEF_BAUD;
+			rcfg.flg.ui = RS485_DEF_FLG;
+			rcfg.timeout = RS485_DEF_TWAIT;
+		}
+		rs485_drv_new_cfg(&rcfg); */
+	}
+#else
 	if(set&1) {
 		if(flash_read_cfg(&ux, ID_CFG_UART0, sizeof(ux)) != sizeof(ux)) {
 			ux.baud = UART0_DEFBAUD;
@@ -201,22 +243,7 @@ void ICACHE_FLASH_ATTR uart_read_fcfg(uint8 set)
 		update_mux_uart0();
 		uart_div_modify(UART0, UART_CLK_FREQ / ux.baud);
 	}
-	if(set&2) {
-		if(flash_read_cfg(&ux, ID_CFG_UART1, sizeof(ux)) != sizeof(ux)) {
-			ux.baud = UART1_DEFBAUD;
-			ux.cfg.dw = UART1_REGCONFIG0DEF; //8N1
-		}
-		UART1_CONF0 = ux.cfg.dw & UART1_REGCONFIG0MASK;
-		UART1_CONF1 = ((0x01 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S)
-			| ((0x01 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S)
-			| (((128 - RST_FIFO_CNT_SET) & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S)
-			| ((0x04 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S) // | UART_RX_TOUT_EN
-		;
-//		if(ux.cfg.b.swap) PERI_IO_SWAP |= PERI_IO_UART1_PIN_SWAP;
-//		else PERI_IO_SWAP &= ~PERI_IO_UART1_PIN_SWAP;
-		update_mux_txd1();
-		uart_div_modify(UART1, UART_CLK_FREQ / ux.baud);
-	}
+#endif
 }
 //=============================================================================
 // uart_save_fcfg()
@@ -228,11 +255,15 @@ void ICACHE_FLASH_ATTR uart_save_fcfg(uint8 set)
 	struct  UartxCfg ux;
 	MEMW();
 	if(set&1) {
+#ifdef USE_RS485DRV
+		flash_save_cfg(&rs485cfg, ID_CFG_UART0, sizeof(rs485cfg));
+#else
 		ux.baud = UART_CLK_FREQ / (UART0_CLKDIV & UART_CLKDIV_CNT);
 		ux.cfg.dw = UART0_CONF0 & UART0_REGCONFIG0MASK;
 		if(uart0_flow_ctrl_flg) ux.cfg.b.flow_en = 1;
 		if(PERI_IO_SWAP & PERI_IO_UART0_PIN_SWAP) ux.cfg.b.swap = 1; // swap uart0 pins (u0rxd <-> u0cts), (u0txd <-> u0rts)
 		flash_save_cfg(&ux, ID_CFG_UART0, sizeof(ux));
+#endif
 	}
 	if(set&2) {
 		ux.baud = UART_CLK_FREQ / (UART1_CLKDIV & UART_CLKDIV_CNT);
@@ -300,10 +331,19 @@ void ICACHE_FLASH_ATTR uart_init(void)
 		tcp2uart_int_rxtx_disable();
 #endif
 // UART0
+#ifndef USE_RS485DRV
 		UART0_INT_ENA = 0;
 		uart_read_fcfg(1);
 	    // clear all interrupt UART0
 		UART0_INT_CLR &= ~0xffff;
+#else
+		if(flash_read_cfg(&rs485cfg, ID_CFG_UART0, sizeof(rs485cfg)) != sizeof(rs485cfg)) {
+			rs485cfg.baud = RS485_DEF_BAUD;
+			rs485cfg.flg.ui = RS485_DEF_FLG;
+			rs485cfg.timeout = RS485_DEF_TWAIT;
+		}
+		rs485_drv_init();
+#endif
 // UART1
     	UART1_INT_ENA = 0;
 		uart_read_fcfg(2);

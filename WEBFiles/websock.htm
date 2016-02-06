@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="charset=windows-1251" />
+<title>WebSocket Test</title>
+<script language="javascript" type="text/javascript">
+var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
+//var	wsUri = "ws://echo.websocket.org";
+var output;
+function init() {
+	output = document.getElementById("output");
+	testWebSocket();
+}
+function testWebSocket() {
+	websocket = new WebSocket(wsUri);
+	websocket.onopen = function(event) {
+		onOpen(event)
+	};
+	websocket.onclose = function(event) {
+		onClose(event)
+	};
+	websocket.onmessage = function(event) {
+		onMessage(event)
+	};
+	websocket.onerror = function(event) {
+		onError(event)
+	};
+}
+function onOpen(event) {
+	writeToScreen("CONNECTED: " + wsUri);
+	doSend("hellomsg");
+}
+function onClose(event) {
+	writeToScreen("DISCONNECTED: " + event.code + ', ' + event.wasClean);
+}
+function onMessage(event) {
+	writeToScreen('<span style="color: blue;">RESPONSE: ' + event.data + '</span>');
+	websocket.close();
+}
+function onError(event) {
+	writeToScreen('<span style="color: red;">ERROR: ' + event.data + ', ' + event.code + ', ' + event.reason + '</span>');
+}
+function doSend(message) {
+	writeToScreen("SENT: " + message);
+	websocket.send(message);
+}
+function writeToScreen(message) {
+	var pre = document.createElement("p");
+	pre.style.wordWrap = "break-word";
+	pre.innerHTML = message;
+	output.appendChild(pre);
+}
+window.addEventListener("load", init, false);
+</script>
+<h2>WebSocket Test</h2>
+<div id="output"></div>

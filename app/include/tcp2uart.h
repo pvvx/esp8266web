@@ -25,10 +25,12 @@ void uart_read_fcfg(uint8 set) ICACHE_FLASH_ATTR;
 
 #define uart0_flow_ctrl_flg (UartDev.flow_ctrl)
 
+#ifndef USE_RS485DRV
 void uart0_set_flow(bool flow_en) ICACHE_FLASH_ATTR;
 void update_rts0(void) ICACHE_FLASH_ATTR;
-void update_mux_txd1(void) ICACHE_FLASH_ATTR;
 void update_mux_uart0(void) ICACHE_FLASH_ATTR;
+#endif
+void update_mux_txd1(void) ICACHE_FLASH_ATTR;
 void set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask) ICACHE_FLASH_ATTR;
 
 #define RST_FIFO_CNT_SET 16 // при остатке в fifo места для 16 символов срабатывает RTS

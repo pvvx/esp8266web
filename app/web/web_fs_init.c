@@ -108,7 +108,7 @@ void ICACHE_FLASH_ATTR web_fini(const uint8 * fname)
 #endif
 						};
 					}
-					else web_int_callback(ts_conn);
+					else web_int_callback(ts_conn, pstr);
 				};
 				sslen = nslen;
 			};

@@ -9,6 +9,9 @@
 #define _INCLUDE_WEB_SRV_H_
 
 #include "tcp_srv_conn.h"
+#ifdef WEBSOCKET_ENA
+#include "websock.h"
+#endif
 
 #define WEB_SVERSION "0.1.4"
 #define DEFAULT_WEB_PORT USE_WEB // 80
@@ -69,7 +72,7 @@ typedef uint32 (* web_func_disc_cb)(uint32 flg); // отложенная фун�
 typedef struct
 {
 	uint32 webflag;		// флаги для http/web сервера
-	uint8  bffiles[4];	// четырые Files pointers для оработки вложенных файлов include
+	uint8  bffiles[4];	// четыре Files pointers для оработки вложенных файлов include
 	uint32 udata_start;	// udata "start=0x..."
 	uint32 udata_stop;	// udata "stop=0x..."
 	uint8  *msgbuf;		// указатель на текущий буфер вывода
@@ -79,6 +82,9 @@ typedef struct
 	uint32 content_len; // размер файла для передачи (GET/POST) или приема, если принимается внешний файл (POST + SCB_RXDATA)
 	web_func_disc_cb web_disc_cb; // функция вызываемая по закрытию соединения
 	uint32 web_disc_par; // параметры функции вызываемой по закрытию соединения
+#ifdef WEBSOCKET_ENA
+	WS_FRSTAT ws;	// параметры websoc
+#endif
 } WEB_SRV_CONN;
 
 typedef enum
@@ -108,7 +114,8 @@ typedef enum
 #define  SCB_BNDR		0x04000 // прилеплен Content-Type: multipart/form-data; boundary="..."
 #define  SCB_REDIR		0x08000 // Redirect 302
 #define  SCB_WEBSOC		0x10000 // WebSocket
-#define  SCB_SYSSAVE	0x20000 // по закрытию соединения вызвать sys_write_cfg()
+#define  SCB_WSDATA		0x20000 // WebSocket data
+#define  SCB_SYSSAVE	0x40000 // по закрытию соединения вызвать sys_write_cfg()
 
 
 #define  SCB_OPEN       0
