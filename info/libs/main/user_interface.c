@@ -99,7 +99,8 @@ bool system_os_post(uint8 prio, os_signal_t sig, os_param_t par)
 		os_printf_plus("err: post prio < %d\n", USER_TASK_PRIO_MAX);
 		return false;
 	}
-	return ets_post((prio + 22) & 0xFF, sig, par); // in ets.h
+//	return ets_post((prio + 22) & 0xFF, sig, par); // in ets.h, + 22 SDK 1.4.1
+	return ets_post((prio + 2) & 0xFF, sig, par); // in ets.h, + 2 SDK 1.5.2
 }
 
 bool system_os_task(os_task_t task, uint8 prio, os_event_t *queue, uint8 qlen)
@@ -112,7 +113,7 @@ bool system_os_task(os_task_t task, uint8 prio, os_event_t *queue, uint8 qlen)
 		os_printf("err: task queue error\n");
 		return false;
 	}
-	ets_task(task, prio + 22, queue, qlen);
+	ets_task(task, prio + 22, queue, qlen); // + 22 SDK 1.4.1,  + 2 SDK 1.5.2
 	return true;
 }
 
