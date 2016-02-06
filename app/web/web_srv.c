@@ -635,7 +635,7 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
         	pstr = head_find_ctr(CurHTTP, HTTPUpgrade, sizeHTTPUpgrade, sizeHTTPwebsocket);
         	if(CurHTTP->httpStatus != 200) return false;
         	if(pstr != NULL) {
-            	if(os_memcmp(pstr, HTTPwebsocket, sizeHTTPwebsocket)) {
+            	if(os_memcmp(word_to_lower_case(pstr), HTTPwebsocket, sizeHTTPwebsocket)) {
                     CurHTTP->httpStatus = 400; // 400 Bad Request
                     return false;
             	}
