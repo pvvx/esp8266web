@@ -67,7 +67,11 @@ enum {
     USER_TASK_PRIO_1,
     USER_TASK_PRIO_2,
     USER_TASK_PRIO_MAX,
+#if DEF_SDK_VERSION > 1410
+	SDK_TASK_PRIO = 2
+#else
 	SDK_TASK_PRIO = 22
+#endif
 };
 
 
