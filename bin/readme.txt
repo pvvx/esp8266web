@@ -1,8 +1,7 @@
    Addr - file name 			- Info
 --------------------------------------------------------   
 0x00000 - bin/0x00000.bin		- Program codes IRAM/RAM
-0x06000 - bin/0x06000.bin		- Program codes Cache Flash
-0x39000 - webbin/WEBFiles.bin	- WebFileSystem (if 512 kbytes Flash)
+0x07000 - bin/0x07000.bin		- Program codes Cache Flash
 0x79000 - bin/clear_eep.bin		- Clear settings EEP area
 0x7C000 - bin/esp_init_data_default.bin - RF SDK options
 0x7E000 - bin/blank.bin			- Default SDK WiFi config

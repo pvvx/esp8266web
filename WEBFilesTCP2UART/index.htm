@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266</title>
+	<link rel="stylesheet" href="/style.css">
+</head><body>
+~inc:menu.inc~
+<div class="content">
+<h2 class="title">&#10031;<a href="/help/webvars.htm">Info</a>&#10031;</h2>
+<p class="center">
+Name: ~wifi_ap_ssid~ Password: ~wifi_ap_psw~<br>
+TCP2UART connect: ~tcp_remote~, Web connect: ~web_remote~,<br>
+Modbus TCP Connection: ~mdb_remote~<br>
+WEB ver: ~sys_webver~, SDK ver: ~sys_sdkver~.<br>
+Power: <span title="Calculate and adjust the division ratio for sys_vdd33 in 'Debug and Test'!" id='syspower'>?</span> V<br>
+ChipID: ~sys_cid~.<br><br>
+DevTime: <span id='sntptime'>SNTP disable</span><br>
+PowerStartTime: <span id='starttime'>?</span><br><br>
+</p></div>
+~inc:footer.inc~
+~inc:vdd.inc~
+~inc:time.inc~
+</body></html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266 Modbus</title>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/site.js"></script>
+</head><body onload="CreateTableTrn()">
+~inc:menu.inc~
+<div class="content">
+<h2 class="title">Modbus TRNs</h2>
+<table id="trnt" class="mdbtab">
+<tr><th>Name</th></tr>
+</table>
+<table>
+   <tr>
+   	<td>Write trn n, data:</td>
+   	<td><input type="text" id="mdbtrnn" size="12" maxlength="6" value="0"></td>
+   	<td><input type="text" id="mdbdata" size="12" maxlength="32" value="1,4,10,0,0,0,0"></td>
+   	<td><input type="button" onClick="newAJAXCommand('/web.cgi?mdbt'+document.getElementById('mdbtrnn').value+'='+document.getElementById('mdbdata').value)" value="Write" class="button"></td>
+   </tr>
+</table>
+</div>
+~inc:footer.inc~
+</body>
+<script type="text/javascript">
+var rownames = ["StartFlag","ID","Command","Number","ExtAddr","IntAddr","Timer","Errors","FifoCount"];
+var rowval = [1,-1,-1,-1,-1,-1,0,0,-1];
+var trns=~mdb_trns~;
+var trna=~mdb_trna~;
+function CreateTableTrn() {
+	t=document.all.trnt;
+	for(x=0;x<trns;x++)t.rows[0].insertCell(x+1).innerHTML='<b>Trn'+x+'</b>';
+	for(i=0;i<rownames.length;i++){
+		r=t.insertRow();r.insertCell(0).innerHTML='<b>'+rownames[i]+'</b>';
+		for(x=0;x<trns;x++){
+			c=r.insertCell(x+1);
+			c.innerText='?';
+			if(rowval[i]>=0) {
+				c.idx=trna+x*10+i;c.wrval=rowval[i];
+				c.onclick=function(){newAJAXCommand('/web.cgi?mdbw'+this.idx+'='+this.wrval)};c.className='s';
+			}
+		}
+	}	
+	newAJAXCommand('mdb.xml?start='+trna+'&stop='+(trna+trns*10-1),updateStatus,true);
+}
+function updateStatus(xmlData){
+	if(!xmlData)return;
+	for(i=0;i<rownames.length;i++){
+		s=document.all.trnt.rows[i+1];
+		for(x=0;x<trns;x++)s.cells[x+1].innerText=getXMLValue(xmlData,'m10'+x+i);
+	}
+}
+</script></html>

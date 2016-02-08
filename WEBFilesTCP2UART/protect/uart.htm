@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266EX TCP2UART</title>
+	<link rel="stylesheet" href="../style.css">
+	<script src="/scripts.js"></script>
+	<script src="/site.js"></script>
+</head><body>
+~inc:menu.inc~
+	<div class="content">
+		<h2 class="title">TCP2UART0</h2>
+		<form method="post" action="">
+			<table class="form">
+			<tr>
+				<td class="label">Baud:</td>
+				<td><input title='300...10000000' name='uart_0_baud' maxlength='8' value='~uart_0_baud~'></td>
+			</tr>
+			<tr>
+				<td class="label">Bits:</td>
+				<td><select name='uart_0_bits'>
+					<option value='0'>5</option>
+					<option value='1'>6</option>
+					<option value='2'>7</option>
+					<option value='3'>8</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td class="label">Stop Bits:</td>
+				<td><select name='uart_0_stop'>
+					<option value='0'>0?</option>
+					<option value='1'>1</option>
+					<option value='2'>1.5</option>
+					<option value='3'>2</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td class="label">Parity:</td>
+				<td><select name='uart_0_even'>
+					<option value='0'>even</option>
+					<option value='1'>odd</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td class="label">Parity enable:</td>
+ 				<td>
+ 					<input type="hidden" name='uart_0_parity' value='0'>
+ 					<input type='checkbox' name='uart_0_parity' value='1'>
+ 				</td>
+			</tr>
+			<tr>
+				<td class="label">LoopBack enable:</td>
+ 				<td>
+ 					<input type="hidden" name='uart_0_loopback' value='0'>
+ 					<input title='TXD(GPIO1)->RXD' type='checkbox' name='uart_0_loopback' value='1'>
+ 				</td>
+			</tr>
+			<tr>
+				<td class="label">Flow enable:</td>
+				<td>
+					<input type="hidden" name='uart_0_flow' value='0'>
+					<input title='RTS(GPIO15)/CTS(GPIO13). Do not set up on the ESP-01: GPIO15 = GND!' type='checkbox' name='uart_0_flow' value='1'>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">RTS inverse:</td>
+				<td>
+					 <input type="hidden" name='uart_0_rts_inv' value='0'>
+					<input title='RTS(GPIO15)' type='checkbox' name='uart_0_rts_inv' value='1'>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">CTS inverse:</td>
+				<td>
+					<input type="hidden" name='uart_0_cts_inv' value='0'>
+					<input title='CTS(GPIO13)' type='checkbox' name='uart_0_cts_inv' value='1'>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">RXD inverse:</td>
+				<td>
+					<input type="hidden" name='uart_0_rxd_inv' value='0'>
+					<input title='RXD(GPIO3)' type='checkbox' name='uart_0_rxd_inv' value='1'>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">TXD inverse:</td>
+				<td>
+					<input type="hidden" name='uart_0_txd_inv' value='0'>
+					<input title='TXD(GPIO1)' type='checkbox' name='uart_0_txd_inv' value='1'>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">Swap TXD<>RTS, RXD<>CTS:</td>
+				<td>
+					<input type="hidden" name='uart_0_swap' value='0'>
+					<input title='TXD(GPIO15), RXD(GPIO13), RTS(GPIO1), CTS(GPIO3)' type='checkbox' name='uart_0_swap' value='1'>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">Client/Server IP:</td>
+				<td><input title='Server: 127.0.0.1, Client: extern ip.' name='cfg_tcp_url' maxlength='63' value='~cfg_tcp_url~'></td>
+			</tr>
+			<tr>
+				<td class="label">TCP Port:</td>
+				<td><input title='0 - disable' name='cfg_tcp_port' maxlength='5' value='~cfg_tcp_port~'></td>
+			</tr>
+			<tr>
+				<td class="label">TCP recved timeout:</td>
+				<td><input title='1...65535 sec, 0 - not limited' name='cfg_tcp_twrec' maxlength='5' value='~cfg_tcp_twrec~'></td>
+			</tr>
+			<tr>
+				<td class="label">TCP close timeout:</td>
+				<td><input title='1...65535 sec, 0 - not limited' name='cfg_tcp_twcls' maxlength='5' value='~cfg_tcp_twcls~'></td>
+			</tr>
+			<tr>
+				<td class="label">Client reconnect timeout:</td>
+				<td><input title='100...65000 ms (max ping time * 2)' name='cfg_tcp_tcrec' maxlength='5' value='~cfg_tcp_tcrec~'></td>
+			</tr>
+			<tr>
+				<td class="label">Server connect reopen:</td>
+				<td>
+					<input type="hidden" name='cfg_tcp_reop' value='0'>
+					<input type='checkbox' name='cfg_tcp_reop' value='1'>
+				</td>
+			</tr>
+			</table>
+			<p class="center">
+				<input type='hidden' name='uart_save' value='1'>
+				<input type='hidden' name='cfg_save' value='1'>
+				<input type="submit" value="Set Configuration" class="button">
+			</p>
+		</form>
+	</div>
+~inc:footer.inc~
+<script type="text/javascript">
+var cfg = {
+	uart_0_parity:"~uart_0_parity~",
+	uart_0_loopback:"~uart_0_loopback~",
+	uart_0_flow:"~uart_0_flow~",
+	uart_0_txd_inv:"~uart_0_txd_inv~",
+	uart_0_rxd_inv:"~uart_0_rxd_inv~",
+	uart_0_cts_inv:"~uart_0_cts_inv~",
+	uart_0_rts_inv:"~uart_0_rts_inv~",
+	uart_0_bits:"~uart_0_bits~",
+	uart_0_stop:"~uart_0_stop~",
+	uart_0_even:"~uart_0_even~",
+	uart_0_swap:"~uart_0_swap~",
+	cfg_tcp_reop: "~cfg_tcp_reop~"
+}
+setFormValues(document.forms[0], cfg);
+</script>
+</body>
+</html>

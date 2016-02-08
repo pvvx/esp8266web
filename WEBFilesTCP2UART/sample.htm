@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266 FWEB Image Upload</title>
+	<link rel="stylesheet" href="style.css">
+</head><body>
+~inc:menu.inc~
+<div class="content">
+Out UART1(debug port): 'Hello!'<br>
+~sys_ram0x60000f00=0x48~
+~sys_ram0x60000f00=0x65~
+~sys_ram0x60000f00=0x6c~
+~sys_ram0x60000f00=0x6c~
+~sys_ram0x60000f00=0x6f~
+~sys_ram0x60000f00=0x21~
+~sys_ram0x60000f00=0x0d~
+~sys_ram0x60000f00=0x0a~
+<hr>
+Out UART0 tx: 'Hello!'<br>
+~sys_ram0x60000000=0x48~
+~sys_ram0x60000000=0x65~
+~sys_ram0x60000000=0x6c~
+~sys_ram0x60000000=0x6c~
+~sys_ram0x60000000=0x6f~
+~sys_ram0x60000000=0x21~
+~sys_ram0x60000000=0x0d~
+~sys_ram0x60000000=0x0a~
+Read UART0 rx:~sys_ram0x60000000~<br>
+<hr>
+Variant 2<br>
+~start=0x60000000~
+Read UART0 regs:<br>
+~start~=~xml_ram~<br>
+~start~=~xml_ram~<br>
+~start~=~xml_ram~<br>
+~start~=~xml_ram~<br>
+<hr>
+~start=0x40200000~
+Read RAM:<br>
+~start~=~xml_ram~<br>
+~start~=~xml_ram~<br>
+~start~=~xml_ram~<br>
+~start~=~xml_ram~<br>
+<hr>
+Variant 2<br>
+RAM0x40200000=~sys_ram0x40200000~<br>
+</div>
+~inc:footer.inc~
+</body></html>

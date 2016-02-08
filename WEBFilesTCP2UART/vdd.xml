@@ -1,0 +1,1 @@
+<response><name>Vdd</name><value>(eval(~sys_vdd33~*100.0/~sys_ucnst_0~.0)).toFixed(3)</value></response>

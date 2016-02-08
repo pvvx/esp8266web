@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<title>WiFi Scan</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+	~inc:menu.inc~
+	<div class="content">
+		<h2 class="title">
+			<div id="scanResult">Stations scanning...</div>
+		</h2>
+		<table id="aps" class="scan">
+			<tr><th>SSID</th><th>BSSID</th><th>Auth</th><th>Ch</th><th>RSSI</th><th>Hd</th></tr>
+		</table>
+		<form id="stform" style="display: none" method='post' action='/timeout.htm'>
+			<table class="form">
+				<tr>
+					<td class="label">Select or input SSID:<input type='hidden' name='wifi_rdcfg' value='0x1C00'></td>
+					<td><input name='wifi_st_ssid' maxlength='31' value='~wifi_st_ssid~' id='inputssid'></td>
+					<td class="label">Type password:</td>
+					<td><input name='wifi_st_psw' maxlength='63' value='~wifi_st_psw~'></td>
+				</tr>
+				<tr>
+					<td class="label">BSSID:</td>
+					<td><input name='wifi_st_bssid' maxlength='31' value='~wifi_st_bssid~' id='inputbsid'></td>
+					<td class="label">AutoConnect:</td>
+					<td><input type='hidden' name='wifi_st_aucn' value='0'>
+						<input type='checkbox' name='wifi_st_aucn' value='1'></td>
+				</tr>
+			</table>
+			<p class="center">
+				<input type='submit' value='Set Config' class="button">
+				<input type='hidden' name='wifi_newcfg' value='0x21C00'>
+			</p>
+		</form>
+		<div id="connection"></div>
+	</div>
+	~inc:footer.inc~
+</body>
+<script src="/site.js"></script>
+<script src="/scripts.js"></script>
+<script type="text/javascript">
+var AUTH = {
+0: "OPEN",
+1: "WEP",
+2: "WPA-PSK",
+3: "WPA2-PSK",
+4: "WPA-WPA2-PSK",
+5: "MAX"};
+var cfg = { wifi_st_aucn: "~wifi_st_aucn~" };
+setFormValues(document.forms[0], cfg);
+var startTime = new Date();
+newAJAXCommand('/web.cgi?wifi_scan=1');
+setTimeout("newAJAXCommand('scan.xml', updateScan)", 2500);
+function updateScan(xmlData) {
+	if(!xmlData) return;
+	var total = getXMLValue(xmlData, 'total');
+	if (total==0) {
+		if((new Date()-startTime)>10000) {
+			startTime = new Date();
+			$('scanResult').innerHTML="Scan failed. Try again.";
+			newAJAXCommand('/web.cgi?wifi_scan=1');
+		}
+		else newAJAXCommand('scan.xml', updateScan);
+		return;
+	}
+	$('scanResult').innerHTML="Scan completed. " + total + " station(s) found.";
+	for(i = 0; i < total; i++){
+		var ap=xmlData.getElementsByTagName('ap')[i];
+		var ch=getXMLValue(ap, 'ch');
+		var au=getXMLValue(ap, 'au');
+		var bsid=getXMLValue(ap, 'bs');
+		var ssid=getXMLValue(ap, 'ss');
+		var rs=getXMLValue(ap, 'rs');
+		var hd=getXMLValue(ap, 'hd');
+		r=document.all.aps.insertRow();
+		c=r.insertCell(0);c.innerHTML="<a href=# >"+ssid+"</a>";c.ssid=ssid;c.bsid=bsid;c.onclick=onApClick;
+		c=r.insertCell(1);c.innerHTML="<a href=# >"+bsid+"</a>";c.ssid=ssid;c.bsid=bsid;c.onclick=onApClick;c.ondblclick=onInfo;c.title='DoubleClick = MF info';
+		(r.insertCell(2)).innerHTML=AUTH[au];
+		(r.insertCell(3)).innerText=ch;
+		(r.insertCell(4)).innerText=rs;
+		(r.insertCell(5)).innerText=hd;
+	}
+	$('stform').style.display='';
+}
+function onApClick() {
+	$('inputssid').value=this.ssid;
+	$('inputbsid').value=this.bsid;
+}
+function onInfo() {
+	s = this.bsid;
+	s=s.substring(0,8);s=s.replace(':','');
+    document.location.href = "http://standards.ieee.org/cgi-bin/ouisearch?"+s.replace(':','');
+}
+</script>
+</html>
