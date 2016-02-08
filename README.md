@@ -19,7 +19,7 @@ Sends 14-bit  samples at 1 Hz .. 48 kHz ([max 192 kHz 12 bits](https://github.co
 Modbus TCP port 502:<br>
  GPIOs, ADC, VDD.<br>
 RS-485 chematics: 
-![SCH](https://github.com/pvvx/esp8266rs485/blob/master/ESP-01_RS-485_sch.gif)
+![SCH](https://github.com/pvvx/esp8266web/blob/master/ESP-01_RS-485_sch.gif)
 
 Supported options 48 kbytes IRAM.<br>
 Supported '[Rapid Loader](https://github.com/pvvx/Rapid_Loader/)' and Flash 512 кbytes - 16 Mbytes.<br>
