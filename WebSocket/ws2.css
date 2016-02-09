@@ -1,0 +1,12 @@
+#consoleLog {
+  overflow-y: scroll;
+  width: 480px;
+  height: 200px;
+  border: solid 1px #aaaaaa;
+  background-color: #ffffff;
+  padding-left: 5px; }
+#consoleLog > pre {
+    margin-top: 0;
+    margin-bottom: 0; }
+#consoleLog > pre:nth-child(even) {
+    background-color: #fafafa; }

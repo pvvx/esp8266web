@@ -154,7 +154,7 @@ WebsocketHead(WS_FRSTAT *ws, uint8 *raw_data, uint32 raw_len)
 		ws->flg |= WS_FLG_FIN;
 	}
 #if DEBUGSOO > 1
-	os_printf("ws#%02xrx[%u] ", raw_data[0], raw_len);
+	os_printf("ws#%02xrx[%u] ", raw_data[0], data_len);
 #endif
 	return 1;
 /*
@@ -205,7 +205,7 @@ WebsocketTxFrame(TCP_SERV_CONN *ts_conn, uint32 opcode, uint8 *raw_data, uint32 
 	err_t err = 1; // ERR_BUF;
 	if(len >= raw_len + head_len) {
 #if DEBUGSOO > 1
-		os_printf("ws#%02xtx[%u] ", head.uc, raw_len);
+		os_printf("ws#%02xtx[%u] ", head.uc[0], raw_len);
 #endif
 		ts_conn->flag.nagle_disabled = 0;
 		tcp_nagle_disable(ts_conn->pcb);
