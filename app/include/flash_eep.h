@@ -129,12 +129,12 @@ bool flash_save_cfg(void *ptr, uint16 id, uint16 size) ICACHE_FLASH_ATTR;
 extern struct SystemCfg syscfg;
 #if defined(USE_TCP2UART) || defined(USE_MODBUS)
 extern uint8 * tcp_client_url;
+bool new_tcp_client_url(uint8 *url) ICACHE_FLASH_ATTR;
+bool read_tcp_client_url(void) ICACHE_FLASH_ATTR;
 #endif
 
 bool sys_write_cfg(void) ICACHE_FLASH_ATTR; // пишет из struct SystemCfg *scfg
 bool sys_read_cfg(void) ICACHE_FLASH_ATTR; // читет в struct SystemCfg *scfg
-bool new_tcp_client_url(uint8 *url) ICACHE_FLASH_ATTR;
-bool read_tcp_client_url(void) ICACHE_FLASH_ATTR;
 
 #define MAX_IDX_USER_CONST 4
 
