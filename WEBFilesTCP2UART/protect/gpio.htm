@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266 GPIOs</title>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/site.js"></script>
+</head><body onload="CreateTableGpio()">
+~inc:menu.inc~
+<div class="content">
+<h2 class="title">GPIO</h2>
+<table id="gpios" class="scan">
+<tr><th>Pin</th><th>Inp</ht><th>Out</th><th>Dir</th><th>Func</th><th>PU</th><th>PD</th><th>OD</th></tr>
+</table>
+GPIO13(CTS0), GPIO15(RTS0) - Flow enable: Off,<br>
+GPIO1(TX0), GPIO3(RX0) - Close TCP-UART: 'TCP port' = 0,  <br>
+GPIO2(TX1) - Disable: 'GPIO2 debug UART TX Enable'.
+</div>
+~inc:footer.inc~
+</body>
+<script type="text/javascript">
+//var pullx = {0: "none", 1: "down", 2: "up", 3: "#"};
+//var onoff = {0: "off", 1: "on"};
+function CreateTableGpio() {
+	for(i = 0; i < 16; i++){
+		r=document.all.gpios.insertRow();
+		(r.insertCell(0)).innerText="GPIO"+i;
+		(r.insertCell(1)).innerHTML="&bull;";
+		c=r.insertCell(2);c.innerHTML="&bull;";c.idx=i;c.onclick=function(){newAJAXCommand("gpio.xml?gpio"+this.idx+"_out=3")};c.className='s';
+		c=r.insertCell(3);c.innerHTML="&bull;";c.idx=i;c.onclick=function(){newAJAXCommand("gpio.xml?gpio"+this.idx+"_dir=3")};c.className='s';
+		(r.insertCell(4)).innerText="?";
+		c=r.insertCell(5);c.innerHTML="&bull;";c.idx=i;c.onclick=function(){newAJAXCommand("gpio.xml?gpio"+this.idx+"_pu=3")};c.className='s';
+		c=r.insertCell(6);c.innerHTML="&bull;";c.idx=i;c.onclick=function(){newAJAXCommand("gpio.xml?gpio"+this.idx+"_pd=3")};c.className='s';
+		c=r.insertCell(7);c.innerHTML="&bull;";c.idx=i;c.onclick=function(){newAJAXCommand("gpio.xml?gpio"+this.idx+"_od=3")};c.className='s';
+	}
+	newAJAXCommand('gpio.xml', updateStatus, true);
+}
+function updateStatus(xmlData) {
+	if(!xmlData) return;
+    var mask = 1;
+	for(i = 0; i < 16; i++){
+		s = document.all.gpios.rows[i+1];
+		var gp = getXMLValue(xmlData, 'gp'+i);
+		s.cells[1].style.color = (getXMLValue(xmlData, 'ginp')&mask) ? '#090' : '#ddd';
+		s.cells[2].style.color = (getXMLValue(xmlData, 'gout')&mask) ? '#090' : '#ddd';
+		s.cells[3].style.color = (getXMLValue(xmlData, 'gdir')&mask) ? '#090' : '#ddd';
+		s.cells[4].innerHTML = getXMLValue(xmlData, 'gf'+i);
+		s.cells[5].style.color = (gp&2)? '#090' : '#ddd';
+		s.cells[6].style.color = (gp&1)? '#090' : '#ddd';
+		s.cells[7].style.color = (getXMLValue(xmlData, 'gd'+i)&1)? '#090' : '#ddd';
+		mask<<=1;
+	}
+}
+</script></html>

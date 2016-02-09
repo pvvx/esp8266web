@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266 WebFS Image Upload</title>
+	<link rel="stylesheet" href="../style.css">
+</head><body>
+~inc:menu.inc~
+<form method='post' action='/fsupload' enctype='multipart/form-data' class="content">
+	<h2 class="title">WebFS Image Upload</h2>
+	<p class="center">
+	Select WEBFiles.bin file...<br><br>
+	<input type='file' name='file'><br><br>
+	<input type='submit' value='Upload' class="button">
+	</p>
+</form>
+<div class="content"><p class="center">
+Curent Disk has ~wfs_files~ files, Disk Size: ~wfs_size~ bytes.<br>
+Disk Addres: ~wfs_addr~, Max Disk Size: ~wfs_max_size~ bytes, Max 250 files.<br><br>
+Flash ID: ~sys_fid~, Size: ~sys_fsize~ bytes.<br>
+<a href='/protect/fullflash.bin'>Download fullflash.bin</a><br><br>
+</p></div>
+~inc:footer.inc~
+</body></html>

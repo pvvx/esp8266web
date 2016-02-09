@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266 Sensors external device</title>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/site.js"></script>
+</head><body onload="CreateTableMdb()">
+~inc:menu.inc~
+<div class="content">
+<h2 class="title">Sensors external device</h2>
+<table id="tbls" class="scan">
+<tr><th>Name</th><th>Value</th></tr>
+<tr><td>Pressure1</td><td>?</td></tr>
+<tr><td>Pressure2</td><td>?</td></tr>
+<tr><td>Pressure3</td><td>?</td></tr>
+<tr><td>Pressure4</td><td>?</td></tr>
+<tr><td>Pressure5</td><td>?</td></tr>
+<tr><td>Pressure6</td><td>?</td></tr>
+<tr><td>Internal Temperature</td><td>?</td></tr>
+<tr><td>External Temperature</td><td>?</td></tr>
+<tr><td>External Dew Point</td><td>?</td></tr>
+<tr><td>Oxugen</td><td>?</td></tr>
+<tr><td>Input1</td><td>?</td></tr>
+<tr><td>Input2</td><td>?</td></tr>
+<tr><td>Input3</td><td>?</td></tr>
+<tr><td>Input4</td><td>?</td></tr>
+</table>
+</div>
+~inc:footer.inc~
+</body>
+<script type="text/javascript">
+function CreateTableMdb() {
+	newAJAXCommand('mdb.xml?start=16&stop=44', updateStatus, true);
+}
+function updateStatus(xmlData) {
+	document.all.tbls.rows[1].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm16')*0.000198559)).toFixed(3)+' atm';
+	document.all.tbls.rows[2].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm18')*0.000198559)).toFixed(3)+' atm';
+	document.all.tbls.rows[3].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm20')*0.000198559)).toFixed(3)+' atm';
+	document.all.tbls.rows[4].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm22')*0.000198559)).toFixed(3)+' atm';
+	document.all.tbls.rows[5].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm24')*0.000198559)).toFixed(3)+' atm';
+	document.all.tbls.rows[6].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm26')*0.000198559)).toFixed(3)+' atm';
+	document.all.tbls.rows[7].cells[1].innerHTML=(eval((getXMLValue(xmlData, 'm28')-9695)*0.005158)).toFixed(3)+' C&deg;';
+	document.all.tbls.rows[8].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm30')/256.0)).toFixed(3)+' C&deg;';
+	document.all.tbls.rows[9].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm32')/256.0)).toFixed(3)+' C&deg;';
+	document.all.tbls.rows[10].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm34')/256.0)).toFixed(3)+' %';
+	document.all.tbls.rows[11].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm36')*0.000343835)).toFixed(3)+' mA';
+	document.all.tbls.rows[12].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm38')*0.000343835)).toFixed(3)+' mA';
+	document.all.tbls.rows[13].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm40')*0.000343835)).toFixed(3)+' mA';
+	document.all.tbls.rows[14].cells[1].innerHTML=(eval(getXMLValue(xmlData, 'm42')*0.000343835)).toFixed(3)+' mA';
+}
+</script></html>

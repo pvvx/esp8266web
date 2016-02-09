@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266 Modbus data</title>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/site.js"></script>
+</head><body onload="CreateTableMdb()">
+~inc:menu.inc~
+<div class="content">
+<h2 class="title">Modbus data</h2>
+<table id="tbls" class="mdbtab">
+<tr><th>Index</th><th>0</th><th>1</ht><th>2</th><th>3</th><th>4</th><th>5</th><th>6</ht><th>7</th><th>8</th><th>9</th>
+</table>
+<p class="center">
+<table>
+   <tr>
+   	<td>Write addr, word:</td>
+   	<td><input type="text" id="mdbwaddr" size="12" maxlength="6" value="0"></td>
+   	<td><input type="text" id="mdbwdata" size="12" maxlength="32" value="0x1234,1234"></td>
+   	<td><input type="button" onClick="newAJAXCommand('/web.cgi?mdbw'+document.getElementById('mdbwaddr').value+'='+document.getElementById('mdbwdata').value)" value="Write" class="button"></td>
+   </tr>
+   <tr>
+   	<td>Write addr, dword:</td>
+   	<td><input type="text" id="mdbdaddr" size="12" maxlength="6" value="0"></td>
+   	<td><input type="text" id="mdbddata" size="12" maxlength="32" value="0x12345678,1999"></td>
+   	<td><input type="button" onClick="newAJAXCommand('/web.cgi?mdbd'+document.getElementById('mdbdaddr').value+'='+document.getElementById('mdbddata').value)" value="Write" class="button"></td>
+   </tr>
+   <tr>
+   	<td>Write addr, string:</td>
+   	<td><input type="text" id="mdbaaddr" size="12" maxlength="6" value="0"></td>
+   	<td><input type="text" id="mdbadata" size="12" maxlength="32" value="Hello!"></td>
+   	<td><input type="button" onClick="newAJAXCommand('/web.cgi?mdba'+document.getElementById('mdbaaddr').value+'='+document.getElementById('mdbadata').value)" value="Write" class="button"></td>
+   </tr>
+</table>
+</p>
+</div>
+~inc:footer.inc~
+</body>
+<script type="text/javascript">
+function CreateTableMdb() {
+    var addr = 0;
+	for(i = 0; i < 10; i++){
+		r=document.all.tbls.insertRow();
+		(r.insertCell(0)).innerText=addr;
+		for(x = 1; x < 11; x++) (r.insertCell(x)).innerText='?';
+		addr+=10;
+	}
+	newAJAXCommand('mdb.xml?start=0&stop=100', updateStatus, true);
+}
+function updateStatus(xmlData) {
+    var addr = 0;
+	if(!xmlData) return;
+	for(i = 0; i < 10; i++){
+		s = document.all.tbls.rows[i+1];
+		for(x = 1; x < 11; x++) {
+			val=getXMLValue(xmlData, 'm'+addr);
+			s.cells[x].innerText=val;
+			s.cells[x].title='0x'+eval(val).toString(16); 
+			addr++;
+		}
+	}
+}
+function SendMdbVal() {
+	;
+}
+</script></html>

@@ -1,0 +1,403 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Excel.Sheet>
+<meta name=Generator content="Microsoft Excel 14">
+<link id=Main-File rel=Main-File href="../webvars.htm">
+<link rel=File-List href=filelist.xml>
+<link rel=Stylesheet href=stylesheet.css>
+<style>
+<!--table
+	{mso-displayed-decimal-separator:"\,";
+	mso-displayed-thousand-separator:" ";}
+@page
+	{margin:.75in .7in .75in .7in;
+	mso-header-margin:.3in;
+	mso-footer-margin:.3in;}
+-->
+</style>
+<![if !supportTabStrip]><script language="JavaScript">
+<!--
+function fnUpdateTabs()
+ {
+  if (parent.window.g_iIEVer>=4) {
+   if (parent.document.readyState=="complete"
+    && parent.frames['frTabs'].document.readyState=="complete")
+   parent.fnSetActiveSheet(1);
+  else
+   window.setTimeout("fnUpdateTabs();",150);
+ }
+}
+
+if (window.name!="frSheet")
+ window.location.replace("../webvars.htm");
+else
+ fnUpdateTabs();
+//-->
+</script>
+<![endif]>
+</head>
+
+<body link=blue vlink=purple>
+
+<table border=0 cellpadding=0 cellspacing=0 width=995 style='border-collapse:
+ collapse;table-layout:fixed;width:747pt'>
+ <col width=64 style='width:48pt'>
+ <col width=83 style='mso-width-source:userset;mso-width-alt:3035;width:62pt'>
+ <col width=38 style='mso-width-source:userset;mso-width-alt:1389;width:29pt'>
+ <col width=121 style='mso-width-source:userset;mso-width-alt:4425;width:91pt'>
+ <col width=689 style='mso-width-source:userset;mso-width-alt:25197;width:517pt'>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 width=64 style='height:15.75pt;width:48pt'></td>
+  <td class=xl65 width=83 style='width:62pt'></td>
+  <td class=xl65 width=38 style='width:29pt'></td>
+  <td class=xl65 width=121 style='width:91pt'></td>
+  <td class=xl65 width=689 style='width:517pt'></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl94>Адрес</td>
+  <td class=xl95>Тип</td>
+  <td class=xl95>Имя</td>
+  <td class=xl95>Описание</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl96 colspan=4 style='mso-ignore:colspan;border-right:1.0pt solid black'>Буфер
+  обмена (пользовательский буфер)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl80>0..999</td>
+  <td class=xl99>u16</td>
+  <td class=xl99>BUF</td>
+  <td class=xl100>Буфер обмена Modbus TCP &lt;-&gt; Modbus RTU RS-485 &lt;-&gt;
+  WEB</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl96 colspan=2 style='mso-ignore:colspan'>Транзактор №0</td>
+  <td class=xl69>&nbsp;</td>
+  <td class=xl101>&nbsp;</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1000</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: start_flg</td>
+  <td class=xl104>Запись любого значения отдичного от нуля вызывает передачу
+  (опрос 50 мсек)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1001</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: id</td>
+  <td class=xl104>Адрес/номер внешнего модуля на шине modbus</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1002</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: cmd</td>
+  <td class=xl104>Номер команды<span style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1003</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: len</td>
+  <td class=xl104>Размер передаваемых данных</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1004</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: ext_addr</td>
+  <td class=xl104>Адрес во внешнем устройстве</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1005</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: int_addr</td>
+  <td class=xl104>Адрес во внутреннем устройстве</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1006</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: timer</td>
+  <td class=xl104>Задает старт таймера и множитель таймера (x 50 мсек), запись
+  0 - останов таймера</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1007</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: error</td>
+  <td class=xl104>Счетчик ошибок приема/передач</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1008</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>trn0: fifo</td>
+  <td class=xl104>Счетчик неотработанных сообщений в очереди</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl80>1009</td>
+  <td class=xl99>u16</td>
+  <td class=xl99>trn0: cnt</td>
+  <td class=xl100>Таймерный счетчик</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl96 colspan=3 style='mso-ignore:colspan'>Транзактор №1,2,3,4,5,6,7</td>
+  <td class=xl101>&nbsp;</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl80>1010..1079</td>
+  <td class=xl99>u16</td>
+  <td class=xl99>&nbsp;</td>
+  <td class=xl100>По 10 ячеек</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl96 colspan=3 style='mso-ignore:colspan'>Системные переменные</td>
+  <td class=xl101>&nbsp;</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1100</td>
+  <td class=xl103>16bit</td>
+  <td class=xl103>GPIO_IN<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>Значения со входов: бит 0 = GPIO0, …, бит 15 = GPIO15</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1101</td>
+  <td class=xl103>16bit</td>
+  <td class=xl103>GPIO_OUT<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>Выходные значения:<span style='mso-spacerun:yes'>  </span>бит
+  0 = GPIO0, …, бит 15 = GPIO15</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1102</td>
+  <td class=xl103>16bit</td>
+  <td class=xl103>GPIO_OUT_SET</td>
+  <td class=xl104>Установка выхода: бит равный 1 выставлет<span
+  style='mso-spacerun:yes'>  </span>бит в GPIO_OUT</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1103</td>
+  <td class=xl103>16bit</td>
+  <td class=xl103>GPIO_OUT_CLEAR<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>Сброс выхода: бит равный 1 сбрасывает бит в GPIO_OUT</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1104</td>
+  <td class=xl103>16bit</td>
+  <td class=xl103>GPIO_ENABLE<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>Бит равный 1 переключает вывод в режим выхода: бит 0 = GPIO0,
+  …, бит 15 = GPIO15</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1105</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>GPIO_NUM</td>
+  <td class=xl104>Номер пина<span style='mso-spacerun:yes'>  </span>для
+  последующих функций (от 0 до 15 включительно)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1106</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>GPIO_FUNC<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>Номер функции для вывода (0..4). Используется номер пина из
+  GPIO_NUM.<span style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1107</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>GPIO_PULLUP<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>Встроенная подтяжка к +VDD (= 0 - откл, =1 - вкл).
+  Используется номер пина из GPIO_NUM.<span style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1108</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>GPIO_OD<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>&quot;Открытый коллектор&quot; (= 0 - откл, =1 - вкл)
+  Используется номер пина из GPIO_NUM.<span style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1109</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>GPIO_MUX<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl104>Регистр конфигурации вывода. Используется номер пина из
+  GPIO_NUM.<span style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1110</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>ADC</td>
+  <td class=xl104>Значение с ADC</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1111</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>VDD</td>
+  <td class=xl104>Значение VDD c ADC</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1112</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>arg_ UserFunc</td>
+  <td class=xl104>Аргумент к UserFunc</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1113</td>
+  <td class=xl103>u16</td>
+  <td class=xl103><span style='mso-spacerun:yes'> </span>UserFunc</td>
+  <td class=xl104>Номер UserFunc ( = 1 - deep_sleep(arg_ UserFunc мс))<span
+  style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl80>1114</td>
+  <td class=xl99>u32</td>
+  <td class=xl99>SNTP Time</td>
+  <td class=xl100>Время SNTP, если = 0 - отключено или нет доступа к серверу</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl96 colspan=3 style='mso-ignore:colspan'>Управление RS-485</td>
+  <td class=xl101>&nbsp;</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1200</td>
+  <td class=xl103>u32</td>
+  <td class=xl103>baud</td>
+  <td class=xl104>Скорость RS-485, 300..3 000 000 bps</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1202</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>parity</td>
+  <td class=xl104>0,1 - нет, 2 стоп бита;<span style='mso-spacerun:yes'> 
+  </span>2 - even, 3 - odd</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl105>&nbsp;</td>
+  <td class=xl80>&nbsp;</td>
+  <td class=xl65></td>
+  <td class=xl106>бит 0..4 - номер пина GPIO сигнала переключения направления
+  шины, при &gt; 15 отлючен.</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl105>1203</td>
+  <td class=xl80>u16</td>
+  <td class=xl65>pin_ena + flg</td>
+  <td class=xl106>бит 8 - swap TXD(GPIO15&lt;-&gt;GPIO1),
+  RXD(GPIO13&lt;-&gt;GPIO3)</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl105>&nbsp;</td>
+  <td class=xl80>&nbsp;</td>
+  <td class=xl65></td>
+  <td class=xl106>бит 9 - =0 - межблочная пауза при более 19200 baud = 1750
+  мкс, =1 межблочная пауза всегда 3.5 символа</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl105>&nbsp;</td>
+  <td class=xl80>&nbsp;</td>
+  <td class=xl65></td>
+  <td class=xl106>бит 10 - =0 - slave, =1 - master</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl107>1204</td>
+  <td class=xl108>u32</td>
+  <td class=xl69>timeout</td>
+  <td class=xl109>предельное время в ms ожидания приема/передачи пакета
+  (таймаут), 3…840 000 мсек<span style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl105>&nbsp;</td>
+  <td class=xl80>&nbsp;</td>
+  <td class=xl65></td>
+  <td class=xl106>бит 0 - =1 применить новый конфиг RS-485</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl105>1206</td>
+  <td class=xl80>u16</td>
+  <td class=xl65>RS-485 func</td>
+  <td class=xl106>бит 1 - =1 сохранить конфиг в Flash</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl110>&nbsp;</td>
+  <td class=xl102>&nbsp;</td>
+  <td class=xl111>&nbsp;</td>
+  <td class=xl112>бит 2 - =1 прочитать конфиг из Flash</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl96 colspan=3 style='mso-ignore:colspan'>Память RTC (256 ячеек/
+  512 байт)</td>
+  <td class=xl104>&nbsp;</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1300</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>Start RTC RAM</td>
+  <td class=xl104>Начало блока в 256 слов RTC RAM</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl102>1555</td>
+  <td class=xl103>u16</td>
+  <td class=xl103>End RTC RAM</td>
+  <td class=xl104>Конец блока (последнее слово) RTC RAM</td>
+ </tr>
+ <![if supportMisalignedColumns]>
+ <tr height=0 style='display:none'>
+  <td width=64 style='width:48pt'></td>
+  <td width=83 style='width:62pt'></td>
+  <td width=38 style='width:29pt'></td>
+  <td width=121 style='width:91pt'></td>
+  <td width=689 style='width:517pt'></td>
+ </tr>
+ <![endif]>
+</table>
+
+</body>
+
+</html>

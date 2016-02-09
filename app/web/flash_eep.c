@@ -285,7 +285,9 @@ uint8 * tcp_client_url;
 // Чтение системных настроек
 //-----------------------------------------------------------------------------
 bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
+#if defined(USE_TCP2UART) || defined(USE_MODBUS)
 	read_tcp_client_url();
+#endif
 	if(flash_read_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg)) != sizeof(syscfg)) {
 		syscfg.cfg.w = 0
 				| SYS_CFG_PIN_CLR_ENA
@@ -353,10 +355,10 @@ bool ICACHE_FLASH_ATTR sys_write_cfg(void) {
 	return flash_save_cfg(&syscfg, ID_CFG_SYS, sizeof(syscfg));
 }
 
+#if defined(USE_TCP2UART) || defined(USE_MODBUS)
 //-------------------------------------------------------------------------------
 // new_tcp_client_url()
 //-------------------------------------------------------------------------------
-
 bool ICACHE_FLASH_ATTR new_tcp_client_url(uint8 *url)
 {
 	if(tcp_client_url != NULL) {
@@ -397,7 +399,7 @@ bool ICACHE_FLASH_ATTR read_tcp_client_url(void)
 	tcp_client_url = NULL;
 	return false;
 }
-
+#endif
 
 /*
  *  Чтение пользовательских констант (0 < idx < 4)

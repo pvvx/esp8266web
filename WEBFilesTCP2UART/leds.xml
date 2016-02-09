@@ -1,0 +1,5 @@
+<response>
+<gpio_inp>~gpio_inp~</gpio_inp>
+<gpio_out>~gpio_out~</gpio_out>
+<gpio_dir>~gpio_dir~</gpio_dir>
+</response>

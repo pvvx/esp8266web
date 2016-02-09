@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266 Samples</title>
+	<link rel="stylesheet" href="style.css">
+</head><body>
+~inc:menu.inc~
+<div class="content">
+<hr>
+Write Mdb[68] string 'Hello!'<br>~mdba68=Hello!~
+Read Mdb[68] string: '~mdba68~'<br>
+Read Mdb[10] string: '~mdba10~'<br>
+<hr>
+Write Mdb[0] dword -12345678<br>~mdbd0=-12345678~
+Read Mdb[0] unsigned dword = ~mdbud0~<br>
+Read Mdb[0] signed dword = ~mdbsd0~<br>
+Read Mdb[0] hex dword = 0x~mdbhd0~<br>
+Read Mdb[0] unsigned word = ~mdbuw0~<br>
+Read Mdb[1] unsigned word = ~mdbuw1~<br>
+Read Mdb[0] signed word = ~mdbsw0~<br>
+Read Mdb[1] signed word = ~mdbsw1~<br>
+Read Mdb[0] hex word = 0x~mdbhw0~<br>
+Read Mdb[1] hex word = 0x~mdbhw1~<br>
+<hr>
+MdbTrn[0].id = 0x~mdbhw1001~<br>
+MdbTrn[0].cmd = 0x~mdbhw1002~<br>
+MdbTrn[0].len = 0x~mdbhw1003~<br>
+MdbTrn[0].eaddr = 0x~mdbhw1004~<br>
+MdbTrn[0].iaddr = 0x~mdbhw1005~<br>
+MdbTrn[0].tims = 0x~mdbhw1006~<br>
+MdbTrn[0].errs = 0x~mdbhw1007~<br>
+MdbTrn[0].fifo = 0x~mdbhw1008~<br>
+MdbTrn[0].timc = 0x~mdbhw1009~<br>
+</div>
+~inc:footer.inc~
+</body></html>

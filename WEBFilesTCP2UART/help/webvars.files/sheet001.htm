@@ -1,0 +1,1986 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Excel.Sheet>
+<meta name=Generator content="Microsoft Excel 14">
+<link id=Main-File rel=Main-File href="../webvars.htm">
+<link rel=File-List href=filelist.xml>
+<link rel=Stylesheet href=stylesheet.css>
+<style>
+<!--table
+	{mso-displayed-decimal-separator:"\,";
+	mso-displayed-thousand-separator:" ";}
+@page
+	{margin:.75in .7in .75in .7in;
+	mso-header-margin:.3in;
+	mso-footer-margin:.3in;}
+-->
+</style>
+<![if !supportTabStrip]><script language="JavaScript">
+<!--
+function fnUpdateTabs()
+ {
+  if (parent.window.g_iIEVer>=4) {
+   if (parent.document.readyState=="complete"
+    && parent.frames['frTabs'].document.readyState=="complete")
+   parent.fnSetActiveSheet(0);
+  else
+   window.setTimeout("fnUpdateTabs();",150);
+ }
+}
+
+if (window.name!="frSheet")
+ window.location.replace("../webvars.htm");
+else
+ fnUpdateTabs();
+//-->
+</script>
+<![endif]>
+</head>
+
+<body link=blue vlink=purple>
+
+<table border=0 cellpadding=0 cellspacing=0 width=935 style='border-collapse:
+ collapse;table-layout:fixed;width:701pt'>
+ <col width=89 style='mso-width-source:userset;mso-width-alt:3254;width:67pt'>
+ <col class=xl65 width=128 style='mso-width-source:userset;mso-width-alt:4681;
+ width:96pt'>
+ <col class=xl65 width=191 style='mso-width-source:userset;mso-width-alt:6985;
+ width:143pt'>
+ <col width=527 style='mso-width-source:userset;mso-width-alt:19273;width:395pt'>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 width=89 style='height:15.75pt;width:67pt'></td>
+  <td class=xl65 width=128 style='width:96pt'></td>
+  <td class=xl65 width=191 style='width:143pt'></td>
+  <td width=527 style='width:395pt'></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl66 width=128 style='width:96pt'><a name="Print_Area">Чтение</a></td>
+  <td class=xl67 width=191 style='width:143pt'>Установка</td>
+  <td class=xl67 width=527 style='width:395pt'>Описание</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Управление файлами</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>inc:<font class="font9">filename</font></td>
+  <td rowspan=2 class=xl85 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>&nbsp;</td>
+  <td class=xl68 width=527 style='width:395pt'>Вложение файла (include).
+  3-итеррации.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl69 width=527 style='width:395pt'>filename<font class="font5"> –
+  имя файла из диска, с корня.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Переменные (используются функциями)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>start</td>
+  <td class=xl71 width=191 style='width:143pt'>start=<font class="font9">hd</font></td>
+  <td class=xl69 width=527 style='width:395pt'>hd<font class="font5"> – 32-х
+  битное число в dec или hex формате. Вывод в hex формате.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>stop</td>
+  <td class=xl71 width=191 style='width:143pt'>stop=<font class="font9">hd</font></td>
+  <td class=xl69 width=527 style='width:395pt'>hd<font class="font5"> – 32-х
+  битное число в dec или hex формате. Вывод в hex формате.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Функции вывода данных</td>
+ </tr>
+ <tr height=61 style='height:45.75pt'>
+  <td height=61 style='height:45.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>xml_mdb</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит 16 битные слова из
+  Modbus в xml виде &lt;m<font class="font10">addr</font><font class="font0">&gt;</font><font
+  class="font10">data</font><font class="font0">&lt;/m</font><font
+  class="font10">addr</font><font class="font0">&gt;. Начальный адрес задается
+  в start, конечный в stop. Вывод в unsigned dec<span
+  style='mso-spacerun:yes'>  </span>формате.</font></td>
+ </tr>
+ <tr height=61 style='height:45.75pt'>
+  <td height=61 style='height:45.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>xml_mdbs</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит 16 битные слова из
+  Modbus в xml виде &lt;maddr&gt;data&lt;/maddr&gt;. Начальный адрес задается в
+  start, конечный в stop. Вывод в signed dec<span style='mso-spacerun:yes'> 
+  </span>формате.</td>
+ </tr>
+ <tr height=61 style='height:45.75pt'>
+  <td height=61 style='height:45.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>xml_mdbh</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит 16 битные слова из
+  Modbus в xml виде &lt;maddr&gt;data&lt;/maddr&gt;. Начальный адрес задается в
+  start, конечный в stop. Вывод в hex<span style='mso-spacerun:yes'> 
+  </span>формате без '0x'.</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>xml_mdbx</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит 16 битные слова из
+  Modbus в xml виде &lt;maddr&gt;data&lt;/maddr&gt;. Начальный адрес задается в
+  start, конечный в stop. Вывод в hex<span style='mso-spacerun:yes'> 
+  </span>формате c '0x'.</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>xml_ram</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит 32-х битные считанные
+  данные по адресу заданному в <font class="font8">start</font><font
+  class="font0"> с увеличением </font><font class="font8">start</font><font
+  class="font0"> на 4. Вывод в hex формате.</font></td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>hexdmpb</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит текстовый строчный файл
+  hex дампа в байтовом виде. Начальный адрес задается в <font class="font8">start</font><font
+  class="font0">, конечный в </font><font class="font8">stop</font><font
+  class="font0">.</font></td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>hexdmpd</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит текстовый строчный файл
+  hex дампа в dword виде. Начальный адрес задается в <font class="font8">start</font><font
+  class="font0">, конечный в </font><font class="font8">stop</font><font
+  class="font0">.</font></td>
+ </tr>
+ <tr height=60 style='height:45.0pt'>
+  <td height=60 style='height:45.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>hexdmpb<font class="font11">addr</font><font
+  class="font8">=</font><font class="font11">len</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Выводит текстовый строчный файл
+  hex дампа в байтовом виде с запросом к web.cgi. <font class="font11">addr </font><font
+  class="font0">- начальный адрес, </font><font class="font11">len</font><font
+  class="font0"> кол-во, кратное 16. Числа в dec или hex формате.<span
+  style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>Пример:
+  web.cgi?hexdmpb0x40000000=0x100<span style='mso-spacerun:yes'> </span></td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>hexdmpb<font class="font11">addr</font><font
+  class="font8">=</font><font class="font11">len</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Выводит текстовый файл в dword
+  виде с запросом к web.cgi. <font class="font11">addr </font><font
+  class="font0">- начальный адрес, </font><font class="font11">len</font><font
+  class="font0"> кол-во, кратное 16. Числа в dec или hex формате.<span
+  style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>Пример:
+  web.cgi?hexdmpd0x40000000=0x100</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>bin_ram</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Вывод бинарных данных из ram или
+  i/o. <font class="font11">addr </font><font class="font0">- начальный адрес, </font><font
+  class="font11">len</font><font class="font0"> кол-во байт.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>bin_flash</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Вывод бинарных данных из Flash. <font
+  class="font11">addr </font><font class="font0">- начальный адрес, </font><font
+  class="font11">len</font><font class="font0"> кол-во байт.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>bin_flash_all</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Вывод бинарных данных всей Flash</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>bin_flash_sec_<font class="font11">num</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Вывод бинарных данных сектора <font
+  class="font11">num</font><font class="font0"> Flash (4килобайта)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>bin_flash_disk</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Вывод бинарных данных всего
+  диска из Flash.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>bin_flash_const</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Вывод бинарных данных настроек
+  из Flash (128 байт)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Системные переменные</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_cid</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит Сhip ID. <font
+  class="font12">Пример:</font><font class="font0"> </font><font class="font13">0099ad1d</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_fid</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит<font class="font13"> </font><font
+  class="font12">Flash ID. Пример:</font><font class="font13"> 001340c8</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_fsize</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит истинный размер Flash в
+  dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_sdkver</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит номер базовой версии
+  SDK. Пример: 1.4.1</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_sysver</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит номер версии системы.
+  Пример: <font class="font12">0.5.1</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_webver</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит номер версии Web.
+  Пример: <font class="font12">0.1.4</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_heap</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит объем доступной на
+  данный момент памяти “heap” в dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_adc</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит текущее значение ADC 16
+  бит в dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_time</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Время со старта системы в
+  микросекундах, 32 бита, в dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_rtctime</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Время из RTC, в RTC циклах
+  (~5.75us), 32 бита, в dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_mactime</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Время со старта системы в
+  микросекундах, 64 бита, в hex формате.</td>
+ </tr>
+ <tr height=61 style='height:45.75pt'>
+  <td height=61 style='height:45.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_vdd33</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит замер напряжения питания
+  в тугриках, плюс в зависимости от резистора на входе ADC. Необходим подбор
+  делителя с калибровкой.<span style='mso-spacerun:yes'>  </span>Обычно коэф.
+  записывается в sys_uconst_0.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_wdt</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит номер режима WDT</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>sys_res_event</td>
+  <td rowspan=2 class=xl85 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>&nbsp;</td>
+  <td class=xl68 width=527 style='width:395pt'>Выводит причину загрузки:</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>1 - power/ch_pd, 2 - reset, 3 -
+  software, 4 - wdt ...</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_rst</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит причину загрузки: см
+  system_get_rst_info()</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_clkcpu</td>
+  <td class=xl71 width=191 style='width:143pt'>sys_clkcpu=<font class="font14">XMHz</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Текущая частота CLK CPU в MHz. <font
+  class="font14">XMHz</font><font class="font0"> 80 или 160 MHz.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>sys_sleep_option=<font class="font14">n</font></td>
+  <td class=xl74 width=527 style='width:395pt'>n<font class="font5"> - номер
+  режима deep-sleep.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>см.
+  system_deep_sleep_set_option(n)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>sys_sleep_us=<font class="font14">x</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Перейти в режим deep_sleep на
+  время в <font class="font14">x</font><font class="font0"> микросекунд.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>sys_sleep_old</td>
+  <td rowspan=2 class=xl85 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>&nbsp;</td>
+  <td class=xl68 width=527 style='width:395pt'>Выводит последний установленный
+  номер режима deep-sleep.</td>
+ </tr>
+ <tr height=61 style='height:45.75pt'>
+  <td height=61 style='height:45.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>Если нет отдельного питания RTC
+  и режим deep-sleep не устанавливался/применялся при текущем включения питания
+  чипа, то значение неопределенно (там хлам).</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_reset</td>
+  <td class=xl71 width=191 style='width:143pt'>sys_reset=12345</td>
+  <td class=xl73 width=527 style='width:395pt'>Вызывает перезагрузку путем
+  перехода на вектор старта CPU.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_restart</td>
+  <td class=xl71 width=191 style='width:143pt'>sys_restart=12345</td>
+  <td class=xl73 width=527 style='width:395pt'>Вызывает перезагрузку с помощью
+  функции system_restart().</td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>sys_ram<font class="font14">addr</font></td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>sys_ram<font class="font14">addr</font><font
+  class="font8">=</font><font class="font14">x,x,x,…</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Выводит 32-х битные считанные
+  данные по адресу <font class="font14">addr </font><font class="font0">в hex
+  формате. Адрес </font><font class="font14">addr</font><font class="font0">
+  всегда кратен 4-м. </font><font class="font14">addr </font><font class="font0">вводится
+  в hex или dec формате.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl75 width=527 style='width:395pt'>x<font class="font5"> – 32-х
+  битные данные для записи в hex или dec формате.</font></td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_rdec<font class="font14">addr</font></td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит 32-х битные считанные
+  данные по адресу <font class="font14">addr </font><font class="font0">в dec
+  формате со знаком. Адрес<span style='mso-spacerun:yes'>  </span></font><font
+  class="font14">addr</font><font class="font0"> всегда кратен 4-м. </font><font
+  class="font14">addr </font><font class="font0">вводится в hex или dec
+  формате.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_ip</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит локальный IP адрес, по
+  которому производится текущий запрос.</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_url</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит локальный url, по
+  которому производится текущий запрос, в зависимости от установок WiFi.</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>sys_debug</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>sys_debug=<font class="font14">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Включение и вотключение вывода
+  отладки в TX UART1 (GPIO2).</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl75 width=527 style='width:395pt'>x<font class="font5"> =0 –
+  отключить, =1 – включить вывод.</font></td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_vdd</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Китайский вывод напряжения
+  питания в тугриках. Работает в зависимости от опций (байт sys_const_107).</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_netbios</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Имя NETBIOS, для AP дополняется
+  первой буквой “A”, для ST “S”.</td>
+ </tr>
+ <tr height=60 style='height:45.0pt'>
+  <td height=60 style='height:45.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>sys_const_<font class="font14">num</font></td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>sys_const_<font class="font14">num</font><font
+  class="font8">=</font><font class="font14">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Системные константы из
+  esp_init_data_default.bin. <font class="font14">num</font><font class="font0">
+  от 0 до 127 включительно и обозначает номер байта в
+  esp_init_data_default.bin. </font><font class="font14">num</font><font
+  class="font0"> задается в hex и dec формате. Вывод 8 бит в dec формате.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl75 width=527 style='width:395pt'>x <font class="font5">– 8 битное
+  число для записи</font><font class="font8"> </font><font class="font5">в dec
+  или hex формате</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sys_const_faddr</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит адрес блока
+  esp_init_data_default.bin. 0x00007C00</td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>sys_ucnst_<font class="font14">num</font></td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>sys_ucnst_<font class="font14">num</font><font
+  class="font8">=</font><font class="font14">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>4-ре 32-х битные
+  пользовательские константы. <font class="font14">num</font><font class="font0">
+  задается в hex и dec формате от 0 до 3 включительно. Вывод в dec формате.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl75 width=527 style='width:395pt'>x <font class="font5">– 32
+  битное число для записи</font><font class="font8"> </font><font class="font5">в
+  dec или hex формате</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>SNTP</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>sntp_time</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит время SNTP. Если =0 -
+  SNTP не работает.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>WiFi</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_mode</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_mode=x</td>
+  <td class=xl73 width=527 style='width:395pt'>wifi_get_opmode()</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_phy</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_phy=x</td>
+  <td class=xl73 width=527 style='width:395pt'>wifi_get_phy_mode()</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_sleep</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_sleep=x</td>
+  <td class=xl73 width=527 style='width:395pt'>wifi_get_sleep_type()</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_maxpw</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_maxpw=x</td>
+  <td class=xl73 width=527 style='width:395pt'>system_phy_set_max_tpw()</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_vddpw</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_vddpw=<font class="font14">x</font></td>
+  <td class=xl73 width=527 style='width:395pt'>system_phy_set_tpw_via_vdd33(x)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_rfopt</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_rfopt=x</td>
+  <td class=xl73 width=527 style='width:395pt'>system_phy_set_rfoption(x)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_scan</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_scan=1</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит текст scan в формате
+  xml, стартует сканирование станций.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_aps_cnt=<font class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Задает кол-во
+  wifi_station_ap_number_set(n)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_aps_id</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_aps_id=<font class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>wifi_station_get_current_ap_id(),
+  wifi_station_ap_change(n)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_aps_xml</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит текст набранных aps в
+  формате xml</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_prrq_xml</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит текст набранных Probe
+  Request в формате xml</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>wifi_rdcfg</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>wifi_rdcfg=<font class="font14">mask</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение текущих установок из WiFi
+  по маске в память.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>При <font class="font8">wifi_rdcfg</font><font
+  class="font0"> применяется маска чтения всех параметров.</font></td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>wifi_newcfg</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>wifi_newcfg=<font class="font14">mask</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Применение установок WiFi из
+  памяти по маске с опциями записи во flash и перезагрузкой.</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>При <font class="font8">wifi_newcfg</font><font
+  class="font0"> применяется маска установки всех параметров, кроме записи во
+  flash и перезагрузки.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_read=<font class="font14">mask</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение установок WiFi из flash в
+  память и применение по маске.</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_save=<font class="font14">mask</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение текущих установок WiFi по
+  маске в память и запись установок WiFi из памяти во flash.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>WiFi STATION</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_aucn</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_aucn=<font class="font14">x</font></td>
+  <td class=xl73 width=527 style='width:395pt'>включение/выключение
+  авто-соединения</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_rect</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_rect =<font
+  class="font14">sec</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Пауза авто-соединения. 0..8192
+  сек</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_dhcp</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_dhcp=<font class="font14">x</font></td>
+  <td class=xl73 width=527 style='width:395pt'>DHCP включен/выключен</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_ip</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_sip=<font class="font14">ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>IP</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_msk</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_msk=<font class="font14">mask_ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>маска IP</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_gw</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_gw=<font class="font14">gateway_ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Gateway</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_mac</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_mac=<font class="font14">mac</font></td>
+  <td class=xl73 width=527 style='width:395pt'>MAC</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_ssid</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_ssid=<font class="font14">ssid</font></td>
+  <td class=xl73 width=527 style='width:395pt'>SSID</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_psw</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_psw=<font class="font14">password</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Пароль, от 8 символов</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_bssid</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_bssid=<font
+  class="font14"> bssid</font></td>
+  <td class=xl73 width=527 style='width:395pt'>BSSID</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_sbss</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_sbss=<font class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>BSSID on/off</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_hostname</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_hostname=<font
+  class="font14">hostname</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Host Name</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_rssi</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>RSSI</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_st_sta</td>
+  <td class=xl72 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>wifi_station_get_connect_status()</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>WiFi SOFT AP</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_dhcp</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_dhcp=<font class="font14">x</font></td>
+  <td class=xl73 width=527 style='width:395pt'>DNCP включен/выключен</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_sip</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_sip=<font class="font14">start_ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>DHCP стартовый IP</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_eip</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_eip=<font class="font14">end_ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>DHCP конечный IP</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_msk</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_msk=<font class="font14">mask_ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>DHCP маска IP</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_gw</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_gw=<font class="font14">gateway_ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Gateway</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_mac</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_mac=<font class="font14">mac</font></td>
+  <td class=xl73 width=527 style='width:395pt'>MAC</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_ssid</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_ssid=<font class="font14">ssid</font></td>
+  <td class=xl73 width=527 style='width:395pt'>SSID</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_hssid</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_ap_hssid=<font
+  class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>SSID hidden</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_psw</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_st_psw=<font class="font14">password</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Пароль, от 8 символов</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_auth</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_ap_auth=<font class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Auth mode</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_bint</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_ap_bint=<font class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Beacon interval 100..60000 ms</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_chl</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_ap_chl=<font class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Channel</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wifi_ap_mcns</td>
+  <td class=xl71 width=191 style='width:143pt'>wifi_ap_mcns=<font class="font14">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Max connections</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>TCP2UART</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>tcp_remote</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит IP:Port с кем соединено,
+  иначе “closed”</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>tcp_host</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит локальный IP:Port, иначе
+  “none”</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>WEB server</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>web_remote</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит IP:Port с кем соединен</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>web_host</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит локальный IP:Port</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Modbus</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>mdbfini=<font class="font9">имя_файла_в
+  диске</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Загружает бинарный файл
+  инициализации всех переменых modbus c web диска.<span
+  style='mso-spacerun:yes'>  </span>Возможное использование в init.ini.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdb_remote</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Выводит IP:Port с кем соединено,
+  иначе “closed”</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdbud<font class="font15">addr</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение dword unsigned, <font
+  class="font15">addr</font><font class="font0"> - номер ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdbsd<font class="font15">addr</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение dword signed,<font
+  class="font15"> addr</font><font class="font0"> - номер ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdbhd<font class="font15">addr</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение dword hex без '0x', <font
+  class="font15">addr </font><font class="font0">- номер ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdbxd<font class="font15">addr</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение dword hex c '0x', <font
+  class="font15">addr </font><font class="font0">- номер ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdbuw<font class="font15">addr</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение word unsigned, <font
+  class="font15">addr</font><font class="font0"> - номер ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdbsw<font class="font15">addr</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение word signed, <font
+  class="font15">addr</font><font class="font0"> - номер ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>mdbhw<font class="font15">addr</font></td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Чтение dword hex без '0x', <font
+  class="font15">addr</font><font class="font0"> - номер ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>mdbw<font class="font11">addr</font><font
+  class="font8">=</font><font class="font11">x,x,x…</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Запись word значения <font
+  class="font11">x</font><font class="font0"> (dec или hex) в ячейку c номером </font><font
+  class="font11">addr </font><font class="font0">(dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>mdbd<font class="font11">addr</font><font
+  class="font8">=</font><font class="font11">x,x,x,…</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Запись dword значения <font
+  class="font11">x </font><font class="font0"><span
+  style='mso-spacerun:yes'> </span>(dec или hex) в ячейку c номером </font><font
+  class="font11">addr </font><font class="font0">(dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>mdbt<font class="font11">n</font><font
+  class="font8">=</font><font class="font11">x,x,x,…</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Запись и старт таранзактора с
+  номером <font class="font11">n</font><font class="font0">, значения в</font><font
+  class="font11"> </font><font class="font0">dec или hex.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>mdba<font class="font11">addr</font></td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>mdba<font class="font15">addr</font><font
+  class="font8">=</font><font class="font15">stirng</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/запись<span
+  style='mso-spacerun:yes'>  </span>строки символов (до 32-х символов),</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>addr <font class="font5">- номер
+  ячейки (dec или hex)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Web File System</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wfs_files</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Кол-во файлов на диске</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wfs_addr</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>32-х битный адрес начала диска
+  во Flash, в hex формате</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wfs_size</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>32-х битный размер текущего
+  диска во Flash, в dec формате</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wfs_max_size</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>32-х битный максимальный размер
+  диска во Flash, в dec формате</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl90 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Wave UDP port</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wdrv_freq</td>
+  <td class=xl71 width=191 style='width:143pt'>wdrv_freq=<font class="font11">sr</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Sample Rate, 1…192000 Гц,<span
+  style='mso-spacerun:yes'>  </span>вывод в dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wdrv_port</td>
+  <td class=xl71 width=191 style='width:143pt'>wdrv_port=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Номер host порта 1..65535</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>wdrv_ip</td>
+  <td class=xl71 width=191 style='width:143pt'>wdrv_ip=<font class="font11">ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Host IP, если 255.255.255.255 –
+  broadcast</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>wdrv_init=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Номер remote порта 3..65535</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>wdrv_start=<font class="font11">sr</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Старт вывода, Sample Rate,
+  1…192000 Гц</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>&nbsp;</td>
+  <td class=xl71 width=191 style='width:143pt'>Wdrv_stop=<font class="font11">any</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Останов</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Тестовые</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>test_adc</td>
+  <td class=xl71 width=191 style='width:143pt'>&nbsp;</td>
+  <td class=xl73 width=527 style='width:395pt'>Тестовый вывод данных ADC в виде
+  короткого wave файла (mono, 14 бит, 22 кГц)</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>GPIO</td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio_inp</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio_inp=<font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Входные значения GPIO0..GPIO15 в
+  виде 16 битного числа. Вывод<span style='mso-spacerun:yes'>  </span>в dec
+  формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl75 width=527 style='width:395pt'>x <font class="font5">– 16
+  битное число для записи</font><font class="font8"> </font><font class="font5">в
+  dec или hex формате.</font></td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio_out</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio_out=<font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Выходные значения у
+  GPIO0..GPIO15 в виде 16 битного числа. Вывод в dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl75 width=527 style='width:395pt'>x <font class="font5">– 16
+  битное число для записи</font><font class="font8"> </font><font class="font5">в
+  dec или hex формате.</font></td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio_dir</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio_dir=<font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Направление (бит =1 выход, =0
+  вход) GPIO0..GPIO15 в виде 16 битного числа. Вывод в dec формате.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl75 width=527 style='width:395pt'>x <font class="font5">– 16
+  битное число для записи</font><font class="font8"> </font><font class="font5">в
+  dec или hex формате.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio_ena=<font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Установка направления работы
+  GPIO<font class="font16">n</font><font class="font0"> как выхода по маске
+  бит.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> = 16
+  битное число для маски</font><font class="font8"> </font><font class="font5">в
+  dec или hex.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio_dis=<font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Установка направления работы
+  GPIO<font class="font16">n </font><font class="font0">как входа по маске бит.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> = 16
+  битное число для маски</font><font class="font8"> </font><font class="font5">в
+  dec или hex.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_inp</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>&nbsp;</td>
+  <td class=xl68 width=527 style='width:395pt'>Вывод входного состояния GPIO<font
+  class="font16">n</font><font class="font0">, 0 или 1.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_out</font></td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_out=x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка для выходного
+  состояния GPIO<font class="font16">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> =0 - вывод
+  “0”, =1 - вывод “1”, =3 - инверсия.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_clr=x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка в “0” выхода
+  GPIO<font class="font16">n</font><font class="font0">,</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> - 0 или 1.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_set=x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка в “1”<span
+  style='mso-spacerun:yes'>  </span>выхода GPIO<font class="font16">n</font><font
+  class="font0">,</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font8"> </font><font
+  class="font5">- 0 или 1.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_dir</font></td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_dir=x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка направления
+  работы GPIO<font class="font16">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> =1 -
+  выход, =0 - вход.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_ena=any</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Установка направления работы
+  GPIO<font class="font16">n</font><font class="font0"> как выхода</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_dis=any</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Установка направления работы
+  GPIO<font class="font16">n</font><font class="font0"> как входа</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_fun</font></td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_fun=fun</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка функции GPIO<font
+  class="font16">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>fun<font class="font5"> = 0..5</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_pull</font></td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>&nbsp;</td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение pull битов у GPIO<font
+  class="font16">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> =0 - нет,
+  =2 - pullup, =1 pulldown (не работает)</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_opd</font></td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_opd=x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка “открытий
+  коллектор” GPIO<font class="font16">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> =0 - откл,
+  =1 вкл, =3 - переключить.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_pu</font></td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_pu=x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка pullup у GPIO<font
+  class="font16">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> =0 - откл,
+  =1 вкл, =3 - переключить.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>gpio<font class="font17">n</font><font
+  class="font8">_pd</font></td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_pd=x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Чтение/установка pulldown у GPIO<font
+  class="font16">n </font><font class="font0">(не работает в чипе).</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>x<font class="font5"> =0 - откл,
+  =1 вкл, =3 - переключить.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_io=any</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Установить функцию GPIO<font
+  class="font16">n</font><font class="font0"> как i/o port.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_def=any</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Установить функцию GPIO<font
+  class="font16">n</font><font class="font0"> в состояние по умолчанию для SDK.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=3 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=3 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_sgs=duty</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Подключить вывод GPIO<font
+  class="font16">n </font><font class="font0">к sigma-delta 312кГц</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl78 width=527 style='width:395pt'>duty<font class="font5"> –
+  параметр duty от 0 до 255.<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio<font class="font17">n</font><font
+  class="font8">_sgс=any</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Отключить вывод GPIO<font
+  class="font16">n </font><font class="font0">от sigma-delta 312кГц</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> – номер
+  GPIO: 0..15<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>gpio_sgn=<font class="font11">duty</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Задать новый параметр duty для<font
+  class="font16"> </font><font class="font0">sigma-delta 312кГц</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>duty<font class="font5"> –
+  параметр duty от 0 до 255.<span style='mso-spacerun:yes'> </span></font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>Конфигурация</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_web_port</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_web_port=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Локальный port Web сервера. =0 –
+  отключен</td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>cfg_web_twrec</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_web_twrec=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Таймаут до закрытия соединения
+  Web сервера если нет принятых данных, в секундах.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> =0 -
+  вечное</font></td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>cfg_web_twcls</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_web_twcls=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Таймаут до закрытия соединения
+  Web сервера после последних принятых данных, в секундах.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> =0 -
+  вечное</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_web_twd</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_web_twd=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Разрешение удаления TIME_WAIT
+  pcb</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_tcp_tcrec</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_tcp_tcrec=<font
+  class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Пауза до следующего запроса для
+  TCP клиента, в микросекундах.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_tcp_port</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_tcp_port=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Port TCP2UART. =0 – отключен</td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>cfg_tcp_twrec</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_tcp_twrec=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Таймаут до закрытия соединения
+  TCP2UART если нет принятых данных, в секундах.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> =0 -
+  вечное</font></td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>cfg_tcp_twcls</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_tcp_twcls=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Таймаут до закрытия соединения
+  TCP2UART после последних принятых данных, в секундах.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> =0 -
+  вечное</font></td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_tcp_reop</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_tcp_reop=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Разрешено открытие новым
+  соединением TCP2UART с закрытием старого. =1 да, =0 нет</td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_tcp_url</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_tcp_url=<font class="font11">ip</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Задание внешнего ip. Если поле
+  пусто или “none”, или “127.0.0.1”, или некорректен ввод ip<span
+  style='mso-spacerun:yes'>  </span>– то TCP2UART является сервером. Иначе –
+  клиентом.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_mdb_port</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_mdb_port=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Port Modbus TCP. =0 – отключен</td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>cfg_mdb_twrec</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_mdb_twrec=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Таймаут до закрытия соединения
+  Modbus TCP если нет принятых данных, в секундах.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> =0 -
+  вечное</font></td>
+ </tr>
+ <tr height=40 style='height:30.0pt'>
+  <td height=40 style='height:30.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>cfg_mdb_twcls</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_mdb_twcls=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Таймаут до закрытия соединения
+  Modbus TCP после последних принятых данных, в секундах.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>n<font class="font5"> =0 -
+  вечное</font></td>
+ </tr>
+ <tr height=41 style='height:30.75pt'>
+  <td height=41 style='height:30.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_mdb_reop</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_mdb_reop=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Разрешено открытие новым
+  соединением Modbus TCP с закрытием старого. =1 да, =0 нет</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_udp</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_udp=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Локальный port тестового UDP. =0
+  – отключен</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>cfg_wdrv_port</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_wdrv_port=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Локальный port UDP вывода Wave
+  потока с ADC.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>=0 – отключен</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_overclk</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_overclk=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Переключение CLK CPU на 160 MHz.
+  =1 да, =0 нет</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_pinclr</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_pinclr=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Включен сброс настроек WiFi при
+  старте по пину RX. =1 да, =0 нет</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_debug</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_debug=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Включен вывод отладки в порт
+  UART1.<span style='mso-spacerun:yes'>  </span>=1 да, =0 нет</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_netbios</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_netbios=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Включен NETBIOS.<span
+  style='mso-spacerun:yes'>  </span>=1 да, =0 нет</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_sntp</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_sntp=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Включен SNTP.<span
+  style='mso-spacerun:yes'>  </span>=1 да, =0 нет</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl70 width=128 style='width:96pt'>cfg_cdns</td>
+  <td class=xl71 width=191 style='width:143pt'>cfg_cdns=<font class="font11">n</font></td>
+  <td class=xl73 width=527 style='width:395pt'>Включен “Capture portal”.<span
+  style='mso-spacerun:yes'>  </span>=1 да, =0 нет</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>cfg_save=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Сохранить конфигурацию.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>=1 сразу, =2 по закрытию
+  соединения, другие значения – не сохранять.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=3 class=xl80 width=846 style='border-right:1.0pt solid black;
+  width:634pt'>UART0 &amp; UART1</td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl84 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_baud</font></td>
+  <td rowspan=2 class=xl84 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_baud=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Baud rate UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x <font class="font5">от 300 до
+  10000000.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_bits</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_bits=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Кол-во бит данных для UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"> =0 – 5
+  бит, …=3 – 8 бит.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_parity</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_parity=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Enable Parity UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_even</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_even=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Parity UART<font class="font11">n</font><font
+  class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – even, =1 – odd.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_stop</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_stop=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Кол-во стоп бит для UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"> =1 – 1
+  бит, =2 – 1.5 бита, =3 – 2 бита.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_loopback</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_loopback=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Enable loopback UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_swap</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_swap=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Enable swap pin RX&lt;-&gt;CTS,
+  TX&lt;-&gt;RTS у UART<font class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_flow</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_flow=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Enable flow control UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_rts_inv</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_rts_inv=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Инверсия RTS на UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_cts_inv</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_cts_inv=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Инверсия CTS на UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_rxd_inv</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_rxd_inv=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Инверсия RXD на UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_txd_inv</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_txd_inv=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Инверсия TXD на UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_dtr_inv</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_dtr_inv=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Инверсия DTR на UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>uart_<font class="font11">n</font><font
+  class="font8">_dsr_inv</font></td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_<font class="font11">n</font><font
+  class="font8">_dsr_inv=</font><font class="font11">x</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Инверсия DSR на UART<font
+  class="font11">n</font><font class="font0">.</font></td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl76 width=527 style='width:395pt'>x<font class="font5"><span
+  style='mso-spacerun:yes'>  </span>=0 – disable, =1 – enable.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_save=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Сохранить конфигурацию UARTx</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>Где <font class="font11">n</font><font
+  class="font0"><span style='mso-spacerun:yes'>  </span>бит0 =1 - UART0, бит1
+  =1 – UART1.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td rowspan=2 class=xl88 width=128 style='border-bottom:1.0pt solid black;
+  border-top:none;width:96pt'>&nbsp;</td>
+  <td rowspan=2 class=xl88 width=191 style='border-bottom:1.0pt solid black;
+  border-top:none;width:143pt'>uart_read=<font class="font11">n</font></td>
+  <td class=xl68 width=527 style='width:395pt'>Прочитать сохраненную
+  конфигурацию UARTx и настроить по ней UARTx.</td>
+ </tr>
+ <tr height=21 style='height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td class=xl73 width=527 style='width:395pt'>Где <font class="font11">n</font><font
+  class="font0"><span style='mso-spacerun:yes'>  </span>бит0 =1 - UART0, бит1
+  =1 – UART1.</font></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td class=xl79></td>
+  <td class=xl65></td>
+  <td></td>
+ </tr>
+ <![if supportMisalignedColumns]>
+ <tr height=0 style='display:none'>
+  <td width=89 style='width:67pt'></td>
+  <td width=128 style='width:96pt'></td>
+  <td width=191 style='width:143pt'></td>
+  <td width=527 style='width:395pt'></td>
+ </tr>
+ <![endif]>
+</table>
+
+</body>
+
+</html>
