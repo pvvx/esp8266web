@@ -510,7 +510,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
             	return;
         	}
-            int n = 0;
+            int n = 1;
 #else
             if(cstr[1] != '_' || cstr[0]<'0' || cstr[0]>'1' ) {
 #if DEBUGSOO > 5
