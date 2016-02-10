@@ -81,6 +81,7 @@ APPDIR = .
 #   its parent path, and not its siblings
 #
 # Required for each makefile to inherit from the parent
+#
 
 # INCLUDES := $(INCLUDES) -I $(PDIR)include
 PDIR := ../$(PDIR)

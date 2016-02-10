@@ -19,9 +19,6 @@
 
 #define MAX_RX_BUF_SIZE 8192
 
-const char txt_wsping[] ICACHE_RODATA_ATTR = "ws:ping";
-const char txt_wspong[] ICACHE_RODATA_ATTR = "ws:pong";
-
 //=============================================================================
 // websock_tx_frame() - передача фрейма
 //=============================================================================
@@ -123,14 +120,12 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 				case sw_frs_text:
 #if DEBUGSOO > 1
 					os_printf("ws:txt ");
-#if DEBUGSOO > 2
 					if(ws->frame_len != 0) {
 						uint8 tt = pstr[len];
 						pstr[len] = 0;
 						os_printf("'%s' ", pstr);
 						pstr[len] = tt;
 					}
-#endif
 #endif
 					if(ws->frame_len == ws->cur_len + len && ws->frame_len != 0) { // полное соо
 						web_conn->msgbufsize = tcp_sndbuf(ts_conn->pcb); // сколько можем выввести сейчас?
@@ -142,60 +137,52 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 							SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
 							return false;
 						}
-						if(ws->frame_len == (sizeof(txt_wsping)-1) && rom_xstrcmp(pstr, txt_wsping) != 0){
-							copy_s4d1(pstr, (void *)txt_wspong, sizeof(txt_wspong) - 1);
-							if(websock_tx_frame(ts_conn, WS_OPCODE_TEXT | WS_FRAGMENT_FIN, pstr, sizeof(txt_wspong) - 1) != ERR_OK) {
+						web_conn->msgbuf = (uint8 *) os_malloc(web_conn->msgbufsize);
+						if (web_conn->msgbuf == NULL) {
+#if DEBUGSOO > 0
+							os_printf("ws:mem!\n");
+#endif
+							websock_tx_close_err(ts_conn, WS_CLOSE_UNEXPECTED_ERROR);
+							SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+							return false;
+						};
+						web_conn->msgbuflen = 0;
+						uint32 opcode;
+						if(CheckSCB(SCB_RETRYCB)) { // повторный callback? да
+							if(web_conn->func_web_cb != NULL) web_conn->func_web_cb(ts_conn);
+							if(!CheckSCB(SCB_RETRYCB)) {
+								ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
+								opcode = WS_OPCODE_CONTINUE | WS_FRAGMENT_FIN;
+							}
+							else opcode = WS_OPCODE_CONTINUE;
+						}
+						else {
+							pstr[len] = '\0';
+							uint8 *vstr = os_strchr(pstr, '=');
+							if(vstr != NULL) {
+								*vstr++ = '\0';
+								web_int_vars(ts_conn, pstr, vstr);
+							}
+							else {
+								web_conn->msgbuf[0] = 0;
+								web_int_callback(ts_conn, pstr);
+							}
+							if(CheckSCB(SCB_RETRYCB)) opcode = WS_OPCODE_TEXT;
+							else {
+								ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
+								opcode = WS_OPCODE_TEXT | WS_FRAGMENT_FIN;
+							}
+						}
+						if(web_conn->msgbuflen != 0) {
+							if(websock_tx_frame(ts_conn, opcode, web_conn->msgbuf, web_conn->msgbuflen) != ERR_OK) {
+								os_free(web_conn->msgbuf);
+								web_conn->msgbuf = NULL;
 								return false; // не докачивать, ошибка или закрытие
 							}
 						}
-						else {
-							web_conn->msgbuf = (uint8 *) os_malloc(web_conn->msgbufsize);
-							if (web_conn->msgbuf == NULL) {
-#if DEBUGSOO > 0
-								os_printf("ws:mem!\n");
-#endif
-								websock_tx_close_err(ts_conn, WS_CLOSE_UNEXPECTED_ERROR);
-								SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
-								return false;
-							};
-							web_conn->msgbuflen = 0;
-							uint32 opcode;
-							if(CheckSCB(SCB_RETRYCB)) { // повторный callback? да
-								if(web_conn->func_web_cb != NULL) web_conn->func_web_cb(ts_conn);
-								if(!CheckSCB(SCB_RETRYCB)) {
-									ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
-									opcode = WS_OPCODE_CONTINUE | WS_FRAGMENT_FIN;
-								}
-								else opcode = WS_OPCODE_CONTINUE;
-							}
-							else {
-								pstr[len] = '\0';
-								uint8 *vstr = os_strchr(pstr, '=');
-								if(vstr != NULL) {
-									*vstr++ = '\0';
-									web_int_vars(ts_conn, pstr, vstr);
-								}
-								else {
-									web_conn->msgbuf[0] = 0;
-									web_int_callback(ts_conn, pstr);
-								}
-								if(CheckSCB(SCB_RETRYCB)) opcode = WS_OPCODE_TEXT;
-								else {
-									ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
-									opcode = WS_OPCODE_TEXT | WS_FRAGMENT_FIN;
-								}
-							}
-							if(web_conn->msgbuflen != 0) {
-								if(websock_tx_frame(ts_conn, opcode, web_conn->msgbuf, web_conn->msgbuflen) != ERR_OK) {
-									os_free(web_conn->msgbuf);
-									web_conn->msgbuf = NULL;
-									return false; // не докачивать, ошибка или закрытие
-								}
-							}
-							os_free(web_conn->msgbuf);
-							web_conn->msgbuf = NULL;
-							if(CheckSCB(SCB_RETRYCB)) return false;
-						}
+						os_free(web_conn->msgbuf);
+						web_conn->msgbuf = NULL;
+						if(CheckSCB(SCB_RETRYCB)) return false;
 					}
 /*
 					if(0) {
