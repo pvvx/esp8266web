@@ -502,14 +502,15 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
         ifcmp("save") uart_save_fcfg(val);
         else ifcmp("read") uart_read_fcfg(val);
         else {
-       		int n = 1;
 #ifdef USE_RS485DRV
+        	// только UART1 !
         	if(cstr[1] != '_' || cstr[0] != '1') {
 #if DEBUGSOO > 5
             	os_printf(" - none! ");
 #endif
             	return;
         	}
+            int n = 0;
 #else
             if(cstr[1] != '_' || cstr[0]<'0' || cstr[0]>'1' ) {
 #if DEBUGSOO > 5
@@ -517,7 +518,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
             	return;
             }
-            if(cstr[0] != '0') n++;
+            int n = cstr[0] & 1;
 #endif
             cstr += 2;
             ifcmp("baud") {
