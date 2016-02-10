@@ -490,14 +490,8 @@ void ICACHE_FLASH_ATTR rs485_drv_start(void)
 		UART0_INT_ENA = 0;
 		// включение приема
 		// tx как i/o порт ввода
-		if(rs485cfg.flg.b.swap != 0)	{
-			MUX_TX15_UART0 = VAL_MUX_TX15_UART0_OFF;
-			MUX_RX13_UART0 = VAL_MUX_RX13_UART0_ON; // настроить пин RX
-		}
-		else {
-			MUX_TX1_UART0 = VAL_MUX_TX1_UART0_OFF;
-			MUX_RX3_UART0 = VAL_MUX_RX3_UART0_ON; // настроить пин RX
-		}
+		if(rs485cfg.flg.b.swap != 0)	MUX_TX15_UART0 = VAL_MUX_TX15_UART0_OFF;
+		else MUX_TX1_UART0 = VAL_MUX_TX1_UART0_OFF;
 		// переключение шины/драйвера на режим rx
 		rs485_rx_enable();
 

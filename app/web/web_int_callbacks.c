@@ -622,7 +622,6 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         	  tcp_puts("0x%08x%08x", ux.dw[1], ux.dw[0]);
           }
           else ifcmp("vdd33") tcp_puts("%u", readvdd33()); // system_get_vdd33() phy_get_vdd33();
-          else ifcmp("vdd") tcp_puts("%u", system_get_vdd33()); //  phy_get_vdd33();
           else ifcmp("wdt") tcp_puts("%u", ets_wdt_get_mode());
           else ifcmp("res_event") tcp_puts("%u", rtc_get_reset_reason()); // 1 - power/ch_pd, 2 - reset, 3 - software, 4 - wdt ...
           else ifcmp("rst") tcp_puts("%u", system_get_rst_info()->reason);
@@ -651,6 +650,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         	  else tcp_puts("%u", read_sys_const(ahextoul(cstr)));
           }
           else ifcmp("ucnst_") tcp_puts("%u", read_user_const(ahextoul(cstr+6)));
+          else ifcmp("vdd") tcp_puts("%u", system_get_vdd33()); //  phy_get_vdd33();
 #ifdef USE_NETBIOS
           else ifcmp("netbios") {
        		  if(syscfg.cfg.b.netbios_ena) tcp_strcpy(netbios_name);

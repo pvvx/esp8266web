@@ -515,6 +515,7 @@ void ICACHE_FLASH_ATTR print_hex_dump(uint8 *buf, uint32 len, uint8 k)
 		ets_printf((uint8 *)&ss[0], *ptr++);
 	}
 }
+
 //=============================================================================
 #define LowerCase(a) ((('A' <= a) && (a <= 'Z')) ? a + 32 : a)
 
@@ -527,6 +528,7 @@ char* ICACHE_FLASH_ATTR word_to_lower_case(char* text) {
 	return text;
 }
 #if 0
+
 //=============================================================================
 /* char UpperCase(char ch) {
 	return (('a' <= ch) && (ch <= 'z')) ? ch - 32 : ch; }*/
@@ -534,10 +536,11 @@ char* ICACHE_FLASH_ATTR word_to_lower_case(char* text) {
 
 char* ICACHE_FLASH_ATTR str_to_upper_case(char* text) {
 	char* p = text;
-	for (; *p; ++p) {
+	for (; *p < ' '; ++p) {
 		*p = UpperCase(*p);
 	}
 	return text;
 }
+
 #endif
 
