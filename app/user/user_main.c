@@ -49,6 +49,17 @@ extern void web_fini(const uint8 * fname);
 static const uint8 sysinifname[] ICACHE_RODATA_ATTR = "protect/init.ini";
 #endif
 
+// Custom initialization function declaration.
+// Weak attribute allows for the user of this project
+// to customize initialization sequence without modifying
+// user_main.c source by implementing a strong function
+// in his own source file.
+// void ICACHE_FLASH_ATTR custom_init()
+// {
+//   ... whatever
+// }
+void ICACHE_FLASH_ATTR __attribute__((weak)) custom_init() {}
+
 void ICACHE_FLASH_ATTR init_done_cb(void)
 {
     os_printf("\nSDK Init - Ok\nCurrent 'heap' size: %d bytes\n", system_get_free_heap_size());
@@ -67,6 +78,7 @@ void ICACHE_FLASH_ATTR init_done_cb(void)
 	rs485_drv_start();
 	init_mdbtab();
 #endif
+	custom_init();
 }
 
 /******************************************************************************
