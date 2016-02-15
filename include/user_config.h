@@ -3,7 +3,7 @@
 
 #include "sdk/sdk_config.h"
 
-#define SYS_VERSION "0.5.6"
+#define SYS_VERSION "0.5.7"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define WEB_DEFAULT_SOFTAP_IP	DEFAULT_SOFTAP_IP // ip 192.168.4.1
@@ -13,7 +13,7 @@
 #define WEB_DEFAULT_STATION_MASK  0x00FFFFFF // mask 255.255.255.0
 #define WEB_DEFAULT_STATION_GW    0x0101A8C0 // gw 192.168.1.1
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define PROGECT_NUMBER 1
+#define PROGECT_NUMBER 0
 // 0 -> проект "TCP2UART"
 // 1 -> проект MODBUS-"RS485"
 // 2 -> пустой web+websocket

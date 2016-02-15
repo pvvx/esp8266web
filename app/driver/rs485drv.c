@@ -20,6 +20,7 @@
 #include "mdbrs485.h"
 #include "mdbtab.h"
 
+
 #define DEBUG_OUT(x) // UART1_FIFO = x
 
 #define os_post ets_post
@@ -63,17 +64,6 @@
 srs485vars rs485vars; // рабочий блок переменных
 srs485cfg rs485cfg; // конфигурация
 uint8 bufi[MDB_SER_ADU_SIZE_MAX*2]; // минимум MDB_SER_ADU_SIZE_MAX*2
-
-/* -------------------------------------------------------------------------
- * Удалить буфер приема, выбрать сообщение из очереди
- * ------------------------------------------------------------------------- */
-#ifdef	RS485_DRV_USE_RX_LIST
-static void free_rx_msg(struct srs485msg *msg)
-{
-	SLIST_REMOVE(&rs485vars.rxmsgs, msg, srs485msg, next);
-	os_free(msg);
-}
-#endif
 #ifdef MDB_RS485_MASTER
 /* -------------------------------------------------------------------------
  * Сбросить флаги транзакторов
@@ -96,9 +86,10 @@ static void reset_flg_trn(void)
 }
 #endif
 /* -------------------------------------------------------------------------
- * Удалить буфер передачи, исключить сообщение из очереди
+ * Удалить буфер передачи, исключить сообщение из очереди,
+ * отметить что была передача (rs485vars.curtxmsg = NULL)
  * ------------------------------------------------------------------------- */
-static void free_tx_msg(void)
+void rs485_free_tx_msg(void)
 {
 	if(rs485vars.curtxmsg != NULL) {
 		SLIST_REMOVE(&rs485vars.txmsgs, rs485vars.curtxmsg, srs485msg, next);
@@ -109,16 +100,15 @@ static void free_tx_msg(void)
 /* -------------------------------------------------------------------------
  * выбрать новое сообщение из очереди
  * ------------------------------------------------------------------------- */
-static struct srs485msg * get_nex_tx_msg(void)
+static struct srs485msg * get_next_tx_msg(void)
 {
-	struct srs485msg *msg = rs485vars.curtxmsg; // сбрасывается в NULL в RS485_SIG_TX_OK
-	if(msg == NULL) { // найти последний блок для передачи
+	struct srs485msg *msg = rs485vars.curtxmsg; // сбрасывается в NULL в task RS485_SIG_TX_OK
+	if(msg == NULL) { // сообщение обработано? (передано?)
+		// найти последний блок для передачи
 		msg = SLIST_FIRST(&rs485vars.txmsgs);
 		if(msg != NULL) { // есть блоки для передачи?
+			// есть блоки для передачи, найти последний
 			while(SLIST_NEXT(msg, next) != NULL) msg = SLIST_NEXT(msg, next); // найти последний блок для передачи
-		}
-		rs485vars.curtxmsg = msg; // последний, не обработанный блок для передачи
-		if(msg != NULL) { // новый пакет
 			// запустить таймер предельного времени ожидания отправки пакета
 //			ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания приема/передачи пакета // вызовет в ets_timer_arm_new()
 			ets_timer_arm_new(&rs485vars.timerw, rs485cfg.timeout, 0, 1); // запустить таймер предельного времени ожидания приема/передачи пакета
@@ -131,33 +121,42 @@ static struct srs485msg * get_nex_tx_msg(void)
  * ------------------------------------------------------------------------- */
 bool rs485_next_txmsg(void)
 {
-	bool ret = false;
+	bool ret = false; // старт не задан
 	if(rs485vars.status == RS485_RX_ENA && rs485vars.flg.b.tx_ready != 0) { // включен прием (можно начать передачу)?
-		struct srs485msg *msg = rs485vars.curtxmsg; // сбрасывается в NULL в RS485_SIG_TX_OK
-		if(msg == NULL) { // найти последний блок для передачи
+		struct srs485msg *msg = rs485vars.curtxmsg; // сбрасывается в NULL в RS485_SIG_TX_OK и по таймеру 3.5 через free_tx_msg()
+		if(msg == NULL) {
+			// найти последний блок для передачи
 			msg = SLIST_FIRST(&rs485vars.txmsgs);
 			if(msg != NULL) { // есть блоки для передачи?
+				// есть блоки для передачи, найти последний
 				while(SLIST_NEXT(msg, next) != NULL) msg = SLIST_NEXT(msg, next); // найти последний блок для передачи
-			}
-			if(msg != NULL) { // есть ещё сообщение, тогда перейти к передаче
+				rs485vars.curtxmsg = msg; // последний, не обработанный блок для передачи
+				rs485vars.out[0] = msg->buf[0];
+				rs485vars.out[1] = msg->buf[1]&0x7F;
+				// проверить на возможность старта передачи
 				ets_intr_lock();
 				if(rs485vars.flg.b.tx_ready != 0  // возможен старт следующей передачи?
 				&& rs485vars.flg.b.rx_chars == 0  // не супели принять символы после TOUT?
 				&& ((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT) == 0) { // в fifo нет символов ?
 					// старт транзакции нового msg
 					// перекинуть из msg все флаги в локальные рабочие пременные
-					rs485vars.curtxmsg = msg; // последний, не обработанный блок для передачи
 					rs485vars.flg.ui = msg->flg.ui; // + сброс флагов
 					rs485vars.pbufo = msg->buf;
 					rs485vars.cntro = msg->len;
 			    	UART0_INT_ENA = UART_TXFIFO_EMPTY_INT_ST; // старт передачи
 					ets_intr_unlock();
-					rs485vars.out[0] = msg->buf[0];
-					rs485vars.out[1] = msg->buf[1]&0x7F;
-		    		ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания передачи пакета
-			    	ret = true;
+		    		//ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания передачи пакета
+					ets_timer_arm_new(&rs485vars.timerw, rs485cfg.timeout, 0, 1); // запустить таймер предельного времени ожидания приема/передачи пакета
+
+			    	ret = true; // старт передачи
 				} // если не удалось, то ждем таймаута или следующей паузы приема
-				else ets_intr_unlock();
+				else {
+					// перекинуть из нового msg id в локальные рабочие пременные, запретить tx_only
+					rs485vars.flg.ui = (rs485vars.flg.ui | msg->flg.ui)
+							& (~(RS485MSG_FLG_TX_ONLY | RS485MSG_FLG_RX_END
+							| RS485MSG_FLG_TX_END | RS485MSG_FLG_WAIT | RS485MSG_FLG_TRN_RES)); // + сброс флагов
+					ets_intr_unlock();
+				}
 			}
 		}
 	}
@@ -172,44 +171,36 @@ void rs485_task(os_event_t *e){
 		case RS485_SIG_RX_OK:	//	Принято ADU (в буфере bufo)
 		{
 			uint32 len = e->par >> 16; // получить длину
+			ets_timer_disarm(&rs485vars.timerp); // остановить таймер окончания паузы
 			if(len >= MDB_SER_ADU_SIZE_MIN) { // есть msg? это не шум?
 				DEBUG_OUT('r');
 				// ADU принято, переместить в буфер приема если валидно
-				ets_timer_disarm(&rs485vars.timerp); // остановить таймер окончания паузы
-//				timer_arg(rs485vars.timerp,1); // запретить выбрать следующее txmsg
-				if (system_get_free_heap_size() > MDB_TCP_RS485_MIN_HEAP) {
-					uint8 * pbufi = &bufi[e->par & 0xFFFF]; // получить укзатель на начало блока
-#ifdef	RS485_DRV_USE_RX_LIST
-					len = rs485_test_msg(pbufi, len);
-					if(len) { // msg валидно, копируем в новый буфер
-						ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания приема пакета
-						struct srs485msg *msg = os_malloc(len + SIZE_RS485MSG_HEAD);
-						if(msg != NULL) {
-							os_memcpy(msg->buf, pbufi, len);
-							msg->len = len;
-							msg->flg.ui = rs485vars.flg.ui;
-							SLIST_INSERT_HEAD(&rs485vars.rxmsgs, msg, next);
-							if(rs485_rx_msg(msg)) free_rx_msg(msg); // обработать сообщение
-						}
-#if DEBUGSOO > 1
-						else os_printf("rs485rx - out of mem!\n");
-#endif
-					};
-#else
-					if(rs485_test_msg(pbufi, len)) {
-						ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания приема пакета
-///						timer_arg(rs485vars.timerp, 0); // разрешить выбрать следующее txmsg
-						// Зарядить таймер на 12 тиков или на 1750 us - 16*1000000/baud при baud > 19200
-						ets_timer_arm_new(&rs485vars.timerp, rs485vars.waitust, 0, 0);
-					}
-#endif
-				};
+				uint8 * pbufi = &bufi[e->par & 0xFFFF]; // получить укзатель на начало блока
+				if(rs485_test_msg(pbufi, len)) { // сообщение валидно? перейти к следующей транзакции?
+					DEBUG_OUT('v');
+					ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания приема пакета
+					// разрешить выбрать следующее txmsg
+					// Зарядить таймер на 12 тиков или на 1750 us - 16*1000000/baud при baud > 19200
+					ets_intr_lock();
+					rs485vars.flg.b.tx_only = 1; // отметить, что далее пытаемся передать следующее соо, если есть
+//					ets_intr_unlock(); // есть в ets_timer_arm_new()
+					ets_timer_arm_new(&rs485vars.timerp, rs485vars.waitust, 0, 0);
+				}
+				else if(rs485vars.flg.b.tx_only || 	rs485vars.curtxmsg == NULL) { // всё пытаемся передать следующее или на тест нового сообщения, без ожидания таймаута
+					// разрешить выбрать следующее txmsg
+					// Зарядить таймер на 12 тиков или на 1750 us - 16*1000000/baud при baud > 19200
+					ets_timer_arm_new(&rs485vars.timerp, rs485vars.waitust, 0, 0);
+				}
 			}
 			else {
 				DEBUG_OUT('e');
 				// ADU менее MDB_SER_ADU_SIZE_MIN -> шум на линии
 				// В режиме rs485vars.flg.b.tx_only ожидать паузу и переключиться на следующую передачу
 				// иначе ожидание по таймауту (но если нет очереди...)
+				if(rs485vars.flg.b.tx_only || rs485vars.curtxmsg == NULL) { // всё пытаемся передать следующее или на тест нового сообщения, без ожидания таймаута
+					// Зарядить таймер на 12 тиков или на 1750 us - 16*1000000/baud при baud > 19200
+					ets_timer_arm_new(&rs485vars.timerp, rs485vars.waitust, 0, 0);
+				};
 			};
 			// Зарядить таймер на 12 тиков или на 1750 us - 16*1000000/baud при baud > 19200
 //			ets_timer_arm_new(&rs485vars.timerp, rs485vars.waitust, 0, 0);
@@ -220,15 +211,14 @@ void rs485_task(os_event_t *e){
 			// ADU передано, удалить буфер передачи, определить что дальше - прием или опять передача
 			ets_timer_disarm(&rs485vars.timerp); // остановить таймер окончания паузы
 			ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания передачи пакета
-			free_tx_msg(); // удалить буфер передачи
+			rs485_free_tx_msg(); // удалить буфер передачи, отметить что была передача (rs485vars.curtxmsg = NULL)
 			if(rs485vars.flg.b.tx_only) { // после передачи не идет прием -> ждать паузу и обработать новое txmsg
-///				timer_arg(rs485vars.timerp, 0); // разрешить выбрать следующее txmsg
+				// разрешить выбрать следующее txmsg
 				// Зарядить таймер на 12 тиков или на 1750 us - 16*1000000/baud при baud > 19200
 				ets_timer_arm_new(&rs485vars.timerp, rs485vars.waitust, 0, 0);
 			}
-			else {
-//				rs485vars.timerw.timer_arg = 1; // не выбрать следующее txmsg
-				// запустить таймер предельного времени ожидания приема пакета
+			else { // не выбирать следующее txmsg
+				// запустить таймер предельного времени ожидания приема пакета или отра
 				ets_timer_arm_new(&rs485vars.timerw, rs485cfg.timeout, 0, 1); // запустить таймер предельного времени ожидания приема пакета
 			}
 			break;
@@ -258,35 +248,46 @@ static void rs485_timerp_isr(void) //uint32 flg_no_next_msg)
 		reset_flg_trn(); // Сбросить флаги транзакторов
 #endif
 		// если очередь не пуста, проверить состояние на возможность передачи и стартануть передачу
-///		if(flg_no_next_msg == 0 // стартовать новую передачу?
-///		&&(msg = get_nex_tx_msg()) != NULL) { // есть новое сообщение и разрешена обработка следующего msg, тогда перейти к передаче
-		if((msg = get_nex_tx_msg()) != NULL) { // есть новое сообщение и разрешена обработка следующего msg, тогда перейти к передаче
+		if((msg = get_next_tx_msg()) != NULL) { // есть новое сообщение и разрешена обработка следующего msg, тогда перейти к передаче
+			// старт транзакции нового msg
+			rs485vars.curtxmsg = msg; // последний, не обработанный блок для передачи
+			rs485vars.out[0] = msg->buf[0];
+			rs485vars.out[1] = msg->buf[1]&0x7F;
+			// проверить на возможность старта передачи
 			ets_intr_lock();
 			if(rs485vars.status == RS485_RX_ENA // включен прием (можно начать передачу)?
 			&& ((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT) == 0 // в fifo нет символов ?
 			&& rs485vars.flg.b.rx_chars == 0) { // ещё не приняты символы?
-				// старт транзакции нового msg
-				// перекинуть из нового msg все флаги в локальные рабочие пременные
 				rs485vars.flg.ui = msg->flg.ui; // + сброс флагов
 				rs485vars.pbufo = msg->buf;
 				rs485vars.cntro = msg->len;
     	    	UART0_INT_ENA = UART_TXFIFO_EMPTY_INT_ST; // hard старт передачи
     	    	ets_intr_unlock();
-				rs485vars.out[0] = msg->buf[0];
-				rs485vars.out[1] = msg->buf[1]&0x7F;
-    	    	ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания передачи пакета
+//    	    	ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания передачи пакета
+				ets_timer_arm_new(&rs485vars.timerw, rs485cfg.timeout, 0, 1); // запустить таймер предельного времени ожидания приема пакета
 			} // если не удалось, то ждем таймаута или следующей паузы приема
-			else ets_intr_unlock();
+			else {
+				// перекинуть из нового msg id в локальные рабочие пременные, запретить tx_only
+				rs485vars.flg.ui = (rs485vars.flg.ui | msg->flg.ui)
+						& (~(RS485MSG_FLG_TX_ONLY | RS485MSG_FLG_RX_END | RS485MSG_FLG_TX_READY
+						| RS485MSG_FLG_TX_END | RS485MSG_FLG_WAIT | RS485MSG_FLG_TRN_RES)); // + сброс флагов
+				ets_intr_unlock();
+			}
 		}
-		else { // очередь пуста или заперт старта новой передачи
+		else { // очередь пуста
 			// если очередь пуста, определить и отметить возможность передачи
-			ets_intr_lock();
+ 			ets_intr_lock();
+#ifdef MDB_RS485_MASTER
+			if(rs485vars.flg.b.int_msg != 0) rs485vars.flg.ui &= RS485MSG_FLG_RX_CHARS; // Transaction Identifier для TCP = 0
+			else
+#endif
+				rs485vars.flg.ui &= RS485MSG_FLG_TID_MASK | RS485MSG_FLG_RX_CHARS; // оставить номер последней транзакции TCP
 			if(rs485vars.status == RS485_RX_ENA // включен прием (можно начать передачу)?
 			&& ((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT) == 0 // в fifo нет символов ?
 			&& rs485vars.flg.b.rx_chars == 0) { // ещё не приняты символы?
-				 rs485vars.flg.b.tx_ready = 1; // возможен старт следующей передачи (требует проверки UART_RXFIFO_CNT == 0 && rs485vars.flg.b.rx_chars == 0)
-				 // конец транзкции старого msg
-				 DEBUG_OUT('+');
+				// конец транзкции старого msg
+				rs485vars.flg.b.tx_ready = 1; // возможен старт следующей передачи (требует проверки UART_RXFIFO_CNT == 0 && rs485vars.flg.b.rx_chars == 0)
+				DEBUG_OUT('+');
 			}
 			ets_intr_unlock();
 		}
@@ -322,15 +323,18 @@ static void rs485_timerw_isr(void)
 #endif
 		if(rs485vars.flg.b.tx_end == 0) { // был конец передачи + пауза 24..32 бита?
 			// передача не удалась (сплошной шум на линии?)
-//#ifdef MDB_RS485_MASTER
-			if(rs485vars.curtxmsg != NULL) {
+			if(rs485vars.curtxmsg != NULL) { // если не равен NULL - ожидание передачи
+#ifdef MDB_RS485_MASTER
+				reset_flg_trn(); // Сбросить флаги транзакторов
+#endif
 				// скопировать флаги из необработанного msg
+				rs485_free_tx_msg(); // удалить старый буфер передачи
 				ets_intr_lock();
-				rs485vars.flg.ui = rs485vars.curtxmsg->flg.ui | (rs485vars.flg.ui & 0x00ff0000);
+				rs485vars.flg.ui = rs485vars.flg.ui
+						& (~(RS485MSG_FLG_TX_ONLY | RS485MSG_FLG_RX_END
+						| RS485MSG_FLG_TX_END | RS485MSG_FLG_WAIT | RS485MSG_FLG_TRN_RES)); // + сброс флагов
 				ets_intr_unlock();
-				free_tx_msg(); // удалить старый буфер передачи
 			}
-//#endif
 		}
 		if(((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT) == 0) { // в fifo нет символов ?
 			if(rs485vars.flg.b.tx_ready != 0 // возможен старт следующей передачи?
@@ -341,7 +345,6 @@ static void rs485_timerw_isr(void)
 				if(rs485vars.timerp.timer_next == (ETSTimer *)0xffffffff) { // уже запущен таймер паузы на 3.5 символа?
 					start_full_timerp(); // Зарядить таймер определения паузы на 3.5 символа
 				}
-///				else timer_arg(rs485vars.timerp, 0); // разрешить выбрать следующее txmsg
 			}
 		}
 #ifdef RS485_TIMEOUT_ALARM_ENA
@@ -431,15 +434,15 @@ static void rs485_uart_isr(void *para)
 			}
 			if(ints & UART_RXFIFO_TOUT_INT_ST) { // Rx time-out event ?
 				DEBUG_OUT('S');
-				uint32 x = rs485vars.pbufi - bufi; // вычислить индекс в буфере на начало msg
-				if(x + rs485vars.cntri <= MDB_SER_ADU_SIZE_MAX) { // в первой части буфера?
-						rs485vars.pbufi = &bufi[x + rs485vars.cntri]; // переместить указатель за msg
+				uint32 pbufi_idx = rs485vars.pbufi - bufi; // вычислить индекс в буфере на начало msg
+				if(pbufi_idx + rs485vars.cntri <= MDB_SER_ADU_SIZE_MAX) { // в первой части буфера?
+						rs485vars.pbufi = &bufi[pbufi_idx + rs485vars.cntri]; // переместить указатель за msg
 				}
 				else rs485vars.pbufi = bufi; // переместить указатель на начало буфера
-				os_post(RS485_TASK_PRIO + SDK_TASK_PRIO, RS485_SIG_RX_OK, x | (rs485vars.cntri << 16)); // есть msg? или шум?
+				os_post(RS485_TASK_PRIO + SDK_TASK_PRIO, RS485_SIG_RX_OK, pbufi_idx | (rs485vars.cntri << 16)); // есть msg? или шум?
 				rs485vars.cntri = 0; // обнулить кол-во символов в буфере приема
 				rs485vars.flg.b.rx_chars = 0; // пока нет принятых символов (для процедуры ожидания паузы)
-		    	rs485vars.flg.b.tx_ready = 0; // сброс разрешения старта передачи
+		    	rs485vars.flg.b.tx_ready = 0; // сброс разрешения старта передачи (ждать ещё паузу таймера!)
 		    	rs485vars.flg.b.rx_end = 1; // был конец приема + пауза 24..32 бита
 			}
     	}
@@ -500,7 +503,6 @@ void ICACHE_FLASH_ATTR rs485_drv_start(void)
 		}
 		// переключение шины/драйвера на режим rx
 		rs485_rx_enable();
-
 		rs485_rx_clr_buf(); // отключим loopback и сбросим rx fifo, ошибки приема и буфер
 		// enable rx time-out function
 		// Установить TOUT 8*x тактов для определения паузы конца сообщения
@@ -510,7 +512,7 @@ void ICACHE_FLASH_ATTR rs485_drv_start(void)
 		UART0_INT_ENA = UART_RXFIFO_FULL_INT_ENA | UART_RXFIFO_TOUT_INT_ENA; // | UART_RX_ERR_INTS;
 		rs485vars.status = RS485_RX_ENA;
 		// запустить таймер предельного времени ожидания приема/отправки пакета
-//		ets_timer_disarm(&rs485vars.timerw); // остановить таймер предельного времени ожидания приема пакета // вызовет в ets_timer_arm_new()
+//		ets_timer_disarm(&rs485vars.timerw); // вызовет в ets_timer_arm_new()
 		ets_timer_arm_new(&rs485vars.timerw, rs485cfg.timeout, 0, 1); // запустить таймер предельного времени ожидания приема пакета
 		start_full_timerp(); // Зарядить таймер определения паузы на 3.5 символа или на 1750 us при baud > 19200
 	}
@@ -523,10 +525,6 @@ void ICACHE_FLASH_ATTR rs485_drv_start(void)
 void ICACHE_FLASH_ATTR rs485_drv_clr_bufs(void)
 {
 	struct srs485msg *msg;
-#ifdef	RS485_DRV_USE_RX_LIST
-	SLIST_FOREACH(msg, &rs485vars.rxmsgs, next) os_free(msg);
-	SLIST_INIT(&rs485vars.rxmsgs);
-#endif
 	rs485vars.curtxmsg = NULL;
 	SLIST_FOREACH(msg, &rs485vars.txmsgs, next) os_free(msg);
 	SLIST_INIT(&rs485vars.txmsgs);
@@ -632,14 +630,11 @@ void ICACHE_FLASH_ATTR rs485_drv_init(void)
 	rs485vars.status = RS485_TX_RX_OFF;
 	rs485vars.pbufi = bufi;
 
-#ifdef	RS485_DRV_USE_RX_LIST
-	SLIST_INIT(&rs485vars.rxmsgs);
-#endif
 	SLIST_INIT(&rs485vars.txmsgs);
 
 	ets_timer_disarm(&rs485vars.timerp);
-	ets_timer_setfn(&rs485vars.timerp, (os_timer_func_t *)rs485_timerp_isr, NULL);
 	ets_timer_disarm(&rs485vars.timerw);
+	ets_timer_setfn(&rs485vars.timerp, (os_timer_func_t *)rs485_timerp_isr, NULL);
 	ets_timer_setfn(&rs485vars.timerw, (os_timer_func_t *)rs485_timerw_isr, NULL);
 }
 

@@ -77,10 +77,12 @@ err_t ICACHE_FLASH_ATTR mdb_tcp_recv(TCP_SERV_CONN *conn) {
 	};
 #ifdef USE_RS485DRV
 	if(rs485vars.status != RS485_TX_RX_OFF && (
-/*#ifdef MDB_RS485_MASTER
+/* отвечаем всегда? (ESP из TCP всегда slave)
+#ifdef MDB_RS485_MASTER
 			rs485cfg.flg.b.master != 0 ||
 #endif */
-			p->adu.id != syscfg.mdb_id)) {
+			p->adu.id != syscfg.mdb_id)) { // запрос не RTU ESP?
+			// запрос не к RTU ESP -> к RS-485
 	        if (rs485_new_tx_msg(p, true) == NULL) { // переслать в RS-485
 			return ERR_MEM;
 		};

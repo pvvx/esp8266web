@@ -5,7 +5,7 @@
        bss|      Uninitialized Data (RAM)|    3FFE8CD0|    3FFEEED8|   25096
       lit4|     Uninitialized Data (IRAM)|    4010514C|    40105BC0|    2676
       text|          Uncached Code (IRAM)|    40100000|    4010514C|   20812
-irom0_text|             Cached Code (SPI)|    40207000|    4023FD60|  232800
+irom0_text|             Cached Code (SPI)|    40207000|    4023FDD8|  232920
 ------------------------------------------------------------------------------
 Entry Point : 40100000 call_user_start()
 Total Used RAM : 51864

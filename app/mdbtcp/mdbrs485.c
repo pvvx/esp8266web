@@ -64,6 +64,8 @@ uint32 CalkCRC16tab(uint8 * blk, uint32 len)
 /* -------------------------------------------------------------------------
  * Обработка передачи
  * создание сообщения и передача его в очередь
+ * flg_out = true -  поместить в конец очереди, пробовать начинать передачу
+ * flg_out = false - не начинать передачу, поместить в начало очереди
  * ------------------------------------------------------------------------- */
 struct srs485msg * ICACHE_FLASH_ATTR rs485_new_tx_msg(smdbtcp * p, bool flg_out)
 {
@@ -77,48 +79,50 @@ struct srs485msg * ICACHE_FLASH_ATTR rs485_new_tx_msg(smdbtcp * p, bool flg_out)
 		msg->buf[len+1] = (uint8)(crc >> 8);
 		msg->len = len + 2;
 		msg->flg.ui = p->mbap.tid; // Transaction Identifier
-		if(p->adu.id == 0) msg->flg.ui |= RS485MSG_FLG_TX_ONLY;
-		// поместить сообшение в очередь
-		SLIST_INSERT_HEAD(&rs485vars.txmsgs, msg, next);
-		//  Старт передачи, если не занят
-   		if(flg_out) rs485_next_txmsg(); //  Проверить наличие пакета в очереди и начать передачу, если возможно
+		if(p->adu.id == 0 || (!flg_out)) msg->flg.ui |= RS485MSG_FLG_TX_ONLY;
+   		if(flg_out) {
+   			// поместить сообшение в конец очереди
+   			SLIST_INSERT_HEAD(&rs485vars.txmsgs, msg, next);
+   			//  Старт передачи, если не занят
+   			rs485_next_txmsg(); //  Проверить наличие пакета в очереди и начать передачу, если возможно
+   		}
+   		else {
+   			struct srs485msg *old;
+   			old = SLIST_FIRST(&rs485vars.txmsgs);
+			if(old != NULL) { // есть блоки для передачи?
+   				while(SLIST_NEXT(old, next) != NULL) old = SLIST_NEXT(old, next); // найти последний блок для передачи
+   				SLIST_NEXT(msg, next) = NULL;
+   				SLIST_NEXT(old, next) = msg;
+   			}
+			else SLIST_INSERT_HEAD(&rs485vars.txmsgs, msg, next);
+   		}
 	}
 #if DEBUGSOO > 1
 	else os_printf("rs485tx - out of mem!\n");
 #endif
 	return msg;
 }
-#ifdef	RS485_DRV_USE_RX_LIST
-/* -------------------------------------------------------------------------
- * Обработка принятого сообщения
- * сообщение в буфере msg.
- * ------------------------------------------------------------------------- */
-bool rs485_rx_msg(struct srs485msg *msg)
-{
-	return true; // удалить буфер
-}
-#endif
 /* -------------------------------------------------------------------------
  * Тест принятого блока
  * сообщение в буфере pbufi, длиной len
  * ------------------------------------------------------------------------- */
 uint32 ICACHE_FLASH_ATTR rs485_test_msg(uint8 * pbufi, uint32 len)
 {
-	if(len >= MDB_SER_ADU_SIZE_MIN) {
+//	if(len >= MDB_SER_ADU_SIZE_MIN) { // уже есть перед вызовом
 		len -= 2;
 		uint32 crc = CalkCRC16tab(pbufi, len);
 		if(pbufi[len] == (uint8)crc && pbufi[len+1] == (uint8)(crc >> 8)) {
 			// сообщение принято, crc = ok
 #ifdef MDB_RS485_MASTER
-			if(rs485vars.flg.b.int_msg != 0) { // запрос от транзактора?
+			if(rs485vars.flg.b.int_msg != 0) { // был запрос от транзактора?
 				smdbadu * adu = (smdbadu *)pbufi;
-				if(rs485vars.out[0] == adu->id && rs485vars.out[1] == (adu->err.err & 0x7F)) {
-//					reset_flg_trn();
-					if((adu->err.err & 0x80) != 0) { // error
+				if(rs485vars.out[0] == adu->id && rs485vars.out[1] == (adu->err.err & 0x7F)) { // id и команда совпадают?
+					// id и команда принятого сообщения совпадают
+					if((adu->err.err & 0x80) != 0) { // это сообщение об ошибке?
 						ets_intr_lock();
-						rs485vars.flg.b.wait = 1; // пока так передать ошибку
+						rs485vars.flg.b.wait = 1; // пока так передать ошибку, просто для счета
 						ets_intr_unlock();
-						return 1; // ok
+						return 1; // ok, перейти к следующей транзакции
 					}
 					switch(adu->fx.hd.fun) {
 					//	case 01: // Read Coils 00000
@@ -135,18 +139,22 @@ uint32 ICACHE_FLASH_ATTR rs485_test_msg(uint8 * pbufi, uint32 len)
 #endif
 									}
 								}
-								return 1; // ok
+								return 1; // ok, перейти к следующей транзакции
 							}
+//							return 0; // ошибка в размере сообщения, ждать далее до таймаута.
 							break;
 					//	case 05: // Write Single Coil 00000
 						case 06: // Write Single Register 40000
 					//	case 15: // Write Multiple Coils 00000
 						case 16: // Write Multiple Registers 40000
+							// пришел ответ регистры записны.
 							if(len == sizeof(adu->o6o16)) { // ok ?
-								return 1; // ok
+								return 1; // ok, перейти к следующей транзакции
 							}
+//							return 0; // ошибка в размере сообщения, ждать далее до таймаута.
 							break;
-						default:
+						default: // пользовательская команда -> просто переписать данные из пакета в указанную память
+
 							if(len >= sizeof(adu->fx.hd)) {
 								uint32 i = (len - sizeof(adu->fx.hd) + 1) >> 1;
 								if(i != 0) {
@@ -157,68 +165,83 @@ uint32 ICACHE_FLASH_ATTR rs485_test_msg(uint8 * pbufi, uint32 len)
 #endif
 									}
 								}
-								return 1; // ok
+								return 1; // ok, перейти к следующей транзакции
 							}
-							break;
+//							return 0; // ошибка в размере сообщения, ждать далее до таймаута.
 					}
+					return 0; // ошибка в размере сообщения или команде, ждать далее до таймаута.
 				}
-				return 0; // error
+				// ответ не на ту команду (надо ли ждать далее?)
+				return 0; // ждать далее до таймаута.
 			}
 
 #endif
-			// запрос/ответ с RS-485 не от транзактора -> отсылаем или отвечаем, если к syscfg.mdb_id
-			smdbtcp * o = (smdbtcp *) os_malloc(sizeof(smdbtcp)); // sizeof(smdbmbap) + len);
-			if(o != NULL) {
-				os_memcpy(&o->adu, pbufi, len);
-				o->mbap.tid = rs485vars.flg.tid; // Transaction Identifier
-				o->mbap.pid = MDB_TCP_PID; // Protocol Identifier
-				o->mbap.len = len;
-				Swapws((uint8 *)o, sizeof(smdbmbap)>>1); // перекинем hi<>lo
-   				TCP_SERV_CONN *conn = mdb_tcp_conn;
-   				if(conn != NULL && (o->adu.id != syscfg.mdb_id // есть соединение и пакет не к нам
+			// запрос/ответ с RS-485 не от транзактора
+			int flg = 0;
+			TCP_SERV_CONN *conn = mdb_tcp_conn;
+			if(
 #ifdef MDB_RS485_MASTER
-   						|| rs485cfg.flg.b.master != 0 // или режим мастер?
+					rs485cfg.flg.b.master == 0 &&
 #endif
-						)) {
+					(((smdbadu *)pbufi)->id == syscfg.mdb_id || ((smdbadu *)pbufi)->id == 0)) {
+				// id и команда принятого сообщения совпадают c id назначенном RTU EPS и режим не мастер?
+				flg = 1;
+			}
+			if(conn != NULL && (((smdbadu *)pbufi)->id != syscfg.mdb_id
+#ifdef MDB_RS485_MASTER
+					|| rs485cfg.flg.b.master != 0
+#endif
+					)) {
+				// есть соединение пакет не к нам или режим мастер (второй мастер на TCP?)
+				flg |= 2;
+			}
+			if(flg) { // надо что-то передавать?
+				if (system_get_free_heap_size() < MDB_TCP_RS485_MIN_HEAP) {
+					rs485_free_tx_msg(); // Удалить буфер передачи, если есть, исключить сообщение из очереди
+					return 1;
+				};
+				smdbtcp * o = (smdbtcp *) os_malloc(sizeof(smdbtcp)); // sizeof(smdbmbap) + len);
+				if(o != NULL) {
+					os_memcpy(&o->adu, pbufi, len);
+					o->mbap.tid = rs485vars.flg.tid; // Transaction Identifier
+					o->mbap.pid = MDB_TCP_PID; // Protocol Identifier
+					o->mbap.len = len;
+					Swapws((uint8 *)o, sizeof(smdbmbap)>>1); // перекинем hi<>lo
+	   				if(flg&2) { // есть соединение пакет не к нам или режим мастер (второй мастер на TCP? :))
 #if DEBUGSOO > 1
-   					// есть соединение пакет не к нам или режим мастер (второй мастер на TCP?)
-   					tcpsrv_print_remote_info(conn);
-   					os_printf("send %u bytes\n", len + sizeof(smdbmbap));
+	   					// есть соединение пакет не к нам или режим мастер (второй мастер на TCP? :))
+	   					tcpsrv_print_remote_info(conn);
+	   					os_printf("send %u bytes\n", len + sizeof(smdbmbap));
 #endif
-   					tcpsrv_int_sent_data(conn, (uint8 *)o, len + sizeof(smdbmbap)); // передать ADU в стек TCP/IP
-    			}
-   				if(
-#ifdef MDB_RS485_MASTER
-   						rs485cfg.flg.b.master == 0	&& // режим slave?
-#endif
-						(o->adu.id == syscfg.mdb_id || o->adu.id == 0)) { // номер устройства = ?
-   					// режим slave, пакет к нам -> отвечаем
-    				o->mbap.len = MdbFunc(&o->adu, o->mbap.len); // обработать сообщение PDU
+	   					tcpsrv_int_sent_data(conn, (uint8 *)o, len + sizeof(smdbmbap)); // передать ADU в стек TCP/IP
+	    			}
+	   				if(flg&1) { // режим slave, пакет к нам -> отвечаем
+	   					// режим slave, пакет к нам -> отвечаем
+	    				o->mbap.len = MdbFunc(&o->adu, o->mbap.len); // обработать сообщение PDU
 #if DEBUGSOO > 2
-    				os_printf("mdb rx-tx %u-%u bytes\n", len, o->mbap.len);
+	    				os_printf("mdb rx-tx %u-%u bytes\n", len, o->mbap.len);
 #endif
-					if(o->mbap.len) rs485_new_tx_msg(o, false);
-//					os_free(o);
-//					return 1;
+						if(o->mbap.len) rs485_new_tx_msg(o, false);
+					}
+	   				os_free(o);
 				}
-//  				else os_free(o);
-   				os_free(o);
-			}
+				else {
 #if DEBUGSOO > 1
-			else {
-				os_printf("rs485rx %u bytes, mem err!\n", len);
+					os_printf("rs485rx %u bytes, mem err!\n", len);
+#endif
+				}
+				return 1; // перейти к следующей транзакции
 			}
-#endif
-//			if(rs485cfg.flg.b.master) rs485vars.out[0] == pbufi[0] && rs485vars.out[1] == (pbufi[1]&0x7F) ) return 1;
-			return 1;
-		}
-#if DEBUGSOO > 2
+//			return 0; // ждать далее до таймаута.
+		} // test CRC
 		else {
+			// error CRC
+#if DEBUGSOO > 2
 			os_printf("rs485rx %u bytes, crc %08x err!\n", len, crc);
-		}
 #endif
-	}
-	return 0;
+		}
+//	}
+		return 0; // error CRC, ждать далее до таймаута или следующего сообщения (зависит от режима и ...).
 }
 
 #ifdef MDB_RS485_MASTER
@@ -271,7 +294,8 @@ bool ICACHE_FLASH_ATTR mdb_start_trn(uint32 num)
 #endif
 			break;
 		};
-		if(len != 2) {
+		if(len != 2) { // переход к команде запись одного регистра?
+			// запись нескольких регистров
 			msg = os_malloc(len + SIZE_RS485MSG_HEAD + 2 + sizeof(adu->f16.hd));
 			if(msg != NULL) {
 				adu = (smdbadu *)msg->buf;
@@ -297,7 +321,7 @@ bool ICACHE_FLASH_ATTR mdb_start_trn(uint32 num)
 	#endif
 			}
 			break;
-		}
+		} // no break!!! - переход к команде запись одного регистра!
 //	case 05: // Write Single Coil 00000
 	case 06: // Write Single Register 40000
 		msg = os_malloc(SIZE_RS485MSG_HEAD + 2 + sizeof(adu->f6));

@@ -321,7 +321,6 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 				;
 #ifdef USE_TCP2UART
 		syscfg.tcp2uart_port = DEFAULT_TCP2UART_PORT;
-		syscfg.tcp2uart_port = 12345;
 		syscfg.tcp2uart_twrec = 0;
 		syscfg.tcp2uart_twcls = 0;
 #endif
