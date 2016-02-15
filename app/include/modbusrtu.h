@@ -34,6 +34,8 @@ http://ru.wikipedia.org/wiki/Modbus
 #define MDBERRPATH 10 // 10 GATEWAY PATH UNAVAILABLE
 #define MDBERRRESP 11 // 11 GATEWAY TARGET DEVICE FAILED TO RESPOND
 
+#define MDBERRCRC 33 // Ответ устройтва есть, но CRC
+
 // Максимальный размер ADU для последовательных сетей
 // RS232/RS485 - 256 байт, для сетей TCP - 260 байт.
 // RS232 / RS485 ADU = 253 bytes + Server address (1 byte) + CRC (2 bytes) = 256 bytes.
@@ -66,7 +68,7 @@ typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial 
 		} hd;
 		uint16 data[126]; //(256-2-2)/2=126
 //		uint16 crc;  // Контрольная сумма (!) для TCP/IP не используется
-	} fx;
+	} fx; // (RX/TX) User functions  simple Protocol Data Unit (PDU)
 	struct __attribute__ ((packed)) // (RX) Read Holding Registers 03 / (RX) Read Input Register 04
 	{
 		struct	__attribute__ ((packed))
@@ -86,7 +88,7 @@ typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial 
 			uint16 addr; // Адрес регистра
 		} hd;
 		uint16 data; // Данные
-	} f6;
+	} f6; // (RX) Write Single Register 06 /  (TX) Response data
 	struct	__attribute__ ((packed)) // (RX) Write Multiple Registers 16
 	{
 		struct	__attribute__ ((packed))
@@ -98,7 +100,7 @@ typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial 
 			uint8 cnt; // Byte Count
 		} hd;
 		uint16 data[MDB_ADU_F16_DATA_MAX]; //(256-2-7)/2=123.5
-	} f16;
+	} f16; // (RX) Write Multiple Registers 16
 	struct __attribute__ ((packed)) // (RX) Read/Write Multiple Registers 23
 	{
 		struct	__attribute__ ((packed))
@@ -112,7 +114,7 @@ typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial 
 			uint8 cnt; // Byte Count
 		} hd;
 		uint16 data[121]; //(256-2-11)/2=121.5
-	} f23;
+	} f23; // (RX) Read/Write Multiple Registers 23
 /*   struct __attribute__ ((packed)) // (RX) Diagnostics (Serial Line only) 08
 	 {
 		struct	__attribute__ ((packed))
@@ -121,7 +123,7 @@ typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial 
 			uint16 subf; // Субфункция
 		} hd;
 		uint16 data;
-	 }f08; */
+	 }f08; // (RX) Diagnostics (Serial Line only) 08 */
 	struct __attribute__ ((packed)) // (TX) Response 01,02,03,04
 	{
 		struct	__attribute__ ((packed))
@@ -131,7 +133,7 @@ typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial 
 			uint8 cnt; // Byte Count
 		} hd;
 		uint16 data[MDB_ADU_F3F4_DATA_MAX];  //(256-2-3)/2=125.5
-	} o3o4;
+	} o3o4; // (TX) Response 01,02,03,04
 	struct __attribute__ ((packed)) // (TX) Response 05,06,15,16
 	{
 		struct	__attribute__ ((packed))
@@ -141,13 +143,13 @@ typedef union __attribute__ ((packed)) // Application Data Unit (ADU) of Serial 
 			uint16 addr; // Адрес регистра
 			uint16 len; // кол-во
 		} hd;
-	} o6o16;
+	} o6o16; // (TX) Response 05,06,15,16
 	struct __attribute__ ((packed)) // (TX) Response error
 	{
 			uint8 id;
 			uint8 err; // Error code (fun | 0x80)
 			uint8 exc; // Exception code (01 or 02 or 03 or 04)
-	} err;
+	} err; // (TX) Response error
 }smdbadu;
 
 typedef struct __attribute__ ((packed)) // MBAP header (MODBUS Application Protocol header)
