@@ -260,7 +260,7 @@ os_timer_t timertrn;	// таймер
  * ------------------------------------------------------------------------- */
 void mdb_timertrn_isr(smdbtrn * trn)
 {
-	if(rs485cfg.flg.b.master != 0) {
+	if(rs485vars.status != RS485_TX_RX_OFF /* && rs485cfg.flg.b.master != 0 */) { // пусть и в slave работает :)
 		uint32 i;
 		for(i = 0; i < MDB_TRN_MAX; i++) {
 			if(trn->start_flg != 0) { // запустил кто-то ?

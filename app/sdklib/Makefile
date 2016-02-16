@@ -52,7 +52,7 @@ ADDLIBS_libsdk = \
 	libmgcc.a	\
 	libmmain.a	\
 	libmphy.a	\
-	libpp.a	\
+	libmpp.a	\
 	libmwpa.a	\
 	libcrypto.a	\
 	libnet80211.a

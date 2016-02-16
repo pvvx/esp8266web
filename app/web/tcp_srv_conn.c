@@ -253,9 +253,9 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 	}
 	{
 		uint8 * newbufi = (uint8 *) os_malloc(len + p->tot_len + 1); // подготовка буфера
-	#if DEBUGSOO > 2
+#if DEBUGSOO > 2
 		os_printf("memi[%d] %p ", len + p->tot_len, ts_conn->pbufi);
-	#endif
+#endif
 		if (newbufi == NULL) {
 			ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
 			return ERR_MEM;
