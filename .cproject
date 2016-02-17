@@ -126,6 +126,7 @@
 							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} -Wl,--start-group ${INPUTS} -Wl,--end-group  ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} " errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1215096163" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
 								<option id="gnu.cpp.link.option.libs.960175278" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="mgcc"/>
+									<listOptionValue builtIn="false" value="crypto"/>
 									<listOptionValue builtIn="false" value="mmain"/>
 									<listOptionValue builtIn="false" value="mphy"/>
 									<listOptionValue builtIn="false" value="pp"/>
