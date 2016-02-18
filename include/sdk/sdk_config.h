@@ -26,6 +26,7 @@
 
 #ifndef USE_MAX_IRAM
 //	#define USE_MAX_IRAM  48 // использовать часть cache под IRAM, IRAM size = 49152 байт
+	#define USE_MAX_IRAM  32 // использовать часть IRAM под переменные LWIP (uint32_t only!)
 #endif
 
 /*  USE_FIX_QSPI_FLASH - использовать фиксированную частоту работы QPI

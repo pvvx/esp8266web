@@ -175,7 +175,7 @@ bool rs485_next_txmsg(void)
 /* =========================================================================
  * rs485_task
  * ------------------------------------------------------------------------- */
-void rs485_task(os_event_t *e){
+static void rs485_task(os_event_t *e){
 	if(rs485vars.status != RS485_TX_RX_OFF) {
 		switch(e->sig) {
 		case RS485_SIG_RX_OK:	//	Принято ADU (в буфере bufo)
