@@ -149,10 +149,13 @@ void system_soft_wdt_feed(void);
 
 void system_show_malloc(void);
 
-#define NULL_MODE       0x00
-#define STATION_MODE    0x01
-#define SOFTAP_MODE     0x02
-#define STATIONAP_MODE  0x03
+typedef enum _wifi_mode {
+	WIFI_DISABLED	= 0,
+	STATION_MODE,
+	SOFTAP_MODE,
+	STATIONAP_MODE	= (STATION_MODE | SOFTAP_MODE),
+	WIFI_UNKNOWN_MODE
+} WIFI_MODE;
 
 typedef enum _auth_mode {
     AUTH_OPEN           = 0,

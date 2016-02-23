@@ -353,8 +353,7 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
     struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
 	wifi_softap_set_default_ssid();
 	wifi_station_set_default_hostname(info.st_mac);
-	if(wifi_config->wfmode[0] == 0xff) wifi_config->wfmode[0] = SOFTAP_MODE;
-	else wifi_config->wfmode[0] &= 3;
+	if( WIFI_UNKNOWN_MODE <= wifi_config->wfmode[0]) wifi_config->wfmode[0] = SOFTAP_MODE;
 	wifi_config->wfmode[1] = 0;
 	if(wifi_config->wfchl >= 14 || wifi_config->wfchl == 0) {
 		wifi_config->wfchl = 1;
@@ -363,15 +362,16 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 		wifi_config->beacon = 100;
 	}
 	wDev_Set_Beacon_Int((wifi_config->beacon/100)*102400);
-	if(wifi_config->field_310 >= 5 || wifi_config->field_310 == 1){
-		wifi_config->field_310 = 0;
-		ets_bzero(wifi_config->ap_passw, 64);
+	if(wifi_config->authmode >= AUTH_MAX || wifi_config->authmode == AUTH_WEP){
+		wifi_config->authmode = AUTH_OPEN;
+		ets_bzero(wifi_config->ap_passw, sizeof(wifi_config->ap_passw));
 	}
 	if(wifi_config->field_311 > 2) wifi_config->field_311 = 0;
 	if(wifi_config->field_312 > 8) wifi_config->field_312 = 4;
-	if(wifi_config->st_ssid_len == 0xffffffff) {
-		ets_bzero(&wifi_config->st_ssid_len, 36);
-		ets_bzero(&wifi_config->st_passw, 64);
+	if(wifi_config->st_ssid_len > 32) {
+		ets_bzero(&wifi_config->st_ssid_len, sizeof(wifi_config->st_ssid_len));
+		ets_bzero(&wifi_config->st_ssid, sizeof(wifi_config->st_ssid));
+		ets_bzero(&wifi_config->st_passw, sizeof(wifi_config->st_passw));
 	}
 	wifi_config->field_880 = 0;
 	wifi_config->field_884 = 0;
@@ -379,8 +379,8 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 
 	if(wifi_config->field_316 > 6) wifi_config->field_316 = 1;
 	if(wifi_config->field_169 > 2) wifi_config->field_169 = 0; // +169
-	wifi_config->phy_mode &= 3;
-	if(wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
+	wifi_config->phy_mode &= PHY_MODE_11N;
+	if(wifi_config->phy_mode < PHY_MODE_11B ) wifi_config->phy_mode = PHY_MODE_11N; // phy_mode
 }
 //=============================================================================
 //-----------------------------------------------------------------------------
@@ -591,11 +591,11 @@ void ICACHE_FLASH_ATTR startup(void)
 #endif
 	WDT_FEED = WDT_FEED_MAGIC; // WDT
 	//
-	int wfmode = g_ic.g.wifi_store.wfmode[0]; // g_ic.c[0x214] (+532) SDK 1.2.0 // SDK 1.3.0 g_ic.c[472]
+	WIFI_MODE wfmode = g_ic.g.wifi_store.wfmode[0]; // g_ic.c[0x214] (+532) SDK 1.2.0 // SDK 1.3.0 g_ic.c[472]
 	wifi_mode_set(wfmode);
-	if(wfmode & 1)  wifi_station_start();
+	if(wfmode & SOFTAP_MODE)  wifi_station_start();
 #if DEF_SDK_VERSION >= 1200
-	if(wfmode == 2) {
+	if(SOFTAP_MODE == wfmode) {
 #if DEF_SDK_VERSION >= 1400
 		if(g_ic.c[470] != 2) wifi_softap_start(0);
 #else
@@ -603,19 +603,19 @@ void ICACHE_FLASH_ATTR startup(void)
 #endif
 		else wifi_softap_start(1);
 	}
-	else if(wfmode == 3) {
+	else if(STATIONAP_MODE == wfmode) {
 		wifi_softap_start(0);
 	}
 #else
-	if(wfmode & 2)  wifi_softap_start();
+	if(wfmode & SOFTAP_MODE)  wifi_softap_start();
 #endif
 
 #if DEF_SDK_VERSION >= 1110
-	if(wfmode == 1) netif_set_default(*g_ic.g.netif1);	// struct netif *
+	if(STATION_MODE == wfmode) netif_set_default(*g_ic.g.netif1);	// struct netif *
 #else
 	if(wfmode) {
 		struct netif * * p;
-		if(wfmode == 1) p = g_ic.g.netif1; // g_ic+0x10;
+		if(wfmode == STATION_MODE) p = g_ic.g.netif1; // g_ic+0x10;
 		else p = g_ic.g.netif2; // g_ic+0x14;
 		netif_set_default(*p);	// struct netif *
 	}

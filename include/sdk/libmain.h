@@ -10,6 +10,7 @@
 
 #include "sdk/sdk_config.h"
 #include "c_types.h"
+#include "user_interface.h"
 
 //=============================================================================
 // extern data
@@ -44,9 +45,9 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
 #if DEF_SDK_VERSION >= 1400 // SDK >= 1.4.0
 	uint8	boot_info[8];	//+000  g_ic+? 504 boot_version SDK 1.5.2 // 0x3FFEF164
 	uint8 	wfmode[4];		//+008  g_ic.c[0x1D8] (+472) SDK 1.3.0 // 3FFF083C
-	uint32	st_ssid_len;	//+012  g_ic+?
-	uint8	st_ssid[32];	//+016
-	uint8	field_048[7];	//+048
+	uint32	st_ssid_len;	//+012  g_ic.c +004
+	uint8	st_ssid[32];	//+016  g_ic.c +008
+	uint8	field_048[7];	//+048  g_ic.c +
 	uint8	st_passw[64];	//+055
 	uint8	field_119;		//+119
 	uint8	data_120[32];	//+120
@@ -59,7 +60,7 @@ struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 o
 	uint8	field_276[32];	//+276
 	uint8	field_308;		//+308
 	uint8	wfchl;			//+309
-	uint8	field_310;		//+310
+	AUTH_MODE	authmode;	//+310
 	uint8	field_311;		//+311
 	uint8	field_312;		//+312
 	uint8	field_313;		//+313
