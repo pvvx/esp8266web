@@ -524,6 +524,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
             ifcmp("baud") {
 //                UartDev.baut_rate = val;
                 uart_div_modify(n, UART_CLK_FREQ / val);
+#ifdef USE_TCP2UART
+                if(n == 0) uart0_set_tout();
+#endif
             }
             else ifcmp("parity") 	WRITE_PERI_REG(UART_CONF0(n), (READ_PERI_REG(UART_CONF0(n)) & (~UART_PARITY_EN)) | ((val)? UART_PARITY_EN : 0));
             else ifcmp("even") 	 	WRITE_PERI_REG(UART_CONF0(n), (READ_PERI_REG(UART_CONF0(n)) & (~UART_PARITY)) | ((val)? UART_PARITY : 0));

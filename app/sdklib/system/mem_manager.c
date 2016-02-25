@@ -166,7 +166,7 @@ void *pvPortMalloc( size_t xWantedSize )
 xBlockLink *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
 void *pvReturn = NULL;
 
-//    os_printf("%s %d %d\n", __func__, xWantedSize, xFreeBytesRemaining);
+    //ets_printf("%s %d %d\n", __func__, xWantedSize, xFreeBytesRemaining);
 
 	ets_intr_lock();
 	{

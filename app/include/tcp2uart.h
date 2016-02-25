@@ -18,7 +18,7 @@
 
 #define DEFAULT_TCP2UART_PORT USE_TCP2UART // 12345
 
-void uart_init(void) ICACHE_FLASH_ATTR;
+void uarts_init(void) ICACHE_FLASH_ATTR;
 
 void uart_save_fcfg(uint8 set) ICACHE_FLASH_ATTR;
 void uart_read_fcfg(uint8 set) ICACHE_FLASH_ATTR;
@@ -33,27 +33,46 @@ void update_mux_uart0(void) ICACHE_FLASH_ATTR;
 void update_mux_txd1(void) ICACHE_FLASH_ATTR;
 void set_uartx_invx(uint8 uartn, uint8 set, uint32 bit_mask) ICACHE_FLASH_ATTR;
 
-#define RST_FIFO_CNT_SET 16 // при остатке в fifo места для 16 символов срабатывает RTS
+#define RST_FIFO_CNT_SET 8 // при остатке в fifo места для 16 символов срабатывает RTS
 
 #ifdef USE_TCP2UART
-extern os_timer_t uart0_rx_buf_timer;
-extern os_timer_t uart0_tx_buf_timer;
+
+#define UART_RX_BUF_MAX 8192 // размер приемного буфера (не менее TCP_MSS*2 + ...)
+#define UART_TASK_QUEUE_LEN 3
+#define UART_TASK_PRIO (USER_TASK_PRIO_0) // + SDK_TASK_PRIO)
+
+typedef void uart_rx_blk_func(uint8 *buf, uint32 count); // функция обработки принятых блоков из UART
+typedef void uart_tx_next_chars_func(void); // запрос на передачу следующих символов блока в UART
+
+typedef enum {
+	UART_RX_CHARS = 1,
+	UART_TX_CHARS,
+} UART_SIGS;
+
+typedef struct {
+	uint8	* uart_rx_buf; // указатель на буфер [UART_RX_BUF_MAX], если равер NULL, драйвер отключен
+	uint32	uart_rx_buf_count; // указатель принимаемых с UART символов в буфере
+	uint32	uart_out_buf_count; // кол-во переданных байт из буфера на обработку
+	uint32	uart_nsnd_buf_count; // кол-во ещё не переданных байт из буфера (находящихся в ожидании к передаче)
+	uart_rx_blk_func * uart_send_rx_blk; // функция обработки принятых блоков из UART
+	uart_tx_next_chars_func * uart_tx_next_chars; // запрос на передачу следующих символов блока в UART
+	ETSEvent taskQueue[UART_TASK_QUEUE_LEN];
+}suart_drv;
+
+void uart0_set_tout(void);
+void uart_del_rx_chars(uint32 len);
+uint32 uart_tx_buf(uint8 *buf, uint32 count);
+bool uart_drv_start(void);
+void uart_drv_close(void);
+
+
+err_t tcp2uart_write(uint8 *pblk, uint16 len);
+err_t tcp2uart_start(uint16 newportn);
+void tcp2uart_close(void);
+
+extern suart_drv uart_drv;
 extern TCP_SERV_CONN * tcp2uart_conn;
 extern TCP_SERV_CFG * tcp2uart_servcfg;
-extern uint32 wait_send_tx;
-
-void loading_rx_buf(void) ICACHE_FLASH_ATTR;
-void send_tx_buf(void) ICACHE_FLASH_ATTR;
-
-err_t tcp2uart_write(uint8 *pblk, uint16 len) ICACHE_FLASH_ATTR;
-err_t tcp2uart_server_init(uint16 portn) ICACHE_FLASH_ATTR;
-err_t tcp2uart_client_init(uint32 ip, uint16 portn);
-err_t tcp2uart_start(uint16 newportn) ICACHE_FLASH_ATTR;
-void tcp2uart_close(void) ICACHE_FLASH_ATTR;
-
-void tcp2uart_int_rxtx_disable(void) ICACHE_FLASH_ATTR;
-
-#define MAX_WAIT_TX_BUF 50000ul // 50 ms
 
 #endif // USE_TCP2UART
 #endif /* _TCP2UART_H_ */

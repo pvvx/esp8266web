@@ -131,10 +131,12 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 //#define DPORT_OFF18		dport_[6] // use clockgate_watchdog(flg) { if(flg) 0x3FF00018 &= 0x77; else 0x3FF00018 |= 8; }
 
 /* 0x3ff00020 is isr flag register, (ESP8266 SPI Module User Guide)
+  bit0 is for uart0 isr
+  bit2 is for uart1 isr
   bit4 is for spi isr,
   bit7 is for hspi isr,
   bit9 is for i2s isr */
-//#define DPORT_OFF20		dport_[8]
+#define DPORT_OFF20		dport_[8]
 
 /* 0x3ff00024
  bit7 16k IRAM base 0x40108000 = SPI cache flash  
