@@ -22,10 +22,14 @@ uint32 flash_size DATA_IRAM_ATTR;
 //=============================================================================
 // define
 //-----------------------------------------------------------------------------
-#ifdef USE_MAX_IRAM
-#define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 0)
+#if defined(USE_MAX_IRAM) 
+ #if USE_MAX_IRAM == 48
+	#define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 0)
+ #else
+	#define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 1)
+ #endif
 #else
-#define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 1)
+	#define Cache_Read_Enable_def() Cache_Read_Enable(0, 0, 1)
 #endif
 /******************************************************************************
  * FunctionName : Cache_Read_Enable_New

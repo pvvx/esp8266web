@@ -413,11 +413,13 @@ void ICACHE_FLASH_ATTR wifi_handle_event_cb(System_Event_t *evt)
 			}
 			break;
 		}
+#if DEBUGSOO > 1
 		case EVENT_STAMODE_DHCP_TIMEOUT:
 			os_printf("DHCP timeot\n");
 			break;
 		default:
 			os_printf("?\n");
 			break;
+#endif
 		}
 }

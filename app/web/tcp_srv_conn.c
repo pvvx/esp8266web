@@ -207,6 +207,88 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_sent(void *arg, struct tcp_pcb *pcb
 	return ret_err;
 }
 /******************************************************************************
+ *
+ ******************************************************************************/
+static err_t ICACHE_FLASH_ATTR recv_trim_bufi(TCP_SERV_CONN * ts_conn, uint32 newadd)
+{
+	uint32 len = 0;
+	ts_conn->flag.busy_bufi = 1; // идет обработка bufi
+	if(newadd) {
+		if(ts_conn->pbufi != NULL && (ts_conn->flag.rx_buf) && ts_conn->cntri < ts_conn->sizei) {
+				len = ts_conn->sizei - ts_conn->cntri; // размер необработанных данных
+				if(ts_conn->cntri > newadd) {
+					os_memcpy(ts_conn->pbufi, &ts_conn->pbufi[ts_conn->cntri], len );
+					ts_conn->sizei = len;
+					len += newadd;
+					ts_conn->pbufi = (uint8 *)mem_realloc(ts_conn->pbufi, len + 1);	//mem_trim(ts_conn->pbufi, len);
+					if(ts_conn->pbufi == NULL) {
+#if DEBUGSOO > 2
+						os_printf("memtrim err %p[%d]  ", ts_conn->pbufi, len + 1);
+#endif
+						return ERR_MEM;
+					}
+#if DEBUGSOO > 2
+					os_printf("memi%p[%d] ", ts_conn->pbufi,  len);
+#endif
+					ts_conn->pbufi[len] = '\0'; // вместо os_zalloc;
+					ts_conn->cntri = 0;
+					ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
+					return ERR_OK;
+				}
+		}
+		else {
+			// не тот режим -> удалить неизвестный буфер
+			os_free(ts_conn->pbufi);
+			ts_conn->pbufi = NULL;
+		}
+		uint8 * newbufi = (uint8 *) os_malloc(len + newadd + 1); // подготовка буфера
+		if (newbufi == NULL) {
+#if DEBUGSOO > 2
+			os_printf("memerr %p[%d]  ", len + newadd, ts_conn->pbufi);
+#endif
+			ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
+			return ERR_MEM;
+		}
+#if DEBUGSOO > 2
+		os_printf("memi%p[%d] ", ts_conn->pbufi,  len + newadd);
+#endif
+		newbufi[len + newadd] = '\0'; // вместо os_zalloc
+		if(len)	{
+			os_memcpy(newbufi, &ts_conn->pbufi[ts_conn->cntri], len);
+			os_free(ts_conn->pbufi);
+		};
+		ts_conn->pbufi = newbufi;
+//		ts_conn->cntri = 0;
+		ts_conn->sizei = len;
+	}
+	else {
+		if((!ts_conn->flag.rx_buf) || ts_conn->cntri >= ts_conn->sizei)  {
+			ts_conn->sizei = 0;
+			if (ts_conn->pbufi != NULL) {
+				os_free(ts_conn->pbufi);  // освободить буфер.
+				ts_conn->pbufi = NULL;
+			};
+		}
+		else if(ts_conn->cntri) {
+			len = ts_conn->sizei - ts_conn->cntri;
+			os_memcpy(ts_conn->pbufi, &ts_conn->pbufi[ts_conn->cntri], len );
+			ts_conn->sizei = len;
+			ts_conn->pbufi = (uint8 *)mem_realloc(ts_conn->pbufi, len + 1);	//mem_trim(ts_conn->pbufi, len);
+			if(ts_conn->pbufi == NULL) {
+#if DEBUGSOO > 2
+				os_printf("memtrim err %p[%d]  ", ts_conn->pbufi, len + 1);
+#endif
+				return ERR_MEM;
+			}
+			ts_conn->pbufi[len] = '\0'; // вместо os_zalloc;
+		}
+//		ts_conn->cntri = 0;
+	}
+	ts_conn->cntri = 0;
+	ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
+	return ERR_OK;
+}
+/******************************************************************************
  * FunctionName : tcpsrv_server_recv
  * Description  : Data has been received on this pcb.
  * Parameters   : arg -- Additional argument to pass to the callback function
@@ -241,63 +323,24 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_recv(void *arg, struct tcp_pcb *pcb
 	};
 	ts_conn->state = SRVCONN_CONNECT; // был прием
 	ts_conn->recv_check = 0; // счет времени до авто-закрытия с нуля
-
-	int len = 0;
-	ts_conn->flag.busy_bufi = 1; // идет обработка bufi
-	if(ts_conn->pbufi != NULL && (ts_conn->flag.rx_buf) && ts_conn->cntri < ts_conn->sizei) {
-			len = ts_conn->sizei - ts_conn->cntri;
-	}
-	else {
-		os_free(ts_conn->pbufi);
-		ts_conn->pbufi = NULL;
-	}
-	{
-		uint8 * newbufi = (uint8 *) os_malloc(len + p->tot_len + 1); // подготовка буфера
-	#if DEBUGSOO > 2
-		os_printf("memi[%d] %p ", len + p->tot_len, ts_conn->pbufi);
-	#endif
-		if (newbufi == NULL) {
-			ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
-			return ERR_MEM;
+	if(p->tot_len) {
+		err = recv_trim_bufi(ts_conn, p->tot_len);
+		if(err != ERR_OK) return err;
+		// добавление всего что отдал Lwip в буфер
+		uint32 len = pbuf_copy_partial(p, &ts_conn->pbufi[ts_conn->sizei], p->tot_len, 0);
+		ts_conn->sizei += len;
+		pbuf_free(p); // все данные выели
+		if(!ts_conn->flag.rx_buf) {
+			 tcp_recved(pcb, len); // сообщает стеку, что съели len и можно посылать ACK и принимать новые данные.
 		}
-		newbufi[len + p->tot_len] = '\0'; // вместо os_zalloc
-		if(len)	{
-			os_memcpy(newbufi, &ts_conn->pbufi[ts_conn->cntri], len);
-			os_free(ts_conn->pbufi);
-		};
-		ts_conn->pbufi = newbufi;
-		ts_conn->cntri = 0;
-		ts_conn->sizei = len;
-	};
-	// добавление всего что отдал Lwip в буфер
-	len = pbuf_copy_partial(p, &ts_conn->pbufi[len], p->tot_len, 0);
-
-	ts_conn->sizei += len;
-	pbuf_free(p); // все данные выели
-	if(!ts_conn->flag.rx_buf) {
-		 tcp_recved(pcb, len); // сообщает стеку, что съели len и можно посылать ACK и принимать новые данные.
-	}
-	else ts_conn->unrecved_bytes += len;
+		else ts_conn->unrecved_bytes += len;
 #if DEBUGSOO > 3
-	os_printf("rec %d of %d :\n", p->tot_len, ts_conn->sizei);
+		os_printf("rec %d of %d :\n", p->tot_len, ts_conn->sizei);
 #endif
-	err = ts_conn->pcfg->func_recv(ts_conn);
-	if((!ts_conn->flag.rx_buf) || ts_conn->cntri >= ts_conn->sizei)  {
-		ts_conn->sizei = 0;
-		if (ts_conn->pbufi != NULL) {
-			os_free(ts_conn->pbufi);  // освободить буфер.
-			ts_conn->pbufi = NULL;
-		};
+		err = ts_conn->pcfg->func_recv(ts_conn);
+		err_t err2 = recv_trim_bufi(ts_conn, 0);
+		if(err2 != ERR_OK) return err2;
 	}
-	else if(ts_conn->cntri) {
-		len = ts_conn->sizei - ts_conn->cntri;
-		os_memcpy(ts_conn->pbufi, &ts_conn->pbufi[ts_conn->cntri], len );
-		ts_conn->sizei = len;
-		ts_conn->pbufi = (uint8 *)mem_realloc(ts_conn->pbufi, len + 1);	//mem_trim(ts_conn->pbufi, len);
-		ts_conn->pbufi[len + 1] = 0;
-	}
-	ts_conn->cntri = 0;
-	ts_conn->flag.busy_bufi = 0; // обработка bufi окончена
 	return err;
 }
 /******************************************************************************

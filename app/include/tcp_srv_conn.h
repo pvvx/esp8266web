@@ -111,7 +111,7 @@ typedef struct t_TCP_SERV_CONN {
 	uint16 sizeo; 					//+48 размер буфера передачи
 	uint16 sizei; 					//+52 размер приемного буфера
 	uint16 cntro; 					//+56 кол-во обработанных байт в буфере передачи
-	uint16 cntri; 					//+60 кол-во не обработанных байт в буфере приема
+	uint16 cntri; 					//+60 кол-во обработанных байт в буфере приема
 	uint16 unrecved_bytes; 			//+64 используется при ручном управлении TCP WIN / This can be used to throttle data reception
 	// далее идут переменные не относящиеся к работе tcp_srv_conn
 	uint8 *linkd; 					//+68 указатель на прилепленные данные пользователя (при закрытии соединения вызывается os_close(linkd), если linkd != NULL;

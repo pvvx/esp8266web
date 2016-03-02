@@ -1327,7 +1327,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 						pupload->fsize = dhead->disksize;
 						pupload->faddr = WEBFS_base_addr();
 #if DEBUGSOO > 4
-						os_printf("updisk[%u]=ok,m=%u ", dhead->disksize, disk_max_size );
+						os_printf("updisk[%u]=ok ", dhead->disksize);
 #endif
 						pupload->status = 3; // = 3 загрузка WebFileSystem во flash
 						isWEBFSLocked = true;

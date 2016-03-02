@@ -11,7 +11,11 @@
 #ifdef USE_WDRV
 
 #define WDRV_TASK_QUEUE_LEN 3
+#if defined(USE_RS485DRV) || defined(USE_TCP2UART)
+#define WDRV_TASK_PRIO (USER_TASK_PRIO_1) // + SDK_TASK_PRIO)
+#else
 #define WDRV_TASK_PRIO (USER_TASK_PRIO_0) // + SDK_TASK_PRIO)
+#endif
 #define WDRV_SIG_DATA 1
 #define WDRV_SIG_INIT 2
 #define WDRV_SIG_STOP 3

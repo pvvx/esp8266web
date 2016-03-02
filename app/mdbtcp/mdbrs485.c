@@ -81,12 +81,7 @@ struct srs485msg * ICACHE_FLASH_ATTR rs485_new_tx_msg(smdbtcp * p, bool flg_out)
 		msg->flg.ui = p->mbap.tid; // Transaction Identifier
 		if(p->adu.id == 0 || (!flg_out)) msg->flg.ui |= RS485MSG_FLG_TX_ONLY;
    		if(flg_out) {
-   			// поместить сообшение в конец очереди
-   			SLIST_INSERT_HEAD(&rs485vars.txmsgs, msg, next);
-   			//  Старт передачи, если не занят
-   			rs485_next_txmsg(); //  Проверить наличие пакета в очереди и начать передачу, если возможно
-   		}
-   		else {
+			// поместить сообшение в конец очереди
    			struct srs485msg *old;
    			old = SLIST_FIRST(&rs485vars.txmsgs);
 			if(old != NULL) { // есть блоки для передачи?
@@ -95,6 +90,12 @@ struct srs485msg * ICACHE_FLASH_ATTR rs485_new_tx_msg(smdbtcp * p, bool flg_out)
    				SLIST_NEXT(old, next) = msg;
    			}
 			else SLIST_INSERT_HEAD(&rs485vars.txmsgs, msg, next);
+   			//  Старт передачи, если не занят
+   			rs485_next_txmsg(); //  Проверить наличие пакета в очереди и начать передачу, если возможно
+   		}
+   		else {
+			// поместить сообшение в начало очереди
+   			SLIST_INSERT_HEAD(&rs485vars.txmsgs, msg, next);
    		}
 	}
 #if DEBUGSOO > 1

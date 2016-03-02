@@ -14,7 +14,7 @@
 #include "queue.h"
 #include "mdbtab.h"
 
-#define RS485_TASK_QUEUE_LEN 3
+#define RS485_TASK_QUEUE_LEN 7
 #define RS485_TASK_PRIO (USER_TASK_PRIO_0) // + SDK_TASK_PRIO)
 
 typedef enum {
@@ -117,9 +117,6 @@ typedef union  // Флаги драйвера приеника/передатч�
 #define RS485MSG_FLG_WAIT		0x00400000
 #define RS485MSG_FLG_TRN_RES 	0x00800000
 #define RS485MSG_FLG_TRN_NUM_MASK 	0xFF000000
-#define RS485MSG_FLG_DEFAULT 	0
-#define RS485MSG_FLG_DRV_MASK
-
 
 typedef struct   // рабочая структура управления драйвером
 {
@@ -162,9 +159,6 @@ void rs485_drv_stop(void);
 /* Проверить наличие пакета в очереди и начать передачу */
 bool rs485_next_txmsg(void);
 
-/* Очистить все очереди сообщений RS485
- * Запуск при остановленном драйвере! */
-void rs485_drv_clr_bufs(void);
 /* (Ре)Инициализация драйвера RS-485 на новый конфиг */
 //void rs485_drv_new_cfg(srs485cfg * newcfg);
 /* (Ре)Инициализация драйвера RS-485 по пинам

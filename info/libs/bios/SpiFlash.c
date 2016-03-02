@@ -229,7 +229,7 @@ void SPIFlashCnfig(uint32_t spi_interface, uint32_t spi_freg)
 }
 
 // ROM:400042AC
-SpiFlashOpResult spi_flash_read(SpiFlashChip *fchip, uint32_t faddr, uint32_t *dst, size_t size)
+SpiFlashOpResult _spi_flash_read(SpiFlashChip *fchip, uint32_t faddr, uint32_t *dst, size_t size)
 {
 	if(faddr + size > fchip->chip_size) return SPI_FLASH_RESULT_ERR;
 	Wait_SPI_Idle(fchip);
@@ -251,7 +251,7 @@ SpiFlashOpResult spi_flash_read(SpiFlashChip *fchip, uint32_t faddr, uint32_t *d
 // ROM:40004B1C
 SpiFlashOpResult SPIRead(uint32_t faddr, uint32_t *dst, size_t size)
 {
-	return spi_flash_read(flashchip, faddr, dst, size);
+	return _spi_flash_read(flashchip, faddr, dst, size);
 }
 
 // ROM:400047F0
