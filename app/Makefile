@@ -41,7 +41,8 @@ COMPONENTS_eagle.app.v6 = \
 	driver/libdriver.a \
 	web/libweb.a	\
 	mdbtcp/libmdbtcp.a \
-	user/libuser.a
+	user/libuser.a \
+	sdklib/libsdk.a
 
 LINK_LIBS = \
     -lsdk

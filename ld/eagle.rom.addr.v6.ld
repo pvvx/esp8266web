@@ -36,6 +36,7 @@ PROVIDE ( SPIReadModeCnfig = 0x400048ec );
 PROVIDE ( SPIUnlock = 0x40004878 );
 PROVIDE ( SPIWrite = 0x40004a4c );
 PROVIDE ( SelectSpiFunction = 0x40003f58 );
+PROVIDE ( SPILoader = 40001308 );
 PROVIDE ( SendMsg = 0x40003cf4 );
 PROVIDE ( UartConnCheck = 0x40003230 );
 PROVIDE ( UartConnectProc = 0x400037a0 );

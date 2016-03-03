@@ -7,6 +7,8 @@
 #define DEFAULT_SOFTAP_IP	0x0104A8C0 // ip 192.168.4.1
 #define DEFAULT_SOFTAP_MASK 0x00FFFFFF // mask 255.255.255.0
 
+#define USE_RAPID_LOADER 0x40200070
+
 #define DEBUGSOO	2  // 0 - откл вывода, 1 - минимум, 2 - норма, >3 - текушая отладка, >4 - удалить что найдется :)
 
 #define DEBUG_UART 1 // включить вывод в загрузчике сообщений, номер UART
@@ -52,8 +54,8 @@
 	#define USE_US_TIMER
 #endif
 
-//#define USE_TIMER0 // использовать аппаратный таймер 0 (NMI или стандартное прерывание)
-//#define TIMER0_USE_NMI_VECTOR	// использовать NMI вектор для таймера 0 (перенаправление таблицы векторов CPU) (см main-vectors.c)
+// #define USE_TIMER0 // использовать аппаратный таймер 0 (NMI или стандартное прерывание)
+// #define TIMER0_USE_NMI_VECTOR	// использовать NMI вектор для таймера 0 (перенаправление таблицы векторов CPU) (см main-vectors.c)
 
 //#define USE_ETS_RUN_NEW // использовать ets_run_new() вместо ets_run()
 
