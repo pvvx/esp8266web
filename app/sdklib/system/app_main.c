@@ -94,73 +94,29 @@ const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
 // IRAM code
 //-----------------------------------------------------------------------------
 void call_user_start(void);
+#ifdef USE_FIX_QSPI_FLASH
 //=============================================================================
-// ROM-BIOS запускает код с адреса 0x40100000
-// при опцииях перезагрузки 'Jump Boot', если:
-// GPIO0 = "0", GPIO1 = "1", GPIO2 = "0" (boot mode:(2,x))
-/* перенесено в main-vectors.c
-void __attribute__((section(".UserEnter.text"))) call_user_start(void)
-{
-	asm volatile ("j call_user_start1");
-} */
-//=============================================================================
-// call_user_start() - вызов из заголовка, загрузчиком
-// ENTRY(call_user_start) in eagle.app.v6.ld
+// Инициализация QSPI и cache
 //-----------------------------------------------------------------------------
-#ifdef USE_FIX_QSPI_FLASH 
-void __attribute__((section(".entry.text"))) call_user_start1(void)
+static void set_qspi_flash_cache(void)
 {
-		SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS = 0x80000064
-		// SPI на 80 MHz
+	SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS = 0x80000064
+	// SPI на 80 MHz
 #if USE_FIX_QSPI_FLASH == 80
-		GPIO_MUX_CFG |= BIT(MUX_SPI0_CLK_BIT); // QSPI = 80 MHz
-		SPI0_CTRL = (SPI0_CTRL & SPI_CTRL_F_MASK) | SPI_CTRL_F80MHZ;
+	GPIO_MUX_CFG |= BIT(MUX_SPI0_CLK_BIT); // QSPI = 80 MHz
+	SPI0_CTRL = (SPI0_CTRL & SPI_CTRL_F_MASK) | SPI_CTRL_F80MHZ;
 #else  // SPI на 40 MHz
-		GPIO_MUX_CFG &= ~(1<< MUX_SPI0_CLK_BIT);
-		SPI0_CTRL = (SPI0_CTRL & SPI_CTRL_F_MASK) | SPI_CTRL_F40MHZ;
+	GPIO_MUX_CFG &= ~(1<< MUX_SPI0_CLK_BIT);
+	SPI0_CTRL = (SPI0_CTRL & SPI_CTRL_F_MASK) | SPI_CTRL_F40MHZ;
 #endif
 #ifdef USE_ALTBOOT
 
 #endif
-		flashchip->chip_size = 512*1024; // песочница для SDK в 512 килобайт flash
-		// Всё - включаем кеширование, далее можно вызывать процедуры из flash
-		Cache_Read_Enable_def();
-		// Инициализация
-		startup();
-		// Очистка стека и передача управления в ROM-BIOS
-		asm volatile (
-				"movi	a2, 1;"
-				"slli   a1, a2, 30;"
-				);
-		ets_run();
-}		
-#else
-void __attribute__((section(".entry.text"))) call_user_start1(void)
-{
-	    // Загрузка заголовка flash
-	    struct SPIFlashHead fhead;
-	    Cache_Read_Disable();
-		SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS
-		SPIRead(0, (uint32_t *)&fhead, sizeof(fhead));
-		// Установка размера Flash от 256Kbytes до 32Mbytes
-		// High four bits fhead.hsz.flash_size: 0 = 512K, 1 = 256K, 2 = 1M, 3 = 2M, 4 = 4M, ... 7 = 32M
-	    uint32 fsize = fhead.hsz.flash_size & 7;
-		if(fsize < 2) flashchip->chip_size = (8 >> fsize) << 16;
-		else flashchip->chip_size = (4 << fsize) << 16;
-	    uint32 fspeed = fhead.hsz.spi_freg;
-		// Установка:
-		// SPI Flash Interface (0 = QIO, 1 = QOUT, 2 = DIO, 0x3 = DOUT)
-		// and Speed QSPI: 0 = 40MHz, 1= 26MHz, 2 = 20MHz, ... = 80MHz
-		sflash_something(fspeed);
-		// SPIFlashCnfig(fhead.spi_interface & 3, (speed > 2)? 1 : speed + 2);
-		// SPIReadModeCnfig(5); // in ROM
-		// Всё - включаем кеширование, далее можно вызывать процедуры из flash
-		Cache_Read_Enable_def();
-		// Инициализация
-		startup();
-		// Передача управления ROM-BIOS
-		ets_run();
+	flashchip->chip_size = 512*1024; // песочница для SDK в 512 килобайт flash
+	// Всё - включаем кеширование, далее можно вызывать процедуры из flash
+	Cache_Read_Enable_def();
 }
+#else
 //-----------------------------------------------------------------------------
 // Установка скорости QSPI
 //  0 = 40MHz, 1 = 26MHz, 2 = 20MHz, >2 = 80MHz
@@ -186,7 +142,108 @@ void sflash_something(uint32 flash_speed)
 	}
 	SPI0_CTRL = xreg | value;
 }
+//=============================================================================
+// Инициализация QSPI и cache
+//-----------------------------------------------------------------------------
+static void set_qspi_flash_cache(void)
+{
+    // Загрузка заголовка flash
+    struct SPIFlashHead fhead;
+    Cache_Read_Disable();
+	SPI0_USER |= SPI_CS_SETUP; // +1 такт перед CS
+	SPIRead(0, (uint32_t *)&fhead, sizeof(fhead));
+	// Установка размера Flash от 256Kbytes до 32Mbytes
+	// High four bits fhead.hsz.flash_size: 0 = 512K, 1 = 256K, 2 = 1M, 3 = 2M, 4 = 4M, ... 7 = 32M
+    uint32 fsize = fhead.hsz.flash_size & 7;
+	if(fsize < 2) flashchip->chip_size = (8 >> fsize) << 16;
+	else flashchip->chip_size = (4 << fsize) << 16;
+    uint32 fspeed = fhead.hsz.spi_freg;
+	// Установка:
+	// SPI Flash Interface (0 = QIO, 1 = QOUT, 2 = DIO, 0x3 = DOUT)
+	// and Speed QSPI: 0 = 40MHz, 1= 26MHz, 2 = 20MHz, ... = 80MHz
+	sflash_something(fspeed);
+	// SPIFlashCnfig(fhead.spi_interface & 3, (speed > 2)? 1 : speed + 2);
+	// SPIReadModeCnfig(5); // in ROM
+	// Всё - включаем кеширование, далее можно вызывать процедуры из flash
+	Cache_Read_Enable_def();
+}
 #endif
+//=============================================================================
+// call_user_start() - вызывается из заголовка, загрузчиком
+// Default entry point:  ENTRY(call_user_start) in eagle.app.v6.ld
+//-----------------------------------------------------------------------------
+void call_user_start(void)
+{
+		// Инициализация QSPI
+		set_qspi_flash_cache();
+		// Инициализация
+		startup();
+		// Очистка стека и передача управления в ROM-BIOS
+		asm volatile (
+				"movi	a2, 1;"
+				"slli   a1, a2, 30;"
+				);
+		ets_run();
+}
+//=============================================================================
+// ROM-BIOS запускает код с адреса 0x40100000
+// при опцииях перезагрузки 'Jump Boot', если:
+// GPIO0 = "0", GPIO1 = "1", GPIO2 = "0" (boot mode:(2,x))
+// jump_boot() перенесено в main-vectors.c
+//-----------------------------------------------------------------------------
+#ifdef USE_RAPID_LOADER
+typedef void (*tloader)(uint32 addr);
+#else
+void ICACHE_FLASH_ATTR loader(uint32 addr)
+{
+	__asm__ __volatile__ (
+		"l32i.n	a3, a2, 0\n"	// SPIFlashHeader.head : bit0..7: = 0xE9, bit8..15: Number of segments, ...
+		"l32i.n	a7, a2, 4\n"	// Entry point
+		"extui	a3, a3, 8, 4\n" // Number of segments & 0x0F
+		"addi.n	a2, a2, 8\n"	// p SPIFlashHeadSegment
+		"j		4f\n"
+	"1:\n"
+		"l32i.n	a5, a2, 0\n"	// Memory offset
+		"addi.n	a4, a2, 8\n"	// p start data
+		"l32i.n	a2, a2, 4\n"	// Segment size
+		"srli	a2, a2, 2\n"	// size >> 2
+		"addx4	a2, a2, a4\n"	// + (size >> 2)
+		"j		3f\n"
+	"2:\n"
+		"l32i.n	a6, a4, 0\n"	// flash data
+		"addi.n	a4, a4, 4\n"
+		"s32i.n	a6, a5, 0\n"	// Memory data
+		"addi.n	a5, a5, 4\n"
+	"3:\n"
+		"bne	a2, a4, 2b\n"	// next SPIFlashHeadSegment != cur
+		"4:\n"
+		"addi.n	a3, a3, -1\n"	// Number of segments - 1
+		"bnei	a3, -1, 1b\n"	// end segments ?
+
+		"movi.n	a2, 1\n"
+		"slli	a1, a2, 30\n"	// стек в 0x400000000
+
+		"jx		a7\n" 			// callx0 a7"
+	);
+}
+#endif
+void call_jump_boot(void)
+{
+	SelectSpiFunction();
+	SPIFlashCnfig(5,4);
+	SPIReadModeCnfig(0);
+	set_qspi_flash_cache();
+	Wait_SPI_Idle(flashchip);
+#ifdef DEBUG_UART
+	os_printf("Jump Boot...\n");
+#endif
+#ifdef USE_RAPID_LOADER
+	tloader loader = (tloader)USE_RAPID_LOADER;
+	loader(USE_RAPID_LOADER+0x40);
+#else
+	loader(0x40200000); // загрузка с начала flash
+#endif
+}
 //=============================================================================
 // Стандартный вывод putc (UART0)
 //-----------------------------------------------------------------------------
@@ -426,7 +483,7 @@ void ICACHE_FLASH_ATTR startup_uart_init(void)
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR startup(void)
 {
-	ets_set_user_start(call_user_start); // установить адрес для возможной перезагрузки сразу в call_user_start()
+	ets_set_user_start(jump_boot); // установить адрес для возможной перезагрузки сразу в call_user_start()
 	// cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
 	if(rom_i2c_readReg(103,4,1) != 136) { // 8: 40MHz, 136: 26MHz
 		if(get_sys_const(sys_const_crystal_26m_en) == 1) { // soc_param0: 0: 40MHz, 1: 26MHz, 2: 24MHz
@@ -447,6 +504,13 @@ void ICACHE_FLASH_ATTR startup(void)
 	while(ptr < &_bss_end) *ptr++ = 0;
 //	user_init_flag = false; // итак всё равно false из-за обнуления данных в сегменте
 	//
+#if defined(TIMER0_USE_NMI_VECTOR)
+	__asm__ __volatile__ (
+			"movi	a2, 0x401\n"
+			"slli	a2, a2, 20\n" // a2 = 0x40100000
+			"wsr.vecbase	a2\n"
+			);
+#endif
 	_xtos_set_exception_handler(EXCCAUSE_UNALIGNED, default_exception_handler);
 	_xtos_set_exception_handler(EXCCAUSE_ILLEGAL, default_exception_handler);
 	_xtos_set_exception_handler(EXCCAUSE_INSTR_ERROR, default_exception_handler);

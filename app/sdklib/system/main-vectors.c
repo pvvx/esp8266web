@@ -141,29 +141,27 @@ void timer0_init(void *func, uint32 par)
   {
     _stext = .;
     _text_start = ABSOLUTE(.);
-    *(.vectors.text)
+    *(.vectors.text) <--
     *(.entry.text)
     ..... */
-void __attribute__((section(".vectors.text"))) call_user_start(void)
+void __attribute__((section(".vectors.text"))) jump_boot(void)
 {
 	__asm__ __volatile__ (
-#if defined(USE_TIMER0) && defined(TIMER0_USE_NMI_VECTOR)
-			"movi	a2, 0x401\n"
-			"slli	a2, a2, 20\n" // a2 = 0x40100000
-			"wsr.vecbase	a2\n"
-#endif
-			"j			call_user_start1\n"
-#if defined(USE_TIMER0) && defined(TIMER0_USE_NMI_VECTOR)
+// +0x00 0x40100000
+			"j			call_jump_boot\n"
+#if defined(TIMER0_USE_NMI_VECTOR)
 			".align 	16\n"
 //			".global	_DebugExceptionVector\n"
 "_DebugExceptionVector:\n"	// +0x10
 			"1:	waiti	2\n" // XCHAL_DEBUGLEVEL // unexpected debug exception, loop in low-power mode
 			"j			1b\n" 		// infinite loop - unexpected debug exception
 #endif
+#if defined(USE_TIMER0)
 			".align 	4\n"
 			".global	timer0_cb, timer0_arg\n"
 "timer0_cb:	.word	0\n"
 "timer0_arg:.word	0\n"
+#endif
 #if defined(USE_TIMER0) && defined(TIMER0_USE_NMI_VECTOR)
 			".align 	16\n"
 //			".global	_NMIExceptionVector\n"
