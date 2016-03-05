@@ -1,4 +1,4 @@
-error REASON_DEEP_SLEEP_AWAKE in libmmain.a
+Path libmmain.a - error deep_sleep
 00001483: 08 82
 00001484: 71 69
 00001485: 12 42
