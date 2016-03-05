@@ -381,7 +381,7 @@ PROVIDE ( ets_tab_task = 0x3FFFDAC0 );
 PROVIDE ( timer_list = 0x3FFFDDB0 );
 /*PROVIDE ( debug_timer = 0x3FFFDDB4 );
 PROVIDE ( debug_timerfn = 0x3FFFDDB8 ); */
-
+PROVIDE ( rom_bss_end = 0x3FFFEB30 ); /* stask: 0x3FFFEB30..0x3FFFFFFF 0x14D0 = 5328 bytes */
 /* 0x3FFFE360..0x3FFFEA80 ram buf max 1824 bytes */
 PROVIDE ( _sprintf_buf = 0x3FFFE360 ); /* char * _sprintf_buf; - use ets_sprintf */
 PROVIDE ( print_mem_buf = 0x3FFFE364 ); /* os_printf_plus() + ets_sprintf() buf 1820 bytes */

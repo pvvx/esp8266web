@@ -229,6 +229,10 @@ void ICACHE_FLASH_ATTR loader(uint32 addr)
 #endif
 void call_jump_boot(void)
 {
+	ets_intr_lock();
+	ets_isr_mask(0xFFFFFFFF); // убить все прерывания
+	IO_RTC_4 = 0; // Отключить блок WiFi (уменьшение потребления на время загрузки)
+	WDT_FEED = WDT_FEED_MAGIC;
 	SelectSpiFunction();
 	SPIFlashCnfig(5,4);
 	SPIReadModeCnfig(0);
@@ -244,6 +248,12 @@ void call_jump_boot(void)
 	loader(0x40200000); // загрузка с начала flash
 #endif
 }
+/*
+void restart(void)
+{
+	ets_uart_printf("Restart...");
+	call_jump_boot();
+}*/
 //=============================================================================
 // Стандартный вывод putc (UART0)
 //-----------------------------------------------------------------------------
@@ -483,7 +493,8 @@ void ICACHE_FLASH_ATTR startup_uart_init(void)
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR startup(void)
 {
-	ets_set_user_start(jump_boot); // установить адрес для возможной перезагрузки сразу в call_user_start()
+	ets_isr_mask(0xFFFFFFFF); // убить все прерывания
+	ets_set_user_start(jump_boot); // установить адрес для возможной перезагрузки по доп. веткам ROM-BIOS
 	// cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
 	if(rom_i2c_readReg(103,4,1) != 136) { // 8: 40MHz, 136: 26MHz
 		if(get_sys_const(sys_const_crystal_26m_en) == 1) { // soc_param0: 0: 40MHz, 1: 26MHz, 2: 24MHz

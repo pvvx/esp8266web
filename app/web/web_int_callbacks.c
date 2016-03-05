@@ -628,7 +628,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           else ifcmp("rst") tcp_puts("%u", system_get_rst_info()->reason);
           else ifcmp("clkcpu") tcp_puts("%u", ets_get_cpu_frequency());
           else ifcmp("sleep_old") tcp_puts("%u", deep_sleep_option); // если нет отдельного питания RTC и deep_sleep не устанавливался/применялся при текущем включения питания чипа, то значение неопределенно (там хлам).
-//          else ifcmp("test") tcp_puts("%d", cal_rf_ana_gain() ); //
+//          else ifcmp("test") { };
           else ifcmp("reset") web_conn->web_disc_cb = (web_func_disc_cb)_ResetVector;
           else ifcmp("restart") web_conn->web_disc_cb = (web_func_disc_cb)system_restart;
           else ifcmp("ram") tcp_puts("0x%08x", *((uint32 *)(ahextoul(cstr+3)&(~3))));

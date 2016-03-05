@@ -488,7 +488,7 @@ typedef enum {
 /* RTC_SLP_VAL: 0x60000704 */
 #define IO_RTC_SLP_VAL			rtc_[1]	// the target value of RTC_COUNTER for wakeup from light-sleep/deep-sleep
 //0x60000708
-#define IO_RTC_2				rtc_[2]	// bit21 - rtc_get_reset_reason(), bit20 - rtc_enter_sleep()
+#define IO_RTC_2				rtc_[2]	// bit21 - rtc_get_reset_reason() { & (1<<21) }, bit20 = 1 - rtc_enter_sleep()
 //0x6000070C
 #define IO_RTC_3				rtc_[3]
 //0x60000710
@@ -497,9 +497,9 @@ typedef enum {
 //bit31 =1 источник тактирования для I2S, ... = PLL (80MHz)
 //bit25,26 =1 источник тактирования для SAR ... = PLL (80MHz)
 //0x60000714
-#define IO_RTC_5				rtc_[5]	// bitrtc_get_reset_reason()
+#define IO_RTC_5				rtc_[5]	// bit0..3: rtc_get_reset_reason()
 //0x60000718
-#define IO_RTC_6				rtc_[6]	// bitrtc_get_reset_reason()
+#define IO_RTC_6				rtc_[6]	// rtc_get_reset_reason()
 /* RTC_SLP_CNT_VAL:	0x6000071C */
 #define IO_RTC_SLP_CNT_VAL		rtc_[7]	// the current value of RTC_COUNTER
 /* IO_RTC_INT_ST:	0x60000720 */
