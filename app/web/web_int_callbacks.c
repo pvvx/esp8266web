@@ -424,9 +424,8 @@ void ICACHE_FLASH_ATTR get_new_url(TCP_SERV_CONN *ts_conn)
 	uint32 ip = 0;
 	uint32 ip_ap = 0;
 	uint32 ip_st = 0;
-//	int z  = NULL_MODE;
 	struct ip_info wifi_info;
-	uint8 opmode = wifi_get_opmode();
+	WIFI_MODE opmode = wifi_get_opmode();
 	if(opmode == STATIONAP_MODE) {
 		if((opmode & STATION_MODE) && wifi_get_ip_info(STATION_IF, &wifi_info)) {
 			ip_st = wifi_info.ip.addr;
@@ -444,7 +443,7 @@ void ICACHE_FLASH_ATTR get_new_url(TCP_SERV_CONN *ts_conn)
 		};
 	};
 	opmode &= wificonfig.b.mode;
-	if(opmode == 0) opmode = wificonfig.b.mode;
+	if(WIFI_DISABLED == opmode) opmode = wificonfig.b.mode;
 	if(wificonfig.ap.ipinfo.ip.addr == 0 || (opmode & SOFTAP_MODE)) {
 		ip = wificonfig.ap.ipinfo.ip.addr;
 #ifdef USE_NETBIOS
@@ -782,7 +781,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
             cstr+=3;
 			struct ip_info wifi_info;
             if(if_index == SOFTAP_IF) {
-            	// SOFTAP
+            	// SOFTAP_MODE
             	ifcmp("dhcp") tcp_puts("%d", (dhcps_flag==0)? 0 : 1);
 				else ifcmp("mac") {
 					uint8 macaddr[6];
@@ -825,7 +824,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 				};
             }
             else { 
-            	// STATION
+            	// STATION_MODE
             	ifcmp("dhcp") tcp_puts("%d", (dhcpc_flag==0)? 0 : 1);
             	else ifcmp("rssi") tcp_puts("%d", wifi_station_get_rssi());
     	        else ifcmp("aucn") tcp_puts("%d", wifi_station_get_auto_connect());

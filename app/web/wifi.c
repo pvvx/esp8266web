@@ -66,7 +66,7 @@ void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
  ******************************************************************************/
 void ICACHE_FLASH_ATTR WiFi_go_to_sleep(enum sleep_type mode, uint32 time_us)
 {
-	wifi_set_opmode_current(NULL_MODE);
+	wifi_set_opmode_current(WIFI_DISABLED);
 	wifi_fpm_set_sleep_type(mode); //	wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
 	wifi_fpm_open();
 	wifi_fpm_do_sleep(time_us);
@@ -349,7 +349,7 @@ void ICACHE_FLASH_ATTR Set_default_wificfg(struct wifi_config *wcfg,
 	os_memset(wcfg, 0, sizeof(wificonfig));
 	uwifi_chg wset;
 	wset.ui = wifi_set_mask;
-	if (wset.b.mode) wcfg->b.mode = WIFI_MODE;
+	if (wset.b.mode) wcfg->b.mode = DEFAULT_WIFI_MODE;
 	if (wset.b.phy)	wcfg->b.phy = PHY_MODE;
 //	if (wset.b.chl)
 		wcfg->b.chl = 1; // for sniffer
@@ -585,10 +585,10 @@ void ICACHE_FLASH_ATTR wifi_start_scan(void)
 #if DEBUGSOO > 1
 	os_printf("\nStart Wifi Scan...");
 #endif
-	int x = wifi_get_opmode();
-	if(!(x&1)) {
+	WIFI_MODE curr_mode = wifi_get_opmode();
+	if(!(curr_mode & STATION_MODE)) {
 		wifi_station_set_auto_connect(0);
-		wifi_set_opmode_current(x|STATION_MODE);
+		wifi_set_opmode_current(curr_mode | STATION_MODE);
 	}
     if(! wifi_station_scan(NULL, wifi_scan_cb)) {
 #if DEBUGSOO > 1

@@ -280,7 +280,7 @@ netbios_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *addr, u
 			uint32 ip = 0;
 			{
 				struct ip_info wifi_info;
-				uint8 opmode = wifi_get_opmode();
+				WIFI_MODE opmode = wifi_get_opmode();
 				if((opmode & STATION_MODE)
 					&& wifi_get_ip_info(STATION_IF, &wifi_info)
 					&& wifi_info.ip.addr == ip_current_netif()->ip_addr.addr) {
