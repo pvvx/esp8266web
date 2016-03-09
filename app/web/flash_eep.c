@@ -20,12 +20,6 @@
 #ifdef USE_TCP2UART
 #include "tcp2uart.h"
 #endif
-#ifdef USE_WDRV
-#include "driver/wdrv.h"
-#endif
-#ifdef UDP_TEST_PORT
-#include "udp_test_port.h"
-#endif
 #ifdef USE_NETBIOS
 #include "netbios.h"
 #endif
@@ -329,12 +323,6 @@ bool ICACHE_FLASH_ATTR sys_read_cfg(void) {
 		syscfg.web_port = DEFAULT_WEB_PORT;
 		syscfg.web_twrec = 5;
 		syscfg.web_twcls = 5;
-#endif
-#ifdef USE_WDRV
-		syscfg.wdrv_remote_port = DEFAULT_WDRV_REMOTE_PORT; // (=0 - отключен)
-#endif
-#ifdef UDP_TEST_PORT
-		syscfg.udp_test_port = DEFAULT_UDP_TEST_PORT;	// (=0 - отключен)
 #endif
 #ifdef USE_MODBUS
 		syscfg.mdb_twrec = 10;

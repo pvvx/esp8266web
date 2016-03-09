@@ -20,20 +20,12 @@
 #include "web_srv.h"
 #endif
 
-#ifdef UDP_TEST_PORT
-#include "udp_test_port.h"
-#endif
-
 #ifdef USE_NETBIOS
 #include "netbios.h"
 #endif
 
 #ifdef USE_SNTP
 #include "sntp.h"
-#endif
-
-#ifdef USE_WDRV
-#include "driver/wdrv.h"
 #endif
 
 //#ifdef USE_MODBUS
@@ -113,9 +105,6 @@ extern void gdbstub_init(void);
 	os_printf("Set CPU CLK: %u MHz\n", ets_get_cpu_frequency());
 #endif
 	Setup_WiFi();
-#ifdef USE_WDRV
-    init_wdrv();
-#endif
 	WEBFSInit(); // файловая система
 
 	system_deep_sleep_set_option(0);

@@ -34,20 +34,26 @@ int ICACHE_FLASH_ATTR ovl_loader(uint8 *filename)
 				ovl_call = NULL;
 			}
 			while(fhead.head.number_segs) {
+				fhead.head.number_segs--;
 				if(WEBFSGetArray(ffile, (uint8*)&fseg, sizeof(fseg)) == sizeof(fseg)
 				&& fseg.segment_size != 0
-				) while(fseg.segment_size) {
-					len = mMIN(fseg.segment_size, sizeof(rambuf));
-					if(WEBFSGetArray(ffile, rambuf, len) == len) {
-						ret = -1; // ошибка
-						break;
+				) {
+					os_printf("ld:%p[%d] ", fseg.memory_offset, fseg.segment_size);
+					while(fseg.segment_size) {
+						len = mMIN(fseg.segment_size, sizeof(rambuf));
+						if(WEBFSGetArray(ffile, rambuf, len) != len) {
+							ret = -1; // ошибка
+							WEBFSClose(ffile);
+							return ret;
+						}
+						copy_s1d4((void *)fseg.memory_offset, rambuf, len);
+						fseg.memory_offset += len;
+						fseg.segment_size -= len;
 					}
-					copy_s1d4((void *)fseg.memory_offset, rambuf, len);
-					fseg.memory_offset += len;
-					fseg.segment_size -= len;
 				}
 			}
 			if(fhead.entry_point >= IRAM_BASE) {
+				os_printf("run:%p ", fhead.entry_point);
 				ovl_call = (tovl_call *)fhead.entry_point;
 				ret = 0;
 			}

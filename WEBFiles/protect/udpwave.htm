@@ -9,23 +9,28 @@
 ~inc:menu.inc~
 <div class="content">
 <h2 class="title">UDP Wave Port</h2>
-<table class="form">
-<tr><form method="post" action="">
-<td class="label">UDP host IP:</td>
-<td><input name='wdrv_ip' maxlength='31' value='~wdrv_ip~'></td>
-</tr><tr>
-<td class="label">UDP host port:</td>
-<td><input title='1..65535' name='wdrv_port' maxlength='5' value='~wdrv_port~'></td>
-</tr><tr>
-<td class="label">UDP remote port:</td>
-<td><input title='1..65535, 0 - close' name='wdrv_init' maxlength='5' value='~cfg_wdrv_port~'></td>
-<td class="left"><input type="submit" value="Set" class="button"></td></form>
-</tr><tr><form method="post" action=""><td class="label">Sample Feq:</td>
-<td><input title='1..192 000 Hz' name='wdrv_start' maxlength='6' value='~wdrv_freq~'></td>
-<td class="left"><input type="submit" value="Start" class="button"></form>
+<table class="form"><form method="post" action="">
+<tr><td class="label">UDP host IP:</td>
+<td><input id='ip72' name='mdbb72' maxlength='31' value='~mdbhd72~'></td></tr>
+<tr><td class="label">UDP host port:</td>
+<td><input title='3..65535' name='mdbw74' maxlength='5' value='~mdbuw74~'></td></tr>
+<tr><td class="label">UDP remote port:</td>
+<td><input title='3..65535' name='mdbw75' maxlength='5' value='~mdbuw75~'></td></tr>
+<tr><td class="label">Sample Feq:</td>
+<td><input title='1..192 000 Hz' name='mdbd70' maxlength='6' value='~mdbud70~'>
+<input type='hidden' name='ovl' value='wdrv.ovl'>
+<input type='hidden' name='ovl$' value='1'>
+<input type="submit" value="Load ovl" class="button"></td></tr></form>
+<tr><td></td><td>
 <form method="post" action="">
-<input type="hidden" name='wdrv_stop' value='0'><input type="submit" value="Stop" class="button">
-</form></td></tr></table>
+<input type='hidden' name='ovl$' value='2'>
+<input id='hid1' type="submit" value="Start" class="button"></form>
+<form method="post" action="">
+<input type='hidden' name='ovl$' value='3'>
+<input id='hid2' type="submit" value="Stop" class="button"></form>
+<form method="post" action="">
+<input type='hidden' name='ovl$' value='0'>
+<input id='hid3' type="submit" value="Close ovl" class="button"></form></td></tr></table>
 <h2 class="title">UDP send:</h2>
 <table class="scan">
 <tr><td>'?'</td><td>WDRV: ver<td></tr>
@@ -35,4 +40,9 @@
 <tr><td>'G'</td><td>Start wave<td></tr></p>
 </table></div>
 ~inc:footer.inc~
-</body></script></html>
+<script type="text/javascript">
+var $ = function(id){return document.getElementById(id);}
+var ih = ~mdbxd72~;
+$('ip72').value = eval(ih&255)+'.'+eval((ih>>8)&255)+'.'+eval((ih>>16)&255)+'.'+eval((ih>>24)&255);
+if(~mdbuw76~!=1) $('hid1').disabled=$('hid2').disabled=$('hid3').disabled=true;
+</script></body></html>

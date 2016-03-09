@@ -21,12 +21,6 @@
 #ifdef USE_CAPTDNS
 #include "captdns.h"
 #endif
-#ifdef USE_WDRV
-#include "driver/wdrv.h"
-#endif
-#ifdef UDP_TEST_PORT
-#include "udp_test_port.h"
-#endif
 #ifdef USE_NETBIOS
 #include "netbios.h"
 #endif
@@ -216,12 +210,6 @@ void ICACHE_FLASH_ATTR close_all_service(void)
 #ifdef USE_WEB
 		if(syscfg.web_port) webserver_close(syscfg.web_port); // webserver_init(0);
 #endif
-#ifdef UDP_TEST_PORT
-		udp_test_port_init(0);
-#endif
-#ifdef USE_WDRV
-		system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, 0);
-#endif
 		tcpsrv_close_all();
 		flg_open_all_service = false;
 	}
@@ -261,12 +249,6 @@ void ICACHE_FLASH_ATTR open_all_service(int flg)
 #endif
 #ifdef USE_NETBIOS
 	    if(syscfg.cfg.b.netbios_ena) netbios_init();
-#endif
-#ifdef UDP_TEST_PORT
-	    if(syscfg.udp_test_port) udp_test_port_init(syscfg.udp_test_port);
-#endif
-#ifdef USE_WDRV
-	    if(syscfg.wdrv_remote_port) system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, syscfg.wdrv_remote_port);
 #endif
 	}
     flg_open_all_service = true;

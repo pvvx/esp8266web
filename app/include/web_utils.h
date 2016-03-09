@@ -25,6 +25,7 @@ void print_hex_dump(uint8 *buf, uint32 len, uint8 k) ICACHE_FLASH_ATTR;
 // char* str_to_upper_case(char* text) ICACHE_FLASH_ATTR;
 uint32 str_array(uint8 *s, uint32 *buf, uint32 max_buf) ICACHE_FLASH_ATTR;
 uint32 str_array_w(uint8 *s, uint16 *buf, uint32 max_buf) ICACHE_FLASH_ATTR;
+uint32 str_array_b(uint8 *s, uint8 *buf, uint32 max_buf) ICACHE_FLASH_ATTR;
 char* word_to_lower_case(char* text) ICACHE_FLASH_ATTR;
 
 #endif /* _INCLUDE_WEB_UTILS_H_ */

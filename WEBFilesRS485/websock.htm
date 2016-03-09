@@ -1,54 +1,116 @@
 <!DOCTYPE html>
+<html><head>
 <meta charset="charset=windows-1251" />
-<title>WebSocket Test</title>
+<link href="ws2.css" rel="stylesheet" type="text/css" />
+<title>WebSocket Test</title></head>
+<body><h2>WebSocket Test</h2>
+<form name="publish">
+	<input type="button" id="OpCl" value="Open">
+	<input type="text" name="message" value="hellomsg">
+	<input type="submit" id="SndM" value="Send" disabled="1"><br>
+</form>
+<div id="console-div">
+	Log messages
+	<div id="consoleLog"></div>
+	<button id="clear">Clear Log</button>
+</div></body>
 <script language="javascript" type="text/javascript">
+var $ = function(id){return document.getElementById(id);}
 var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
-//var	wsUri = "ws://echo.websocket.org";
-var output;
-function init() {
-	output = document.getElementById("output");
-	testWebSocket();
+var ws, wstt, wsopen = 0;
+$("OpCl").onclick =  function() {
+	if(wsopen) {
+		ws.close();
+		$("OpCl").value = "Open";
+	}
+	else {
+		ws = new WebSocket(wsUri);
+		log("CONNECT: " + ws.url);
+		ws.onopen = function(evt) {
+			$("OpCl").value = "Close";
+			$("SndM").disabled = false;
+            log("CONNECTED");
+			wstt = setTimeout(wsping, 2500);
+		};
+		ws.onclose = function(evt) {
+			log("CLOSED: ("+evt.code+") "+evt.reason);
+			clearTimeout(wstt);
+			wsopen = 0;
+			$("SndM").disabled = true;
+		};
+		ws.onerror = function(event) {
+			logError("ERROR (" + event.data +", "+ event.code +", "+ event.reason + ")");
+			wsopen = 0;
+			$("SndM").disabled = true;
+		};
+		// обработчик входящих сообщений
+		ws.onmessage = function(evt) {
+			var data = evt.data;
+			if (typeof(data) == "string") {
+				//text
+				if(data != "ws:pong") logResponse("RECEIVED TEXT: " + data);
+			}
+			else if (data.byteLength) {
+				//arraybuffer
+				var u = new Uint8Array(data);
+				var bytes = [];
+				for (var i=0; i<u.byteLength; i++) {
+					bytes.push(u[i]);
+				}
+				logResponse("RECEIVED ARRAY BUFFER: " + bytes);
+			}
+			else if (data.size) {
+				//blob
+				var cb = function(result) {
+					logResponse("RECEIVED BLOB: " + result);
+				};
+			}
+			else {
+				logResponse("RECEIVED UNKNOWN TYPE: " + data);
+			}
+			clearTimeout(wstt);
+			wstt = setTimeout(wsping, 2500);
+		}
+		wsopen = 1;
+	}
 }
-function testWebSocket() {
-	websocket = new WebSocket(wsUri);
-	websocket.onopen = function(event) {
-		onOpen(event)
-	};
-	websocket.onclose = function(event) {
-		onClose(event)
-	};
-	websocket.onmessage = function(event) {
-		onMessage(event)
-	};
-	websocket.onerror = function(event) {
-		onError(event)
-	};
+function wsping() {ws.send("ws:ping"); wstt = setTimeout(wsping, 2500);}
+var consoleLog = $("consoleLog");
+$("clear").onclick = function() {
+	while (consoleLog.childNodes.length > 0) {
+	consoleLog.removeChild(consoleLog.lastChild);
+	}
 }
-function onOpen(event) {
-	writeToScreen("CONNECTED: " + wsUri);
-	doSend("hellomsg");
-}
-function onClose(event) {
-	writeToScreen("DISCONNECTED: " + event.code + ', ' + event.wasClean);
-}
-function onMessage(event) {
-	writeToScreen('<span style="color: blue;">RESPONSE: ' + event.data + '</span>');
-	websocket.close();
-}
-function onError(event) {
-	writeToScreen('<span style="color: red;">ERROR: ' + event.data + ', ' + event.code + ', ' + event.reason + '</span>');
-}
-function doSend(message) {
-	writeToScreen("SENT: " + message);
-	websocket.send(message);
-}
-function writeToScreen(message) {
-	var pre = document.createElement("p");
+var log = function(message) {
+	var pre = document.createElement("pre");
 	pre.style.wordWrap = "break-word";
 	pre.innerHTML = message;
-	output.appendChild(pre);
+	consoleLog.appendChild(pre);
+	consoleLog.scrollTop = consoleLog.scrollHeight;
+	while (consoleLog.childNodes.length > 25) {
+		consoleLog.removeChild(consoleLog.firstChild);
+	}
 }
-window.addEventListener("load", init, false);
+var logResponse = function(msg) {
+	log("<span style='color:blue'>"+msg+"</span>");
+}
+var logSend = function(msg) {
+	log("<span style='color:green'>"+msg+"</span>");
+}
+var logError = function(msg) {
+	log("<span style='color:red'>"+msg+"</span>");
+}
+document.forms.publish.onsubmit = function() {
+	clearTimeout(wstt);
+	try {
+		var text = this.message.value;
+		logSend("SEND TEXT: "+text);
+		ws.send(text);
+	} catch (e) {
+		logError("EXCEPTION: "+e);
+	}
+	wstt = setTimeout(wsping, 2500);
+	return false;
+}
 </script>
-<h2>WebSocket Test</h2>
-<div id="output"></div>
+</html>

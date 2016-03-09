@@ -36,10 +36,6 @@
 #include "sntp.h"
 #endif
 
-#ifdef USE_WDRV
-#include "driver/wdrv.h"
-#endif
-
 #ifdef USE_CAPTDNS
 #include "captdns.h"
 #endif
@@ -702,20 +698,6 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 		    	else tcp_put('?');
 		    }
 #endif
-#ifdef UDP_TEST_PORT
-		    else ifcmp("udp_") {
-		    	cstr+=4;
-		    	ifcmp("port") tcp_puts("%u", syscfg.udp_test_port);
-		    	else tcp_put('?');
-		    }
-#endif		    
-#ifdef USE_WDRV
-		    else ifcmp("wdrv_") {
-		    	cstr+=5;
-		    	ifcmp("port") tcp_puts("%u", syscfg.wdrv_remote_port);
-		    	else tcp_put('?');
-		    }
-#endif
 			else ifcmp("overclk") tcp_put((syscfg.cfg.b.hi_speed_enable)? '1' : '0');
 			else ifcmp("pinclr") tcp_put((syscfg.cfg.b.pin_clear_cfg_enable)? '1' : '0');
 			else ifcmp("debug") tcp_put((syscfg.cfg.b.debug_print_enable)? '1' : '0');
@@ -734,9 +716,13 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           cstr+=5;
           ifcmp("rdcfg") Read_WiFi_config(&wificonfig, WIFI_MASK_ALL);
           else ifcmp("newcfg") {
-//        	  tcp_puts("%d", New_WiFi_config(WIFI_MASK_ALL));
-        	  web_conn->web_disc_cb = (web_func_disc_cb)New_WiFi_config;
-        	  web_conn->web_disc_par = WIFI_MASK_ALL;
+/*        	  if(CheckSCB(SCB_WEBSOC)) {
+        		  tcp_puts("%d",New_WiFi_config(WIFI_MASK_ALL));
+        	  }
+        	  else { */
+        		  web_conn->web_disc_cb = (web_func_disc_cb)New_WiFi_config;
+        		  web_conn->web_disc_par = WIFI_MASK_ALL;
+//        	  }
           }
 //          else ifcmp("csta") tcp_puts("%d", wifi_station_get_connect_status());
           else ifcmp("mode") tcp_puts("%d", wifi_get_opmode());
@@ -1068,8 +1054,13 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 			if(*cstr == ':') {
 				int i = ovl_loader(cstr + 1);
 				if (i == 0) {
-					web_conn->web_disc_cb = (web_func_disc_cb)ovl_loader; // адрес старта оверлея
-					web_conn->web_disc_par = 1; // параметр функции - инициализация
+					if(CheckSCB(SCB_WEBSOC)) {
+						tcp_puts("%d", ovl_call(1));
+					}
+					else {
+						web_conn->web_disc_cb = (web_func_disc_cb)ovl_call; // адрес старта оверлея
+						web_conn->web_disc_par = 1; // параметр функции - инициализация
+					}
 				}
 				tcp_puts("%d", i);
 			}
@@ -1088,21 +1079,6 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 		else ifcmp("sntp_") {
 			cstr += 5;
 			ifcmp("time") tcp_puts("%u", get_sntp_time());
-			else tcp_put('?');
-		}
-#endif
-#ifdef USE_WDRV
-		else ifcmp("wdrv_") {
-			cstr+=5;
-			ifcmp("freq") {
-				tcp_puts("%u", wdrv_sample_rate);
-			}
-			else ifcmp("port") {
-				tcp_puts("%u", wdrv_host_port);
-			}
-			else ifcmp("ip") {
-				tcp_puts(IPSTR, IP2STR(&wdrv_host_ip));
-			}
 			else tcp_put('?');
 		}
 #endif

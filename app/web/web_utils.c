@@ -236,6 +236,31 @@ uint32 ICACHE_FLASH_ATTR str_array_w(uint8 *s, uint16 *buf, uint32 max_buf)
 	}
 	return ret;
 }
+uint32 ICACHE_FLASH_ATTR str_array_b(uint8 *s, uint8 *buf, uint32 max_buf)
+{
+	uint32 ret = 0;
+	uint8 *sval = NULL;
+	while(max_buf > ret) {
+		if(sval == NULL) {
+			if (*s == '-' && s[1] >= '0' && s[1] <= '9') {
+				sval = s;
+				s++;
+			}
+			else if (*s >= '0' && *s <= '9') sval = s;
+		}
+		if(*s == ',' || *s == '.' || *s <= ')') {
+			if(sval != NULL) {
+				*buf = ahextoul(sval);
+				sval = NULL;
+			}
+			buf++;
+			ret++;
+			if(*s < ')') return ret;
+		}
+		s++;
+	}
+	return ret;
+}
 /******************************************************************************
  * FunctionName : strtmac
 *******************************************************************************/

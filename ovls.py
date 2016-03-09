@@ -49,7 +49,8 @@ if __name__ == '__main__':
 #			print fields[2] + "\t" + fields[0]
 			try:
 				if fields[2].find("$") == -1 :
-					ff.write("PROVIDE\t("+ fields[2] + " = 0x" + fields[0] + ");\n")
+					if fields[2] != "call_user_start":
+						ff.write("PROVIDE\t("+ fields[2] + " = 0x" + fields[0] + ");\n")
 			except:
 				print "Error write files: " + filename + " !"
 				exit(1)				

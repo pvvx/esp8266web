@@ -9,6 +9,7 @@ TCP2UART: 300..3000000 Baud, Flow Control On/Off, Inverse On/Of all signals, ...
 RS-485: half-duplex 300..1000000 Baud <br>
 HTTP-Web services to more than 10 simultaneous open connections.<br>
 Websocket open uri: '/web.cgi'<br>
+Supports Overlay drivers.<br>
 
 TCP/HTTP transfer speed:<br>
 ~1 Mbytes/sec (debug off).<br>

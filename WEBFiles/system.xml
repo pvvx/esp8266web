@@ -69,8 +69,6 @@
  <modbus_twrec>~cfg_mdb_twrec~</modbus_twrec>
  <modbus_twcls>~cfg_mdb_twcls~</modbus_twcls>
  <modbus_reopen>~cfg_mdb_reop~</modbus_reopen>
- <udp_test_port>~cfg_udp_port~</udp_test_port>
- <wave_adc_port>~cfg_wdrv_port~</wave_adc_port>
  <hi_clock_cpu_enable>~cfg_overclk~</hi_clock_cpu_enable>
  <pin_rx_clr_cfg_enable>~cfg_pinclr~</pin_rx_clr_cfg_enable>
  <debug_print_gpio2_enable>~cfg_debug~</debug_print_gpio2_enable>
@@ -78,11 +76,6 @@
  <sntp_enable>~cfg_sntp~</sntp_enable>
  <capdns_enable>~cfg_cdns~</capdns_enable>
 </cfg>
-<wdrv>
- <wave_freq>~wdrv_freq~</wave_freq>
- <wave_host_ip>~wdrv_ip~</wave_host_ip>
- <wave_host_port>~wdrv_port~</wave_host_port>
-</wdrv>
 <wifi>
  <mode>~wifi_mode~</mode>
  <phy>~wifi_phy~</phy>

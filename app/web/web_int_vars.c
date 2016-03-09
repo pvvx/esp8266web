@@ -44,10 +44,6 @@
 struct ping_option pingopt; // for test
 #endif
 
-#ifdef USE_WDRV
-#include "driver/wdrv.h"
-#endif
-
 #ifdef USE_CAPTDNS
 #include "captdns.h"
 #endif
@@ -60,10 +56,6 @@ struct ping_option pingopt; // for test
 #ifdef USE_RS485DRV
 #include "driver/rs485drv.h"
 #include "mdbrs485.h"
-#endif
-
-#ifdef UDP_TEST_PORT
-#include "udp_test_port.h"
 #endif
 
 #ifdef USE_OVERLAY
@@ -154,6 +146,11 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
         			uint32 buf[32];
         			os_memset(buf,0,sizeof(buf));
         			WrMdbData((uint8 *)&buf, addr, str_array(pvar, buf, 32) << 1);
+        		}
+        		else if(cstr[-1]=='b') {
+        			uint8 buf[32];
+        			os_memset(buf,0,sizeof(buf));
+        			WrMdbData((uint8 *)&buf, addr, str_array_b(pvar, buf, 32));
         		}
         		else if(cstr[-1]=='a') {
         			uint32 i = 0;
@@ -289,15 +286,6 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
         	}
 #endif
 	    }
-#ifdef UDP_TEST_PORT
-	    else ifcmp("udp_") {
-	    	cstr+=4;
-	    	ifcmp("port") {
-		    	udp_test_port_init(val);
-	    		syscfg.udp_test_port = val;
-	    	}
-	    }
-#endif
 #ifdef USE_MODBUS
 	    else ifcmp("mdb_") {
 	    	cstr+=4;
@@ -332,15 +320,6 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #if DEBUGSOO > 5
         	else os_printf(" - none!\n");
 #endif
-	    }
-#endif
-#ifdef USE_WDRV
-	    else ifcmp("wdrv_") {
-	    	cstr+=5;
-	    	ifcmp("port") {
-				if(wdrv_init(val)) syscfg.wdrv_remote_port = val; // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
-				//if(syscfg.wdrv_remote_port != 0 && wdrv_host_port != 0 && wdrv_host_ip.addr != 0) wdrv_start(wdrv_sample_rate);
-	    	}
 	    }
 #endif
 		else ifcmp("overclk") 	syscfg.cfg.b.hi_speed_enable = (val)? 1 : 0;
@@ -743,8 +722,13 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			cstr += 3;
 			if(*cstr == 0) {
 				if (ovl_loader(pvar) == 0) {
-					web_conn->web_disc_cb = (web_func_disc_cb)ovl_loader; // адрес старта оверлея
-					web_conn->web_disc_par = 1; // параметр функции - инициализация
+					if(CheckSCB(SCB_WEBSOC)) {
+						ovl_call(1);
+					}
+					else {
+						web_conn->web_disc_cb = (web_func_disc_cb)ovl_call; // адрес старта оверлея
+						web_conn->web_disc_par = 1; // параметр функции - инициализация
+					}
 				}
 			}
 			else if(*cstr == '$') {
@@ -755,32 +739,6 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			}
 		}
 #endif
-#ifdef USE_WDRV
-	else ifcmp("wdrv_") {
-		cstr+=5;
-		ifcmp("freq") {
-			if(val > 0 && val <= MAX_SAMPLE_RATE)	wdrv_sample_rate = val;
-		}
-		else ifcmp("ip") {
-			val = ipaddr_addr(pvar);
-			if(val)	wdrv_host_ip.addr = val;
-			else wdrv_host_ip.addr = DEFAULT_WDRV_HOST_IP;
-		}
-		else ifcmp("port") {
-			if(val > 0 && val < 65536) wdrv_host_port = val;
-		}
-		else ifcmp("init") {
-			if(wdrv_init(val)) syscfg.wdrv_remote_port = val;
-			 // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_INIT, val);
-		}
-		else ifcmp("start") {
-			if(val > 0 && val <= MAX_SAMPLE_RATE) wdrv_start(val); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_START, val);
-		}
-		else ifcmp("stop") {
-			wdrv_stop(); // system_os_post(WDRV_TASK_PRIO, WDRV_SIG_STOP, 0);
-		}
-	}
-#endif // USE_WDRV
 #ifdef USE_TIMER0
 	else ifcmp("tinit") {
 #ifdef TIMER0_USE_NMI_VECTOR
