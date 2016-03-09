@@ -66,6 +66,10 @@ struct ping_option pingopt; // for test
 #include "udp_test_port.h"
 #endif
 
+#ifdef USE_OVERLAY
+#include "overlay.h"
+#endif
+
 extern int rom_atoi(const char *);
 #define atoi rom_atoi
 
@@ -174,7 +178,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	else ifcmp("sys_") {
 		cstr+=4;
 		ifcmp("restart") {
-			if(val == 12345) 	web_conn->web_disc_cb = (web_func_disc_cb)system_restart;
+			if(val == 12345) web_conn->web_disc_cb = (web_func_disc_cb)system_restart;
 		}
 		else ifcmp("reset") {
 			if(val == 12345) web_conn->web_disc_cb = (web_func_disc_cb)_ResetVector;
@@ -733,6 +737,23 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
    		}
     }
 #endif
+#endif
+#ifdef USE_OVERLAY
+		else ifcmp("ovl") {
+			cstr += 3;
+			if(*cstr == 0) {
+				if (ovl_loader(pvar) == 0) {
+					web_conn->web_disc_cb = (web_func_disc_cb)ovl_loader; // адрес старта оверлея
+					web_conn->web_disc_par = 1; // параметр функции - инициализация
+				}
+			}
+			else if(*cstr == '$') {
+    			if(ovl_call != NULL) ovl_call(ahextoul(pvar));
+    		}
+			else if(*cstr == '@') {
+    			if(ovl_call != NULL) ovl_call((int)pvar);
+			}
+		}
 #endif
 #ifdef USE_WDRV
 	else ifcmp("wdrv_") {

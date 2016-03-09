@@ -53,6 +53,10 @@
 #include "driver/rs485drv.h"
 #endif
 
+#ifdef USE_OVERLAY
+#include "overlay.h"
+#endif
+
 /*extern uint32 adc_rand_noise;
 extern uint32 dpd_bypass_original;
 extern uint16 phy_freq_offset
@@ -1058,6 +1062,28 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         	}
         	else tcp_put('?');
         }
+#ifdef USE_OVERLAY
+		else ifcmp("ovl") {
+			cstr += 3;
+			if(*cstr == ':') {
+				int i = ovl_loader(cstr + 1);
+				if (i == 0) {
+					web_conn->web_disc_cb = (web_func_disc_cb)ovl_loader; // адрес старта оверлея
+					web_conn->web_disc_par = 1; // параметр функции - инициализация
+				}
+				tcp_puts("%d", i);
+			}
+			else if(*cstr == '$') {
+    			if(ovl_call != NULL) tcp_puts("%d", ovl_call(ahextoul(cstr + 1)));
+    			else tcp_put('?');
+    		}
+			else if(*cstr == '@') {
+    			if(ovl_call != NULL) tcp_puts("%d", ovl_call((int) cstr + 1));
+    			else tcp_put('?');
+    		}
+			else tcp_put('?');
+		}
+#endif
 #ifdef USE_SNTP
 		else ifcmp("sntp_") {
 			cstr += 5;

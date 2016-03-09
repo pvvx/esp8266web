@@ -429,7 +429,7 @@ static const uint8_t base64map[128] ICACHE_RODATA_ATTR =
 //=============================================================================
 bool ICACHE_FLASH_ATTR base64decode(const uint8 *in, int len, uint8_t *out, int *outlen)
 {
-	uint8 *map = UartDev.rcv_buff.pRcvMsgBuff;
+	uint8 *map = (uint8 *)UartDev.rcv_buff.pRcvMsgBuff;
 	ets_memcpy(map, base64map, 128);
     int g, t, x, y, z;
     uint8_t c;

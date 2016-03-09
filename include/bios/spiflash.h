@@ -23,6 +23,8 @@ struct SPIFlashHead { // заголовок flash (использует загр
 	struct SPIFlashHsz hsz; // options
 }  __attribute__((packed));
 
+#define LOADER_HEAD_ID 0xE9
+
 struct SPIFlashHeadSegment {
 	uint32 memory_offset; // Memory offset
 	uint32 segment_size; // Segment size
@@ -31,7 +33,6 @@ struct SPIFlashHeadSegment {
 struct SPIFlashHeader { // полный заголовок flash (использует загрузчик BIOS)
 	struct SPIFlashHead head;
 	uint32 entry_point; // Entry point
-	struct SPIFlashHeadSegment seg; // Segment
 }  __attribute__((packed));
 
 typedef struct{

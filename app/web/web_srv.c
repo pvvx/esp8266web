@@ -34,6 +34,10 @@
 #include "captdns.h"
 #endif
 
+#ifdef USE_OVERLAY
+#include "overlay.h"
+#endif
+
 #define USE_WEB_NAGLE // https://en.wikipedia.org/wiki/Nagle%27s_algorithm
 #define MIN_REQ_LEN  7  // Minimum length for a valid HTTP/0.9 request: "GET /\r\n" -> 7 bytes
 #define CRLF "\r\n"
@@ -832,7 +836,7 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 		if(isWEBFSLocked) return false;
 		// поиск файла на диске
 		if(!web_inc_fopen(ts_conn, pstr)) {
-			uint16 i = os_strlen(pbuf);
+			uint32 i = os_strlen(pbuf);
 			if(i + sizeof(http_default_file) < MAX_FILE_NAME_SIZE - 1) {
 				// добавить к имени папки "/index.htm"
 				pbuf[i] = '/';
@@ -857,7 +861,7 @@ LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 	uint32 pdata = 0;
 	uint8 pbuf[mMAX(mMAX(sizeHTTPdefault,sizeHTTPfserror), sizeHTTPfsupload)];
-	uint16 size = 0;
+	uint32 size = 0;
 	switch(web_conn->webfile) {
 	case WEBFS_WEBCGI_HANDLE:
 		pdata = (uint32)((void *)HTTPdefault);
@@ -883,7 +887,7 @@ LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 }
 /******************************************************************************
 *******************************************************************************/
-LOCAL int ICACHE_FLASH_ATTR web_find_cbs(uint8 * chrbuf, uint16 len) {
+LOCAL int ICACHE_FLASH_ATTR web_find_cbs(uint8 * chrbuf, uint32 len) {
   int i;
   for(i = 0; i < len; i++)  if(chrbuf[i] == '~')  return i;
   return -1;
@@ -957,8 +961,8 @@ LOCAL void ICACHE_FLASH_ATTR webserver_send_fdata(TCP_SERV_CONN *ts_conn) {
 			else {
 				uint8 *pstr = &web_conn->msgbuf[web_conn->msgbuflen]; // указатель в буфере
 				// запомнить указатель в файле. ftell(fp)
-				uint16 max = mMIN(web_conn->msgbufsize - web_conn->msgbuflen, SCB_SEND_SIZE); // читаем по 128 байт ?
-				uint16 len = WEBFSGetArray(web_conn->webfile, pstr, max);
+				uint32 max = mMIN(web_conn->msgbufsize - web_conn->msgbuflen, SCB_SEND_SIZE); // читаем по 128 байт ?
+				uint32 len = WEBFSGetArray(web_conn->webfile, pstr, max);
 				// прочитано len байт в буфер по указателю &sendbuf[msgbuflen]
 				if(len) { // есть байты для передачи, ищем string "~calback~"
 					int cmp = web_find_cbs(pstr, len);
@@ -1190,7 +1194,7 @@ Content-Disposition: form-data; name="stop"\r\n\r\n
 ------WebKitFormBoundaryugGNBVFOk6qxfe22--\r\n */
 //-----------------------------------------------------------------------------
 const char crlf_end_boundary[] ICACHE_RODATA_ATTR = "--" CRLF;
-LOCAL int ICACHE_FLASH_ATTR find_boundary(HTTP_UPLOAD *pupload, uint8 *pstr, uint16 len)
+LOCAL int ICACHE_FLASH_ATTR find_boundary(HTTP_UPLOAD *pupload, uint8 *pstr, uint32 len)
 {
 	int x = len - 6 - pupload->sizeboundary;
 	if(x <= 0) return 0; // разделитель (boundary) не найден - докачивать буфер
@@ -1230,6 +1234,9 @@ const char disk_err1_filename[] ICACHE_RODATA_ATTR = "/disk_er1.htm";
 const char disk_err2_filename[] ICACHE_RODATA_ATTR = "/disk_er2.htm";
 const char disk_err3_filename[] ICACHE_RODATA_ATTR = "/disk_er3.htm";
 const char sysconst_filename[] ICACHE_RODATA_ATTR = "sysconst";
+#ifdef USE_OVERLAY
+const char overlay_filename[] ICACHE_RODATA_ATTR = "overlay";
+#endif
 const char sector_filename[] ICACHE_RODATA_ATTR = "fsec_";
 #define sector_filename_size 5
 const char file_label[] ICACHE_RODATA_ATTR = "file";
@@ -1239,8 +1246,8 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 	HTTP_UPLOAD *pupload = (HTTP_UPLOAD *)ts_conn->pbufo;
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 	if(pupload == NULL) return 500; // ошибка сервера
-	uint16 ret;
-	uint16 len;
+	uint32 ret;
+	uint32 len;
 	uint8 *pnext;
 	uint8 *pstr;
 	while(web_conn->content_len && ts_conn->pbufi != NULL) {
@@ -1333,13 +1340,47 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 						isWEBFSLocked = true;
 						break;
 					}
+#ifdef USE_OVERLAY
+					else if(rom_xstrcmp(pupload->name, overlay_filename)) {
+						if(len < sizeof(struct SPIFlashHeader)) return 0; // докачивать
+						struct SPIFlashHeader *fhead = (struct SPIFlashHeader *)pstr;
+						if(web_conn->content_len - pupload->sizeboundary < sizeof(fhead)
+						|| fhead->head.id != LOADER_HEAD_ID) {
+							if(isWEBFSLocked) return 400;
+							SetSCB(SCB_REDIR);
+							rom_xstrcpy(pupload->filename, disk_err1_filename); // os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // неверный формат
+							return 200;
+						};
+						if(fhead->entry_point >= IRAM_BASE && ovl_call != NULL) {
+							ovl_call(0); // close прошлый оверлей
+							ovl_call = NULL;
+						}
+						pupload->start = fhead->entry_point;
+						pupload->segs = fhead->head.number_segs;
+						if(pupload->segs) {
+							pupload->fsize = sizeof(struct SPIFlashHeadSegment);
+							pupload->status = 5; // = 5 загрузка файла оверлея, начать с загрузки заголовка сегмента
+						}
+						else {
+							pupload->fsize = 0;
+							pupload->status = 4; // = 4 загрузка файла оверлея, запуск entry_point
+						}
+						//
+						len = sizeof(struct SPIFlashHeader);
+						ts_conn->cntri += len;
+						if(!web_trim_bufi(ts_conn, &ts_conn->pbufi[len], ts_conn->sizei - len)) return 500;
+						web_conn->content_len -= len;
+						//
+						break;
+					}
+#endif
 					else if(rom_xstrcmp(pupload->name, sysconst_filename)) {
 						pupload->fsize = SIZE_SYS_CONST;
 						pupload->faddr = esp_init_data_default_addr;
 						pupload->status = 2; // = 2 загрузка файла во flash
 						break;
 					}
-					else if(rom_xstrcmp(pupload->name, sector_filename)){
+					else if(rom_xstrcmp(pupload->name, sector_filename)) {
 						pupload->fsize = SPI_FLASH_SEC_SIZE;
 						pupload->faddr = ahextoul(&pupload->name[sector_filename_size]) << 12;
 						pupload->status = 2; // = 2 загрузка файла сектора во flash
@@ -1383,7 +1424,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #if DEBUGSOO > 4
 				os_printf("fdata ");
 #endif
-				uint16 block_size = mMIN(max_len_buf_write_flash + 8 + pupload->sizeboundary, web_conn->content_len);
+				uint32 block_size = mMIN(max_len_buf_write_flash + 8 + pupload->sizeboundary, web_conn->content_len);
 				if(ts_conn->sizei < block_size) return 0; // докачивать
 				ret = find_boundary(pupload, pstr, block_size);
 #if DEBUGSOO > 4
@@ -1465,6 +1506,114 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 					if(ret == 200)	return ret;
 				}
 				break;
+			}
+#ifdef USE_OVERLAY
+			case 4: // загрузка данных/кода оверлея
+			case 5: // загрузка заголовка данных оверлея
+			{
+				uint32 block_size = mMIN(max_len_buf_write_flash + 8 + pupload->sizeboundary, web_conn->content_len);
+				if(ts_conn->sizei < block_size) return 0; // докачивать
+				ret = find_boundary(pupload, pstr, block_size);
+				if((ret == 1 || ret == 200)) { // найден конец или новый boundary?
+					len = mMIN(block_size, pupload->pbndr - 2 - ts_conn->pbufi);
+				}
+				else {
+					len = mMIN(max_len_buf_write_flash, web_conn->content_len - 8 - pupload->sizeboundary);
+				}
+				block_size = len;
+				while(block_size) {
+#if DEBUGSOO > 5
+					os_printf("blk:%d,st:%d,fs:%d,%d  ", block_size, pupload->status, pupload->fsize, pupload->segs);
+#endif
+					if(pupload->status == 5) {
+						if(block_size >= sizeof(struct SPIFlashHeadSegment)) { // размер данных
+							if(pupload->segs) { //
+								os_memcpy(&pupload->faddr, pstr, 4);
+								os_memcpy(&pupload->fsize, &pstr[4], 4);
+#if DEBUGSOO > 4
+								os_printf("New seg ovl addr:%p[%p] ", pupload->faddr, pupload->fsize);
+#endif
+							}
+						}
+						else if(ret != 1 && ret != 200) { // не найден конец или boundary?
+							return 0; // докачивать
+						}
+						else {
+#if DEBUGSOO > 5
+							os_printf("err_load_fseg ");
+#endif
+//						if(block_size < sizeof(struct SPIFlashHeadSegment)
+//						|| pupload->segs == 0 //
+//						|| pupload->fsize > USE_OVERLAY) {
+							if(!isWEBFSLocked) {
+								SetSCB(SCB_REDIR);
+								rom_xstrcpy(pupload->filename, disk_err1_filename); // os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // не всё передано или неверный формат
+								return 200;
+							}
+							return 400; //  не всё передано или неверный формат
+						}
+						pupload->segs--; // счет сегментов
+						pupload->status = 4; // загрузка данных/кода оверлея
+						pstr += sizeof(struct SPIFlashHeadSegment);
+						block_size -= sizeof(struct SPIFlashHeadSegment);
+					};
+					uint32 i = mMIN(pupload->fsize, block_size);
+					if(i) {
+#if DEBUGSOO > 1
+						os_printf("Wr:%p[%p] ", pupload->faddr, i);
+#endif
+						copy_s1d4((void *)pupload->faddr, pstr, i);
+						block_size -= i;
+						pupload->faddr += i;
+						pstr += i;
+						pupload->fsize -= i;
+					};
+					if(pupload->fsize == 0) {
+						if(pupload->segs) { // все сегменты загружены?
+							pupload->status = 5; // загрузка заголовка данных оверлея
+						}
+						else { // все сегменты загружены
+							block_size = 0;
+							break; // break while(block_size)
+						}
+					};
+				}; // while(block_size)
+				if(len) {
+					ts_conn->cntri += len;
+					if(!web_trim_bufi(ts_conn, &ts_conn->pbufi[len], ts_conn->sizei - len)) return 500;
+					web_conn->content_len -= len;
+				};
+				if((ret == 1 || ret == 200)) { // найден конец или новый boundary?
+#if DEBUGSOO > 5
+					os_printf("fs:%d,%d ", pupload->fsize, pupload->segs);
+#endif
+					if(pupload->fsize != 0 || pupload->segs != 0) { //
+						if(!isWEBFSLocked) {
+							SetSCB(SCB_REDIR);
+							rom_xstrcpy(pupload->filename, disk_err1_filename); // os_memcpy(pupload->filename,"/disk_er1.htm\0",14); // не всё передано или неверный формат
+							return 200;
+						}
+						return 400; //  не всё передано или неверный формат
+					}
+					else {
+#if DEBUGSOO > 1
+						os_printf("Ovl%p", pupload->start);
+#endif
+						if(pupload->start >= IRAM_BASE) {
+							ovl_call = (tovl_call *)pupload->start;
+							web_conn->web_disc_cb = (web_func_disc_cb)pupload->start; // адрес старта оверлея
+							web_conn->web_disc_par = 1; // параметр функции - инициализация
+						}
+						if(!isWEBFSLocked) {
+							SetSCB(SCB_REDIR);
+							rom_xstrcpy(pupload->filename, disk_ok_filename); // os_memcpy(pupload->filename,"/disk_ok.htm\0",13);
+						};
+					};
+					if(ret == 1) pupload->status = 0; // = 0 найден следующий boundary
+					if(ret == 200)	return ret;
+				};
+				break;
+#endif
 			};
 		};
 	};
@@ -1528,7 +1677,7 @@ LOCAL bool ICACHE_FLASH_ATTR web_rx_buf(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_co
 //-----------------------------------------------------------------------------
 //--- web_trim_bufi -----------------------------------------------------------
 //-----------------------------------------------------------------------------
-bool ICACHE_FLASH_ATTR web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint16 data_len)
+bool ICACHE_FLASH_ATTR web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint32 data_len)
 {
     if(pdata != NULL && data_len != 0 && ts_conn->sizei > data_len) {
         	os_memcpy(ts_conn->pbufi, pdata, data_len); // переместим кусок в начало буфера

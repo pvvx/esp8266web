@@ -42,7 +42,7 @@ void web_hexdump(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
 bool web_inc_fopen(TCP_SERV_CONN *ts_conn, uint8 *cFile) ICACHE_FLASH_ATTR;
 bool web_inc_fclose(WEB_SRV_CONN *web_conn) ICACHE_FLASH_ATTR;
 
-bool web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint16 data_len) ICACHE_FLASH_ATTR;
+bool web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint32 data_len) ICACHE_FLASH_ATTR;
 bool web_feee_bufi(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
 //uint8 * head_find_ctr(HTTP_CONN *CurHTTP, const uint8 * c, int clen, int dlen) ICACHE_FLASH_ATTR;
 

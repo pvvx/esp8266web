@@ -137,6 +137,10 @@ typedef struct s_http_upload
   uint16 sizeboundary;
   uint8  name[VarNameSize];
   uint8  filename[VarNameSize];
+#ifdef USE_OVERLAY
+  uint32 segs; // кол-во сегментов оверлея // пока в web_conn->web_disc_par
+  uint32 start; // адрес запуска оверлея
+#endif
   uint32 fsize;
   uint32 faddr;
   uint8 *pbndr;

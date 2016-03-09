@@ -536,9 +536,7 @@ LOCAL void ICACHE_FLASH_ATTR wifi_scan_cb(void *arg, STATUS status)
 #endif
 	if (status == OK) {
 		struct bss_info * bss_link = (struct bss_info *) arg;
-//		bss_link = bss_link->next.stqe_next;
 		int total_scan = 0;
-//		int max_scan =  eraminfo.size / (sizeof(struct bss_scan_info));
 		uint8 *ptr = (uint8 *)&buf_scan_infos; // ptr_scan_infos;
 		while (bss_link != NULL && total_scan < max_scan_bss) {
 			ets_memcpy(ptr, &bss_link->bssid, sizeof(struct bss_scan_info));

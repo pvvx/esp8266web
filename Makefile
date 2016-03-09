@@ -4,7 +4,7 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM6 -b 460800
+ESPOPTION ?= -p COM2 -b 460800
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80
@@ -46,7 +46,8 @@ OBJDUMP := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-objdump
 
 SDK_TOOLS	?= c:/Espressif/utils
 #ESPTOOL		?= $(SDK_TOOLS)/esptool
-ESPTOOL		?= C:/Python27/python.exe $(CWD)esptool.py
+ESPTOOL	?= C:/Python27/python.exe $(CWD)esptool.py
+OVLTOOL ?= C:/Python27/python.exe $(CWD)ovls.py
 
 CSRCS ?= $(wildcard *.c)
 ASRCs ?= $(wildcard *.s)
@@ -187,6 +188,7 @@ $$(IMAGEODIR)/$(1).out: $$(OBJS) $$(DEP_OBJS_$(1)) $$(DEP_LIBS_$(1)) $$(DEPENDS_
 endef
 
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
+	$(OVLTOOL) $< ../ld/labels.ld
 	@echo "------------------------------------------------------------------------------"
 	@mkdir -p ../$(FIRMWAREDIR)
 	@$(ESPTOOL) elf2image -o ../$(FIRMWAREDIR)/ $(flashimageoptions) $<
