@@ -30,6 +30,7 @@
 #include "tcp2uart.h"
 #include "web_iohw.h"
 #include "wifi_events.h"
+//#include "sdk/app_main.h"
 
 #ifdef USE_NETBIOS
 #include "netbios.h"

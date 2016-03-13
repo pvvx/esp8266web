@@ -128,7 +128,7 @@ extern volatile uint32 io4_regs_[384];	// 0x60009800
 #define Select_CLKx1() CLK_PRE_PORT = (CLK_PRE_PORT >> 1) << 1
 
 // 0x3FF00018
-//#define DPORT_OFF18		dport_[6] // use clockgate_watchdog(flg) { if(flg) 0x3FF00018 &= 0x77; else 0x3FF00018 |= 8; }
+#define DPORT_OFF18		dport_[6] // use clockgate_watchdog(flg) { if(flg) 0x3FF00018 &= 0x77; else 0x3FF00018 |= 8; }
 
 /* 0x3ff00020 is isr flag register, (ESP8266 SPI Module User Guide)
   bit0 is for uart0 isr

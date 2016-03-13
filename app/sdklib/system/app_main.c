@@ -230,7 +230,7 @@ void ICACHE_FLASH_ATTR loader(uint32 addr)
 void call_jump_boot(void)
 {
 	ets_intr_lock();
-	ets_isr_mask(0xFFFFFFFF); // убить все прерывания
+	ets_isr_mask(0x3FE); // запретить прерывания 1..9
 	IO_RTC_4 = 0; // Отключить блок WiFi (уменьшение потребления на время загрузки)
 	WDT_FEED = WDT_FEED_MAGIC;
 	SelectSpiFunction();
@@ -413,7 +413,7 @@ void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 	while(ptr < &_bss_end) *ptr++ = 0;
 }*/
 //-----------------------------------------------------------------------------
-// Тест конфигурации для WiFi (будет переделан)
+// Тест конфигурации для WiFi
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 {
@@ -442,12 +442,12 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 	}
 	wifi_config->field_880 = 0;
 	wifi_config->field_884 = 0;
-	g_ic.c[257] = 0; // ?
 
-	if(wifi_config->field_316 > 6) wifi_config->field_316 = 1;
-	if(wifi_config->field_169 > 2) wifi_config->field_169 = 0; // +169
-	wifi_config->phy_mode &= 3;
-	if(wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
+//	g_ic.c[257] = 0; // ?
+
+	if(wifi_config->field_316 >= 6) wifi_config->field_316 = 1;
+	if(wifi_config->field_169 >= 2) wifi_config->field_169 = 0; // +169
+	if(wifi_config->phy_mode >= 4 || wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
 }
 //=============================================================================
 //-----------------------------------------------------------------------------
@@ -493,7 +493,7 @@ void ICACHE_FLASH_ATTR startup_uart_init(void)
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR startup(void)
 {
-	ets_isr_mask(0xFFFFFFFF); // убить все прерывания
+	ets_isr_mask(0x3FE); // запретить прерывания 1..9
 	ets_set_user_start(jump_boot); // установить адрес для возможной перезагрузки по доп. веткам ROM-BIOS
 	// cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
 	if(rom_i2c_readReg(103,4,1) != 136) { // 8: 40MHz, 136: 26MHz
@@ -533,8 +533,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	_xtos_set_exception_handler(EXCCAUSE_LOAD_PROHIBITED, default_exception_handler);
 	_xtos_set_exception_handler(EXCCAUSE_STORE_PROHIBITED, default_exception_handler);
 	_xtos_set_exception_handler(EXCCAUSE_PRIVILEGED, default_exception_handler);
-	// Тест системных данных в RTС
-//	if(rtc_get_reset_reason()==2) {};
+	//
 #if	DEF_SDK_VERSION < 1400
 	if((RTC_RAM_BASE[0x60>>2]>>16) > 4) { // проверка опции phy_rfoption = deep_sleep_option
 #ifdef DEBUG_UART
@@ -587,7 +586,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	uint8 * buf = os_malloc(SIZE_SAVE_SYS_CONST);
 	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
 #if DEF_SDK_VERSION >= 1410
-	if(buf[112] == 3) g_ic.c[471] = 1;
+	if(buf[112] == 3) g_ic.c[471] = 1; // esp_init_data_default: freq_correct_en[112]
 	else g_ic.c[471] = 0;
 #endif
 	buf[0xf8] = 0;
@@ -596,7 +595,7 @@ void ICACHE_FLASH_ATTR startup(void)
 	// **
 	// user_rf_pre_init(); // не использется, т.к. мождно вписать что угодно и тут :)
     //	system_phy_set_powerup_option(0);
-	//	system_phy_set_rfoption(0);
+	//	system_phy_set_rfoption(1);
 	// **
 #elif DEF_SDK_VERSION >= 1300
 	uint8 *buf = (uint8 *)os_malloc(256); // esp_init_data_default.bin
@@ -613,7 +612,7 @@ void ICACHE_FLASH_ATTR startup(void)
 		ets_memcpy(buf, esp_init_data_default, esp_init_data_default_size);
 	}
 //	system_restoreclock(); // STARTUP_CPU_CLK
-	init_wifi(buf, info.st_mac); // инициализация оборудования WiFi
+	init_wifi(buf, info.st_mac); // инициализация WiFi
 #if DEF_SDK_VERSION >= 1400
 	if(buf[0xf8] == 1 || phy_rx_gain_dc_flag == 1) { // сохранить новые калибровки RF/VCC33 ?
 #ifdef DEBUG_UART
@@ -626,7 +625,39 @@ void ICACHE_FLASH_ATTR startup(void)
 	//
 #if DEF_SDK_VERSION >= 1400 // (SDK 1.4.0)
 	system_rtc_mem_read(0, &rst_if, sizeof(rst_if));
-//	os_printf("RTC_MEM(0) = %u\n", rst_if.reason);
+//	os_printf("RTC_MEM(0) = %u,%u,%p \n", rst_if.reason, IO_RTC_SCRATCH0, RTC_RAM_BASE[0x78>>2]);
+#if DEF_SDK_VERSION >= 1520
+	{
+		uint32 reset_reason = IO_RTC_SCRATCH0;
+		if(reset_reason >= REASON_EXCEPTION_RST && reset_reason < REASON_DEEP_SLEEP_AWAKE) {
+			// reset_reason == REASON_EXCEPTION_RST, REASON_SOFT_WDT_RST, REASON_SOFT_RESTART, REASON_DEEP_SLEEP_AWAKE
+			TestStaFreqCalValInput = RTC_RAM_BASE[0x78>>2]>>16;
+			chip_v6_set_chan_offset(1, TestStaFreqCalValInput);
+		}
+		else {
+			TestStaFreqCalValInput = 0;
+			RTC_RAM_BASE[0x78>>2] &= 0xFFFF;
+			if(reset_reason == REASON_DEFAULT_RST) {
+				reset_reason = rtc_get_reset_reason();
+				if(reset_reason == 1) { // =1 - ch_pd
+					ets_memset(&rst_if, 0, sizeof(rst_if)); // rst_if.reason = REASON_DEFAULT_RST
+				}
+				else if(reset_reason == 2) { // =2 - reset
+					if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE
+					 ||	rst_if.epc1 != 0
+					 || rst_if.excvaddr != 0) {
+						ets_memset(&rst_if, 0, sizeof(rst_if));
+						rst_if.reason = REASON_EXT_SYS_RST;
+						RTC_MEM(0) = REASON_EXT_SYS_RST;
+					}
+				}
+			}
+			else if(reset_reason > REASON_EXT_SYS_RST) {
+				ets_memset(&rst_if, 0, sizeof(rst_if)); // rst_if.reason = REASON_DEFAULT_RST
+			}
+		}
+	}
+#else
 	if (rst_if.reason >= REASON_EXCEPTION_RST && rst_if.reason < REASON_DEEP_SLEEP_AWAKE) { // >= 2 < 5
 		// 2,3,4 REASON_EXCEPTION_RST, REASON_SOFT_WDT_RST, REASON_SOFT_RESTART
 		TestStaFreqCalValInput = RTC_RAM_BASE[0x78>>2]>>16; // *((volatile uint32 *)0x60001078) >> 16
@@ -640,14 +671,13 @@ void ICACHE_FLASH_ATTR startup(void)
 			rst_if.reason = REASON_EXT_SYS_RST; // = 6
 		}
 //		else if(rst_if.reason == REASON_WDT_RST && rtc_get_reset_reason() == 1) rst_if.reason = REASON_DEFAULT_RST;
-
 	}
 #endif
-
+	//
 #ifdef DEBUG_UART
-	//
 	os_print_reset_error(); // вывод фатальных ошибок, вызвавших рестарт. см. в модуле wdt
-	//
+#endif
+	RTC_MEM(0) = 0; //	system_rtc_mem_write(0, &rst_if, sizeof(rst_if));
 #endif
 //	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F; // ??
 #if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1)

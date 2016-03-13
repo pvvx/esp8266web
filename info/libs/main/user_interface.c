@@ -190,9 +190,8 @@ uint16 system_get_vdd33(void)
 
 ETSTimer sta_con_timer;
 
-extern void system_restart_local(void);
 
-void system_restart(void)
+void ICACHE_FLASH_ATTR system_restart(void)
 {
 	int mode = wifi_get_opmode();
 	if(mode == STATIONAP_MODE || mode == STATION_MODE ) wifi_station_stop();
@@ -215,9 +214,67 @@ void system_restore(void)
 
 void system_restart_core(void)
 {
+	ets_intr_lock();
+	Wait_SPI_Idle(flashchip);
 	Cache_Read_Disable();
 	DPORT_OFF24 &= 0x67; // 0x3FF00024 &= 0x67;
 	Call _ResetVector(); // ROM:0x40000080
+}
+
+int sub_40240CD8(int x)
+{
+	if(fpm_allow_tx() == 0) wifi_fpm_do_wakeup();
+	if(pm_is_open() == 0) return 0;
+	if(byte_3FFE97A0 == 0) { // status_led_output_level???
+		ets_timer_setfn(&dword_3FFE97A4, loc_40240D9C, 0);
+		status_led_output_level = 1;
+	}
+	pm_is_waked();
+	if(pm_is_waked() == 0 && byte_3FFE97B8 == 1) {
+		if(byte_3FFE97B8 != 0) {
+			pm_post(1);
+			ets_timer_disarm(&dword_3FFE97A4);
+			ets_timer_arm_new(&dword_3FFE97A4, 10, 0, 1)
+			byte_3FFE97B8 = 1;
+		}
+		if(++byte_3FFE97B9 > 10 ) {
+			os_printf("DEFERRED FUNC NUMBER IS BIGGER THAN 10\n");
+		}
+		if(byte_3FFE97BA + byte_3FFE97B9 <= 10) {
+			unk_3FFE984C[0x79 + byte_3FFE97BA + byte_3FFE97B9] = x; // tab unk_3FFE98D0 ?
+		}
+		else unk_3FFE984C[0x83] = x;
+		return -1;
+
+	}
+	else return 0;
+}
+
+
+void ICACHE_FLASH_ATTR system_restart_local(void)
+{
+	struct rst_info rst_inf;
+	if(sub_40240CD8(4) == -1) {
+		clockgate_watchdog(0);
+		DPORT_OFF18 = 0xFFFF00FF;
+		pm_open_rf();
+	}
+	system_rtc_mem_read(0, &rst_inf, sizeof(rst_inf));
+	if(rst_inf.reason != REASON_EXCEPTION_RST && rst_inf.reason != REASON_SOFT_WDT_RST) {
+		ets_memset(&rst_inf, 0, sizeof(rst_inf));
+		IO_RTC_SCRATCH0 = REASON_SOFT_RESTART;
+		rst_inf.reason = REASON_SOFT_RESTART;
+		system_rtc_mem_write(0, &rst_inf, sizeof(rst_inf));
+	}
+	system_restart_hook(&rst_inf); // ret.n
+	user_uart_wait_tx_fifo_empty(0, 500000);
+	user_uart_wait_tx_fifo_empty(1, 500000);
+	ets_intr_lock();
+	SAR_BASE[0x48>>2] |= 3;
+	DPORT_OFF18 |= 0x100;
+	SAR_BASE[0x48>>2] &= 0x7C;
+	DPORT_OFF18 &= 0xEFF;
+	system_restart_core();
 }
 
 /*

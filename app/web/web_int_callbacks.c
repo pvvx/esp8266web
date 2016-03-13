@@ -27,6 +27,7 @@
 #include "sdk/rom2ram.h"
 #include "sys_const_utils.h"
 #include "wifi_events.h"
+//#include "sdk/app_main.h"
 
 #ifdef USE_NETBIOS
 #include "netbios.h"

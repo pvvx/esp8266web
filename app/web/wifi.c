@@ -71,8 +71,8 @@ void ICACHE_FLASH_ATTR WiFi_go_to_sleep(enum sleep_type mode, uint32 time_us)
 	wifi_fpm_open();
 	wifi_fpm_do_sleep(time_us);
 	flg_wifi_sleep_enable = true;
-	Select_CLKx1(); // REG_CLR_BIT(0x3ff00014, BIT(0));
-	ets_update_cpu_frequency(80);
+//	Select_CLKx1(); // REG_CLR_BIT(0x3ff00014, BIT(0));
+//	ets_update_cpu_frequency(80);
 }
 /******************************************************************************
  * FunctionName : WiFi_up_from_sleep
