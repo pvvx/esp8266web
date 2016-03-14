@@ -1613,8 +1613,8 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 					if(ret == 200)	return ret;
 				};
 				break;
-#endif
 			};
+#endif
 		};
 	};
 	return 0; //

@@ -236,22 +236,22 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 					ts_conn->cntri += len;
 					break;
 //					return true;
-			case sw_frs_close:
+				case sw_frs_close:
 #if DEBUGSOO > 1
 				os_printf("ws:close ");
 #endif
 //				if((ws->flg & WS_FLG_CLOSE) == 0) {
 				{
-#if DEBUGSOO > 1
-					uint32 close_code;
 					if(len >= 2) {
-						close_code = (pstr[0]<<8) | pstr[1];
+					uint32 close_code = (pstr[0]<<8) | pstr[1];
+#if DEBUGSOO > 1
 						os_printf("code:%d ", close_code);
+#endif
 						if(close_code == WS_CLOSE_NORMAL)	websock_tx_close_err(ts_conn, WS_CLOSE_NORMAL);
 						// else websock_tx_frame(ts_conn, WS_OPCODE_CLOSE | WS_FRAGMENT_FIN, NULL, 0);
 					}
-#endif
-					else {
+					else
+					{
 						websock_tx_close_err(ts_conn, WS_CLOSE_NORMAL);
 						// websock_tx_frame(ts_conn, WS_OPCODE_CLOSE | WS_FRAGMENT_FIN, NULL, 0);
 					}
