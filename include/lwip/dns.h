@@ -110,6 +110,30 @@ ip_addr_t      dns_getserver(u8_t numdns);
 err_t          dns_gethostbyname(const char *hostname, ip_addr_t *addr,
                                  dns_found_callback found, void *callback_arg);
 
+/** DNS table entry */
+struct dns_table_entry {
+  u8_t  state;
+  u8_t  numdns;
+  u8_t  tmr;
+  u8_t  retries;
+  u8_t  seqno;
+  u8_t  err;
+  u32_t ttl;
+  char name[DNS_MAX_NAME_LENGTH];
+  ip_addr_t ipaddr;
+  /* pointer to callback on DNS query done */
+  dns_found_callback found;
+  void *arg;
+};
+
+extern struct dns_table_entry dns_table[DNS_TABLE_SIZE];
+
+/* DNS protocol states */
+#define DNS_STATE_UNUSED          0
+#define DNS_STATE_NEW             1
+#define DNS_STATE_ASKING          2
+#define DNS_STATE_DONE            3
+
 #if DNS_LOCAL_HOSTLIST && DNS_LOCAL_HOSTLIST_IS_DYNAMIC
 int            dns_local_removehost(const char *hostname, const ip_addr_t *addr);
 err_t          dns_local_addhost(const char *hostname, const ip_addr_t *addr);

@@ -120,11 +120,6 @@ static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
 #define DNS_FLAG2_ERR_NONE        0x00
 #define DNS_FLAG2_ERR_NAME        0x03
 
-/* DNS protocol states */
-#define DNS_STATE_UNUSED          0
-#define DNS_STATE_NEW             1
-#define DNS_STATE_ASKING          2
-#define DNS_STATE_DONE            3
 
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/bpstruct.h"
@@ -168,22 +163,6 @@ struct dns_answer {
 };
 #define SIZEOF_DNS_ANSWER 10
 
-/** DNS table entry */
-struct dns_table_entry {
-  u8_t  state;
-  u8_t  numdns;
-  u8_t  tmr;
-  u8_t  retries;
-  u8_t  seqno;
-  u8_t  err;
-  u32_t ttl;
-  char name[DNS_MAX_NAME_LENGTH];
-  ip_addr_t ipaddr;
-  /* pointer to callback on DNS query done */
-  dns_found_callback found;
-  void *arg;
-};
-
 #if DNS_LOCAL_HOSTLIST
 
 #if DNS_LOCAL_HOSTLIST_IS_DYNAMIC
@@ -222,7 +201,7 @@ static void dns_check_entries(void);
 /* DNS variables */
 static struct udp_pcb        *dns_pcb LWIP_DATA_IRAM_ATTR;
 static u8_t                   dns_seqno;
-static struct dns_table_entry dns_table[DNS_TABLE_SIZE];
+struct dns_table_entry dns_table[DNS_TABLE_SIZE];
 static ip_addr_t              dns_servers[DNS_MAX_SERVERS];
 /** Contiguous buffer for processing responses */
 //static u8_t                   dns_payload_buffer[LWIP_MEM_ALIGN_BUFFER(DNS_MSG_SIZE)];
