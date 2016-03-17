@@ -120,7 +120,7 @@ class MultipartPostHandler(urllib2.BaseHandler):
 if __name__ == '__main__':
 	if len(sys.argv) == 2:
 		if sys.argv[1] == '-h':
-			print 'Usage: file/overlay filename espurl username password'
+			print 'Usage: option filename espurl username password'
 			sys.exit(0)
 
 	fileoption = 'file'

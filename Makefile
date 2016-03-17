@@ -4,11 +4,11 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM2 -b 460800
+ESPOPTION ?= -p COM6 -b 460800
 
 UPLOADADDR = http://aesp8266/fsupload
 
-UPLOADOVL = ./ovls/bin/tcp_client.ovl 
+UPLOADOVL = ./ovls/bin/10dof.ovl 
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80
@@ -245,11 +245,11 @@ UploadOvl:
 	$(UPLOADTOOL) overlay $(UPLOADOVL) $(UPLOADADDR)
 
 UploadWeb: $(USERFBIN)
-	./WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib" ./WEBFiles ./webbin WEBFiles.bin
+	./WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib, *.ovl, *.ini" ./WEBFiles ./webbin WEBFiles.bin
 	$(UPLOADTOOL) file ./webbin/WEBFiles.bin $(UPLOADADDR)
 
 $(USERFBIN):
-	./WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib" ./WEBFiles ./webbin WEBFiles.bin
+	./WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib, *.ovl, *.ini" ./WEBFiles ./webbin WEBFiles.bin
 
 .subdirs:
 	@set -e; $(foreach d, $(SUBDIRS), $(MAKE) -C $(d);)
