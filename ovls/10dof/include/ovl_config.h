@@ -12,8 +12,8 @@
 #define	CS_MPU9250_PIN	mdb_buf.ubuf[41]
 #define drv_host_ip 	((ip_addr_t *)mdb_buf.ubuf)[42>>1]
 #define drv_host_port 	mdb_buf.ubuf[44]
-#define drv_init_usr	mdb_buf.ubuf[45]
-#define drv_error		mdb_buf.ubuf[46]
+#define drv_init_usr	mdb_buf.ubuf[45] // Флаг: =0 - драйвер закрыт, =1 - драйвер установлен и работает
+#define drv_error		mdb_buf.ubuf[46] // Ошибки: =0 - нет ошибок
 #define drv_temp		mdb_buf.ubuf[47]
 #define drv_press		((sint32 *)(mdb_buf.ubuf))[48>>1] // long
 

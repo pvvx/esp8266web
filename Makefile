@@ -4,7 +4,7 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM6 -b 460800
+ESPOPTION ?= -p COM2 -b 460800
 
 UPLOADADDR = http://aesp8266/fsupload
 
