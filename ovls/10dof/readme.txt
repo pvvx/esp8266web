@@ -37,7 +37,7 @@ ovl$=3 - stop передачи по UDP
 
 Запрос / Выходная информация или команда по UDP
 '?'	UDRV: ver	
-'A'	WDRV: set remote ip , remote port	
+'A'	UDRV: set remote ip , remote port	
 'S'	UDRV: stop	
 'G'	UDRV: start
 

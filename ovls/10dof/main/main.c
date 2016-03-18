@@ -20,7 +20,7 @@
 
 #define DRV_TASK_PRIO (USER_TASK_PRIO_1)
 
-os_timer_t test_timer;
+os_timer_t test_timer DATA_IRAM_ATTR;
 
 #define timer_arg(pt,arg) do { \
 	uint32 * ptimer_arg = (uint32 *)&pt.timer_arg; \
@@ -42,7 +42,7 @@ uint32 data_blk_idx DATA_IRAM_ATTR;
 struct udp_pcb *pcb_udp_drv DATA_IRAM_ATTR;
 
 //tsblk_data sblk_data;
-static const char DRV_ver_str[] ICACHE_RODATA_ATTR = "UDRV: 0.0.1";
+static const char DRV_ver_str[] ICACHE_RODATA_ATTR = "UDRV: 0.0.2";
 static const char DRV_stop_str[] ICACHE_RODATA_ATTR = "UDRV: stop";
 static const char DRV_start_str[] ICACHE_RODATA_ATTR = "UDRV: start";
 static const char DRV_ip_str[] ICACHE_RODATA_ATTR = "UDRV: set ip " IPSTR ", port %u";
@@ -161,11 +161,11 @@ void test_timer_isr(uint32 flg)
 			if(drv_udp_start) {
 				uint32 len = fifo_count * sizeof(el_sblk_data) + 2;
 				struct pbuf *z = pbuf_alloc(PBUF_TRANSPORT, len, PBUF_RAM);
-				if(z == NULL) return;
-		    	err_t err = pbuf_take(z, sblk_data, len);
-		    	if(err != ERR_OK) return;
-		    	udp_sendto(pcb_udp_drv, z, &drv_host_ip, drv_host_port);
-		  	    pbuf_free(z);
+				if(z != NULL) {
+			    	err_t err = pbuf_take(z, sblk_data, len);
+			    	if(err == ERR_OK) udp_sendto(pcb_udp_drv, z, &drv_host_ip, drv_host_port);
+			  	    pbuf_free(z);
+				}
 			}
 			data_blk_idx = 0;
 #if DEBUGSOO > 1
@@ -219,6 +219,7 @@ int ovl_init(int flg)
 	ets_timer_disarm(&test_timer);
 	if(flg == 1) {
 		if(drv_init_flg == 0) {
+			drv_init_usr = 0;
 			if(CS_BMP280_PIN == CS_MPU9250_PIN || CS_MPU9250_PIN > 15 || CS_BMP280_PIN > 15) {
 				CS_BMP280_PIN = 5;
 				CS_MPU9250_PIN = 4;
@@ -262,6 +263,7 @@ int ovl_init(int flg)
 			}
 			sblk_data = (tsblk_data *) os_malloc(sizeof(tsblk_data));
 			if(sblk_data == NULL) {
+				close_udp_drv();
 #if DEBUGSOO > 1
 				os_printf("Mem Error!\n");
 #endif
@@ -280,10 +282,14 @@ int ovl_init(int flg)
 		}
 	}
 	else if(flg == 2) {
-		drv_udp_start = 1;
+		if(drv_init_flg) {
+			drv_udp_start = 1;
+		}
 	}
 	else if(flg == 3) {
-		drv_udp_start = 0;
+		if(drv_init_flg) {
+			drv_udp_start = 0;
+		}
 	}
 	else {
 		close_udp_drv();
@@ -291,6 +297,7 @@ int ovl_init(int flg)
 			os_free(sblk_data);
 			sblk_data = NULL;
 		}
+		drv_init_flg = 0; // ???
 		drv_init_usr = 0;
 		drv_error = 2;
 	}
