@@ -33,15 +33,12 @@ static uint32 tim_cnt DATA_IRAM_ATTR;
 #endif
 uint32 drv_init_flg DATA_IRAM_ATTR; // флаг инициализации
 uint32 drv_udp_start DATA_IRAM_ATTR; // флаг старта передачи
-//uint32 adtst;
 
-//uint8 buf[16];
 tsblk_data *sblk_data DATA_IRAM_ATTR;
-uint32 data_blk_count DATA_IRAM_ATTR;
+uint32 sample_number DATA_IRAM_ATTR;
 uint32 data_blk_idx DATA_IRAM_ATTR;
 struct udp_pcb *pcb_udp_drv DATA_IRAM_ATTR;
 
-//tsblk_data sblk_data;
 static const char DRV_ver_str[] ICACHE_RODATA_ATTR = "UDRV: 0.0.2";
 static const char DRV_stop_str[] ICACHE_RODATA_ATTR = "UDRV: stop";
 static const char DRV_start_str[] ICACHE_RODATA_ATTR = "UDRV: start";
@@ -112,19 +109,18 @@ void test_timer_isr(uint32 flg)
 	hspi_cmd_read(CS_MPU9250_PIN, SPI_CMD_READ | MPU9250_RA_FIFO_COUNTH , uc, 2);
 	fifo_count = (uc[0]<<8) | uc[1];
 	if(fifo_count == 0xFFFF) {
-		drv_error = 3;
+		drv_error = -6;
 		return;
 	}
 	fifo_count /= sizeof(fifo);
 	if(fifo_count) {
-//		uint32 i = data_blk_idx;
-		if(data_blk_idx == 0) sblk_data->number = data_blk_count;
+		if(data_blk_idx == 0) sblk_data->number = sample_number;
 		fifo_count += data_blk_idx;
 		if(fifo_count > MAX_TX_BLK_DATA) {
 			fifo_count = MAX_TX_BLK_DATA;
 		}
 		for(; data_blk_idx < fifo_count; data_blk_idx++) {
-			data_blk_count++;
+			sample_number++;
 			uint32 z = sizeof(fifo);
 			uint8 * ptr = (uint8 *)&fifo;
 			while(z--) {
@@ -164,8 +160,10 @@ void test_timer_isr(uint32 flg)
 				if(z != NULL) {
 			    	err_t err = pbuf_take(z, sblk_data, len);
 			    	if(err == ERR_OK) udp_sendto(pcb_udp_drv, z, &drv_host_ip, drv_host_port);
+			    	else drv_error = -7;
 			  	    pbuf_free(z);
 				}
+				else drv_error = -8;
 			}
 			data_blk_idx = 0;
 #if DEBUGSOO > 1
@@ -216,10 +214,11 @@ void close_udp_drv(void)
 //=============================================================================
 int ovl_init(int flg)
 {
-	ets_timer_disarm(&test_timer);
 	if(flg == 1) {
 		if(drv_init_flg == 0) {
 			drv_init_usr = 0;
+			sample_number = 0;
+			data_blk_idx = 0;
 			if(CS_BMP280_PIN == CS_MPU9250_PIN || CS_MPU9250_PIN > 15 || CS_BMP280_PIN > 15) {
 				CS_BMP280_PIN = 5;
 				CS_MPU9250_PIN = 4;
@@ -267,9 +266,10 @@ int ovl_init(int flg)
 #if DEBUGSOO > 1
 				os_printf("Mem Error!\n");
 #endif
-				drv_error = -3;
+				drv_error = -4;
 				return drv_error;
 			}
+			ets_timer_disarm(&test_timer);
 			ets_timer_setfn(&test_timer, (os_timer_func_t *)test_timer_isr, NULL);
 			ets_timer_arm_new(&test_timer, 10000, 1, 0); // 10 ms, 100 раз в сек
 			drv_init_flg = 1;
@@ -285,13 +285,16 @@ int ovl_init(int flg)
 		if(drv_init_flg) {
 			drv_udp_start = 1;
 		}
+		else drv_error = -5;
 	}
 	else if(flg == 3) {
 		if(drv_init_flg) {
 			drv_udp_start = 0;
 		}
+		else drv_error = -5;
 	}
 	else {
+		ets_timer_disarm(&test_timer);
 		close_udp_drv();
 		if(sblk_data != NULL) {
 			os_free(sblk_data);

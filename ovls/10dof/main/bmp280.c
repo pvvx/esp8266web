@@ -161,9 +161,9 @@ bool init_bmp280(void)
 			while(i--) os_printf(" %02x", *ptr++);
 			os_printf("\n");
 #endif
+			hspi_cmd_read(CS_BMP280_PIN, BMP280_RA_STATUS | SPI_CMD_READ, (uint8 *)&bmp280.reg.status, BMP280_RA_TXLSB - BMP280_RA_STATUS + 1);
 #if DEBUGSOO > 2
 			os_printf("Reg BMP280:");
-			hspi_cmd_read(CS_BMP280_PIN, BMP280_RA_STATUS | SPI_CMD_READ, (uint8 *)&bmp280.reg.status, BMP280_RA_TXLSB - BMP280_RA_STATUS + 1);
 			ptr = (uint8 *)&bmp280.reg;
 			i = sizeof(bmp280.reg);
 			while(i--)	os_printf(" %02x", *ptr++);
