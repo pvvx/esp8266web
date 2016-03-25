@@ -36,6 +36,7 @@ struct smpu9250_config {
 } __attribute__ ((packed));
 
 struct sAK8963_regs mag_regs;
+
 //union uMPU9250_regs mpu_regs;
 
 sint32 kasa[3] DATA_IRAM_ATTR; // mag_regs.asa{x,y,z}-128;
