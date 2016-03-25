@@ -1,8 +1,8 @@
 #ifndef __ESPCONN_H__
 #define __ESPCONN_H__
-
 #include "lwipopts.h"
 #ifdef USE_ESPCONN
+
 #include "lwip/dns.h"
 #include "os_type.h"
 

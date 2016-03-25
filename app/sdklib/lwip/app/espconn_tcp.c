@@ -8,7 +8,6 @@
  * Modification history:
  *     2014/3/31, v1.0 create this file.
 *******************************************************************************/
-
 #include "lwipopts.h"
 
 #ifdef USE_ESPCONN

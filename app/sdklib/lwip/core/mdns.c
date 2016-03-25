@@ -41,19 +41,14 @@
  *----------------------------------------------------------------------------*/
 #include "lwip/opt.h"
 #if LWIP_MDNS /* don't build if not configured for use in lwipopts.h */
-#include "osapi.h"
-#include "os_type.h"
 #include "lwip/mdns.h"
 #include "lwip/puck_def.h"
 #include "lwip/udp.h"
 #include "lwip/mem.h"
 #include "lwip/igmp.h"
+#include "osapi.h"
+#include "os_type.h"
 #include "user_interface.h"
-#include "user_interface.h"
-#include "sdk/add_func.h"
-#include "netif/wlan_lwip_if.h"
-#define os_sprintf ets_sprintf
-
 
 #ifdef MEMLEAK_DEBUG
 static const char mem_debug_file[] ICACHE_RODATA_ATTR = __FILE__;
@@ -184,7 +179,7 @@ PACK_STRUCT_END
 #define SIZEOF_MDNS_SERVICE 6
 
 uint16 PUCK_PORT ;
-os_timer_t mdns_timer LWIP_DATA_IRAM_ATTR;
+os_timer_t mdns_timer;
 /* forward declarations */
 static void mdns_recv(void *s, struct udp_pcb *pcb, struct pbuf *p,
 		struct ip_addr *addr, u16_t port);
@@ -198,14 +193,14 @@ static char host_name[MDNS_NAME_LENGTH];
 static char service_name[MDNS_NAME_LENGTH];
 static char server_name[MDNS_NAME_LENGTH];
 //static char puck_datasheet[PUCK_DATASHEET_SIZE];
-static struct udp_pcb *mdns_pcb LWIP_DATA_IRAM_ATTR;
-
+static struct udp_pcb *mdns_pcb = NULL;
+static struct mdns_info * ms_info = NULL;
 static struct ip_addr multicast_addr;
 static struct ip_addr host_addr;
 static uint8 register_flag = 0;
 static uint8 mdns_flag = 0;
 //#if (DNS_USES_STATIC_BUF == 1)
-// static u8_t mdns_payload[DNS_MSG_SIZE];
+static u8_t mdns_payload[DNS_MSG_SIZE];
 //#endif /* (MDNS_USES_STATIC_BUF == 1) */
 /*
  *  Function to set the UDP pcb used to send the mDNS packages
@@ -366,14 +361,9 @@ mdns_answer(u16_t type, const char* name, u8_t id) {
 			ans.type = htons(DNS_RRTYPE_PTR);
 			ans.class = htons(DNS_RRCLASS_IN);
 			ans.ttl = htonl(MDNS_SERVICE_TIME);
-/*			os_strcpy(tmpBuf, name);
+			os_strcpy(tmpBuf, name);
 			os_strcat(tmpBuf, ".");
-			os_strcat(tmpBuf, PUCK_SERVICE); */
-			{
-				char * pch = &tmpBuf[os_strlen(os_strcpy(tmpBuf, name))];
-				*pch++ = '.';
-				os_strcpy(pch, PUCK_SERVICE);
-			}
+			os_strcat(tmpBuf, PUCK_SERVICE);
 
 			length = os_strlen(tmpBuf) + MDNS_LENGTH_ADD;
 			ans.len = htons(length);
@@ -428,15 +418,9 @@ mdns_answer(u16_t type, const char* name, u8_t id) {
 			ans.type = htons(DNS_RRTYPE_SRV);
 			ans.class = htons(DNS_RRCLASS_FLUSH_IN);
 			ans.ttl = htonl(MDNS_SERVICE_TIME);
-/*			os_strcpy(tmpBuf, host_name);
+			os_strcpy(tmpBuf, host_name);
 			os_strcat(tmpBuf, ".");
-			os_strcat(tmpBuf, MDNS_LOCAL); */
-			{
-				char * pch = &tmpBuf[os_strlen(os_strcpy(tmpBuf, host_name))];
-				*pch++ = '.';
-				os_strcpy(pch, MDNS_LOCAL);
-			}
-
+			os_strcat(tmpBuf, MDNS_LOCAL);
 			length = os_strlen(tmpBuf) + MDNS_LENGTH_ADD;
 			ans.len = htons(SIZEOF_MDNS_SERVICE + length);
 			length = 0;
@@ -672,7 +656,7 @@ mdns_send_service(struct mdns_info *info, u8_t id) {
 		ans.ttl = htonl(300);
 //		length = os_strlen(TXT_DATA) + MDNS_LENGTH_ADD + 1;
 		device_info = (char *)os_zalloc(50);
-		ets_sprintf(device_info,"vendor = %s","ESP8266");
+		ets_sprintf(device_info,"vendor = %s","Espressif");
 		for(i = 0; i < 10 &&(info->txt_data[i] != NULL);i++) {
 			length += os_strlen(info->txt_data[i]);
 			length++;
@@ -737,15 +721,9 @@ mdns_send_service(struct mdns_info *info, u8_t id) {
 		ans.type = htons(DNS_RRTYPE_SRV);
 		ans.class = htons(DNS_RRCLASS_FLUSH_IN);
 		ans.ttl = htonl(300);
-/*		os_strcpy(tmpBuf,service_name);
+		os_strcpy(tmpBuf,service_name);
 		os_strcat(tmpBuf, ".");
-		os_strcat(tmpBuf, MDNS_LOCAL); */
-		{
-			char * pch = &tmpBuf[os_strlen(os_strcpy(tmpBuf, service_name))];
-			*pch++ = '.';
-			os_strcpy(pch, MDNS_LOCAL);
-		}
-
+		os_strcat(tmpBuf, MDNS_LOCAL);
 		length = os_strlen(tmpBuf) + MDNS_LENGTH_ADD;
 		ans.len = htons(SIZEOF_MDNS_SERVICE + length);
 		length = 0;
@@ -777,14 +755,9 @@ mdns_send_service(struct mdns_info *info, u8_t id) {
 		*query++ = '\0';
 		/* set the name of the authority field.
 		 * The same name as the Query using the offset address*/
-/*		os_strcpy(tmpBuf,service_name);
+		os_strcpy(tmpBuf,service_name);
 		os_strcat(tmpBuf, ".");
-		os_strcat(tmpBuf, MDNS_LOCAL); */
-		{
-			char * pch = &tmpBuf[os_strlen(os_strcpy(tmpBuf, service_name))];
-			*pch++ = '.';
-			os_strcpy(pch, MDNS_LOCAL);
-		}
+		os_strcat(tmpBuf, MDNS_LOCAL);
 		pHostname = tmpBuf;
 		--pHostname;
 		do {
@@ -865,14 +838,13 @@ static void ICACHE_FLASH_ATTR
 mdns_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr,
 		u16_t port) {
 	u8_t i;
-	char * mdns_payload;
 	struct mdns_hdr *hdr;
 	u8_t nquestions;
 	LWIP_UNUSED_ARG(arg);
 	LWIP_UNUSED_ARG(pcb);
 	LWIP_UNUSED_ARG(addr);
 	LWIP_UNUSED_ARG(port);
-	struct mdns_info *minfo = (struct mdns_info *)arg;
+	struct mdns_info *info = (struct mdns_info *)arg;
 	/* is the dns message too big ? */
 	if (p->tot_len > DNS_MSG_SIZE) {
 		LWIP_DEBUGF(DNS_DEBUG, ("dns_recv: pbuf too big\n"));
@@ -886,8 +858,6 @@ mdns_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr,
 		/* free pbuf and return */
 		goto memerr1;
 	}
-	mdns_payload = mem_malloc(p->tot_len);
-	if(mdns_payload == NULL) goto memerr1;
 	/* copy dns payload inside static buffer for processing */
 	if (pbuf_copy_partial(p, mdns_payload, p->tot_len, 0) == p->tot_len) {
 		/* The ID in the DNS header should be our entry into the name table. */
@@ -909,7 +879,7 @@ mdns_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr,
 				} else if (mdns_compare_name((unsigned char *) PUCK_SERVICE,
 						(unsigned char *) mdns_payload + SIZEOF_DNS_HDR) == 0) {
 					/* respond with the puck service*/
-					mdns_send_service(minfo, 0);
+					mdns_send_service(info, 0);
 				} else
 					goto memerr2;
 			}
@@ -917,7 +887,7 @@ mdns_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr,
 	}
 	goto memerr2;
 	memerr2:
-	mem_free(mdns_payload);
+	os_memset(mdns_payload , 0 ,DNS_MSG_SIZE);
 	memerr1:
 	/* free pbuf */
 	pbuf_free(p);
@@ -930,8 +900,12 @@ mdns_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_addr *addr,
 void ICACHE_FLASH_ATTR
 mdns_close(void)
 {
-	if (mdns_pcb != NULL)
+	if (mdns_pcb != NULL && ms_info != NULL)
 		udp_remove(mdns_pcb);
+		os_free(ms_info);
+		mdns_pcb = NULL;
+		ms_info = NULL;
+
 }
 
 void ICACHE_FLASH_ATTR
@@ -967,14 +941,14 @@ mdns_get_hostname(void) {
 	if (host_name[0] != 0 ) {
 	return name;
 	} else {
-		return ("ESP8266");
+		return ("Espressif");
 	}
 }
 
 void ICACHE_FLASH_ATTR
 mdns_set_hostname(char *name) {
 	if (name == NULL) {
-		os_strncpy(host_name, "ESP8266", os_strlen("ESP8266")+3);
+		os_strncpy(host_name, "Espressif", os_strlen("Espressif")+3);
 		return;
 	}
 	if (os_strlen(name) + 3 <= MDNS_NAME_LENGTH ){
@@ -988,7 +962,7 @@ mdns_set_hostname(char *name) {
 void ICACHE_FLASH_ATTR
 mdns_set_servername(const char *name) {
 	if (name == NULL) {
-		PUCK_SERVICE = "_ESP8266._tcp._local";
+		PUCK_SERVICE = "_Espressif._tcp._local";
 	}else {
 		os_sprintf(server_name ,"_%s._tcp.local",name);
 		PUCK_SERVICE = server_name;
@@ -999,7 +973,7 @@ char* ICACHE_FLASH_ATTR
 mdns_get_servername(void) {
 	char *name = PUCK_SERVICE;
 	if (name == NULL) {
-		PUCK_SERVICE = "_ESP8266._tcp._local";
+		PUCK_SERVICE = "_Espressif._tcp._local";
 	}
 	return name;
 }
@@ -1060,26 +1034,33 @@ mdns_init(struct mdns_info *info) {
 	multicast_addr.addr = DNS_MULTICAST_ADDRESS;
 	struct ip_addr ap_host_addr;
 	struct ip_info ipconfig;
-	if (info->ipAddr == 0) {
+	ms_info = (struct mdns_info *)os_zalloc(sizeof(struct mdns_info));
+	if (ms_info != NULL) {
+		os_memcpy(ms_info,info,sizeof(struct mdns_info));
+	} else {
+		os_printf("ms_info alloc failed\n");
+		return;
+	}
+	if (ms_info->ipAddr == 0) {
 		os_printf("mdns ip error!\n ");
 		return;
 	}
-	host_addr.addr = info->ipAddr ;
+	host_addr.addr = ms_info->ipAddr ;
 	LWIP_DEBUGF(DNS_DEBUG, ("dns_init: initializing\n"));
 	//get the datasheet from PUCK
-	mdns_set_hostname(info->host_name);
-	mdns_set_servername(info->server_name);
-	mdns_set_name(info->host_name);
+	mdns_set_hostname(ms_info->host_name);
+	mdns_set_servername(ms_info->server_name);
+	mdns_set_name(ms_info->host_name);
 
 	// get the host name as instrumentName_serialNumber for MDNS
 	// set the name of the service, the same as host name
 	os_printf("host_name = %s\n", host_name);
 	os_printf("server_name = %s\n", PUCK_SERVICE);
-	if (info->server_port == 0)
+	if (ms_info->server_port == 0)
 	{
 		PUCK_PORT = 80;
 	} else {
-		PUCK_PORT = info->server_port;
+		PUCK_PORT = ms_info->server_port;
 	}
 
 	/* initialize mDNS */
@@ -1110,14 +1091,14 @@ mdns_init(struct mdns_info *info) {
 
 		/*loopback function for the multicast(224.0.0.251) messages received at port 5353*/
 //		mdns_enable();
-		udp_recv(mdns_pcb, mdns_recv, info);
+		udp_recv(mdns_pcb, mdns_recv, ms_info);
 		mdns_flag = 1;
 		/*
 		 * Register the name of the instrument
 		 */
 
 		os_timer_disarm(&mdns_timer);
-		os_timer_setfn(&mdns_timer, (os_timer_func_t *)mdns_reg,info);
+		os_timer_setfn(&mdns_timer, (os_timer_func_t *)mdns_reg,ms_info);
 		os_timer_arm(&mdns_timer, 1000, 1);
 	}
 }

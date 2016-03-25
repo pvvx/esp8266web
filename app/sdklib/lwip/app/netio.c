@@ -369,6 +369,4 @@ void ICACHE_FLASH_ATTR netio_init(void)
 }
 
 #endif /* LWIP_TCP */
-
 #endif // USE_NETIO
-

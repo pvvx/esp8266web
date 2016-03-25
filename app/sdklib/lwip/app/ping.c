@@ -46,7 +46,6 @@
 
 #ifdef USE_PING
 
-
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
 
 #include "lwip/mem.h"
@@ -330,5 +329,4 @@ ping_regist_sent(struct ping_option *ping_opt, ping_sent_function ping_sent)
 }
 
 #endif /* LWIP_RAW */
-
 #endif // USE_PING

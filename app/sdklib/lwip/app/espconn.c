@@ -1274,4 +1274,3 @@ espconn_dns_setserver(u8_t numdns, ip_addr_t *dnsserver)
 }
 
 #endif // USE_ESPCONN
-

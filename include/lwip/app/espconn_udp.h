@@ -1,6 +1,5 @@
 #ifndef __ESPCONN_UDP_H__
 #define __ESPCONN_UDP_H__
-
 #include "lwipopts.h"
 #ifdef USE_ESPCONN
 

@@ -93,10 +93,10 @@ static err_t tcp_timewait_input(struct tcp_pcb *pcb)ICACHE_FLASH_ATTR;
  * @param inp network interface on which this segment was received
  */
  /** 
- *  TCP��ʼ�����봦�?��֤��TCPͷ���������IP����� 
+ *  TCP��ʼ�����봦�?��֤��TCPͷ���������IP�����
  
- * @����p:������յ�TCP��(ָ��IPͷ�ĸ���) 
- * @����inp:���նε�����ӿ� 
+ * @����p:������յ�TCP��(ָ��IPͷ�ĸ���)
+ * @����inp:���նε�����ӿ�
  */ 
 void
 tcp_input(struct pbuf *p, struct netif *inp)
@@ -112,15 +112,15 @@ tcp_input(struct pbuf *p, struct netif *inp)
 
   PERF_START;
 
-  TCP_STATS_INC(tcp.recv);	//״̬��1 
+  TCP_STATS_INC(tcp.recv);	//״̬��1
   snmp_inc_tcpinsegs();			//tcp����μ�1
 
   iphdr = (struct ip_hdr *)p->payload;// pointer to the actual data in the buffer
   /* 
-  *��ͷ����(IHL)��4λ��IPЭ���ͷ�ĳ��ȣ�ָ��IPv4Э���ͷ���ȵ��ֽ������ٸ�32λ�� 
-  *����IPv4�İ�ͷ���ܰ�ɱ������Ŀ�ѡ ���������ֶο�������ȷ��IPv4��ݱ�����ݲ��ֵ�ƫ������ 
-  *IPv4��ͷ����С������20���ֽڣ����IHL����ֶε���Сֵ��ʮ���Ʊ�ʾ����5 (5x4 = 20�ֽ�)�� 
-  *����˵�����ʾ�İ�ͷ�����ֽ�����4�ֽڵı���  
+  *��ͷ����(IHL)��4λ��IPЭ���ͷ�ĳ��ȣ�ָ��IPv4Э���ͷ���ȵ��ֽ������ٸ�32λ��
+  *����IPv4�İ�ͷ���ܰ�ɱ������Ŀ�ѡ ���������ֶο�������ȷ��IPv4��ݱ�����ݲ��ֵ�ƫ������
+  *IPv4��ͷ����С������20���ֽڣ����IHL����ֶε���Сֵ��ʮ���Ʊ�ʾ����5 (5x4 = 20�ֽ�)��
+  *����˵�����ʾ�İ�ͷ�����ֽ�����4�ֽڵı���
   */
   tcphdr = (struct tcp_hdr *)((u8_t *)p->payload + IPH_HL(iphdr) * 4);
 
@@ -135,7 +135,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
     TCP_STATS_INC(tcp.lenerr);//���󳤶ȼ���
     TCP_STATS_INC(tcp.drop);//��ֹ����
     snmp_inc_tcpinerrs();
-    pbuf_free(p);//�ͷ�buffer 
+    pbuf_free(p);//�ͷ�buffer
     return;
   }
 
@@ -183,16 +183,16 @@ tcp_input(struct pbuf *p, struct netif *inp)
   /* Convert fields in TCP header to host byte order. */
   tcphdr->src = ntohs(tcphdr->src);				//ת��Դ��ַ
   tcphdr->dest = ntohs(tcphdr->dest);				//ת��Ŀ�ĵ�ַ
-  seqno = tcphdr->seqno = ntohl(tcphdr->seqno);	//ת�����к� 
+  seqno = tcphdr->seqno = ntohl(tcphdr->seqno);	//ת�����к�
   ackno = tcphdr->ackno = ntohl(tcphdr->ackno);	//ת��Ӧ���
   tcphdr->wnd = ntohs(tcphdr->wnd);				//ת��tcp����
 
-  flags = TCPH_FLAGS(tcphdr);//�õ�tcp header�ı�־ 
+  flags = TCPH_FLAGS(tcphdr);//�õ�tcp header�ı�־
   /* 
-  *��־��3λ�����ֶΣ��� 
-  *    ����λ��1λ 
-  *    ���ֶ�λ��1λ��ȡֵ��0��������ݱ��ֶΣ���1����ݱ����ֶܷΣ� 
-  *    ����λ��1λ��ȡֵ��0����ݰ����û�а�1����ݰ�����и��İ� 
+  *��־��3λ�����ֶΣ���
+  *    ����λ��1λ
+  *    ���ֶ�λ��1λ��ȡֵ��0��������ݱ��ֶΣ���1����ݱ����ֶܷΣ�
+  *    ����λ��1λ��ȡֵ��0����ݰ����û�а�1����ݰ�����и��İ�
   */ 
   tcplen = p->tot_len + ((flags & (TCP_FIN | TCP_SYN)) ? 1 : 0);//TCP_FIN �� TCP_SYN ��λ��1�������0
 
@@ -288,7 +288,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
       }
     
       LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: packed for LISTENing connection.\n"));
-      tcp_listen_input(lpcb);//����tcp������ݰ� 
+      tcp_listen_input(lpcb);//����tcp������ݰ�
       pbuf_free(p);
       return;
     }
@@ -511,8 +511,9 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
       return ERR_ABRT;
     }
 #endif /* TCP_LISTEN_BACKLOG */
-    for(pactive_pcb = tcp_active_pcbs; pactive_pcb != NULL; pactive_pcb = pactive_pcb->next)
-    	active_pcb_num ++;
+    for(pactive_pcb = tcp_active_pcbs; pactive_pcb != NULL; pactive_pcb = pactive_pcb->next) {
+    	if (pactive_pcb->state == ESTABLISHED) active_pcb_num ++;
+    }
     if (active_pcb_num == MEMP_NUM_TCP_PCB){
     	LWIP_DEBUGF(TCP_DEBUG, ("tcp_listen_input: exceed the number of active TCP connections\n"));
     	TCP_STATS_INC(tcp.memerr);
@@ -717,8 +718,9 @@ tcp_process(struct tcp_pcb *pcb)
         pcb->rtime = -1;
       else {
         pcb->rtime = 0;
-        pcb->nrtx = 0;
+//        pcb->nrtx = 0;
       }
+      pcb->nrtx = 0;
 
       tcp_seg_free(rseg);
 
@@ -1064,7 +1066,7 @@ tcp_receive(struct tcp_pcb *pcb)
           pcb->acked--;
         }
 
-        pcb->snd_queuelen -= pbuf_clen(next->p);//�������������pbufs���� 
+        pcb->snd_queuelen -= pbuf_clen(next->p);//�������������pbufs����
         tcp_seg_free(next);//�ͷ�tcp��
 
         LWIP_DEBUGF(TCP_QLEN_DEBUG, ("%"U16_F" (after freeing unacked)\n", (u16_t)pcb->snd_queuelen));
@@ -1101,7 +1103,7 @@ tcp_receive(struct tcp_pcb *pcb)
                                     ntohl(pcb->unsent->tcphdr->seqno), ntohl(pcb->unsent->tcphdr->seqno) +
                                     TCP_TCPLEN(pcb->unsent)));
 
-      next = pcb->unsent;//pcbδ���ͱ�־ 
+      next = pcb->unsent;//pcbδ���ͱ�־
       pcb->unsent = pcb->unsent->next;//δ���͵���һ��
       LWIP_DEBUGF(TCP_QLEN_DEBUG, ("tcp_receive: queuelen %"U16_F" ... ", (u16_t)pcb->snd_queuelen));
       LWIP_ASSERT("pcb->snd_queuelen >= pbuf_clen(next->p)", (pcb->snd_queuelen >= pbuf_clen(next->p)));
