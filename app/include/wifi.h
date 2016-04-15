@@ -41,7 +41,7 @@
 #endif
 
 #define MAX_PHY_TPW 82 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
-#define DEF_MAX_PHY_TPW 82 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
+#define DEF_MAX_PHY_TPW 75 // maximum value of RF Tx Power, unit : 0.25dBm, range 0..82
 
 
 #ifndef DEBUGSOO
