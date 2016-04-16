@@ -134,8 +134,8 @@ int OpenINA219drv(void)
 		ets_timer_disarm(&test_timer);
 		// 16V@40mV (G=1) -> 8192
 		if( ina_wr(INA219_REG_CALIBRATION, 8192) && ina_wr(INA219_REG_CONFIG,
-					INA219_CONFIG_BVOLTAGERANGE_16V |
-					INA219_CONFIG_GAIN_1_40MV |
+					INA219_CONFIG_BVOLTAGERANGE_32V |
+					INA219_CONFIG_GAIN_8_320MV |
 					INA219_CONFIG_BADCRES_12BIT |
 					INA219_CONFIG_SADCRES_12BIT_128S_69MS |
 					INA219_CONFIG_MODE_SANDBVOLT_CONTINUOUS)) {
@@ -166,11 +166,25 @@ int CloseINA219drv(void)
 //=============================================================================
 int ovl_init(int flg)
 {
-	if(flg == 1) {
+	int x = 0;
+	switch(flg) {
+	case 1:
 		if(ina_init_flg) CloseINA219drv();
 		return OpenINA219drv();
+	case 2:
+		ets_timer_disarm(&test_timer);
+		return 0;
+	case 3:
+	{
+		ina_rd(INA219_REG_BUSVOLTAGE,x);
+		return x;
 	}
-	else {
+	case 4:
+	{
+		ina_rd(INA219_REG_SHUNTVOLTAGE,x);
+		return x;
+	}
+	default:
 		return CloseINA219drv();
 	}
 }
