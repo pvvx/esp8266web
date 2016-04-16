@@ -365,5 +365,3 @@ int ovl_init(int flg)
 	}
 	return 0;
 }
-
-
