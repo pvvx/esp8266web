@@ -579,8 +579,8 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	            else ifcmp("sgs") 	{ sigma_delta_setup(n); set_sigma_duty_312KHz(val); }
 	            else ifcmp("sgc") 	sigma_delta_close(n);
 	            else ifcmp("od") 	reg_sct_bits(&GPIOx_PIN(n), GPIO_PIN_DRIVER, val);
-	            else ifcmp("pu") 	reg_sct_bits(get_addr_gpiox_mux(n), GPIO_MUX_PULLUP_BIT, val);
-	            else ifcmp("pd") 	reg_sct_bits(get_addr_gpiox_mux(n), GPIO_MUX_PULLDOWN_BIT, val);
+	            else ifcmp("pu") 	reg_sct_bits(get_addr_gpiox_mux(n), 1<<GPIO_MUX_PULLUP_BIT, val);
+	            else ifcmp("pd") 	reg_sct_bits(get_addr_gpiox_mux(n), 1<<GPIO_MUX_PULLDOWN_BIT, val);
     		}
     	}
     	else if(*cstr == '_') {

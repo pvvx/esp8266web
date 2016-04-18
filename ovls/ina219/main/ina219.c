@@ -10,6 +10,8 @@
 #include "ovl_sys.h"
 #include <math.h>
 
+#define KSHUNT	8192 // default 8192
+
 #define ina_pin_sda	mdb_buf.ubuf[60]
 #define ina_pin_scl	mdb_buf.ubuf[61]
 #define ina_count	mdb_buf.ubuf[62]
@@ -17,13 +19,13 @@
 #define ina_voltage	mdb_buf.ubuf[64] // Voltage LSB = 1mV per bit (step 4 mV)
 #define ina_current	mdb_buf.ubuf[65] // Current LSB = 50uA per bit
 #define ina_power	mdb_buf.ubuf[66] // Power LSB = 1mW per bit
-#define ina_shunt	mdb_buf.ubuf[67]
+#define ina_shunt	mdb_buf.ubuf[67] // 10uV
 
 uint32 ina_init_flg DATA_IRAM_ATTR;
 os_timer_t test_timer DATA_IRAM_ATTR;
 
-#define ina_wr(a,b) i2c_wrword((INA219_ADDRESS<<24)|(a<<16)|b)
-#define ina_rd(a,b) if(i2c_setaddr((INA219_ADDRESS<<8)|a)) b = i2c_rdword(INA219_ADDRESS | INA219_READ)
+#define ina_wr(a,b) i2c_wrword((INA219_ADDRESS<<24)|((a)<<16)|(b))
+#define ina_rd(a,b) if(i2c_setaddr((INA219_ADDRESS<<8)|(a))) b = i2c_rdword(INA219_ADDRESS | INA219_READ)
 
 
 unsigned int inafuncs DATA_IRAM_ATTR; // номер функции
@@ -133,7 +135,7 @@ int OpenINA219drv(void)
 		i2c_stop();
 		ets_timer_disarm(&test_timer);
 		// 16V@40mV (G=1) -> 8192
-		if( ina_wr(INA219_REG_CALIBRATION, 8192) && ina_wr(INA219_REG_CONFIG,
+		if( ina_wr(INA219_REG_CALIBRATION, KSHUNT) && ina_wr(INA219_REG_CONFIG,
 					INA219_CONFIG_BVOLTAGERANGE_32V |
 					INA219_CONFIG_GAIN_8_320MV |
 					INA219_CONFIG_BADCRES_12BIT |
@@ -185,7 +187,16 @@ int ovl_init(int flg)
 		return x;
 	}
 	default:
-		return CloseINA219drv();
+		switch(flg>>16) {
+		case 1:
+			ina_wr(INA219_REG_CALIBRATION, flg & 0xFFFF);
+			return 0;
+		case 2:
+			ina_wr(INA219_REG_CONFIG, flg & 0xFFFF);
+			return 0;
+		default:
+			return CloseINA219drv();
+		}
 	}
 }
 
