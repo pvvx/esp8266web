@@ -53,7 +53,7 @@ bool i2c_wrword(uint32 w)
 }
 
 //-------------------------------------------------------------------------------
-// read a word
+// set addr
 bool i2c_setaddr(uint32 addr)
 {
 	i2c_start();
@@ -120,7 +120,7 @@ void IntReadIna219(void)
 	}
 }
 //----------------------------------------------------------------------------------
-// Initialize Humidity Sensor driver
+// Initialize Sensor driver
 int OpenINA219drv(void)
 //----------------------------------------------------------------------------------
 {
@@ -153,7 +153,7 @@ int OpenINA219drv(void)
 		return -2;
 }
 //----------------------------------------------------------------------------------
-// Close Humidity Sensor driver
+// Close Sensor driver
 int CloseINA219drv(void)
 //----------------------------------------------------------------------------------
 {
