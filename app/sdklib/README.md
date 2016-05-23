@@ -1,5 +1,5 @@
 # MinEspSDK (meSDK)
-Minimalist SDK on ESP8266ex v1.5.2
+Minimalist SDK on ESP8266ex v1.5.4
 ---
 
 A complete set of Wi-Fi and [LwIP](http://savannah.nongnu.org/projects/lwip/) functions.<br>
@@ -17,11 +17,11 @@ A complete set of Wi-Fi and [LwIP](http://savannah.nongnu.org/projects/lwip/) fu
 через 540 мс. Основное время занимает инициализации SDK в части WiFi.<br>
 Далее полудуплексный трафик TCP составляет более 1-го Мегабайта в секунду.<br>    
 
-From [Espressif SDK](http://bbs.espressif.com/) ver 1.5.2 used only:<br> 
+From [Espressif SDK](http://bbs.espressif.com/) ver 1.5.4 used only:<br> 
 libpp.a, libwpa.a, libcrypto.a, libnet80211.a, parts libphy.a, user_interface.o<br>
-Из [Espressif SDK](http://bbs.espressif.com/) ver 1.5.2 используются только описанные части.<br>
+Из [Espressif SDK](http://bbs.espressif.com/) ver 1.5.4 используются только описанные части.<br>
 Остальные части даны с исходными кодами.<br>
-LwIP based on [Open source LWIP for ESP_IOT_SDK_V1.4.0](http://bbs.espressif.com/viewtopic.php?f=46&t=1221).<br>
+LwIP based on [Open source LWIP for ESP_IOT_SDK_V1.5.2](http://bbs.espressif.com/viewtopic.php?f=46&t=1221).<br>
 
 Supported options 48 kbytes IRAM.<br>
 Supported '[Rapid Loader](https://github.com/pvvx/Rapid_Loader/)' and Flash 512 кbytes - 16 Mbytes.<br>

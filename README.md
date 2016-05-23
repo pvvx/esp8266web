@@ -27,11 +27,11 @@ Supported '[Rapid Loader](https://github.com/pvvx/Rapid_Loader/)' and Flash 512 
 Поддержка расширенной памяти IRAM в 48 килобайт,<br>
 Flash от 512 килобайт до 16 Мегабайт и ускоряющего загрузку SDK 'лоадера'.<br>
 
-From [Espressif SDK](http://bbs.espressif.com/) ver 1.5.2 used only:<br> 
+From [Espressif SDK](http://bbs.espressif.com/) ver 1.5.4 used only:<br> 
 libpp.a, libwpa.a, libnet80211.a, parts libphy.a, libcrypto.a, user_interface.o<br>
-Из [Espressif SDK](http://bbs.espressif.com/) ver 1.5.2 используются только описанные части.<br>
+Из [Espressif SDK](http://bbs.espressif.com/) ver 1.5.4 используются только описанные части.<br>
 Остальные части даны с исходными кодами.<br>
-LwIP based on [Open source LWIP for ESP_IOT_SDK_V1.4.0](http://bbs.espressif.com/viewtopic.php?f=46&t=1221).<br> 
+LwIP based on [Open source LWIP for ESP_IOT_SDK_V1.5.2](http://bbs.espressif.com/viewtopic.php?f=46&t=1221).<br> 
 
 Options programming Flash:<br> 
 

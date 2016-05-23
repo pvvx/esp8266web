@@ -3,7 +3,7 @@
 MEMORY
 {
   dram0_0_seg :		org = 0x3FFFDF60, len = 0x00400    
-  iram1_0_seg :		org = 0x40106300, len = 0x01D00
+  iram1_0_seg :		org = 0x40106600, len = 0x01A00
   irom0_0_seg :		org = 0x40210000, len = 0xF0000
 }
 

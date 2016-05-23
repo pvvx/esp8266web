@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ESP8266</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h3 class="top">ESP8266 Built-in Web server <sup>&copy;</sup></h3>
+<div class="menu">
+	<div>
+		<a href="/index.htm">Main</a>
+		<a href="/protect/uart.htm">TCP-UART Settings</a>
+		<a href="/protect/wifi.htm">WiFi settings</a>
+		<a href="/protect/scan.htm">WiFi Scan</a>
+		<a href="/protect/upload.htm">WebFS Upload</a>
+		<a href="/protect/setup.htm">System Setup</a>
+	</div>
+	<div>
+		<a href="/protect/gpio.htm">GPIO</a>
+		<a href="/protect/hexdmpb.htm">HexDump Bytes</a>
+		<a href="/protect/hexdmpd.htm">HexDump DWord</a>
+		<a href="/protect/tstfuncs.htm">Download Bin</a>
+		<a href="/protect/dsleep.htm">Deep Sleep</a>
+		<a href="/protect/debug.htm">Debug and Test</a>
+	</div>
+</div>
+<script type="text/javascript">
+for (var i = 0; i < document.links.length; i++) {
+    if (document.links[i].href == document.URL) {
+        document.links[i].className = 'active';
+    }
+}
+</script>
+<style>
+.slider {background-repeat: repeat-x; background-image: url(data:image/gif;base64,R0lGODlhAgAVALIBADg4OHh4eGtra0ZGRjU1NUJCQhcXFwAAACH5BAUAAAcALAAAAAACABUAAAMNeLoqHm4MQkoxhumtEwA7);}
+.knob {position: relative; background-image: url(data:image/gif;base64,R0lGODlhEwAVAPcAAAAXSwEWSwAZTAEYTAAaTQIZTQsiVAErcwEucgA3iQE4iBQ+igBDlABFkgFQmwFRmgFcowFfpRFusRNvshpysh1yszNUmyV6uyd7uyd8vCl9vSl+vip+vix9vjNxrjJ9tDJ/tT57tC5/wFF/oSyAvi+AvzuHuzyFuj2Euj+IvSuAwCyAwC6CwDOFwTeJxTiKxDqKxzmKyTqMyDqOzDuPzT2Pyz6OzUKIvEeJvVOBo0mPwkuPwEyOwEKRzEWRy0mRw06Sw0ySxU2Txk+TxEiX0Eub1kqc1kqb2kuc202e3VCRx1iXw1mYxFqZxFuaxV2axk+h3VCg3VCi3lSg2lWh21qo5luq5V2p412t6F6w7F+w8WKdx2KayWOdy2OeymSdyGWeyWafymieyn2Yw2mgyWihzHGy3Ha23GGz7Wm07WCx8GKy8Wq28G+89G+/9HC98XO/83O+9XPA9nXB83TC83XB9XbC9H3H9Iafx4Ku0YOw0YWw04Wy04ax04ay1Yaz1Iey1ILL9IPM9YPO9ofP9YbQ94fR9ojQ9ojS9YnS9ZLc95Pd9pTb95fd95Pd+Jff+Jje+Jfi95nh95jg+L/O46Xt+abs+Knv+6ru+6zu+qvx+63x+qzy+rL4+rX5/Lf4/LT8+7b8/Lr8+7/7/MHN48DP4sDP5MLO5MH7/MH7/cD8/MX7/cv9/M78+s/9/dD8+9v9/P///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAALEALAAAAAATABUAAAj+AGMJHEiwoEGBBgQQGBAAQAEBBQoYOLhgDCVTpU6dMsWRFB4LBRF4yMPHz58+fQDt4dNHT4gDBBWA2EKmDJgvXsSA6RKGy4cEBBugYPLECZMmTpwgbbLkBAOCDkzw0AFkiA4lQn7sCAIkxQOCESpgIKHhwooNKlZ0EJGBAgSCEji4gFHDxowZNGjEkPGixQSCJXoQMYJEShIpUKQciVLEBwuCN6ZcwZIFjZo1WdRoqWKFCg6CI9i8eTPHDh05burAidMmTY6CZwYREpSoECFEhg4FumPmYCRFkx41kvTIESRGiw4KBMXJEqZKlzJt0qR84CpRnjp9CpWqOkFXqEYSqWrlvaArVq/KG4Slvr175QEBADs=);}
+</style>
+<div class="content"><table cellspacing="2" cellpadding="0" border="0" style="font-size:16pt"><tr>
+<td width="50%">U: <span id="xdata1" style="font-weight:bold">?</span> V, I: <span id="xdata2" style="font-weight:bold">?</span> mA</td>
+<! ~sys_debug=0~,~mdbw60=0,2~,~ovl:ina219.ovl~>
+<td style="font-size:10pt">
+<div id="sl"></div>GET TimeOuts <span id="toutid" style="font-weight:bold">?</span> ms'</td></tr></table>
+<canvas id="mycanvas1" width="620pt" height="150pt"></canvas>
+<canvas id="mycanvas2" width="620pt" height="150pt"></canvas>
+SampleRate: <span id="smprate" style="font-weight:bold">?</span> sps
+</div>
+<script src="grf.js" type="text/javascript"></script>
+<script src="slider.js" type="text/javascript"></script>
+<script type="text/javascript">
+var line1 = new TimeSeries();
+var line2 = new TimeSeries();
+var smoothie1 = new SmoothieChart({ millisPerPixel: 3, maxValueScale:1.05, // interpolation:'step',
+  grid: { strokeStyle:'rgb(75, 75, 75)', lineWidth: 1, millisPerLine: 100, verticalSections: 6 },
+  labels: { fillStyle:'rgb(255, 255, 255)' }
+});
+var smoothie2 = new SmoothieChart({ millisPerPixel: 3, maxValueScale:1.05, // interpolation:'step', 
+  grid: { strokeStyle:'rgb(75, 75, 75)', lineWidth: 1, millisPerLine: 100, verticalSections: 6 },
+  labels: { fillStyle:'rgb(255, 255, 255)' }
+});
+//smoothie.addTimeSeries(line1, { strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0, 0.4)', lineWidth:2 });
+//smoothie.addTimeSeries(line2, { strokeStyle:'rgb(255, 0, 255)', fillStyle:'rgba(255, 0, 255, 0.3)', lineWidth:2 });
+smoothie1.addTimeSeries(line1, { strokeStyle:'rgb(0, 255, 0)',  lineWidth: 2 });
+smoothie2.addTimeSeries(line2, { strokeStyle:'rgb(255, 0, 255)', lineWidth: 2 });
+smoothie1.streamTo(document.getElementById("mycanvas1"));
+smoothie2.streamTo(document.getElementById("mycanvas2"));
+var nextimeout = 20;
+var mysl1 = new slider('sl', 333, 1, 200, 0);
+mysl1.setValue(nextimeout);
+document.getElementById('toutid').innerHTML = mysl1.getValue(); 
+ var uicnt = 0;
+ var wstt;
+ var smprate = 0;
+function onMessage(evt) {
+    smprate++;
+	if (evt.data) {
+	    if(uicnt) {
+			newval = (eval(evt.data)*0.0964).toFixed(2);			
+ 			line2.append(new Date().getTime(), newval);
+			document.getElementById('xdata2').innerHTML = newval;
+ 		}
+ 		else {
+			newval = (eval(evt.data)*0.000519).toFixed(4);			
+			line1.append(new Date().getTime(), newval);
+			document.getElementById('xdata1').innerHTML = newval;
+		}
+	} 
+	wsSendMsg();
+//	clearTimeout(wstt);
+//	wstt = setTimeout(wsSendMsg, nextimeout);
+}
+// var wsUri = "ws://192.168.1.15/web.cgi";
+ var wsUri = "ws://192.168.4.1/web.cgi";
+// var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
+function testWebSocket() {
+	websocket = new WebSocket(wsUri);
+	websocket.onopen = function(evt) {onOpen(evt)};
+	websocket.onmessage = function(evt) {onMessage(evt)};
+}
+function wsSendMsg() {
+	if(uicnt) {uicnt = 0; websocket.send("ovl$3"); }
+	else {uicnt = 1; websocket.send("ovl$4"); }
+}
+function onOpen(evt) {
+	document.getElementById('xdata1').style.color = 'rgb(0, 155, 100)';
+	document.getElementById('xdata2').style.color = 'rgb(155, 0, 100)';
+	websocket.send("ovl$=2");
+	wsSendMsg();
+}
+function wsSmpRate() {
+	document.getElementById('smprate').innerHTML = smprate;
+	smprate = 0;
+	wstt = setTimeout(wsSmpRate, 1000);
+}
+wstt = setTimeout(wsSmpRate, 1000);
+testWebSocket();
+</script>
+<div class="copyright">(c) 2014..2015 by <a href='http://esp8266.ru/'>esp8266.ru</a></div>
+</body></html>
