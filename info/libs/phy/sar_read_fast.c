@@ -25,7 +25,7 @@ void phy_adc_read_fast(uint16 *adc_addr, uint16 adc_num, uint8 adc_clk_div)
 	uint32 save_22 = SAR_BASE[22];
 	SAR_BASE[20] = (SAR_BASE[20] & 0xFFFF00FF) | ((adc_clk_div & 0xFF) << 8);
 	SAR_BASE[21] = (SAR_BASE[21] & 0xFF000000) | (adc_clk_div * 5 + ((adc_clk_div - 1) << 16) + ((adc_clk_div - 1) << 8) - 1);
-	SAR_BASE[22] = (SAR_BASE[22] & 0xFF000000) | (adc_clk_div * 11 + ((adc_clk_div * 3 - 1) << 8) + ((adc_clk_div * 10 - 1) << 16) - 1);
+	SAR_BASE[22] = (SAR_BASE[22] & 0xFF000000) | (adc_clk_div * 11 + ((adc_clk_div * 3 - 1) << 8) + ((adc_clk_div * 11 - 1) << 16) - 1);
 	SAR_BASE[20] &= 0xFFFFFFE3;
 	rom_i2c_writeReg_Mask(108,2,0,5,5,1);
 	SAR_BASE[23] |= 1 << 21;

@@ -14,7 +14,7 @@
 uint32 wdrv_bufn DATA_IRAM_ATTR; // кол-во накоплений в буфере ADC (1..8 замеров)
 extern uint8 tout_dis_txpwr_track; // флаг отключения процедуры подстройки питания для WiFi с использованием SAR
 
-/* Инициализация SAR sps ~= 3 000 000 / (clk_div * win_cnt) 
+/* Инициализация SAR sps ~= 3 000 000 / (clk_div * win_cnt)
 	clk_div от 1 до 23, win_cnt от 1 до 8 */
 void ICACHE_FLASH_ATTR sar_init(uint32 clk_div, uint32 win_cnt)
 {
@@ -26,7 +26,7 @@ void ICACHE_FLASH_ATTR sar_init(uint32 clk_div, uint32 win_cnt)
 	SAR_CFG = (SAR_CFG & 0xFFFF00E3) | ((wdrv_bufn-1) << 2) | (clk_div << 8); 
 	// установить делители частоты SAR
 	SAR_TIM1 = (SAR_TIM1 & 0xFF000000) | (clk_div * 5 + ((clk_div - 1) << 16) + ((clk_div - 1) << 8) - 1);
-	SAR_TIM2 = (SAR_TIM2 & 0xFF000000) | (clk_div * 11 + ((clk_div * 3 - 1) << 8) + ((clk_div * 10 - 1) << 16) - 1);
+	SAR_TIM2 = (SAR_TIM2 & 0xFF000000) | (clk_div * 11 + ((clk_div * 3 - 1) << 8) + ((clk_div * 11 - 1) << 16) - 1);
 	// включить SAR
 	rom_i2c_writeReg_Mask(108,2,0,5,5,1);
 	SAR_CFG1 |= 1 << 21;
@@ -60,7 +60,7 @@ void ICACHE_FLASH_ATTR read_adcs(uint16 *ptr, uint16 len, uint32 cfg)
 			SAR_CFG = x;
 			SAR_CFG = x | (1 << 1);
 			uint16 sar_dout = 0;
-			volatile uint32 * sar_regs = &SAR_DATA; // указатель для считывания до 8 шт. накопленных 
+			volatile uint32 * sar_regs = &SAR_DATA; // указатель для считывания до 8 шт. накопленных
 													// значений SAR из аппаратного буфера в 0x60000D80
 			while((SAR_CFG >> 24) & 0x07); // while(READ_PERI_REG(0x60000D50)&(0x7<<24)); // wait r_state == 0
 			for(i = 0; i < wdrv_bufn; i++) {

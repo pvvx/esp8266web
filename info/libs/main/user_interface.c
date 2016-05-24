@@ -1374,3 +1374,16 @@ uint32 ICACHE_FLASH_ATTR rtc_mem_recovery(uint32 *mem_start, uint32 *mem_end, ui
 	return ret;
 }
 
+void system_adc_read_fast(uint16 *adc_addr, uint16 adc_num, uint8 adc_clk_div)
+{
+	int i;
+	phy_adc_read_fast(adc_addr, adc_num, adc_clk_div);
+	if(adc_num) {
+		for(i=0; i<adc_num; i++) {
+			if(adc_addr[i]!= 0xffff) {
+				adc_addr[i] = adc_addr[i]*12/11;
+				if(adc_addr[i] > 0x400) adc_addr[i] = 0x400;
+			}
+		}
+	}
+}
