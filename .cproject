@@ -155,8 +155,191 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.93393110" name="/" resourcePath="ovls">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.341394698" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.674891053">
+								<option id="gnu.c.compiler.option.include.paths.861972029" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1097010709" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.793208281"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.1215096163"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.527554852" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.1151397103"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.2066576256" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.1771519366">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.983892500" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.1620250185" name="/" resourcePath="ovls/10dof">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1822117052" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945.1517039288" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827.364760557" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1671291038" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588">
+								<option id="gnu.c.compiler.option.include.paths.2009784841" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/10dof/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1037478679" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1653886109" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.965118423" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.801814767" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.527554852"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.1296672344" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.2066576256">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1710375158" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.1317655191" name="/" resourcePath="ovls/sht7x">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1134830334" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945.288013738" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827.1204230409" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.467156662" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588">
+								<option id="gnu.c.compiler.option.include.paths.1295684200" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/sht7x/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1303552522" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.215518077" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.338423774" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.39570063" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.527554852"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.995440181" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.2066576256">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1176871421" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.874841626" name="/" resourcePath="ovls/stats">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1589889045" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945.2132149542" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827.786937161" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.2055472534" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588">
+								<option id="gnu.c.compiler.option.include.paths.47838526" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/stats/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1585119708" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.664793893" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1835299331" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1405815708" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.527554852"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.1437754998" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.2066576256">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2107530269" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.1163033610" name="/" resourcePath="ovls/wdrv">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1879634908" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945.111664881" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827.1304599045" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.2055287744" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588">
+								<option id="gnu.c.compiler.option.include.paths.1822389834" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/wdrv/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.833417908" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.825337818" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.805896337" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.809664470" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.527554852"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.418257070" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.2066576256">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.867530681" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.89385620" name="/" resourcePath="ovls/ina219">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1562966267" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945.1741206411" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827.122039116" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.435178334" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588">
+								<option id="gnu.c.compiler.option.include.paths.1008382086" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/ina219/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.430426917" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.999830297" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1111471718" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1426461757" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.527554852"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.830319613" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.2066576256">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.877389491" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.1440156796" name="/" resourcePath="ovls/oiintr">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.608477171" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945.894735669" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827.691927865" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.2142018549" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588">
+								<option id="gnu.c.compiler.option.include.paths.1886276239" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/oiintr/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.703143892" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.591830036" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1862361843" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.2131007811" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.527554852"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.1723102126" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.2066576256">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2132995539" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178.951596635" name="/" resourcePath="ovls/udplog">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.612866229" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base" unusedChildren="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945.1946029476" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1272816131.812727945"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827.202705709" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1306314832.1583773827"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.43717819" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.407349588">
+								<option id="gnu.c.compiler.option.include.paths.1438610900" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/web/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ovls/udplog/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1989548926" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.2105963924" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1731239367"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.520333986" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.2093117679"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.175980957" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.527554852"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.771204740" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.2066576256">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1177487246" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="esp8266web.asm|PVFSlib|PVFS21|MinEspSDKLib.asm|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="ovls|esp8266web.asm|PVFSlib|PVFS21|MinEspSDKLib.asm|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -243,7 +426,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="app/gdbstub|esp8266web.asm|app/web|app/mdbtcp|app/driver|MinEspSDKLib.asm|app/user|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="ovls|app/gdbstub|esp8266web.asm|app/web|app/mdbtcp|app/driver|MinEspSDKLib.asm|app/user|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

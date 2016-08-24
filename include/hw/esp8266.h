@@ -9,6 +9,9 @@
 #define ESP8266_H
 
 //#include "hw/eagle_soc.h"
+#ifndef _C_TYPES_H_
+#include "c_types.h"
+#endif
 
 #define	Q_CLK_FREQ	26000000ul	// unit: Hz, 40000000 Hz
 

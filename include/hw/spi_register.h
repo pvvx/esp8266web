@@ -264,12 +264,12 @@
 #define SPI_T_ERASE_TIME				0x00000FFF
 #define SPI_T_ERASE_TIME_S				0
 
-#define SPI_FLASH_EXT2(i)			(REG_SPI_BASE(i) + 0xF8)
+#define SPI_FLASH_EXT2(i)			(REG_SPI_BASE(i) + 0xF8) //00000000/00000000 
 #define SPI_ST 							0x00000007
 #define SPI_ST_S						0
 
-#define SPI_EXT3(i)					(REG_SPI_BASE(i) + 0xFC) //00000000/00000000
-#define SPI_INT_HOLD_ENA				0x00000003
+#define SPI_EXT3(i)					(REG_SPI_BASE(i) + 0xFC) //00000000/00000000 
+#define SPI_INT_HOLD_ENA				0x00000003	//used set priority for spi or hspi
 #define SPI_INT_HOLD_ENA_S				0
 
 #endif // SPI_REGISTER_H_INCLUDED
