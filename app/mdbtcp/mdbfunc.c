@@ -116,7 +116,7 @@ uint32 ICACHE_FLASH_ATTR RdMdbData(uint8 * wbuf, uint16 addr, uint32 len)
 		           *p++ = 0;
 		      	   *p++ = 0;
 		      	}
-					os_memset(wbuf, 0, i << 1); // передать нули
+				os_memset(wbuf, 0, i << 1); // передать нули
 			}
 		};
 		len -= i; // вычесть кол-во данных этой пересылки
@@ -162,7 +162,7 @@ uint32 ICACHE_FLASH_ATTR WrMdbData(uint8 * dbuf, uint16 addr, uint32 len)
 		len -= i; // вычесть кол-во данных этой пересылки
 		addr += i;  // шаг адреса
 		dbuf += i << 1; // шаг в блоке данных запроса mdb
-		ptr++; // на следюший указатель в таблице
+		ptr++; // на следющий указатель в таблице
 	} while (len);
 	return MDBERRNO;
 }
@@ -172,6 +172,8 @@ uint32 ICACHE_FLASH_ATTR MdbFunc(smdbadu * mdbbuf, uint32 len)
 	uint32 i;
 	mdbiosize = 0;
 	switch (mdbbuf->fx.hd.fun) {
+//	case 01: // Read Coils 00000
+//	case 02: // Read Discrete Inputs 10000
 	case 03: // Read Holding Registers 40000
 	case 04: // Read Input Registers 30000
 		if (len < sizeof(mdbbuf->f3f4))	break;

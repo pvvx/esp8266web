@@ -42,6 +42,11 @@ struct s_info info; // ip,mask,gw,mac AP, ST
 ETSTimer check_timeouts_timer DATA_IRAM_ATTR; // timer_lwip
 uint8 user_init_flag;
 
+#if DEF_SDK_VERSION >= 2000
+// замена user_rf_cal_sector_set()
+uint32 DATA_IRAM_ATTR rf_cal_sec; // = 256-5; // всегда 251 секторов
+#endif
+
 #if DEF_SDK_VERSION >= 1400
 extern int chip_v6_set_chan_offset(int, int);
 extern uint8 phy_rx_gain_dc_flag;
@@ -412,12 +417,19 @@ void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 	uint8 * ptr = &_bss_start;
 	while(ptr < &_bss_end) *ptr++ = 0;
 }*/
+extern int ieee80211_chan_in_regdomain(sint32 x);
 //-----------------------------------------------------------------------------
 // Тест конфигурации для WiFi
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 {
     struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
+#if 0 // DEF_SDK_VERSION >= 2000
+    int flg = 0;
+    if(g_ic.c[540] == 0xff) {
+    	flg = 1; g_ic.c[540] = 2;
+    }
+#endif
 	wifi_softap_set_default_ssid();
 	wifi_station_set_default_hostname(info.st_mac);
 	if(wifi_config->wfmode[0] == 0xff) wifi_config->wfmode[0] = SOFTAP_MODE;
@@ -448,6 +460,33 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 	if(wifi_config->field_316 >= 6) wifi_config->field_316 = 1;
 	if(wifi_config->field_169 >= 2) wifi_config->field_169 = 0; // +169
 	if(wifi_config->phy_mode >= 4 || wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
+#if 0 // DEF_SDK_VERSION >= 2000
+	if(flg) {
+		// sub_402100C4();
+		{
+			uint8 * tst_ch = &g_ic.c[1688];
+			if(tst_ch[0] != 0 && tst_ch[0] != 1) tst_ch[0] = 0;
+			if(tst_ch[1] == 1) {
+				if(!((tst_ch[6] == 0x49 || tst_ch[6] == 0x4F || tst_ch[6] == 0x20) // 'I','O',' '
+				&& ((tst_ch[10] + tst_ch[11]) < 0x10)))
+				{
+					uint16 * tst_u16 = (uint16 *) tst_ch;
+					tst_u16[1] = 0x81;
+					tst_u16[2] = 0x9C;
+					tst_ch[6] = 0x20;
+					tst_ch[7] = 0x43; //'C'
+					tst_ch[8] = 0x4E; //'N'
+					tst_ch[9] = 1;
+					tst_ch[10] = 1;
+					tst_ch[11] = 0x0E;
+				}
+				if(ieee80211_chan_in_regdomain(wifi_config->wfchl) == 0) wifi_config->wfchl = tst_ch[10];
+			}
+			else ets_memset(tst_ch, 0, 14);
+		}
+		system_param_save_with_protect((flashchip->chip_size/flashchip->sector_size) - 3, wifi_config, wifi_config_size);
+	}
+#endif // DEF_SDK_VERSION >= 2000
 }
 //=============================================================================
 //-----------------------------------------------------------------------------
@@ -548,6 +587,8 @@ void ICACHE_FLASH_ATTR startup(void)
 	//
 	prvHeapInit(); // инициализация менеджера памяти heap
 	//
+	rf_cal_sec	= 256-5;
+	//
 	read_wifi_config(); // чтение последних установок wifi (последние 3 сектора flash)
 	//
 #ifdef USE_OPEN_LWIP	
@@ -585,8 +626,12 @@ void ICACHE_FLASH_ATTR startup(void)
 #if DEF_SDK_VERSION >= 1400
 	uint8 * buf = os_malloc(SIZE_SAVE_SYS_CONST);
 	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
-#if DEF_SDK_VERSION >= 1410
-	if(buf[112] == 3) g_ic.c[471] = 1; // esp_init_data_default: freq_correct_en[112]
+#if DEF_SDK_VERSION >= 2000
+	if(buf[sys_const_freq_correct_en] == 3) g_ic.c[491] = 1; // esp_init_data_default: freq_correct_en[112]
+	else g_ic.c[491] = 0;
+
+#elif DEF_SDK_VERSION >= 1410
+	if(buf[sys_const_freq_correct_en] == 3) g_ic.c[471] = 1; // esp_init_data_default: freq_correct_en[112]
 	else g_ic.c[471] = 0;
 #endif
 	buf[0xf8] = 0;

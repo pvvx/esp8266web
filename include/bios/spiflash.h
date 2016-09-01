@@ -54,6 +54,8 @@ extern SpiFlashChip * flashchip; // in RAM-BIOS: 0x3fffc714
 
 void Cache_Read_Disable(void);
 void Cache_Read_Enable(uint32_t a, uint32_t b, uint32_t c);
+SpiFlashOpResult Enable_QMode(SpiFlashChip *sflashchip);
+SpiFlashOpResult Disable_QMode(SpiFlashChip *sflashchip);
 
 SpiFlashOpResult SPI_read_status(SpiFlashChip *sflashchip, uint32_t *sta);
 SpiFlashOpResult SPI_write_status(SpiFlashChip *sflashchip, uint32_t sta);
@@ -67,6 +69,7 @@ SpiFlashOpResult SPIEraseSector(uint32_t sectornum);
 SpiFlashOpResult SPIEraseChip(void);
 SpiFlashOpResult SPILock(void);
 SpiFlashOpResult SPIUnlock(void);
+
 
 SpiFlashOpResult SPIRead(uint32_t faddr, uint32_t *dst, size_t size);
 int SPIReadModeCnfig(uint32_t mode);

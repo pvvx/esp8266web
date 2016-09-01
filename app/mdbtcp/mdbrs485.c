@@ -379,7 +379,7 @@ bool ICACHE_FLASH_ATTR mdb_start_trn(uint32 num)
 		msg->flg.ui = p->int_addr | RS485MSG_FLG_INT_MSG | (num << 24); // Transaction Identifier
 		if(p->id == 0) msg->flg.ui |= RS485MSG_FLG_TX_ONLY;
 		else p->fifo_cnt++; // счетчик запросов
-		// поместить сообшение в очередь
+		// поместить сообщение в очередь
 		SLIST_INSERT_HEAD(&rs485vars.txmsgs, msg, next);
 		//  Старт передачи, если не занят
 		rs485_next_txmsg(); //  Проверить наличие пакета в очереди и начать передачу, если возможно
