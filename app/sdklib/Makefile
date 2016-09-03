@@ -54,7 +54,7 @@ ADDLIBS_libsdk = \
 	libmphy.a	\
 	libpp.a	\
 	libmwpa.a	\
-	libcrypto.a	\
+	libmcrypto.a	\
 	libnet80211.a
 
 ifndef USE_OPEN_LWIP 
