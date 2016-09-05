@@ -42,11 +42,6 @@ struct s_info info; // ip,mask,gw,mac AP, ST
 ETSTimer check_timeouts_timer DATA_IRAM_ATTR; // timer_lwip
 uint8 user_init_flag;
 
-#if DEF_SDK_VERSION >= 2000
-// замена user_rf_cal_sector_set()
-uint32 DATA_IRAM_ATTR rf_cal_sec; // = 256-5; // всегда 251 секторов
-#endif
-
 #if DEF_SDK_VERSION >= 1400
 extern int chip_v6_set_chan_offset(int, int);
 extern uint8 phy_rx_gain_dc_flag;
@@ -54,11 +49,21 @@ extern uint8 * phy_rx_gain_dc_table;
 extern sint16 TestStaFreqCalValInput;
 extern struct rst_info rst_inf;
 #endif
+#if DEF_SDK_VERSION >= 2000
+// замена user_rf_cal_sector_set()
+uint32 DATA_IRAM_ATTR rf_cal_sec; // = 128-5; // всегда 123-ий (0x7B000)
+#endif
+
 #if DEF_SDK_VERSION >= 1200
 uint8 SDK_VERSION[] = {SDK_VERSION_TXT};
 uint16 lwip_timer_interval;
 #endif
 
+#ifdef FIX_SDK_FLASH_SIZE
+#define sdk_flash_read(f,d,s) copy_s4d1((char *)d, (void *)(f + FLASH_BASE), s )
+#else
+#define sdk_flash_read(f,d,s) spi_flash_read(f,d,s)
+#endif
 
 #ifdef USE_OPEN_LWIP
 extern bool default_hostname; // in eagle_lwip_if.c
@@ -419,12 +424,35 @@ void ICACHE_FLASH_ATTR read_macaddr_from_otp(uint8 *mac)
 }*/
 extern int ieee80211_chan_in_regdomain(sint32 x);
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int ICACHE_FLASH_ATTR flash_data_check(uint8 *check_buf)
+{
+	uint32 cbuf[32];
+	uint32 *pcbuf = cbuf;
+	uint8 *pbuf = check_buf;
+	int i = 27;
+	while(i--) {
+		*pcbuf = pbuf[0] | (pbuf[1]<<8) | (pbuf[2]<<16) | (pbuf[3]<<24);
+		pcbuf++;
+		pbuf+=4;
+	}
+	cbuf[24] = (OTP_MAC1 & 0xFFFFFFF) | ((OTP_CHIPID & 0xF000)<<16);
+	cbuf[25] = (dport_[23] & 0xFFFFFFF) | (OTP_MAC0 & 0xFF000000);
+	pcbuf = cbuf;
+	uint32 xsum = 0;
+	do	xsum += *pcbuf++;
+	while(pcbuf != &cbuf[26]);
+	xsum ^= 0xFFFFFFFF;
+	if (cbuf[26] != xsum) return 1;
+	return 0;
+}
+//-----------------------------------------------------------------------------
 // Тест конфигурации для WiFi
 //-----------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 {
     struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
-#if 0 // DEF_SDK_VERSION >= 2000
+#if DEF_SDK_VERSION >= 2000
     int flg = 0;
     if(g_ic.c[540] == 0xff) {
     	flg = 1; g_ic.c[540] = 2;
@@ -460,9 +488,9 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 	if(wifi_config->field_316 >= 6) wifi_config->field_316 = 1;
 	if(wifi_config->field_169 >= 2) wifi_config->field_169 = 0; // +169
 	if(wifi_config->phy_mode >= 4 || wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
-#if 0 // DEF_SDK_VERSION >= 2000
+#if DEF_SDK_VERSION >= 2000
 	if(flg) {
-		// sub_402100C4();
+		// sub_402100C4():
 		{
 			uint8 * tst_ch = &g_ic.c[1688];
 			if(tst_ch[0] != 0 && tst_ch[0] != 1) tst_ch[0] = 0;
@@ -484,7 +512,10 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 			}
 			else ets_memset(tst_ch, 0, 14);
 		}
-		system_param_save_with_protect((flashchip->chip_size/flashchip->sector_size) - 3, wifi_config, wifi_config_size);
+#ifdef DEBUG_UART
+		os_printf("Save WiFiCFG\n");
+#endif
+		system_param_save_with_protect(fsec_sdk_wifi_cfg, wifi_config, wifi_config_size);
 	}
 #endif // DEF_SDK_VERSION >= 2000
 }
@@ -493,11 +524,21 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 void ICACHE_FLASH_ATTR read_wifi_config(void)
 {
 	struct ets_store_wifi_hdr hbuf;
-	spi_flash_read(flashchip->chip_size - 0x1000,(uint32 *)(&hbuf), sizeof(hbuf));
-	uint32 store_cfg_addr = flashchip->chip_size - 0x3000 + ((hbuf.bank)? 0x1000 : 0);
+	sdk_flash_read(faddr_sdk_wifi_cfg_head,(uint32 *)(&hbuf), sizeof(hbuf));
 	struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
-	spi_flash_read(store_cfg_addr,(uint32 *)wifi_config, wifi_config_size);
+	sdk_flash_read(faddr_sdk_wifi_cfg + ((hbuf.bank)? flashchip_sector_size : 0),(uint32 *)wifi_config, wifi_config_size);
+#if DEF_SDK_VERSION >= 2000
+	if (hbuf.flag == 0xFFFFFFFF) { // первый пуск или выключили питание при записи конфигурации (китай-фича! :))
+#ifdef DEBUG_UART
+//		os_printf("\nHello Espressif!\n");
+#endif
+		return;
+	}
+	if ((hbuf.flag != 0x55AA55AA || hbuf.flag2 != 0xAA55AA55)
+	|| (system_get_checksum((uint8 *)wifi_config, hbuf.xx[(hbuf.bank)? 1 : 0]) != hbuf.chk[(hbuf.bank)? 1 : 0])) {
+#else
 	if (hbuf.flag != 0x55AA55AA || system_get_checksum((uint8 *)wifi_config, hbuf.xx[(hbuf.bank)? 1 : 0]) != hbuf.chk[(hbuf.bank)? 1 : 0]) {
+#endif
 #ifdef DEBUG_UART
 		os_printf("\nError wifi_config! Clear.\n");
 #endif
@@ -530,10 +571,15 @@ void ICACHE_FLASH_ATTR startup_uart_init(void)
 //=============================================================================
 // startup()
 //-----------------------------------------------------------------------------
-void ICACHE_FLASH_ATTR startup(void)
+//extern uint8 freq_trace_enable;
+//extern int flash_data_check(uint8 * b);
+extern void phy_afterwake_set_rfoption(int op);
+extern int phy_check_data_table(void * gdctbl, int x, int flg);
+extern void write_data_to_rtc(uint8 *);
+extern void get_data_from_rtc(uint8 *);
+
+void ICACHE_FLASH_ATTR set_pll(void)
 {
-	ets_isr_mask(0x3FE); // запретить прерывания 1..9
-	ets_set_user_start(jump_boot); // установить адрес для возможной перезагрузки по доп. веткам ROM-BIOS
 	// cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
 	if(rom_i2c_readReg(103,4,1) != 136) { // 8: 40MHz, 136: 26MHz
 		if(get_sys_const(sys_const_crystal_26m_en) == 1) { // soc_param0: 0: 40MHz, 1: 26MHz, 2: 24MHz
@@ -542,6 +588,16 @@ void ICACHE_FLASH_ATTR startup(void)
 			rom_i2c_writeReg(103,4,2,145);
 		}
 	}
+}
+
+
+void ICACHE_FLASH_ATTR startup(void)
+{
+	ets_isr_mask(0x3FE); // запретить прерывания 1..9
+	ets_set_user_start(jump_boot); // установить адрес для возможной перезагрузки по доп. веткам ROM-BIOS
+	// IO_RTC_4 = 0xfe000000;
+	sleep_reset_analog_rtcreg_8266(); // портит PLL !
+	set_pll(); // cтарт на модуле с кварцем в 26MHz, а ROM-BIOS выставил 40MHz?
 #if	STARTUP_CPU_CLK == 160
 	system_overclock(); // set CPU CLK 160 MHz
 #endif
@@ -587,7 +643,10 @@ void ICACHE_FLASH_ATTR startup(void)
 	//
 	prvHeapInit(); // инициализация менеджера памяти heap
 	//
-	rf_cal_sec	= 256-5;
+#if DEF_SDK_VERSION >= 2000
+	// замена user_rf_cal_sector_set()
+	rf_cal_sec	= fsec_rf_cal; // сектор сохранения калибровок WiFi
+#endif
 	//
 	read_wifi_config(); // чтение последних установок wifi (последние 3 сектора flash)
 	//
@@ -595,8 +654,6 @@ void ICACHE_FLASH_ATTR startup(void)
 	default_hostname = true; // используется default_hostname
 #endif	
 	//
-	// IO_RTC_4 = 0xfe000000;
-	sleep_reset_analog_rtcreg_8266();
 	// создать два MAC адреса для AP и SP
 	read_macaddr_from_otp(info.st_mac);
 	wifi_softap_cacl_mac(info.ap_mac, info.st_mac);
@@ -623,9 +680,69 @@ void ICACHE_FLASH_ATTR startup(void)
 	overlap_hspi_init(); // не используется для модулей с одной flash!
 #endif
 	//
+#if	DEF_SDK_VERSION >= 2000
+	uint32 rgrr = rtc_get_reset_reason();
+	system_rtc_mem_read(0, &rst_if, sizeof(struct rst_info));
+	uint32 reset_reason = IO_RTC_SCRATCH0;
+	if(reset_reason == 0) {
+		if(rgrr == 2) { // pin reset
+			if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE || rst_if.epc1 != 0 || rst_if.excvaddr != 0) {
+				ets_memset(&rst_if, 0, sizeof(struct rst_info));
+				rst_if.reason = REASON_EXT_SYS_RST;
+			}
+		}
+		else if (rgrr == 1) { // ch_pd
+			ets_memset(&rst_if, 0, sizeof(struct rst_info));
+		};
+	}
+	else if(reset_reason > 7) ets_memset(&rst_if, 0, sizeof(struct rst_info));
+//		system_rtc_mem_write(0, &rst_if, sizeof(struct rst_info));
+	//
+	uint8 * pbuf = os_malloc(SIZE_SAVE_SYS_CONST);
+	sdk_flash_read(faddr_esp_init_data_default,(uint32 *)pbuf, 128); // esp_init_data_default.bin
+	sdk_flash_read(rf_cal_sec*flashchip_sector_size,(uint32 *)pbuf + 128, SIZE_SAVE_SYS_CONST-128);
+	//
+	if(pbuf[0] != 5) { // первый байт esp_init_data_default.bin не равен 5 ? - бардак!
+#ifdef DEBUG_UART
+		os_printf("Set default esp_init_data!\n");
+#endif
+		ets_memcpy(pbuf, esp_init_data_default, esp_init_data_default_size);
+	}
+	//
+	phy_rx_gain_dc_table = &pbuf[0x100];
+	int xflg;
+	if(flash_data_check(&pbuf[128]) != 0 || phy_check_data_table(phy_rx_gain_dc_table, 125, 1) != 0) xflg = 1;
+	else xflg = 0;
+	if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE) {
+		phy_afterwake_set_rfoption(1);
+		if(xflg == 0) write_data_to_rtc(pbuf+128);
+	}
+	pbuf[0xf8] = 0;
+	//
+	init_wifi(pbuf, info.st_mac);
+	//
+	if((pbuf[sys_const_freq_correct_en] & 5) == 1) g_ic.c[491] = 1;
+	else g_ic.c[491] = 0;
+	if(xflg != 0) {
+		if((rgrr == 1) // ch_pd
+		|| ((rst_if.reason != REASON_DEEP_SLEEP_AWAKE) && (rgrr == 2))) { // pin reset
+#ifdef DEBUG_UART
+			os_printf("Save rf_cal (%u, %u, %u, %u)\n", xflg, g_ic.c[491], rst_if.reason, rgrr);
+#endif
+			get_data_from_rtc(pbuf+128);
+			spi_flash_write(rf_cal_sec*flashchip_sector_size, (uint32 *)&pbuf[128], SIZE_SAVE_SYS_CONST-128);
+		}
+	}
+	os_free(pbuf);
+	//
+#ifdef DEBUG_UART
+	os_print_reset_error(); // вывод фатальных ошибок, вызвавших рестарт. см. в модуле wdt
+#endif
+	RTC_MEM(0) = 0; //	system_rtc_mem_write(0, &rst_if, sizeof(rst_if));
+#else	// DEF_SDK_VERSION < 2000
 #if DEF_SDK_VERSION >= 1400
 	uint8 * buf = os_malloc(SIZE_SAVE_SYS_CONST);
-	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
+	spi_flash_read(esp_init_data_default_faddr,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
 #if DEF_SDK_VERSION >= 2000
 	if(buf[sys_const_freq_correct_en] == 3) g_ic.c[491] = 1; // esp_init_data_default: freq_correct_en[112]
 	else g_ic.c[491] = 0;
@@ -644,10 +761,10 @@ void ICACHE_FLASH_ATTR startup(void)
 	// **
 #elif DEF_SDK_VERSION >= 1300
 	uint8 *buf = (uint8 *)os_malloc(256); // esp_init_data_default.bin
-	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
+	spi_flash_read(esp_init_data_default_faddr,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
 #else
 	uint8 *buf = (uint8 *)os_malloc(esp_init_data_default_size); // esp_init_data_default.bin
-	spi_flash_read(esp_init_data_default_addr,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
+	spi_flash_read(esp_init_data_default_faddr,(uint32 *)buf, esp_init_data_default_size); // esp_init_data_default.bin
 #endif
 	//
 	if(buf[0] != 5) { // первый байт esp_init_data_default.bin не равен 5 ? - бардак!
@@ -722,8 +839,9 @@ void ICACHE_FLASH_ATTR startup(void)
 #ifdef DEBUG_UART
 	os_print_reset_error(); // вывод фатальных ошибок, вызвавших рестарт. см. в модуле wdt
 #endif
-	RTC_MEM(0) = 0; //	system_rtc_mem_write(0, &rst_if, sizeof(rst_if));
+	RTC_MEM(0) = REASON_DEFAULT_RST; //	вместо system_rtc_mem_write(0, &rst_if, sizeof(rst_if));
 #endif
+#endif	// DEF_SDK_VERSION >= 2000
 //	DPORT_BASE[0] = (DPORT_BASE[0] & 0x60) | 0x0F; // ??
 #if DEF_SDK_VERSION >= 1119 // (SDK 1.1.1)
 	wdt_init(1);

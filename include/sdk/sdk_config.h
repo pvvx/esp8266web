@@ -37,10 +37,16 @@
 		80 - 80 MHz QSPI 
   		другое значение - 40 MHz QSPI */
 // #define USE_FIX_QSPI_FLASH 80 // назначается в MakeFile -DUSE_FIX_QSPI_FLASH=$(SPI_SPEED)
-
 #ifdef USE_FIX_QSPI_FLASH
-	#define USE_FIX_SDK_FLASH_SIZE  
+	#ifndef FIX_SDK_FLASH_SIZE
+		#define FIX_SDK_FLASH_SIZE (512*1024) // назначается в MakeFile -DFIX_SDK_FLASH_SIZE=...
+	#endif
 #endif
+
+//#if DEF_SDK_VERSION >= 2000
+// замена user_rf_cal_sector_set()
+#define DEF_RF_CAL_SEC (128-5) // сектор сохранения калибровок WiFi faddr = 0x7B000
+//#endif
 
 //#define USE_READ_ALIGN_ISR // побайтный доступ к IRAM и cache Flash через EXCCAUSE_LOAD_STORE_ERROR
 

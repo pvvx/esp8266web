@@ -23,7 +23,7 @@ extern void pp_soft_wdt_init(void);
 void ICACHE_FLASH_ATTR wdt_init(int flg)
 {
 	if(flg != 0) {
-		RTC_MEM(0) = 0;
+		RTC_MEM(0) = REASON_DEFAULT_RST;
 		WDT_CTRL &= 0x7e; // Disable WDT
 		INTC_EDGE_EN |= 1; // 0x3ff00004 |= 1
 		WDT_REG1 = 0xb; // WDT timeot
@@ -114,8 +114,8 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 //	if(rst_inf->reason >= RST_EVENT_WDT
 //	 && rst_inf->reason <= RST_EVENT_MAX
 //	 && (!(rst_inf->reason == RST_EVENT_WDT && rst_inf->epc1 == 0x40000f68))) {
+	os_printf("Reset event: ");
 	if(rst_inf->reason > RST_EVENT_WDT && rst_inf->reason <= RST_EVENT_MAX) {
-		os_printf("Old reset: ");
 		switch(rst_inf->reason) {
 /*		case RST_EVENT_WDT:
 			os_printf("WDT (%d):\n", rst_inf->exccause);
@@ -146,6 +146,20 @@ void ICACHE_FLASH_ATTR os_print_reset_error(void)
 		}
 		uart_wait_tx_fifo_empty();
 	}
+	else switch(rtc_get_reset_reason()) {
+		case 1: // ch_pd
+			os_printf("CH_PD\n");
+			break;
+		case 2: // pin reset
+			os_printf("RST\n");
+			break;
+		case 4: // wdt
+			os_printf("WDT\n");
+			break;
+		default:
+			os_printf("Unknown\n");
+	}
+
 	// rst_inf->reason = 0;
 }
 

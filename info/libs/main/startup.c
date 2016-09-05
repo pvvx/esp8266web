@@ -88,7 +88,7 @@ void mem_clr_bss(void) {
 	while(ptr < &_bss_end) *ptr++ = 0;
 }
 
-LOCAL void SystemParamErr(uint32 fsector)
+LOCAL void SystemParamErr(void) // uint32 fsector)
 {
 	os_printf("system param error\n");
 /*	// далее нет в SDK 2.0.0
@@ -138,8 +138,8 @@ LOCAL void startup(void)
 	uint32 xspeed;
 
 	ets_install_putc1(sdk_putc1);
-	read_mac(mac);
 	SPI0_USER |= SPI_CS_SETUP;
+	read_mac(mac);
 	SPIRead(0, (uint32_t *)&fhead, sizeof(fhead));
 	if(((GPIO_IN >> 16) & 7) != 5) {
 		if(fhead.hsz.spi_freg < 3) xspeed = fhead.hsz.spi_freg + 2;
@@ -180,7 +180,7 @@ LOCAL void startup(void)
 		dual_flash_flag = 0;
 		break;
 	}
-	sflash_something(fhead.hsz.spi_freg);
+	sflash_something(xspeed);
 
 	uint32 cfg_flash_addr = (flashchip->chip_size/flashchip->sector_size) - 3;
 	SPIRead((cfg_flash_addr + 2)*flashchip->sector_size, &hbuf, sizeof(hbuf)); // read 32 bytes ets_store_wifi_hdr
@@ -196,10 +196,11 @@ LOCAL void startup(void)
 	mem_clr_bss();
 	ets_install_putc1(sdk_putc1); // повторно !
 	if(hbuf.flag != 0x55AA55AA || hbuf.flag != 0xFFFFFFFF) SystemParamErr(cfg_flash_addr);
-	if(hbuf.flag2 == 0xAA55AA55 || hbuf.flag2 == 0xFFFFFFFF) {
-		if()
+	else if(hbuf.flag2 == 0xAA55AA55 || hbuf.flag2 == 0xFFFFFFFF) {
+		if(system_get_checksum((uint8 *)wscfg, hbuf.xx[(hbuf.bank)? 1 : 0]) != hbuf.chk[(hbuf.bank)? 1 : 0])
+			SystemParamErr();
 	}
-	else SystemParamErr(cfg_flash_addr);
+	else SystemParamErr();
 
 	uint32 flash_id = spi_flash_get_id(); // в libmain.a: spi_flash.o
 	bool ret;
@@ -221,6 +222,11 @@ LOCAL void startup(void)
 void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 {
     struct s_wifi_store * wifi_config = &g_ic.g.wifi_store;
+    int flg = 0;
+    if(g_ic.c[540] == 0xff) {
+    	flg = 1;
+    	g_ic.c[540] = 2;
+    }
 	wifi_softap_set_default_ssid();
 	wifi_station_set_default_hostname(info.st_mac);
 	if(wifi_config->wfmode[0] == 0xff) wifi_config->wfmode[0] = SOFTAP_MODE;
@@ -249,12 +255,59 @@ void ICACHE_FLASH_ATTR tst_cfg_wifi(void)
 	if(wifi_config->field_169 > 2) wifi_config->field_169 = 0; // +169
 	wifi_config->phy_mode &= 3;
 	if(wifi_config->phy_mode == 0 ) wifi_config->phy_mode = 3; // phy_mode
+	if(flg) {
+		// sub_402100C4():
+		{
+			uint8 * tst_ch = &g_ic.c[1688];
+			if(tst_ch[0] != 0 && tst_ch[0] != 1) tst_ch[0] = 0;
+			if(tst_ch[1] == 1) {
+				if(!((tst_ch[6] == 0x49 || tst_ch[6] == 0x4F || tst_ch[6] == 0x20) // 'I','O',' '
+				&& ((tst_ch[10] + tst_ch[11]) < 0x10)))
+				{
+					uint16 * tst_u16 = (uint16 *) tst_ch;
+					tst_u16[1] = 0x81;
+					tst_u16[2] = 0x9C;
+					tst_ch[6] = 0x20;
+					tst_ch[7] = 0x43; //'C'
+					tst_ch[8] = 0x4E; //'N'
+					tst_ch[9] = 1;
+					tst_ch[10] = 1;
+					tst_ch[11] = 0x0E;
+				}
+				if(ieee80211_chan_in_regdomain(wifi_config->wfchl) == 0) wifi_config->wfchl = tst_ch[10];
+			}
+			else ets_memset(tst_ch, 0, 14);
+		}
+		system_param_save_with_protect((flashchip->chip_size/flashchip->sector_size) - 3, wifi_config, wifi_config_size);
+	}
+}
+
+int flash_data_check(uint8 *check_buf)
+{
+	uint32 cbuf[32];
+	uint32 *pcbuf = cbuf;
+	uint8 *pbuf = check_buf;
+	int i = 27;
+	while(i--) {
+		*pcbuf = pbuf[0] | (pbuf[1]<<8) | (pbuf[2]<<16) | (pbuf[3]<<24);
+		pcbuf++;
+		pbuf+=4;
+	}
+	cbuf[24] = (OTP_MAC1 & 0xFFFFFFF) | ((OTP_CHIPID & 0xF000)<<16);
+	cbuf[25] = (dport_[23] & 0xFFFFFFF) | (OTP_MAC0 & 0xFF000000);
+	pcbuf = cbuf;
+	uint32 xsum = 0;
+	do	xsum += *pcbuf++;
+	while(pcbuf != &cbuf[26]);
+	xsum ^= 0xFFFFFFFF;
+	if (cbuf[26] != xsum) return 1;
+	return 0;
 }
 
 extern uint8 phy_rx_gain_dc_flag;
 extern uint8 * phy_rx_gain_dc_table;
 extern sint16 TestStaFreqCalValInput;
-uint8  SDK_VERSION = "1.4.0";
+uint8  SDK_VERSION = "2.0.0";
 extern struct rst_info rst_inf;
 extern uint8 freq_trace_enable;
 
@@ -291,25 +344,24 @@ void ICACHE_FLASH_ATTR sdk_init(void)
 	while((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT);
 	while((UART1_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT);
 	//
-	GPIO0_MUX &= 0xEFF;
-	GPIO2_MUX &= 0xEFF;
+	GPIO0_MUX &= 0xfffffeff;
+	GPIO2_MUX &= 0xfffffeff;
 	//
-	struct rst_info * ri = (struct rst_info *) os_malloc(sizeof(struct rst_info));
+	struct rst_info * ri = (struct rst_info *) os_zalloc(sizeof(struct rst_info));
 	system_rtc_mem_read(0, &rst_if, sizeof(struct rst_info));
-	uint32 x = IOREG(0x60000730); // IO_RTC_SCRATCH0?
+	uint32 x = IOREG(0x60000730); // IO_RTC_SCRATCH0
 	if(x == 0) {
-		if (rtc_get_reset_reason() == 1) {
+		if (rtc_get_reset_reason() == 1) { // ch_pd
 			ets_memset(&rst_if, 0, sizeof(struct rst_info));
 		}
 		else {
-			int rera = rtc_get_reset_reason();
-			if(rera == 2) {
-				if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE && rst_if.epc1 != 0 && rst_if.excvaddr != 0) {
+			if(rtc_get_reset_reason() == 2) { // pin reset
+				if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE || rst_if.epc1 != 0 || rst_if.excvaddr != 0) {
 					ets_memset(&rst_if, 0, sizeof(struct rst_info));
 					rst_if.reason = REASON_EXT_SYS_RST;
 				}
 			}
-			else rtc_get_reset_reason(); // ???
+			else rtc_get_reset_reason(); // ??? 8)
 		}
 	} else if(x > 7) ets_memset(&rst_if, 0, sizeof(struct rst_info));
 	system_rtc_mem_write(0, &rst_if, sizeof(struct rst_info));
@@ -320,20 +372,21 @@ void ICACHE_FLASH_ATTR sdk_init(void)
 	//
 	uint8 * pbuf = os_malloc(756);
 	spi_flash_read(((flashchip->chip_size/flashchip->sector_size) - 4)*flashchip->sector_size,(uint32 *)pbuf, 128); // esp_init_data_default.bin
-	spi_flash_read(((flashchip->chip_size/flashchip->sector_size) - 4)*flashchip->sector_size + 128,(uint32 *)pbuf + 128, 628); // esp_init_data_default.bin
+	//
+	spi_flash_read(rf_cal_sec*flashchip->sector_size + 128,(uint32 *)pbuf + 128, 628); // rf_cal_sec
 	//
 	phy_rx_gain_dc_table = &pbuf[0x100];
 	int xflg;
-	if(flash_data_check(&pbuf[0x100]) != 0 || phy_check_data_table(phy_rx_gain_dc_table, 125, 1) != 0) xflg = 1;
+	if(flash_data_check(&pbuf[128]) != 0 || phy_check_data_table(phy_rx_gain_dc_table, 125, 1) != 0) xflg = 1;
 	else xflg = 0;
 	if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE) {
 		phy_afterwake_set_rfoption(1);
 	}
-	if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE && x == 0) {
+	if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE && xflg == 0) {
 		write_data_to_rtc(&pbuf[128]);
 	}
 	pbuf[0xf8] = 0;
-	phy_rx_gain_dc_flag = 0;
+//	phy_rx_gain_dc_flag = 0;
 	//
 	user_rf_pre_init();
 	//
@@ -418,55 +471,20 @@ void ICACHE_FLASH_ATTR sdk_init(void)
 	os_printf("rf[113] : %02x\n", pbuf[113]); // sys_const_force_freq_offset
 	os_printf("rf[114] : %02x\n", pbuf[114]); // ?
 	if(xflg != 0) {
-		if(rst_if.reason != REASON_DEEP_SLEEP_AWAKE) {
-			if(rtc_get_reset_reason() == 2) {
-				goto xxxxxx1;
-			}
-		}
-		else if(rtc_get_reset_reason() == 1) {
-xxxxxx1:
+		if((rtc_get_reset_reason() == 1) // ch_pd
+		|| ((rst_if.reason != REASON_DEEP_SLEEP_AWAKE) && (rtc_get_reset_reason() == 2))) { // pin reset
 			os_printf("w_flash\n");
 			get_data_from_rtc(pbuf+128);
 			wifi_param_save_protect_with_check(rf_cal_sec, flashchip->sector_size, pbuf + 128, 628);
 		}
 	}
-/* old SDK
-	if(pbuf[0xf8] == 1 || phy_rx_gain_dc_flag == 1) {
-		wifi_param_save_protect_with_check((flashchip->chip_size/flashchip->sector_size) - 4, flashchip->sector_size, pbuf, 756);
-	}
-*/
+
 	os_free(pbuf);
 
 	os_printf("\nSDK ver: %s compiled @ Aug  9 2016 15:12:27\n", SDK_VERSION);
 	os_printf("phy ver: %d, pp ver: %d.%d\n\n", (*((volatile uint32 *)0x6000107C))>>16, ((*((volatile uint32 *)0x600011F8))>>8)&0xFF, (*((volatile uint32 *)0x600011F8))&0xFF);
 
 
-/* old 	SDK
-	struct rst_info * ri = (struct rst_info *) os_malloc(sizeof(struct rst_info));
-	if(system_rtc_mem_read(0, &rst_if, sizeof(struct rst_info))) ;
-
-	if(ri->reason >= REASON_EXCEPTION_RST || ri->reason < REASON_DEEP_SLEEP_AWAKE) { // >= 2 < 5
-		// 2,3,4 REASON_EXCEPTION_RST, REASON_SOFT_WDT_RST, REASON_SOFT_RESTART
-		TestStaFreqCalValInput = RTC_RAM_BASE[30]>>16; //(*((volatile int *)0x60001078))/65536;
-		chip_v6_set_chan_offset(1, TestStaFreqCalValInput);
-	}
-	else {
-		TestStaFreqCalValInput = 0;
-		RTC_RAM_BASE[30] &= 0xFFFF; // *((volatile uint32 *)0x60001078) &= &0xFFFF;
-	}
-	if(ri->reason > REASON_EXT_SYS_RST) { // < 7
-		ets_memset(ri, 0, sizeof(struct rst_info));
-//		ri->reason = REASON_DEFAULT_RST; // = 0
-	}
-	if(ri->reason != REASON_DEEP_SLEEP_AWAKE) { // != 5
-		if(rtc_get_reset_reason() == 2) { // hw RESET
-			ets_memset(ri, 0, sizeof(struct rst_info));
-			ri->reason = REASON_EXT_SYS_RST; // = 6
-		}
-	}
-	system_rtc_mem_write(0, ri, sizeof(struct rst_info));
-	os_free(ri);
-*/
 	if((g_ic.c[491] & 1) != 0) {
 		if(rst_if.reason == REASON_DEEP_SLEEP_AWAKE) {
 			TestStaFreqCalValInput = RTC_RAM_BASE[30]>>16; //(*((volatile int *)0x60001078))/65536;

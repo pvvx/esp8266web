@@ -21,7 +21,7 @@ uint32 disk_base_addr DATA_IRAM_ATTR;
  *
  *     [F][W][E][B][uint8 Ver Hi][uint8 Ver Lo] // заголовок диска
  *     [uint16 Number of Files] // кол-во файлов на диске
- *     [Name Hash 0]...[Name Hash N] // uint16 типа хеш на каждое имя файла 
+ *     [Name Hash 0]...[Name Hash N] // uint16 типа хеш на каждое имя файла
  *     [File Record 0]...[File Record N] // uint32 указатели на адреса структур файлов, относительно начала диска
  *
  * File Record Structure:
@@ -441,7 +441,7 @@ LOCAL void ICACHE_FLASH_ATTR WEBFS_Update(void)
 uint32 ICACHE_FLASH_ATTR WEBFS_max_size(void)
 {
 	uint32 size = spi_flash_real_size();
-	if(size > FLASH_MIN_SIZE) size -= WEBFS_DISK_ADDR_BIGFLASH;
+	if(size > sdk_flashchip_size) size -= WEBFS_DISK_ADDR_BIGFLASH;
 	else {
 		size = WEBFS_DISK_ADDR_MINFLASH_END - WEBFS_DISK_ADDR_MINFLASH_START;
 	}
@@ -462,6 +462,6 @@ uint32 ICACHE_FLASH_ATTR WEBFS_curent_size(void)
 uint32 ICACHE_FLASH_ATTR WEBFS_base_addr(void)
 {
 	uint32 addr = WEBFS_DISK_ADDR_MINFLASH_START;
-	if(spi_flash_real_size() > FLASH_MIN_SIZE)	addr = WEBFS_DISK_ADDR_BIGFLASH;
+	if(spi_flash_real_size() > sdk_flashchip_size)	addr = WEBFS_DISK_ADDR_BIGFLASH;
 	return addr;
 }

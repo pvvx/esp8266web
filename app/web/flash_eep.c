@@ -392,7 +392,7 @@ bool ICACHE_FLASH_ATTR read_tcp_client_url(void)
  *  Чтение пользовательских констант (0 < idx < 4)
  */
 uint32 ICACHE_FLASH_ATTR read_user_const(uint8 idx) {
-#ifdef USE_FIX_SDK_FLASH_SIZE
+#ifdef FIX_SDK_FLASH_SIZE
 	uint32 ret = 0xFFFFFFFF;
 	if (idx < MAX_IDX_USER_CONST) {
 		if (flash_read_cfg(&ret, ID_CFG_KVDD + idx, 4) != 4) {

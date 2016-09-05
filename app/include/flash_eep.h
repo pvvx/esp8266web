@@ -11,10 +11,13 @@
 #include "user_config.h"
 //-----------------------------------------------------------------------------
 
-#define FMEMORY_SCFG_BASE_ADDR 0x79000 // 0x3B000, 0x3C000, 0x3D000 / 0x79000, 0x7A000, 0x7B000
-#define FMEMORY_SCFG_BANK_SIZE 0x01000 // размер сектора, 4096 bytes
+#define FMEMORY_SCFG_BANK_SIZE flashchip_sector_size // размер сектора, 4096 bytes
+#if DEF_SDK_VERSION >= 2000
+#define FMEMORY_SCFG_BANKS 2 // кол-во секторов для сохранения (0x7B000 используется для RF_CAL_SEC)
+#else
 #define FMEMORY_SCFG_BANKS 3 // кол-во секторов для сохранения
-
+#endif
+#define FMEMORY_SCFG_BASE_ADDR (sdk_flashchip_size - (FMEMORY_SCFG_BANKS + SDK_CFG_FLASH_SEC)*flashchip_sector_size) // 0x79000, 0x7A000[, 0x7B000]
 //-----------------------------------------------------------------------------
 
 #define ID_CFG_WIFI  0x6977 // id для сохранения установок WiFi (wificonfig)

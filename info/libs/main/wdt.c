@@ -128,13 +128,15 @@ void ICACHE_FLASH_ATTR PPWdtReset(void)
 void ICACHE_FLASH_ATTR wdt_init(int flg) // wdt_init(1) вызывается в стартовом блоке libmain.a
 {
 	if(flg) {
-		WDT_CTRL &= 0x7e; // Disable WDT  // 0x60000900
+		WDT_CTRL &= 0xFFFFFFFE; // Disable WDT  // 0x60000900
+		ets_isr_attach(ETS_WDT_INUM, wdt_feed , NULL);
 		INTC_EDGE_EN |= 1; // 0x3ff00004 |= 1
 		WDT_REG1 = 0xb; // WDT timeout
 		WDT_REG2 = 0xd;
 		WDT_CTRL |= 0x38;
 		WDT_CTRL &= 0x79;
 		WDT_CTRL |= 1;	// Enable WDT
+		ets_isr_unmask(1<<ETS_WDT_INUM);
 	}
 	pp_soft_wdt_init();
 }

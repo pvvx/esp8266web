@@ -647,7 +647,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           else ifcmp("const_") {
         	  cstr += 6;
         	  ifcmp("faddr") {
-        		  tcp_puts("0x%08x", esp_init_data_default_addr);
+        		  tcp_puts("0x%08x", faddr_esp_init_data_default);
         	  }
         	  else tcp_puts("%u", read_sys_const(ahextoul(cstr)));
           }
@@ -895,7 +895,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
             			web_get_flash(ts_conn);
             		}
             		else ifcmp("const") {
-            	    	web_conn->udata_start = esp_init_data_default_addr;
+            	    	web_conn->udata_start = faddr_esp_init_data_default;
             	    	web_conn->udata_stop = web_conn->udata_start + SIZE_SYS_CONST;
             	    	web_get_flash(ts_conn);
             		}

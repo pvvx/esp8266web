@@ -1376,7 +1376,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #endif
 					else if(rom_xstrcmp(pupload->name, sysconst_filename)) {
 						pupload->fsize = SIZE_SYS_CONST;
-						pupload->faddr = esp_init_data_default_addr;
+						pupload->faddr = faddr_esp_init_data_default;
 						pupload->status = 2; // = 2 загрузка файла во flash
 						break;
 					}
@@ -1452,7 +1452,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #endif
 				if(block_size) { // идут данные файла
 //					tcpsrv_unrecved_win(ts_conn); // для ускорения, пока стрирается-пишется уже обновит окно (включено в web_rx_buf)
-					if(pupload->faddr >= FLASH_MIN_SIZE && pupload->status == 3) {
+					if(pupload->faddr >= sdk_flashchip_size && pupload->status == 3) {
 						if((pupload->faddr & 0x0000FFFF)==0) {
 
 #if DEBUGSOO > 2

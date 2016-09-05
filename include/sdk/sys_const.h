@@ -8,18 +8,11 @@
 
 #include "sdk_config.h"
 #include "hw/esp8266.h"
+#include "sdk/flash.h"
 
 #define MAX_IDX_SYS_CONST 128
 #define SIZE_SYS_CONST 128
 #define SIZE_SAVE_SYS_CONST 756 // размер сохранения блока системных констант в секторе с номером (max_flash - 4). SDK 1.4.0
-
-#ifdef USE_FIX_SDK_FLASH_SIZE
-#define esp_init_data_default_sec (0x7C)
-#define esp_init_data_default_addr (0x7C000)
-#else
-#define esp_init_data_default_sec (flashchip->chip_size - 4)
-#define esp_init_data_default_addr (flashchip->chip_size - 4 * SPI_FLASH_SEC_SIZE)
-#endif
 
 #define	sys_const_spur_freq_cfg		26 // rx_param25: spur_freq=spur_freq_cfg/spur_freq_cfg_div
 #define	sys_const_spur_freq_cfg_div	27	// rx_param26
@@ -105,7 +98,9 @@
 										// 7: use 113 byte force_freq_offset to correct frequency offset, bbpll is 160M , it only can correct + frequency offset . 
 #define	sys_const_force_freq_offset 113 // tx_param43: signed, unit is 8khz
 
-#define get_sys_const(a)  ((*((unsigned int *)((unsigned int)((a) + FLASH_BASE + FLASH_SYSCONST_ADR) & (~3))))>>(((unsigned int)a & 3) << 3))
+//#ifdef FIX_SDK_FLASH_SIZE
+#define get_sys_const(a)  ((*((unsigned int *)((unsigned int)((a) + FLASH_BASE + faddr_esp_init_data_default) & (~3))))>>(((unsigned int)a & 3) << 3))
+//#endif
 
 extern uint8 chip6_phy_init_ctrl[128]; // 
 extern uint8 phy_in_most_power; // system_phy_set_max_tpw()

@@ -45,7 +45,7 @@ struct ets_store_wifi_hdr { // Sector flash addr flashchip->chip_size-0x1000  (0
 //-----------------------------------------------------------------------------
 struct s_wifi_store { // WiFi config flash addr: flashchip->chip_size - 0x3000 or -0x2000
 #if DEF_SDK_VERSION >= 2000 // SDK >= 2.0.0
-	uint8	boot_info[8];	//+000  g_ic+532 boot_version
+	uint8	boot_info[8];	//+000  (boot_info[1]) boot_version
 	uint8 	wfmode[4];		//+008
 	uint32	st_ssid_len;	//+012
 	uint8	st_ssid[32];	//+016
@@ -255,11 +255,13 @@ struct	s_g_ic{
 	uint8	field_02C[84];	//+002C g_ic+44
 	uint32	field_080;	//+0080 g_ic+128
 	uint8	field_084[200];	//+0084 g_ic+132
+	// [0x12c]
 	void *	field_14C;	//+014C g_ic+332
 	uint32	ratetable;		//+0150 g_ic+336
 	uint8	field_154[44];	//+0154 g_ic+340
 	uint32	field_180;		//+0180 g_ic+384
-	void *	field_184;	//+0184 g_ic+388
+	// [0x170..0x180] wifi_get_user_ie
+	void *	field_184;	//+0184 g_ic+388 user_ie_manufacturer_recv_cb
 	uint32	field_188;		//+0188 g_ic+392
 	uint32	field_18C;		//+018C g_ic+396
 	uint32	field_190;	//+0190 g_ic+400
@@ -278,6 +280,7 @@ struct	s_g_ic{
 	uint32	field_1C4;		//+01C4 g_ic+452
 #if DEF_SDK_VERSION >= 2000 // SDK >= 2.0.0
 	uint32	field_1C8[19]; //+01C8 g_ic+456 532-456
+	// [0x1F8] unregister_send_pkt_freedom_cb
 #elif DEF_SDK_VERSION >= 1500 // SDK >= 1.5.0
 	uint32	field_1C8[12];	//+01C8 g_ic+456 504-456
 #elif DEF_SDK_VERSION >= 1400 // SDK >= 1.4.0
