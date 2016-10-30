@@ -6,9 +6,9 @@
 
 ESPOPTION ?= -p COM2 -b 460800
 
-UPLOADADDR = http://aesp8266/fsupload
+UPLOADADDR = http://sesp8266/fsupload
 
-UPLOADOVL = ./ovls/bin/ina219.ovl
+UPLOADOVL = ./ovls/bin/i219u.ovl
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80
@@ -19,7 +19,8 @@ SPI_SIZE?=512
 # 
 ADDR_FW1 = 0x00000
 ADDR_FW2 = 0x07000
-# 
+#
+#USERFADDR = 0x10000
 USERFADDR = $(shell printf '0x%X\n' $$(( ($$(stat --printf="%s" $(OUTBIN2)) + 0xFFF + $(ADDR_FW2)) & (0xFFFFF000) )) )
 USERFBIN = ./webbin/WEBFiles.bin
 #
@@ -100,9 +101,14 @@ CCFLAGS += \
 	-fno-tree-ccp	\
 	-foptimize-register-move	\
 	-fno-inline-functions	\
+	-ffunction-sections -fdata-sections\
+	-Xlinker --gc-sections	\
+	-Wl,--gc-sections \
 	-Wl,--wrap=os_printf_plus	\
 	-Wl,-EL	\
 	-nostdlib
+
+
 
 ifeq ($(SPI_SPEED), 26.7)
     freqdiv = 1
@@ -216,7 +222,7 @@ else
 endif	
 	@dd if=../bin/0.bin >>../bin/$(ADDR_FW1).bin
 	$(OVLTOOL) $< ../ld/labels.ld
-	@make -C ../ovls
+#	@make -C ../ovls
 
 all: .subdirs $(OBJS) $(OLIBS) $(SPECIAL_MKTARGETS) $(OIMAGES) $(OBINS) 
 
@@ -240,8 +246,8 @@ clobber: $(SPECIAL_CLOBBER)
 FlashUserFiles: $(USERFBIN)
 	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(USERFADDR) $(USERFBIN)
 
-FlashAll: $(OUTBIN1)  $(USERFBIN) $(OUTBIN2) $(DEFAULTBIN) $(BLANKBIN) $(CLREEPBIN)
-	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(ADDR_FW1) $(OUTBIN1) $(ADDR_FW2) $(OUTBIN2) $(USERFADDR) $(USERFBIN)  $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
+FlashAll: $(OUTBIN1) NewUserBin $(OUTBIN2) $(DEFAULTBIN) $(BLANKBIN) $(CLREEPBIN)
+	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(ADDR_FW1) $(OUTBIN1) $(ADDR_FW2) $(OUTBIN2) $(USERFADDR) $(USERFBIN) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
 
 FlashClearSetings: $(CLREEPBIN) $(DEFAULTBIN) $(BLANKBIN)
 	$(ESPTOOL) $(ESPOPTION) write_flash $(flashimageoptions) $(CLREEPADDR) $(CLREEPBIN) $(DEFAULTADDR) $(DEFAULTBIN) $(BLANKADDR) $(BLANKBIN)
@@ -253,8 +259,14 @@ UploadOvl:
 	$(UPLOADTOOL) overlay $(UPLOADOVL) $(UPLOADADDR)
 
 UploadWeb: $(USERFBIN)
+	@$(RM) -f $(USERFBIN)
 	./WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib, *.ovl, *.ini" ./WEBFiles ./webbin WEBFiles.bin
-	$(UPLOADTOOL) file ./webbin/WEBFiles.bin $(UPLOADADDR)
+	$(UPLOADTOOL) file $(USERFBIN) $(UPLOADADDR)
+
+NewUserBin:
+	@$(RM) -f $(USERFBIN)
+	@cp -f ovls/bin/*.ovl WEBFiles
+	./WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib, *.ovl, *.ini" ./WEBFiles ./webbin WEBFiles.bin
 
 $(USERFBIN):
 	./WEBFS22.exe -h "*.htm, *.html, *.cgi, *.xml, *.bin, *.txt, *.wav" -z "*.inc, snmp.bib, *.ovl, *.ini" ./WEBFiles ./webbin WEBFiles.bin

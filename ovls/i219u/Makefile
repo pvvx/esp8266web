@@ -1,4 +1,4 @@
-OUTNAME:=ina219.ovl
+OUTNAME:=i219u.ovl
 TARGET = eagle
 
 ifndef PDIR # {

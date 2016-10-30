@@ -35,7 +35,9 @@ const uint8 txt_tcpsrv_out_of_mem[] ICACHE_RODATA_ATTR = "tcpsrv: out of mem!\n"
 // пред.описание...
 static void tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
 static void tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
+#if 0
 static void tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
+#endif
 static void tcpsrv_server_close(TCP_SERV_CONN * ts_conn) ICACHE_FLASH_ATTR;
 static err_t tcpsrv_server_poll(void *arg, struct tcp_pcb *pcb) ICACHE_FLASH_ATTR;
 static void tcpsrv_error(void *arg, err_t err) ICACHE_FLASH_ATTR;
@@ -368,12 +370,38 @@ void ICACHE_FLASH_ATTR tcpsrv_unrecved_win(TCP_SERV_CONN *ts_conn) {
 	ts_conn->unrecved_bytes = 0;
 }
 /******************************************************************************
+ tcpsrv_check_max_tm_tcp_pcb
+ *******************************************************************************/
+static void ICACHE_FLASH_ATTR tcpsrv_check_max_tm_tcp_pcb(void)
+{
+	struct tcp_pcb *pcb;
+	int i = 0;
+	for (pcb = tcp_tw_pcbs; pcb != NULL; pcb = pcb->next) i++;
+#if DEBUGSOO > 4
+	os_printf("tcpsrv: check %d tm pcb\n", i);
+#endif
+	while(i-- > MAX_TIME_WAIT_PCB) {
+		struct tcp_pcb *inactive = NULL;
+		for (pcb = tcp_tw_pcbs; pcb != NULL; pcb = pcb->next) {
+			inactive = pcb;
+		}
+#if DEBUGSOO > 3
+		os_printf("tcpsrv: kill %d tm pcb\n", i);
+#endif
+		if(inactive != NULL) {
+			tcp_pcb_remove(&tcp_tw_pcbs, inactive);
+			memp_free(MEMP_TCP_PCB, inactive);
+		}
+	}
+}
+/******************************************************************************
  * FunctionName : tcpsrv_disconnect
  * Description  : disconnect with host
  * Parameters   : arg -- Additional argument to pass to the callback function
  * Returns      : none
  ******************************************************************************/
 static void ICACHE_FLASH_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) {
+#if 0 // old version
 	struct tcp_pcb *pcb = ts_conn->pcb;
 	if (pcb != NULL
 			&& pcb->state == TIME_WAIT
@@ -388,6 +416,12 @@ static void ICACHE_FLASH_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_co
 		tcp_pcb_remove(&tcp_tw_pcbs, pcb);
 		memp_free(MEMP_TCP_PCB, pcb);
 	};
+#else
+#if MEMP_MEM_MALLOC // tcp_alloc() уже управляет убийством TIME_WAIT если MEMP_MEM_MALLOC == 0
+	if(ts_conn->flag.pcb_time_wait_free) tcpsrv_check_max_tm_tcp_pcb();
+	// http://www.serverframework.com/asynchronousevents/2011/01/time-wait-and-its-design-implications-for-protocols-and-scalable-servers.html
+#endif
+#endif
 	// remove the node from the server's connection list
 	if(ts_conn->flag.client && ts_conn->flag.client_reconnect) tcpsrv_client_reconnect(ts_conn);
 	else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
@@ -398,6 +432,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_co
  * Parameters   : arg -- Additional argument to pass to the callback function
  * Returns      : none
  ******************************************************************************/
+#if 0 // old version
 static void ICACHE_FLASH_ATTR tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) {
 //	if (ts_conn == NULL) return;
 	struct tcp_pcb *pcb = find_tcp_pcb(ts_conn); // ts_conn->pcb;
@@ -421,6 +456,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) {
 			os_timer_arm(&ts_conn->ptimer, TCP_FAST_INTERVAL*2, 0); // ждем ещё 250 ms
 	}
 }
+#endif
 /******************************************************************************
  * FunctionName : tcpsrv_server_close
  * Description  : The connection shall be actively closed.
@@ -429,7 +465,73 @@ static void ICACHE_FLASH_ATTR tcpsrv_close_cb(TCP_SERV_CONN * ts_conn) {
  * Returns      : none
  ******************************************************************************/
 static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
-
+#if 1
+	struct tcp_pcb *pcb = ts_conn->pcb;
+	if(pcb == NULL) return;
+#if DEBUGSOO > 3
+	os_printf("tcpsrv_server_close (%p)\n", pcb);
+#endif
+	if(ts_conn->state != SRVCONN_CLOSEWAIT && ts_conn->state != SRVCONN_CLOSED) {
+		ts_conn->state = SRVCONN_CLOSEWAIT;
+		ts_conn->recv_check = 0;
+		ts_conn->flag.wait_sent = 0; // блок передан
+		ts_conn->flag.rx_null = 1; // отключение вызова func_received_data() и прием в null
+		ts_conn->flag.tx_null = 1; // отключение вызова func_sent_callback() и передача в null
+		if (ts_conn->pbufo != NULL) {
+			os_free(ts_conn->pbufo);
+			ts_conn->pbufo = NULL;
+		}
+		ts_conn->sizeo = 0;
+		ts_conn->cntro = 0;
+		if (ts_conn->pbufi != NULL)	{
+			os_free(ts_conn->pbufi);
+			ts_conn->pbufi = NULL;
+		}
+		ts_conn->sizei = 0;
+		ts_conn->cntri = 0;
+		tcp_recv(pcb, NULL); // отключение приема
+		tcp_sent(pcb, NULL); // отключение передачи
+		tcp_poll(pcb, NULL, 0); // отключение poll
+		if(ts_conn->unrecved_bytes) {
+			tcp_recved(pcb, ts_conn->unrecved_bytes);
+			ts_conn->unrecved_bytes = 0;
+		}
+		tcp_recved(pcb, TCP_WND);
+	}
+	if(ts_conn->state == SRVCONN_CLOSEWAIT) {
+//			pcb = find_tcp_pcb(ts_conn); // ts_conn->pcb;
+//			ts_conn->pcb = pcb;
+		if (pcb == NULL || pcb->state == CLOSED || pcb->state == TIME_WAIT) {
+			/*remove the node from the server's active connection list*/
+#if DEBUGSOO > 3
+			os_printf("close(%p)\n", pcb);
+#endif
+			tcpsrv_disconnect_successful(ts_conn);
+		} else {
+			if (ts_conn->recv_check > 3) { // счет до принудительного закрытия 3 раза по TCP_SRV_CLOSE_WAIT
+#if DEBUGSOO > 1
+				tcpsrv_print_remote_info(ts_conn);
+				os_printf("tcp_abandon!\n");
+#endif
+				tcp_poll(pcb, NULL, 0);
+				tcp_err(pcb, NULL);
+				tcp_abandon(pcb, 0);
+				ts_conn->pcb = NULL;
+				// remove the node from the server's active connection list
+				tcpsrv_disconnect_successful(ts_conn);
+			}
+			else if (tcp_close(pcb) != ERR_OK) { // послать закрытие соединения, closing failed
+#if DEBUGSOO > 1
+				tcpsrv_print_remote_info(ts_conn);
+				os_printf("+ncls+%p\n", pcb);
+#endif
+				// closing failed, try again later
+				tcp_poll(pcb, tcpsrv_server_poll, TCP_SRV_CLOSE_WAIT);
+			}
+			else tcpsrv_disconnect_successful(ts_conn);
+		}
+	}
+#else // old version
 	struct tcp_pcb *pcb = ts_conn->pcb;
 //	if(pcb == NULL) return;
 	ts_conn->state = SRVCONN_CLOSEWAIT;
@@ -473,6 +575,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 	}
 //	else { } // closing succeeded
 	os_timer_arm(&ts_conn->ptimer, TCP_FAST_INTERVAL*2, 0); // если менее, то Lwip не успевает pcb->state = TIME_WAIT ?
+#endif
 }
 /******************************************************************************
  * FunctionName : espconn_server_poll
@@ -487,6 +590,40 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
  *                ERR_ABRT: if you have called tcp_abort from within the function!
  *******************************************************************************/
 static err_t ICACHE_FLASH_ATTR tcpsrv_server_poll(void *arg, struct tcp_pcb *pcb) {
+#if 1
+	TCP_SERV_CONN * ts_conn = arg;
+	if (ts_conn == NULL) {
+#if DEBUGSOO > 3
+		os_printf("poll, ts_conn = NULL! - abandon\n");
+#endif
+		tcp_poll(pcb, NULL, 0);
+		tcp_abandon(pcb, 0);
+		return ERR_ABRT;
+	}
+#if DEBUGSOO > 3
+	tcpsrv_print_remote_info(ts_conn);
+	os_printf("poll: %d #%d, %d,%d\n", ts_conn->recv_check, pcb->state, ts_conn->pcfg->time_wait_rec, ts_conn->pcfg->time_wait_cls);
+#endif
+	ts_conn->recv_check++;
+	if (ts_conn->state != SRVCONN_CLOSEWAIT) {
+		ts_conn->pcb = pcb;
+		if (pcb->state == ESTABLISHED) {
+			if (ts_conn->state == SRVCONN_LISTEN) {
+				if ((ts_conn->pcfg->time_wait_rec)
+					&& (ts_conn->recv_check > ts_conn->pcfg->time_wait_rec))
+					tcpsrv_server_close(ts_conn);
+			}
+			else if (ts_conn->state == SRVCONN_CONNECT) {
+				if ((ts_conn->pcfg->time_wait_cls)
+					&& (ts_conn->recv_check > ts_conn->pcfg->time_wait_cls))
+					tcpsrv_server_close(ts_conn);
+			}
+		} else
+			tcpsrv_server_close(ts_conn);
+	}
+	else tcpsrv_server_close(ts_conn);
+	return ERR_OK;
+#else // old version
 	TCP_SERV_CONN * ts_conn = arg;
 	if (ts_conn == NULL) {
 #if DEBUGSOO > 3
@@ -518,6 +655,7 @@ static err_t ICACHE_FLASH_ATTR tcpsrv_server_poll(void *arg, struct tcp_pcb *pcb
 	} else
 		tcp_poll(pcb, NULL, 0); // отключить tcpsrv_server_poll
 	return ERR_OK;
+#endif
 }
 /******************************************************************************
  * FunctionName : tcpsrv_list_delete
@@ -1085,11 +1223,26 @@ err_t ICACHE_FLASH_ATTR tcpsrv_close_port(uint16 portn)
 	else return ERR_ARG;
 }
 /******************************************************************************
+ tcpsrv_delete_all_tm_tcp_pcb
+ *******************************************************************************/
+void ICACHE_FLASH_ATTR tcpsrv_delete_all_tm_tcp_pcb(void)
+{
+	struct tcp_pcb *pcb;
+	for (pcb = tcp_tw_pcbs; pcb != NULL; pcb = pcb->next) {
+#if DEBUGSOO > 3
+		ts_printf("tcpsrv: del tm %p pcb\n", pcb);
+#endif
+		tcp_pcb_remove(&tcp_tw_pcbs, pcb);
+		memp_free(MEMP_TCP_PCB, pcb);
+	}
+}
+/******************************************************************************
  tcpsrv_close_all
  *******************************************************************************/
 err_t ICACHE_FLASH_ATTR tcpsrv_close_all(void)
 {
 	err_t err = ERR_OK;
 	while(phcfg != NULL && err == ERR_OK) err = tcpsrv_close(phcfg);
+	tcpsrv_delete_all_tm_tcp_pcb();
 	return err;
 }

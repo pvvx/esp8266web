@@ -46,8 +46,15 @@ enum srvconn_state {
  #define TCP_SRV_END_WAIT  5
 #endif
 
+#if 0 // old version
 // время (в 1/4 сек) ожидание до принудительного закрытия соединения после отсылки FIN.
 #define TCP_SRV_CLOSE_WAIT 120 // 120/4 = 30 сек
+#else
+// время (в сек) до повтора закрытия соединения (исполняется до 3-х раз).
+#define TCP_SRV_CLOSE_WAIT 5 // 5 сек
+// максимальное кол-во TCP c TIME_WAIT
+#define  MAX_TIME_WAIT_PCB 10
+#endif
 
 // минимальный размер heap по умолчанию, при открытии нового соединения, при = 0 заменяется на это:
 #define TCP_SRV_MIN_HEAP_SIZE 14528  // самый минимум от 6Kb

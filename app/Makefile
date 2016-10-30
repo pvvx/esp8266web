@@ -52,11 +52,14 @@ LINK_LIBS = \
 LINKFLAGS_eagle.app.v6 = \
 	-nostartfiles	\
 	-nodefaultlibs	\
+	-ffunction-sections -fdata-sections\
+	-Wl,--no-check-sections	\
+	-Wl,--gc-sections	\
+	-Xlinker --gc-sections	\
 	-nostdlib	\
 	-L../lib	\
-    -T$(LD_FILE) \
-	-Wl,--no-check-sections	\
-    -u call_user_start \
+	-T$(LD_FILE) \
+	-u call_user_start \
 	-Wl,-static \
 	-Wl,-Map -Wl,$(@:.out=.map) \
 	-Wl,--start-group \
@@ -64,6 +67,10 @@ LINKFLAGS_eagle.app.v6 = \
 	$(DEP_LIBS_eagle.app.v6) \
 	-Wl,--end-group
 
+#	-Wl,--gc-sections	\
+#	-Wl,-ffunction-sections -Wl,-fdata-sections\
+#	-Wl,--no-check-sections	\
+	
 CONFIGURATION_DEFINES +=	\
 			-DICACHE_FLASH	\
 			-DPBUF_RSV_FOR_WLAN	\

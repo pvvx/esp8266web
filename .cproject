@@ -58,7 +58,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="esp8266web.asm|eagle.app.v6.asm|PVFSlib|PVFS21" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="lib154|esp8266web.asm|eagle.app.v6.asm|PVFSlib|PVFS21" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -126,7 +126,7 @@
 							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} -Wl,--start-group ${INPUTS} -Wl,--end-group  ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} " errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1215096163" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
 								<option id="gnu.cpp.link.option.libs.960175278" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="mgcc"/>
-									<listOptionValue builtIn="false" value="crypto"/>
+									<listOptionValue builtIn="false" value="mcrypto"/>
 									<listOptionValue builtIn="false" value="mmain"/>
 									<listOptionValue builtIn="false" value="mphy"/>
 									<listOptionValue builtIn="false" value="pp"/>
@@ -339,7 +339,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ovls|esp8266web.asm|PVFSlib|PVFS21|MinEspSDKLib.asm|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="lib154|ovls|esp8266web.asm|PVFSlib|PVFS21|MinEspSDKLib.asm|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -426,7 +426,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ovls|app/gdbstub|esp8266web.asm|app/web|app/mdbtcp|app/driver|MinEspSDKLib.asm|app/user|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="lib154|ovls|app/gdbstub|esp8266web.asm|app/web|app/mdbtcp|app/driver|MinEspSDKLib.asm|app/user|eagle.app.v6.asm|ld|lib|bin|info" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

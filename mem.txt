@@ -19,14 +19,14 @@ SDK 2.0.0 (p1)
    Section|                   Description| Start (hex)|   End (hex)|Used space
 ------------------------------------------------------------------------------
       data|        Initialized Data (RAM)|    3FFE8000|    3FFE838C|     908
-    rodata|           ReadOnly Data (RAM)|    3FFE838C|    3FFE8BBC|    2096
-       bss|      Uninitialized Data (RAM)|    3FFE8BC0|    3FFEEC48|   24712
-      lit4|     Uninitialized Data (IRAM)|    40105958|    401065A0|    3144
-      text|          Uncached Code (IRAM)|    40100000|    40105958|   22872
-irom0_text|             Cached Code (SPI)|    40207000|    402405A4|  234916
+    rodata|           ReadOnly Data (RAM)|    3FFE838C|    3FFE8BB0|    2084
+       bss|      Uninitialized Data (RAM)|    3FFE8BB0|    3FFEEC28|   24696
+      lit4|     Uninitialized Data (IRAM)|    40105814|    4010645C|    3144
+      text|          Uncached Code (IRAM)|    40100000|    40105814|   22548
+irom0_text|             Cached Code (SPI)|    40207000|    402405A3|  234915
 ------------------------------------------------------------------------------
-Entry Point : 4010016C call_user_start()
-Total Used RAM : 53732
-Free IRam : 6752 or 23136 (option 48k IRAM)
-Free Heap : 54204
-Total Free RAM : 77340
+Entry Point : 4010013C call_user_start()
+Total Used RAM : 53380
+Free IRam : 7076 or 23460 (option 48k IRAM)
+Free Heap : 54232
+Total Free RAM : 77692
