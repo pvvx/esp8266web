@@ -1,0 +1,101 @@
+~inc:grfx1.inc~
+<td width="50%">U: <span id="xdata1" style="font-weight:bold">?</span> V, I: <span id="xdata2" style="font-weight:bold">?</span> mA</td>
+<! ~sys_debug=0~,~mdbw60=0,2~,~ovl:ina219.ovl~>
+<td style="font-size:10pt">
+<div id="sl"></div>Scale: <span id="toutid" style="font-weight:bold">?</span> ms per line</td></tr></table>
+<canvas id="mycanvas1" width="620pt" height="150pt"></canvas>
+<canvas id="mycanvas2" width="620pt" height="250pt"></canvas>
+SampleRate: <span id="smprate" style="font-weight:bold">?</span> sps
+</div>
+<script src="smoothie.js" type="text/javascript"></script>
+<script src="slider.js" type="text/javascript"></script>
+<script type="text/javascript">
+var line1 = new TimeSeries();
+var line2 = new TimeSeries();
+var oldtimeout = 20;
+var smoothie1 = new SmoothieChart({ millisPerPixel: oldtimeout, maxValueScale:1.05,  interpolation:'linear', maxDataSetLength: 2000,
+  grid: { strokeStyle:'rgb(75, 75, 75)', lineWidth: 1, millisPerLine: oldtimeout*50, verticalSections: 6 },
+  labels: { fillStyle:'rgb(255, 255, 255)' }
+});
+var smoothie2 = new SmoothieChart({ millisPerPixel: oldtimeout, maxValueScale:1.05,  interpolation:'linear', maxDataSetLength: 2000,
+  grid: { strokeStyle:'rgb(75, 75, 75)', lineWidth: 1, millisPerLine: oldtimeout*50, verticalSections: 6 },
+  labels: { fillStyle:'rgb(255, 255, 255)' }
+});
+//smoothie.addTimeSeries(line1, { strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0, 0.4)', lineWidth:2 });
+//smoothie.addTimeSeries(line2, { strokeStyle:'rgb(255, 0, 255)', fillStyle:'rgba(255, 0, 255, 0.3)', lineWidth:2 });
+smoothie1.addTimeSeries(line1, { strokeStyle:'rgb(0, 255, 0)',  lineWidth: 2 });
+smoothie2.addTimeSeries(line2, { strokeStyle:'rgb(255, 0, 255)', lineWidth: 2 });
+smoothie1.streamTo(document.getElementById("mycanvas1"));
+smoothie2.streamTo(document.getElementById("mycanvas2"));
+var mysl1 = new slider('sl', 333, 1, 200, 0);
+function NewTimeScale(t) {
+	if(oldtimeout != t) {
+		oldtimeout = t;
+		smoothie1.options.grid.millisPerLine = t*50;
+		smoothie1.options.millisPerPixel = t;
+		smoothie2.options.grid.millisPerLine = t*50;
+		smoothie2.options.millisPerPixel = t
+		document.getElementById('toutid').innerHTML = t*50;
+	}
+}
+mysl1.setValue(oldtimeout);
+//NewTimeScalevar(oldtimeout);
+ var uicnt = 0;
+ var wstt;
+ var smprate = 0;
+function onMessage(evt) {
+    smprate++;
+	if (evt.data) {
+	    if(uicnt==0) {
+        	newval = eval(evt.data);
+			if(newval & 0x8000) newval = -65536+newval;	
+			newval = (newval*0.0964).toFixed(2);			
+ 			line2.append(new Date().getTime(), newval, true);
+			document.getElementById('xdata2').innerHTML = newval;
+ 		}
+ 		else {
+        	newval = eval(evt.data) & 0xFFFC;
+			newval = (newval*0.000519).toFixed(3);
+			line1.append(new Date().getTime(), newval, true);
+			document.getElementById('xdata1').innerHTML = newval;
+		}
+	} 
+	wsSendMsg();
+//	clearTimeout(wstt);
+//	wstt = setTimeout(wsSendMsg, 2); 
+}
+// var wsUri = "ws://192.168.1.15/web.cgi";
+// var wsUri = "ws://192.168.4.1/web.cgi";
+ var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
+function testWebSocket() {
+	websocket = new WebSocket(wsUri);
+	websocket.onopen = function(evt) {onOpen(evt)};
+	websocket.onmessage = function(evt) {onMessage(evt)};
+}
+function wsSendMsg() {
+	if(uicnt) {uicnt = 0; websocket.send("ovl$3"); }
+	else {uicnt = 1; websocket.send("ovl$4"); }
+}
+function onOpen(evt) {
+	document.getElementById('xdata1').style.color = 'rgb(0, 155, 100)';
+	document.getElementById('xdata2').style.color = 'rgb(155, 0, 100)';
+	websocket.send("sys_debug=0");
+	websocket.send("mdbw60=0,2");
+	websocket.send("ovl:i219u.ovl");
+//	websocket.send("ovl$=0x2041F"); // 16V, Gain 1, 40mV Range, max speed
+//	websocket.send("ovl$=0x21C4F"); // 16V, Gain 8, 320mV Range
+//	websocket.send("ovl$=0x2047F"); // 16V, Gain 1, 40mV Range, low speed
+	websocket.send("ovl$=2");
+	wsSendMsg();
+}
+function wsSmpRate() {
+	document.getElementById('smprate').innerHTML = smprate;
+	smprate = 0;
+	wstt = setTimeout(wsSmpRate, 1000);
+}
+wsSmpRate();
+// wstt = setTimeout(wsSmpRate, 1000);
+testWebSocket();
+</script>
+~inc:footer.inc~
+</body></html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<title>UDP Test Port</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+~inc:menu.inc~
+<div class="content">
+<h2 class="title">UDP Test Port</h2>
+<table class="form"><tr><form method="post" action="">
+<tr><td class="label">UDP remote port:</td>
+<td><input title='3..65535' name='mdbw90' maxlength='5' value='~mdbuw90~'></td>
+<td class="left"><input type='hidden' name='ovl' value='udptp.ovl'>
+<input type='hidden' name='ovl$' value='1'>
+<input type="submit" value="Load ovl" class="button"></td></tr></form>
+<tr><td></td><td></td><td class="left">
+<form method="post" action="">
+<input type='hidden' name='ovl$' value='0'>
+<input id='hid3' type="submit" value="Close ovl" class="button"></form></td></tr></table>
+<h2 class="title">UDP send:</h2>
+<table class="scan">
+<tr><td>'A?'</td><td>ChipID, WiFi...<td></tr>
+<tr><td>'I?'</td><td>UDP + TCP connections<td></tr>
+<tr><td>'U?'</td><td>UDP connections<td></tr>
+<tr><td>'T?'</td><td>TCP connections<td></tr>
+<tr><td>'S?'</td><td>WEB connections<td></tr>
+<tr><td>'H?'</td><td>'heap' size<td></tr>
+<tr><td>'R?'</td><td>Sysmem restart<td></tr>
+<tr><td>...</td><td>...<td></tr></p>
+</table></div>
+~inc:footer.inc~
+<script type="text/javascript">
+var $ = function(id){return document.getElementById(id);}
+if(~mdbuw91~!=1) $('hid3').disabled=true;
+</script></body></html>
