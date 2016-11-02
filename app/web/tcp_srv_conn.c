@@ -1237,12 +1237,27 @@ void ICACHE_FLASH_ATTR tcpsrv_delete_all_tm_tcp_pcb(void)
 	}
 }
 /******************************************************************************
+ tcpsrv_delete_all_act_tcp_pcb
+ *******************************************************************************/
+void ICACHE_FLASH_ATTR tcpsrv_delete_all_act_tcp_pcb(void)
+{
+	struct tcp_pcb *pcb;
+	for (pcb = tcp_active_pcbs; pcb != NULL; pcb = pcb->next) {
+#if DEBUGSOO > 3
+		ts_printf("tcpsrv: del act %p pcb\n", pcb);
+#endif
+		tcp_abandon(pcb, 0);
+	}
+}
+/******************************************************************************
  tcpsrv_close_all
  *******************************************************************************/
 err_t ICACHE_FLASH_ATTR tcpsrv_close_all(void)
 {
 	err_t err = ERR_OK;
-	while(phcfg != NULL && err == ERR_OK) err = tcpsrv_close(phcfg);
+//	while(phcfg != NULL && err == ERR_OK) err = tcpsrv_close(phcfg);
+	while(phcfg != NULL) tcpsrv_close(phcfg);
+	tcpsrv_delete_all_act_tcp_pcb();
 	tcpsrv_delete_all_tm_tcp_pcb();
 	return err;
 }

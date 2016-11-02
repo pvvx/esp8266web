@@ -213,7 +213,7 @@
     while (this.data.length - removeCount >= maxDataSetLength && this.data[removeCount + 1][0] < oldestValidTime) {
       removeCount++;
     }
-    if (removeCount !== 0) {
+    if (removeCount > 0) {
       this.data.splice(0, removeCount);
     }
   };

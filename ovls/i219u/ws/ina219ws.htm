@@ -37,7 +37,6 @@ for (var i = 0; i < document.links.length; i++) {
 </style>
 <div class="content"><table cellspacing="2" cellpadding="0" border="0" style="font-size:16pt"><tr>
 <td width="50%">U: <span id="xdata1" style="font-weight:bold">?</span> V, I: <span id="xdata2" style="font-weight:bold">?</span> mA</td>
-<! ~sys_debug=0~,~mdbw60=0,2~,~ovl:i219u.ovl~>
 <td style="font-size:10pt">
 <div id="sl"></div>Scale: <span id="toutid" style="font-weight:bold">?</span> ms per line</td></tr></table>
 <canvas id="mycanvas1" width="620pt" height="150pt"></canvas>
@@ -76,63 +75,69 @@ function NewTimeScale(t) {
 	}
 }
 mysl1.setValue(oldtimeout);
-//NewTimeScalevar(oldtimeout);
- var uicnt = 0;
+ var uicnt = -1;
  var wstt;
  var smprate = 0;
 function onMessage(evt) {
-    smprate++;
-	if (evt.data) {
-	    if(uicnt==0) {
+	smprate++;
+	if((typeof(evt.data) == "string") && (evt.data == "ws:pong")) {
+		wsSendMsg();
+	}
+	else if(evt.data) {
+	    if(uicnt==1) {
         	newval = eval(evt.data);
 			if(newval & 0x8000) newval = -65536+newval;	
 			newval = (newval*0.0964).toFixed(2);			
  			line2.append(new Date().getTime(), newval, true);
 			document.getElementById('xdata2').innerHTML = newval;
  		}
- 		else {
+ 		else if(uicnt==0) {
         	newval = eval(evt.data) & 0xFFFC;
 			newval = (newval*0.000519).toFixed(3);
 			line1.append(new Date().getTime(), newval, true);
 			document.getElementById('xdata1').innerHTML = newval;
 		}
+		clearTimeout(wstt);
+		wstt = setTimeout(wsSendMsg, 2); 
+//		wsSendMsg();
 	} 
-	wsSendMsg();
-//	clearTimeout(wstt);
-//	wstt = setTimeout(wsSendMsg, 2); 
 }
- var wsUri = "ws://192.168.1.15/web.cgi";
+var wsUri = "ws://sesp8266/web.cgi";
 // var wsUri = "ws://192.168.4.1/web.cgi";
 // var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
+function onMessage0(evt) {
+		websocket.onmessage = function(evt) {onMessage(evt)};
+}
 function testWebSocket() {
 	websocket = new WebSocket(wsUri);
 	websocket.onopen = function(evt) {onOpen(evt)};
-	websocket.onmessage = function(evt) {onMessage(evt)};
+	websocket.onmessage = function(evt) {onMessage0(evt)};
 }
 function wsSendMsg() {
 	if(uicnt) {uicnt = 0; websocket.send("ovl$3"); }
 	else {uicnt = 1; websocket.send("ovl$4"); }
+
 }
 function onOpen(evt) {
 	document.getElementById('xdata1').style.color = 'rgb(0, 155, 100)';
 	document.getElementById('xdata2').style.color = 'rgb(155, 0, 100)';
 	websocket.send("sys_debug=0");
 	websocket.send("mdbw60=0,2");
-	websocket.send("ovl:ina219.ovl");
-//	websocket.send("ovl$=0x2041F"); // 16V, Gain 1, 40mV Range, max speed
-//	websocket.send("ovl$=0x21C4F"); // 16V, Gain 8, 320mV Range
-//	websocket.send("ovl$=0x2047F"); // 16V, Gain 1, 40mV Range, low speed
+	websocket.send("ovl:i219u.ovl");
 	websocket.send("ovl$=2");
-	wsSendMsg();
+//	websocket.send("ovl$=0x2041F"); // 16V, Gain 1, 40mV Range, sample 532us
+//	websocket.send("ovl$=0x21C4F"); // 16V, Gain 8, 320mV Range
+	websocket.send("ovl$=0x2046F"); // 16V, Gain 1, 40mV Range, sample 17ms 
+	websocket.send("ws:ping");
 }
+
 function wsSmpRate() {
 	document.getElementById('smprate').innerHTML = smprate;
 	smprate = 0;
-	wstt = setTimeout(wsSmpRate, 1000);
+	setTimeout(wsSmpRate, 1000);
 }
 wsSmpRate();
-// wstt = setTimeout(wsSmpRate, 1000);
 testWebSocket();
 </script>
-<div class="copyright">(c) 2014..2015 by <a href='http://esp8266.ru/'>esp8266.ru</a></div>
+<div class="copyright">(c) 2014..2016 by <a href='http://esp8266.ru/'>esp8266.ru</a></div>
 </body></html>
