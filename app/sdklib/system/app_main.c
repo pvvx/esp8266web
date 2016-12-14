@@ -73,7 +73,18 @@ extern bool default_hostname; // in eagle_lwip_if.c
 //=============================================================================
 //  esp_init_data_default.bin
 //-----------------------------------------------------------------------------
-#if DEF_SDK_VERSION >= 1400
+#if DEF_SDK_VERSION >= 1420
+const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
+	    5,    0,    4,    2,    5,    5,    5,    2,    5,    0,    4,    5,    5,    4,    5,    5,
+	    4, 0xFE, 0xFD, 0xFF, 0xF0, 0xF0, 0xF0, 0xE0, 0xE0, 0xE0, 0xE1,  0xA, 0xFF, 0xFF, 0xF8,    0,
+	 0xF8, 0xF8, 0x52, 0x4E, 0x4A, 0x44, 0x40, 0x38,    0,    0,    1,    1,    2,    3,    4,    5,
+	    1,    0,    0,    0,    0,    0,    2,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	 0xE1,  0xA,    0,    0,    0,    0,    0,    0,    0,    0,    1, 0x93, 0x43,    0,    0,    0,
+	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0
+};
+#elif DEF_SDK_VERSION >= 1400
 const uint8 esp_init_data_default[128] ICACHE_RODATA_ATTR = {
 	    5,    0,    4,    2,    5,    5,    5,    2,    5,    0,    4,    5,    5,    4,    5,    5,
 	    4, 0xFE, 0xFD, 0xFF, 0xF0, 0xF0, 0xF0, 0xE0, 0xE0, 0xE0, 0xE1,  0xA, 0xFF, 0xFF, 0xF8,    0,
@@ -742,7 +753,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #else	// DEF_SDK_VERSION < 2000
 #if DEF_SDK_VERSION >= 1400
 	uint8 * buf = os_malloc(SIZE_SAVE_SYS_CONST);
-	spi_flash_read(esp_init_data_default_faddr,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
+	spi_flash_read(faddr_esp_init_data_default,(uint32 *)buf, SIZE_SAVE_SYS_CONST); // esp_init_data_default.bin + ???
 #if DEF_SDK_VERSION >= 2000
 	if(buf[sys_const_freq_correct_en] == 3) g_ic.c[491] = 1; // esp_init_data_default: freq_correct_en[112]
 	else g_ic.c[491] = 0;
@@ -780,7 +791,7 @@ void ICACHE_FLASH_ATTR startup(void)
 #ifdef DEBUG_UART
 		os_printf("\nSave rx_gain_dc table (%u, %u)\n", buf[0xf8], phy_rx_gain_dc_flag );
 #endif
-		wifi_param_save_protect_with_check(esp_init_data_default_sec, flashchip_sector_size, buf, SIZE_SAVE_SYS_CONST);
+		wifi_param_save_protect_with_check(fsec_esp_init_data_default, flashchip_sector_size, buf, SIZE_SAVE_SYS_CONST);
 	}
 #endif
 	os_free(buf);
