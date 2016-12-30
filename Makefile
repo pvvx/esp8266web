@@ -4,11 +4,11 @@
 #
 #############################################################
 
-ESPOPTION ?= -p COM2 -b 460800
+ESPOPTION ?= -p COM7 -b 460800
 
-UPLOADADDR = http://sesp8266/fsupload
+UPLOADADDR = http://esp8266/fsupload
 
-UPLOADOVL = ./ovls/bin/i219u.ovl
+UPLOADOVL = ./ovls/bin/tcp_client.ovl
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80

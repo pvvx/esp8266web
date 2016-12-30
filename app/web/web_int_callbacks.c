@@ -298,7 +298,7 @@ void ICACHE_FLASH_ATTR web_modbus_xml(TCP_SERV_CONN *ts_conn)
 }
 #endif
 //===============================================================================
-// RAM hexdump
+// RAM hexdamp
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR web_hexdump(TCP_SERV_CONN *ts_conn)
 {
@@ -468,6 +468,18 @@ void ICACHE_FLASH_ATTR get_new_url(TCP_SERV_CONN *ts_conn)
 	tcp_puts(IPSTR, IP2STR(&ip));
 #endif
 	if(syscfg.web_port != 80) tcp_puts(":%u", syscfg.web_port);
+}
+
+#include "sdk/libmain.h"
+#define DEBUG_OUT(x)   UART1_FIFO = x
+
+void ICACHE_FLASH_ATTR test_beacon(uint8 * ptr)
+{
+//	if((uint32)ptr > 0x3fff0000 && (uint32)ptr < 0x40000000) {
+//		DEBUG_OUT('#');
+//		os_printf("beacon(%p)\n", ptr);
+//		print_hex_dump(ptr, 32, ' ');
+//	}
 }
 /******************************************************************************
  * FunctionName : web_callback
@@ -775,6 +787,14 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
             if(if_index == SOFTAP_IF) {
             	// SOFTAP
             	ifcmp("dhcp") tcp_puts("%d", (dhcps_flag==0)? 0 : 1);
+                else ifcmp("tsf") {
+              	  union {
+              	  		uint32 dw[2];
+              	  		uint64 dd;
+              	  	}ux;
+              	  ux.dd = get_tsf_ap();
+              	  tcp_puts("0x%08x%08x", ux.dw[1], ux.dw[0]);
+                }
 				else ifcmp("mac") {
 					uint8 macaddr[6];
 					wifi_get_macaddr(if_index, macaddr);
@@ -823,6 +843,14 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 				else ifcmp("sta") tcp_puts("%d", wifi_station_get_connect_status());
 	            else ifcmp("rect") tcp_puts("%u", wificonfig.st.reconn_timeout);
                 else ifcmp("hostname") { if(hostname != NULL) tcp_puts(hostname); else tcp_puts("none"); }
+                else ifcmp("tsf") {
+              	  union {
+              	  		uint32 dw[2];
+              	  		uint64 dd;
+              	  	}ux;
+              	  ux.dd = get_tsf_station();
+              	  tcp_puts("0x%08x%08x", ux.dw[1], ux.dw[0]);
+                }
                 else ifcmp("mac") {
 					uint8 macaddr[6];
 					wifi_get_macaddr(if_index, macaddr);
@@ -844,6 +872,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
                         else tcp_put('?');
                     };
             	};
+
             };
           };
         }
@@ -1085,6 +1114,16 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #endif
 #ifdef TEST_SEND_WAVE
         else ifcmp("test_adc") web_test_adc(ts_conn);
+#endif
+#if 1 //def TEST_BEACON
+        else ifcmp("test_bea") {
+#if DEF_SDK_VERSION >= 2000
+        	g_ic.d[125]
+#elif DEF_SDK_VERSION >= 1540
+        	g_ic.d[119]
+#endif
+        	= (uint32) test_beacon;
+        }
 #endif
 		else tcp_put('?');
 }

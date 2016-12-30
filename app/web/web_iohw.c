@@ -131,6 +131,7 @@ void ICACHE_FLASH_ATTR test_pin_clr_wifi_config(void)
 	*get_addr_gpiox_mux(pin_num) = old_mux; // восстановить mux
 }
 
+#if 0
 //===============================================================================
 // get_mac_time()
 //-------------------------------------------------------------------------------
@@ -149,6 +150,6 @@ uint64 ICACHE_FLASH_ATTR get_mac_time(void)
 	}
 	return ux.dd;
 }
-
+#endif
 
 

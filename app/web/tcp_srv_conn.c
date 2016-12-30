@@ -423,7 +423,10 @@ static void ICACHE_FLASH_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_co
 #endif
 #endif
 	// remove the node from the server's connection list
-	if(ts_conn->flag.client && ts_conn->flag.client_reconnect) tcpsrv_client_reconnect(ts_conn);
+	if(ts_conn->flag.client && ts_conn->flag.client_reconnect) {
+		ts_conn->pcb = NULL;
+		tcpsrv_client_reconnect(ts_conn);
+	}
 	else tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
 }
 /******************************************************************************
@@ -493,10 +496,10 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 		tcp_sent(pcb, NULL); // отключение передачи
 		tcp_poll(pcb, NULL, 0); // отключение poll
 		if(ts_conn->unrecved_bytes) {
-			tcp_recved(pcb, ts_conn->unrecved_bytes);
+			tcp_recved(pcb, TCP_WND);
+//			tcp_recved(pcb, ts_conn->unrecved_bytes);
 			ts_conn->unrecved_bytes = 0;
 		}
-		tcp_recved(pcb, TCP_WND);
 	}
 	if(ts_conn->state == SRVCONN_CLOSEWAIT) {
 //			pcb = find_tcp_pcb(ts_conn); // ts_conn->pcb;
@@ -508,13 +511,14 @@ static void ICACHE_FLASH_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 #endif
 			tcpsrv_disconnect_successful(ts_conn);
 		} else {
+			tcp_err(pcb, NULL);
 			if (ts_conn->recv_check > 3) { // счет до принудительного закрытия 3 раза по TCP_SRV_CLOSE_WAIT
 #if DEBUGSOO > 1
 				tcpsrv_print_remote_info(ts_conn);
 				os_printf("tcp_abandon!\n");
 #endif
 				tcp_poll(pcb, NULL, 0);
-				tcp_err(pcb, NULL);
+//				tcp_err(pcb, NULL);
 				tcp_abandon(pcb, 0);
 				ts_conn->pcb = NULL;
 				// remove the node from the server's active connection list
@@ -730,6 +734,13 @@ static void ICACHE_FLASH_ATTR tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) {
 			ts_conn->unrecved_bytes = 0;
 			ts_conn->ptrtx = NULL;
 			ts_conn->flag = ts_conn->pcfg->flag;
+			ts_conn->state = SRVCONN_CLIENT; // установка соединения (клиент)
+		}
+		if (ts_conn->pcb != NULL) {
+			if ((ts_conn->pcb = find_tcp_pcb(ts_conn)) != NULL) {
+				tcp_abandon(ts_conn->pcb, 0);
+				ts_conn->pcb = NULL;
+			}
 		}
 #if DEBUGSOO > 1
 		os_printf("Waiting next connection %u ms...\n", TCP_CLIENT_NEXT_CONNECT_MS);
@@ -843,7 +854,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_client_connect(TCP_SERV_CONN * ts_conn)
 		if(pcb != NULL) {
 			ts_conn->pcb = pcb;
 			ts_conn->state = SRVCONN_CLIENT; // установка соединения (клиент)
-			ts_conn->recv_check = 0;
+//			ts_conn->recv_check = 0;
 			err_t err = tcp_bind(pcb, IP_ADDR_ANY, 0); // Binds pcb to a local IP address and new port number. // &netif_default->ip_addr
 #if DEBUGSOO > 2
 			os_printf("tcp_bind() = %d\n", err);

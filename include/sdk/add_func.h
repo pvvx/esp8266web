@@ -123,6 +123,11 @@ void wifi_station_set_default_hostname(uint8 * mac);
 
 void user_init(void);
 
+extern uint64_t get_mac_time(void) ICACHE_FLASH_ATTR; // step 1 us
+#define get_tsf_ap() get_mac_time()
+extern uint64_t get_tsf_station(void) ICACHE_FLASH_ATTR; // step 1 us
+
+
 #ifdef USE_TIMER0
 void timer0_start(uint32 us, bool repeat_flg);
 void timer0_stop(void);
