@@ -67,7 +67,9 @@ OUTBIN1 := ./$(FIRMWAREDIR)/$(ADDR_FW1).bin
 # OUTBIN2 := ./$(FIRMWAREDIR)/$(ADDR_FW2).bin
 
 CCFLAGS += \
-	-Wundef			\
+	-Wundef	\
+	-Wall	\
+	-Wstrict-aliasing	\
 	-Wpointer-arith	\
 	-Werror	\
 	-Wl,-EL	\

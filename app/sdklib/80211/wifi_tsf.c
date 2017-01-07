@@ -61,6 +61,7 @@ uint64 ICACHE_FLASH_ATTR get_mac_time(void)
 		volatile uint32 dw[2];
 		uint64 dd;
 	}ux;
+	ets_intr_lock();
 	volatile uint32 * ptr = (volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR;
 	ux.dw[0] = ptr[0];
 	ux.dw[1] = ptr[1];
@@ -68,6 +69,7 @@ uint64 ICACHE_FLASH_ATTR get_mac_time(void)
 		ux.dw[0] = ptr[0];
 		ux.dw[1] = ptr[1];
 	}
+	ets_intr_unlock();
 	return ux.dd;
 }
 
@@ -77,8 +79,10 @@ extern void cnx_update_bss_mor_(int a2,  struct ieee80211_scanparams *scnp, void
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR cnx_update_bss_more(int a2,  struct ieee80211_scanparams *scnp, void *a4)
 {
+//?	ets_intr_lock();
 	recv_tsf_time = *((volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR);
 	os_memcpy((void *)&recv_tsf, (void *)scnp->tstamp, 8);
+//?	ets_intr_unlock();
 	cnx_update_bss_mor_(a2, scnp, a4);
 }
 //===============================================================================
