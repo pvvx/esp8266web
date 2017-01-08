@@ -36,6 +36,7 @@ DEFAULTADDR := $(shell printf '0x%X\n' $$(($(SPI_SIZE)*1024 - 4*4096)))
 BLANKBIN := ./$(FIRMWAREDIR)/blank.bin
 #BLANKADDR := 0x7E000
 BLANKADDR := $(shell printf '0x%X\n' $$(($(SPI_SIZE)*1024 - 2*4096)))
+CWD ?=$(PDIR)
 WEB_BASE := $(subst \,/,$(CWD))
 
 # Base directory for the compiler

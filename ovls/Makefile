@@ -5,7 +5,8 @@
 #############################################################
 
 UPLOADOPTION = ./bin/tcp_client.ovl http://aesp8266/fsupload
-WEB_BASE := $(subst \,/,$(CWD))
+CWD?=../../
+WEB_BASE?=$(subst \,/,$(CWD))
 
 ADDR_FW1 = 0x00000
 ADDR_FW2 = 0x10000
@@ -33,8 +34,8 @@ CCFLAGS += -Os -Wall -Wno-pointer-sign -fno-tree-ccp -mno-target-align -mno-seri
 #
 
 SDK_TOOLS	?= c:/Espressif/utils
-ESPTOOL		?= C:/Python27/python.exe $(CWD)esptool.py
-UPLOADTOOL  ?= C:/Python27/python.exe $(CWD)ovl_upload.py
+ESPTOOL		?= C:/Python27/python.exe $(WEB_BASE)esptool.py
+UPLOADTOOL  ?= C:/Python27/python.exe $(WEB_BASE)ovl_upload.py
 
 CSRCS ?= $(wildcard *.c)
 ASRCs ?= $(wildcard *.s)
@@ -140,7 +141,7 @@ $(OBJODIR)/%.o: %.c
 
 $(OBJODIR)/%.d: %.c
 	@mkdir -p $(OBJODIR);
-	@echo DEPEND: $(CC) -M $(CFLAGS) $<
+#	@echo DEPEND: $(CC) -M $(CFLAGS) $<
 	@set -e; rm -f $@; \
 	$(CC) -M $(CFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\.o\)[ :]*,$(OBJODIR)/\1 $@ : ,g' < $@.$$$$ > $@; \
@@ -178,6 +179,6 @@ $(foreach lib,$(GEN_LIBS),$(eval $(call MakeLibrary,$(basename $(lib)))))
 
 $(foreach image,$(GEN_IMAGES),$(eval $(call MakeImage,$(basename $(image)))))
 
-INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(WEB_BASE)include -I $(WEB_BASE)app/include
+INCLUDES := $(INCLUDES) -I $(PDIR)include -I ../$(WEB_BASE)include -I ../$(WEB_BASE)app/include
 #PDIR := ../$(PDIR)
 #sinclude $(PDIR)Makefile
