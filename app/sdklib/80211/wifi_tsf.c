@@ -4,7 +4,6 @@
  *  Created on: 28 дек. 2016 г.
  *      Author: pvvx
  */
-#if 1
 
 #include "user_config.h"
 #include "bios.h"
@@ -14,6 +13,7 @@
 #include "ets_sys.h"
 #include "osapi.h"
 
+#if 1 // =1 use libnet80211_new.a
 
 struct ieee80211_scanparams {
 	uint8_t		status;		/* +0 bitmask of IEEE80211_BPARSE_* */
@@ -51,28 +51,6 @@ struct ieee80211_scanparams {
 volatile uint64 recv_tsf; // принятый TSF от внешней AP
 volatile uint32 recv_tsf_time;	// время приема TSF (младшие 32 бита - считем, что для времязависимых приложений не ставят время следования beacon более 4294967296 us :) )
 
-// #define MAC_TIMER64BIT_COUNT_ADDR 0x3ff21048
-//===============================================================================
-// get_mac_time() = get_tsf_ap() -  TSF AP
-//-------------------------------------------------------------------------------
-uint64 ICACHE_FLASH_ATTR get_mac_time(void)
-{
-	union {
-		volatile uint32 dw[2];
-		uint64 dd;
-	}ux;
-	ets_intr_lock();
-	volatile uint32 * ptr = (volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR;
-	ux.dw[0] = ptr[0];
-	ux.dw[1] = ptr[1];
-	if(ux.dw[1] != ptr[1]) {
-		ux.dw[0] = ptr[0];
-		ux.dw[1] = ptr[1];
-	}
-	ets_intr_unlock();
-	return ux.dd;
-}
-
 extern void cnx_update_bss_mor_(int a2,  struct ieee80211_scanparams *scnp, void *a4);
 //===============================================================================
 // save_tsf_station()
@@ -97,4 +75,32 @@ uint64 ICACHE_FLASH_ATTR get_tsf_station(void)
 	return cur_tsf;
 }
 
+#else
+uint64 ICACHE_FLASH_ATTR get_tsf_station(void)
+{
+	return 0;
+}
 #endif
+
+// #define MAC_TIMER64BIT_COUNT_ADDR 0x3ff21048
+//===============================================================================
+// get_mac_time() = get_tsf_ap() -  TSF AP
+//-------------------------------------------------------------------------------
+uint64 ICACHE_FLASH_ATTR get_mac_time(void)
+{
+	union {
+		volatile uint32 dw[2];
+		uint64 dd;
+	}ux;
+	ets_intr_lock();
+	volatile uint32 * ptr = (volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR;
+	ux.dw[0] = ptr[0];
+	ux.dw[1] = ptr[1];
+	if(ux.dw[1] != ptr[1]) {
+		ux.dw[0] = ptr[0];
+		ux.dw[1] = ptr[1];
+	}
+	ets_intr_unlock();
+	return ux.dd;
+}
+

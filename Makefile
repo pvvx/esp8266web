@@ -6,7 +6,7 @@
 
 ESPOPTION ?= -p COM7 -b 460800
 
-UPLOADADDR = http://esp8266/fsupload
+UPLOADADDR = http://aesp8266/fsupload
 
 UPLOADOVL = ./ovls/bin/tcp_client.ovl
 
