@@ -1268,7 +1268,7 @@ err_t ICACHE_FLASH_ATTR tcpsrv_close_all(void)
 	err_t err = ERR_OK;
 //	while(phcfg != NULL && err == ERR_OK) err = tcpsrv_close(phcfg);
 	while(phcfg != NULL) tcpsrv_close(phcfg);
-//	tcpsrv_delete_all_act_tcp_pcb();
+	tcpsrv_delete_all_act_tcp_pcb();
 	tcpsrv_delete_all_tm_tcp_pcb();
 	return err;
 }
