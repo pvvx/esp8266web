@@ -1118,7 +1118,7 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
                     	tcp_puts_fd("%s %d\r\n", HTTPContentLength, web_conn->content_len);
                     	if(CurResp->status == 200 && (!isWEBFSLocked) && web_conn->bffiles[0] != WEBFS_WEBCGI_HANDLE) {
                     		// lifetime (sec) of static responses as string 60*60*24*14=1209600"
-                        	tcp_puts_fd("Cache-Control: smax-age=%d\r\n", FILE_CACHE_MAX_AGE_SEC);
+                        	tcp_puts_fd("Cache-Control: max-age=%d\r\n", FILE_CACHE_MAX_AGE_SEC);
                     	}
                     	else {
                     		tcp_strcpy_fd("Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\n");
