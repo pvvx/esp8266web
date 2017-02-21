@@ -131,6 +131,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
 	ifcmp("start") 		web_conn->udata_start = val;
 	else ifcmp("stop") 	web_conn->udata_stop = val;
+	else ifcmp("uart_data")	tcp2uart_ajax_tx(pvar);
 #ifdef USE_MODBUS
 	else ifcmp("mdb") {
 		cstr+=3;

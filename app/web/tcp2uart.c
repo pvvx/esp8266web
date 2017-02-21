@@ -17,9 +17,9 @@
 #include "flash_eep.h"
 #include "hw/uart_register.h"
 #include "web_iohw.h"
+#include "web_srv.h"
 #include "wifi.h"
 #include "tcp2uart.h"
-
 
 
 #define mMIN(a, b)  ((a<b)?a:b)
@@ -262,6 +262,70 @@ err_t ICACHE_FLASH_ATTR tcp2uart_start(uint16 portn)
 		else err = ERR_USE;
 		tcp2uart_servcfg = p;
 		return err;
+}
+
+//-------------------------------------------------------------------------------
+void ICACHE_FLASH_ATTR tcp2uart_ajax_init(void)
+{
+	uint32 conf0 = UART0_CONF0;
+	UART0_CONF0 = conf0 | UART_RXFIFO_RST | UART_TXFIFO_RST;
+	UART0_CONF0 = conf0 & (~ (UART_RXFIFO_RST | UART_TXFIFO_RST));
+	uint16 tmp = syscfg.tcp2uart_port;
+	syscfg.tcp2uart_port = 12345;
+	update_mux_uart0();
+	syscfg.tcp2uart_port = tmp;
+}
+
+//-------------------------------------------------------------------------------
+uint8 ICACHE_FLASH_ATTR tcp2uart_ajax_tx(uint8 *s)
+{
+	uint8 len = 0;
+
+	tcp2uart_ajax_init();
+
+	while(*s >= ' ') {
+
+        uint8 b = 0, i = 2;
+
+        while(i--) {
+            if (*s >= '0' && *s <= '9')			{ b <<= 4;   b |= *s - '0'; }
+            else if (*s >= 'A' && *s <= 'F')	{ b <<= 4;   b |= *s - 'A' + 10; }
+            else if (*s >= 'a' && *s <= 'f')	{ b <<= 4;   b |= *s - 'a' + 10; }
+            else return len;
+            s++;
+        };
+
+		MEMW();     // синхронизация и ожидание отработки fifo-write на шине CPU
+		if (((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) >= 127) break;
+		UART0_FIFO = b;
+        len++;
+	};
+
+	return len;
+}
+
+//-------------------------------------------------------------------------------
+uint8 ICACHE_FLASH_ATTR tcp2uart_ajax_rx(TCP_SERV_CONN *ts_conn, uint16 tmo)
+{
+	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
+	uint8  tm4 = 1 + (40000 / (UART_CLK_FREQ / (UART0_CLKDIV & UART_CLKDIV_CNT)));		// timeout for 4 symbols
+	uint8  b = 0, idle = 0;
+	uint16 len = 0, cnt = 0;
+
+	while (cnt < tmo) {
+
+		if (idle) idle++;
+
+		while (((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT) && len < 512) {
+			idle = 1;   len++;   b = UART0_FIFO;   tcp_puts("%02X", b);
+		}
+
+		if (idle > tm4) break;
+
+		os_delay_us(1000);   cnt++;
+	};
+
+	return len;
 }
 
 #endif // USE_TCP2UART
