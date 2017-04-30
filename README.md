@@ -52,7 +52,8 @@ Upload WEBFS:<br>
 2) Explorer: http://192.168.4.1/fsupload (name and password from WiFi AP)<br>
 3) Select WEBFiles.bin file. Upload.<br>
 
-Для компиляции SDK используется [Unofficial Developer Kit](http://esp8266.ru/forum/forums/devkit/).<br><br>
+Для компиляции SDK используется [Unofficial Developer Kit](http://esp8266.ru/forum/forums/devkit/)<br>
+и Eclipse Cpp Neon<br>
 
 Переключение проекта с TCP2UART на MODBUS RS-485 производится в include/user_config.h.<br>
 Файлы для web-диска для проектов находятся в разных папках.<br> 
