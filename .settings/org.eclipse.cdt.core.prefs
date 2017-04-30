@@ -19,6 +19,9 @@ environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218
 environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786/PATH/value=C\:\\MinGW\\bin;C\:\\MinGW\\msys\\1.0\\bin;C\:\\Espressif\\xtensa-lx106-elf\\bin;C\:\\Python27
 environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786/append=true
 environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786/appendContributed=true
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900/MSYS_HOME/delimiter=;
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900/MSYS_HOME/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900/MSYS_HOME/value=C\:\\MinGW\\msys\\1.0
 environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900/PATH/delimiter=;
 environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900/PATH/operation=replace
 environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.1544080900/PATH/value=${MINGW_HOME}\\bin;${MSYS_HOME}\\bin;C\:\\Espressif\\xtensa-lx106-elf\\bin;C\:\\Python27
