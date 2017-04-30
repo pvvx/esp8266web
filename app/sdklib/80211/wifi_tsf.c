@@ -13,7 +13,7 @@
 #include "ets_sys.h"
 #include "osapi.h"
 
-#if 1 // =1 use libnet80211_new.a
+#if 1 // use libnet80211_new.a
 
 struct ieee80211_scanparams {
 	uint8_t		status;		/* +0 bitmask of IEEE80211_BPARSE_* */
@@ -57,10 +57,10 @@ extern void cnx_update_bss_mor_(int a2,  struct ieee80211_scanparams *scnp, void
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR cnx_update_bss_more(int a2,  struct ieee80211_scanparams *scnp, void *a4)
 {
-//?	ets_intr_lock();
+	ets_intr_lock();
 	recv_tsf_time = *((volatile uint32 *)MAC_TIMER64BIT_COUNT_ADDR);
 	os_memcpy((void *)&recv_tsf, (void *)scnp->tstamp, 8);
-//?	ets_intr_unlock();
+	ets_intr_unlock();
 	cnx_update_bss_mor_(a2, scnp, a4);
 }
 //===============================================================================
