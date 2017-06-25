@@ -263,69 +263,62 @@ err_t ICACHE_FLASH_ATTR tcp2uart_start(uint16 portn)
 		tcp2uart_servcfg = p;
 		return err;
 }
-
+#ifdef USE_UART_AJAX
+uint32 uart_ajax_init DATA_IRAM_ATTR;
 //-------------------------------------------------------------------------------
 void ICACHE_FLASH_ATTR tcp2uart_ajax_init(void)
 {
+	// Обновить mux выводов UART0
+	uint16 tmp = syscfg.tcp2uart_port;
+	syscfg.tcp2uart_port = -1;
+	update_mux_uart0();
+	syscfg.tcp2uart_port = tmp;
+	// clear RX & TX FIFO
 	uint32 conf0 = UART0_CONF0;
 	UART0_CONF0 = conf0 | UART_RXFIFO_RST | UART_TXFIFO_RST;
 	UART0_CONF0 = conf0 & (~ (UART_RXFIFO_RST | UART_TXFIFO_RST));
-	uint16 tmp = syscfg.tcp2uart_port;
-	syscfg.tcp2uart_port = 12345;
-	update_mux_uart0();
-	syscfg.tcp2uart_port = tmp;
+	// флаг инициализации
+	uart_ajax_init = 1;
 }
 
 //-------------------------------------------------------------------------------
-uint8 ICACHE_FLASH_ATTR tcp2uart_ajax_tx(uint8 *s)
+void ICACHE_FLASH_ATTR tcp2uart_ajax_tx(uint8 *s)
 {
-	uint8 len = 0;
-
-	tcp2uart_ajax_init();
-
-	while(*s >= ' ') {
-
-        uint8 b = 0, i = 2;
-
-        while(i--) {
-            if (*s >= '0' && *s <= '9')			{ b <<= 4;   b |= *s - '0'; }
-            else if (*s >= 'A' && *s <= 'F')	{ b <<= 4;   b |= *s - 'A' + 10; }
-            else if (*s >= 'a' && *s <= 'f')	{ b <<= 4;   b |= *s - 'a' + 10; }
-            else return len;
-            s++;
-        };
-
-		MEMW();     // синхронизация и ожидание отработки fifo-write на шине CPU
-		if (((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) >= 127) break;
-		UART0_FIFO = b;
-        len++;
-	};
-
-	return len;
+	if(uart_drv.uart_rx_buf == NULL) { // TCP2UART занят?
+		tcp2uart_ajax_init();
+		// Передать символы в UART
+		while(1) {
+	        uint32 b = 0, i = 2;
+	        while(i--) {
+	            if (*s >= '0' && *s <= '9')			{ b <<= 4;   b |= *s - '0'; }
+	            else if (*s >= 'A' && *s <= 'F')	{ b <<= 4;   b |= *s - 'A' + 10; }
+	            else if (*s >= 'a' && *s <= 'f')	{ b <<= 4;   b |= *s - 'a' + 10; }
+	            else return;
+	            s++;
+	        };
+			MEMW();     // синхронизация и ожидание отработки fifo-write на шине CPU
+			if (((UART0_STATUS >> UART_TXFIFO_CNT_S) & UART_TXFIFO_CNT) >= 127) break;
+			UART0_FIFO = b;
+		};
+	}
 }
 
 //-------------------------------------------------------------------------------
-uint8 ICACHE_FLASH_ATTR tcp2uart_ajax_rx(TCP_SERV_CONN *ts_conn, uint16 tmo)
+void ICACHE_FLASH_ATTR tcp2uart_ajax_rx(TCP_SERV_CONN *ts_conn)
 {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
-	uint8  tm4 = 1 + (40000 / (UART_CLK_FREQ / (UART0_CLKDIV & UART_CLKDIV_CNT)));		// timeout for 4 symbols
-	uint8  b = 0, idle = 0;
-	uint16 len = 0, cnt = 0;
-
-	while (cnt < tmo) {
-
-		if (idle) idle++;
-
-		while (((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT) && len < 512) {
-			idle = 1;   len++;   b = UART0_FIFO;   tcp_puts("%02X", b);
-		}
-
-		if (idle > tm4) break;
-
-		os_delay_us(1000);   cnt++;
-	};
-
-	return len;
+    uint32 len = (web_conn->msgbufsize - web_conn->msgbuflen) >> 1;
+    uint32 flg = 0;
+	if(uart_drv.uart_rx_buf == NULL) { // TCP2UART занят?
+		if(!uart_ajax_init) tcp2uart_ajax_init();
+		while (len && ((UART0_STATUS >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT)) {
+			tcp_puts("%02X", (uint8)UART0_FIFO);
+		    flg = 1;
+			len--;
+		};
+		if(!flg) tcp_put('.');
+	}
+	else tcp_put('#');
 }
-
+#endif // USE_UART_AJAX
 #endif // USE_TCP2UART

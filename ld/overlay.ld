@@ -3,7 +3,8 @@
 MEMORY
 {
   dram0_0_seg :		org = 0x3FFFDF60, len = 0x00400    
-  iram1_0_seg :		org = 0x40106600, len = 0x01A00
+  iram1_0_seg :		org = 0x40106600, len = 0x01A00 
+/*  iram1_0_seg :		org = 0x40108000, len = 0x04000 if USE_MAX_IRAM == 48*/
   irom0_0_seg :		org = 0x40210000, len = 0xF0000
 }
 

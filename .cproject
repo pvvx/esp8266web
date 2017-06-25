@@ -19,7 +19,7 @@
 					<folderInfo id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.1251635855" name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.651374611" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF;org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.mingw.base.991691910" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder arguments="-s -f ${ProjDirPath}/Makefile" buildPath="${workspace_loc:/Web_Base}/" command="mingw32-make.exe" enableAutoBuild="true" id="cdt.managedbuild.builder.gnu.cross.827626650" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<builder arguments="-f ${ProjDirPath}/Makefile" command="mingw32-make.exe" id="cdt.managedbuild.builder.gnu.cross.827626650" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.233665234" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1586244416" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -63,7 +63,6 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-			<storageModule moduleId="ilg.gnuarmeclipse.managedbuild.packs"/>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.810182178" moduleId="org.eclipse.cdt.core.settings" name="AutoMake">
@@ -125,13 +124,13 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1151397103" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
 							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} -Wl,--start-group ${INPUTS} -Wl,--end-group  ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} " errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1215096163" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
-								<option id="gnu.cpp.link.option.libs.960175278" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+								<option id="gnu.cpp.link.option.libs.960175278" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="mgcc"/>
-									<listOptionValue builtIn="false" value="crypto"/>
+									<listOptionValue builtIn="false" value="mcrypto"/>
 									<listOptionValue builtIn="false" value="mmain"/>
 									<listOptionValue builtIn="false" value="mphy"/>
 									<listOptionValue builtIn="false" value="pp"/>
-									<listOptionValue builtIn="false" value="net80211_new"/>
+									<listOptionValue builtIn="false" value="net80211"/>
 									<listOptionValue builtIn="false" value="mwpa"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1050560824" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
@@ -345,7 +344,6 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-			<storageModule moduleId="ilg.gnuarmeclipse.managedbuild.packs"/>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.1772762371.1703441878">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.mingw.base.1544080900.2027218786.1772762371.1703441878" moduleId="org.eclipse.cdt.core.settings" name="CreateLib">
@@ -483,11 +481,11 @@
 		<buildTargets>
 			<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>mingw32-make.exe</buildCommand>
-				<buildArguments/>
+				<buildArguments>-f ${ProjDirPath}/Makefile</buildArguments>
 				<buildTarget>all</buildTarget>
 				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>false</runAllBuilders>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
 			</target>
 			<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>mingw32-make.exe</buildCommand>

@@ -492,10 +492,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #endif
         ifcmp("start") tcp_puts("0x%08x", web_conn->udata_start);
         else ifcmp("stop") tcp_puts("0x%08x", web_conn->udata_stop);
-    	else ifcmp("uart_data") {
-    		cstr+=9;   uint16 tmo = 200;   ifcmp("_tmo_") { tmo = ahextoul(cstr+5); }
-    		tcp2uart_ajax_rx(ts_conn, tmo);
-    	}
+#ifdef USE_UART_AJAX
+    	else ifcmp("uart_data") tcp2uart_ajax_rx(ts_conn);
+#endif
         else ifcmp("xml_") {
             cstr+=4;
             web_conn->udata_start&=~3;

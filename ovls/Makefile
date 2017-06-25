@@ -4,7 +4,7 @@
 #
 #############################################################
 
-UPLOADOPTION = ./bin/tcp_client.ovl http://aesp8266/fsupload
+UPLOADOPTION = ./bin/sync.ovl http://atesp8266/fsupload
 CWD?=../../
 WEB_BASE?=$(subst \,/,$(CWD))
 

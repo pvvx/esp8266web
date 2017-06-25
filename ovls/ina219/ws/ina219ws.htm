@@ -87,13 +87,13 @@ function onMessage(evt) {
 	    if(uicnt==1) {
         	newval = eval(evt.data);
 			if(newval & 0x8000) newval = -65536+newval;	
-			newval = (newval*0.0964).toFixed(2);			
+			newval = (newval*0.0960).toFixed(2);			
  			line2.append(new Date().getTime(), newval, true);
 			document.getElementById('xdata2').innerHTML = newval;
  		}
  		else if(uicnt==0) {
         	newval = eval(evt.data) & 0xFFFC;
-			newval = (newval*0.000519).toFixed(3);
+			newval = (newval*0.000500).toFixed(3);
 			line1.append(new Date().getTime(), newval, true);
 			document.getElementById('xdata1').innerHTML = newval;
 		}
@@ -122,7 +122,7 @@ function onOpen(evt) {
 	document.getElementById('xdata1').style.color = 'rgb(0, 155, 100)';
 	document.getElementById('xdata2').style.color = 'rgb(155, 0, 100)';
 	websocket.send("sys_debug=0");
-	websocket.send("mdbw60=0,2");
+	websocket.send("mdbw60=5,4");
 	websocket.send("ovl:ina219.ovl");
 	websocket.send("ovl$=2");
 //	websocket.send("ovl$=0x2041F"); // 16V, Gain 1, 40mV Range, sample 532us

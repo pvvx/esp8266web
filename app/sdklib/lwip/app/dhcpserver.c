@@ -267,6 +267,11 @@ static uint8_t* ICACHE_FLASH_ATTR add_offer_options(uint8_t *optptr)
             *optptr++ = 1; // B-node
         }
 #endif
+#if 0
+		*optptr++ = DHCP_OPTION_HOSTNAME;
+		*optptr = os_sprintf(optptr+1, "ESP_%02X%02X%02X", info.st_mac[3], info.st_mac[4], info.st_mac[5]);
+		optptr += *optptr + 1;
+#endif
         return optptr;
 }
 ///////////////////////////////////////////////////////////////////////////////////

@@ -6,9 +6,9 @@
 
 ESPOPTION ?= -p COM7 -b 460800
 
-UPLOADADDR = http://aesp8266/fsupload
+UPLOADADDR = http://atesp8266/fsupload TESP8266
 
-UPLOADOVL = ./ovls/bin/tcp_client.ovl
+UPLOADOVL = ./ovls/bin/sync.ovl
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80

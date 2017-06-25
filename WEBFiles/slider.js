@@ -45,8 +45,7 @@ function slider(elemId, sliderWidth, range1, range2, step) {
 			if (step == 0)
 				knob.style.left = x + 'px';
 			else
-				knob.style.left = Math.round(x / (step * point)) * step * point
-						+ 'px'
+				knob.style.left = Math.round(x / (step * point)) * step * point + 'px'
 		}
 		NewTimeScale(getValue())
 	}

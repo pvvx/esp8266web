@@ -231,14 +231,10 @@ int ovl_init(int flg)
 			set_gpiox_mux_func_ioport(CS_MPU9250_PIN);	//	SET_PIN_FUNC_IOPORT(CS_MPU9250_PIN);
 			set_gpiox_mux_pull(CS_MPU9250_PIN, 0);		//	SET_PIN_PULLUP_DIS(CS_MPU9250_PIN);
 #if DEBUGSOO > 1
-			os_printf("HSPI CLK = %u Hz\n",
-#endif
-			hspi_master_init(0x07070300,1000000) // 8 bit addr, 8 bit cmd, CS none, SPI MODE 3, SETUP + no HOLD, 1 MHz
-#if DEBUGSOO > 1
-			); 
+			os_printf("HSPI CLK = %u Hz\n", hspi_master_init(0x07070300,1000000)); // 8 bit addr, 8 bit cmd, CS none, SPI MODE 3, SETUP + no HOLD, 1 MHz
 			os_printf("Init BMP280...\n");
 #else
-			;
+			hspi_master_init(0x07070300,1000000); // 8 bit addr, 8 bit cmd, CS none, SPI MODE 3, SETUP + no HOLD, 1 MHz
 #endif
 			if(!init_bmp280()) {
 #if DEBUGSOO > 1

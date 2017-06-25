@@ -70,10 +70,10 @@ err_t tcp2uart_write(uint8 *pblk, uint16 len);
 err_t tcp2uart_start(uint16 newportn);
 void tcp2uart_close(void);
 
-
-uint8 tcp2uart_ajax_tx(uint8 *s) ICACHE_FLASH_ATTR;
-uint8 tcp2uart_ajax_rx(TCP_SERV_CONN *ts_conn, uint16 tmo) ICACHE_FLASH_ATTR;
-
+#ifdef USE_UART_AJAX
+void tcp2uart_ajax_tx(uint8 *s) ICACHE_FLASH_ATTR;
+void tcp2uart_ajax_rx(TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR;
+#endif
 
 extern suart_drv uart_drv;
 extern TCP_SERV_CONN * tcp2uart_conn;

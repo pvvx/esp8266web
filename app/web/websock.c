@@ -39,7 +39,8 @@ bool ICACHE_FLASH_ATTR WebSocketAcceptKey(uint8* dkey, uint8* skey)
 			pcmp++;
 			len++;
 		};
-		if(len != sizeWebSocketKey) return false;
+//		if(len != sizeWebSocketKey) return false;
+		if(len < 10) return false;
 		ets_memcpy(keybuf, WebSocketAddKey, sizeWebSocketAddKey);
 	};
 	SHA1Init(&cha);

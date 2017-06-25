@@ -635,6 +635,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) {
 		}
 		if (ts_conn->pcb != NULL) {
 			if ((ts_conn->pcb = find_tcp_pcb(ts_conn)) != NULL) {
+				tcp_err(ts_conn->pcb, NULL);
 				tcp_abandon(ts_conn->pcb, 0);
 				ts_conn->pcb = NULL;
 			}
@@ -760,6 +761,7 @@ static void ICACHE_FLASH_ATTR tcpsrv_client_connect(TCP_SERV_CONN * ts_conn)
 		if(ts_conn->pcb != NULL) {
 			pcb = find_tcp_pcb(ts_conn);
 			if(pcb != NULL) {
+				tcp_err(pcb, NULL);
 				tcp_abandon(ts_conn->pcb, 0);
 //				ts_conn->pcb = NULL;
 			}

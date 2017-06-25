@@ -1,0 +1,4 @@
+Path libmmain.a - error deep_sleep
+000015B1: C8 06
+000015B2: 81 FF
+000015B3: 08 FF

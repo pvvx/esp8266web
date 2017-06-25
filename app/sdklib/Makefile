@@ -62,7 +62,6 @@ ADDLIBS_libsdk = \
 ifndef USE_OPEN_LWIP 
 ADDLIBS_libsdk += \
 	liblwipif.a	\
-	lib80211add.a	
 	libmlwip.a	
 endif
 
