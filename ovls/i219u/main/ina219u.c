@@ -165,7 +165,7 @@ uint16 ICACHE_FLASH_ATTR IntReadIna219(uint32 num)
  //#define TIMER0_USE_NMI_VECTOR
  Предел при NMI примерно до 50 кГц из-за прервания обработки WiFi...
  ------------------------------------------------------------------------------*/
-void timer0_isr(void)
+void ICACHE_FLASH_ATTR timer0_isr(void)
 {
 	if(out_wave_pbuf != NULL) {
 		out_wave_pbuf[wdrv_buf_wr_idx] = IntReadIna219(wdrv_buf_wr_idx);
@@ -211,7 +211,7 @@ int ICACHE_FLASH_ATTR OpenINA219(void)
 		return -2;
 }
 
-void wdrv_stop(void)
+void ICACHE_FLASH_ATTR wdrv_stop(void)
 {
 #ifdef USE_TIMER0
 	timer0_stop();	
@@ -458,7 +458,7 @@ void ICACHE_FLASH_ATTR close_wdrv(void)
 
 //=============================================================================
 //=============================================================================
-int ovl_init(int flg)
+int ICACHE_FLASH_ATTR ovl_init(int flg)
 {
 int i = 0;
 	switch(flg) {

@@ -566,6 +566,15 @@ void system_deep_sleep_local_2(void)
 	IO_RTC_2 = 1<<20; // rtc_enter_sleep()	HWREG(PERIPHS_RTC_BASEADDR, 0x08) = 0x100000;
 }
 
+Т.е. вместо того, чтобы написать:
+void __attribute__ ((noreturn)) system_deep_sleep_local_2(void)
+{
+	....
+	IO_RTC_2 = 1<<20; // rtc_enter_sleep()	
+	while(1);
+}
+
+
 
 void system_deep_sleep_instant(void *timer_arg) // В ранних SDK _sys_deep_sleep_timer()
 {

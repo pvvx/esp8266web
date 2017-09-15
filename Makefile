@@ -6,9 +6,9 @@
 
 ESPOPTION ?= -p COM7 -b 460800
 
-UPLOADADDR = http://atesp8266/fsupload TESP8266
+UPLOADADDR = http://stesp8266/fsupload TESP8266
 
-UPLOADOVL = ./ovls/bin/sync.ovl
+UPLOADOVL = ./ovls/bin/i219u.ovl
 
 # SPI_SPEED = 40MHz or 80MHz
 SPI_SPEED?=80
